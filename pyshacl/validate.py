@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import rdflib
 import RDFClosure as owl_rl
+
+from pyshacl.shape import find_shapes
+
 if owl_rl.json_ld_available:
     import rdflib_jsonld
 
@@ -43,11 +46,16 @@ class Validator(object):
             "shacl_graph must be a rdflib Graph object"
         self.shacl_graph = shacl_graph
 
+
     def run(self):
         if self.options['inference']:
             self._run_pre_inference(self.target_graph)
-        return True
-
+        shapes = find_shapes(self.shacl_graph)
+        results = {}
+        for s in shapes:
+            r = s.validate(self.target_graph)
+            results[s.node] = r
+        return results
 
 def _load_into_graph(target):
     if isinstance(target, rdflib.Graph):
