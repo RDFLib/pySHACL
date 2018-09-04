@@ -1,0 +1,107 @@
+# baseURI: http://datashapes.org/shasf/tests/rules/triple/schema2person.test
+# imports: http://datashapes.org/dash
+# imports: http://datashapes.org/schema
+# imports: http://datashapes.org/shasf/tests/rules/triple/person
+# prefix: ex
+
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix ex: <http://datashapes.org/shasf/tests/rules/triple/schema2person.test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix person: <http://datashapes.org/shasf/tests/rules/triple/person#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://datashapes.org/shasf/tests/rules/triple/schema2person.test>
+  rdf:type owl:Ontology ;
+  rdfs:label "Test of person2schema" ;
+  owl:imports <http://datashapes.org/dash> ;
+  owl:imports <http://datashapes.org/schema> ;
+  owl:imports <http://datashapes.org/shasf/tests/rules/triple/person> ;
+  owl:versionInfo "Created with TopBraid Composer" ;
+  sh:declare [
+      rdf:type sh:PrefixDeclaration ;
+      sh:namespace "http://datashapes.org/shasf/tests/rules/triple/schema2person.test#"^^xsd:anyURI ;
+      sh:prefix "ex" ;
+    ] ;
+  sh:declare [
+      rdf:type sh:PrefixDeclaration ;
+      sh:namespace "http://schema.org/"^^xsd:anyURI ;
+      sh:prefix "schema" ;
+    ] ;
+.
+ex:InferencingTestCase
+  rdf:type dash:InferencingTestCase ;
+  dash:expectedResult [
+      rdf:object person:Person ;
+      rdf:predicate rdf:type ;
+      rdf:subject ex:JohnDoe ;
+    ] ;
+  dash:expectedResult [
+      rdf:object "12345" ;
+      rdf:predicate person:zipCode ;
+      rdf:subject ex:JohnDoe ;
+    ] ;
+  dash:expectedResult [
+      rdf:object "Doe" ;
+      rdf:predicate person:lastName ;
+      rdf:subject ex:JohnDoe ;
+    ] ;
+  dash:expectedResult [
+      rdf:object "John" ;
+      rdf:predicate person:firstName ;
+      rdf:subject ex:JohnDoe ;
+    ] ;
+.
+ex:JohnDoe
+  rdf:type schema:Person ;
+  schema:address ex:JohnDoeAddress ;
+  schema:familyName "Doe" ;
+  schema:givenName "John" ;
+  rdfs:label "John doe" ;
+.
+ex:JohnDoeAddress
+  rdf:type schema:PostalAddress ;
+  schema:postalCode "12345" ;
+  rdfs:label "John Doe's address" ;
+.
+ex:schema2personMappingShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "Schema-to-Person Mapping Shape" ;
+  sh:rule [
+      rdf:type sh:TripleRule ;
+      sh:object person:Person ;
+      sh:predicate rdf:type ;
+      sh:subject sh:this ;
+    ] ;
+  sh:rule [
+      rdf:type sh:TripleRule ;
+      sh:object [
+          sh:path schema:familyName ;
+        ] ;
+      sh:predicate person:lastName ;
+      sh:subject sh:this ;
+    ] ;
+  sh:rule [
+      rdf:type sh:TripleRule ;
+      sh:object [
+          sh:path schema:givenName ;
+        ] ;
+      sh:predicate person:firstName ;
+      sh:subject sh:this ;
+    ] ;
+  sh:rule [
+      rdf:type sh:TripleRule ;
+      sh:object [
+          sh:path (
+              schema:address
+              schema:postalCode
+            ) ;
+        ] ;
+      sh:predicate person:zipCode ;
+      sh:subject sh:this ;
+    ] ;
+  sh:targetClass schema:Person ;
+.

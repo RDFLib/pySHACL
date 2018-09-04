@@ -1,0 +1,87 @@
+# baseURI: http://datashapes.org/sh/tests/core/node/or-001.test
+# imports: http://datashapes.org/dash
+# prefix: ex
+
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix ex: <http://datashapes.org/sh/tests/core/node/or-001.test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://datashapes.org/sh/tests/core/node/or-001.test>
+  rdf:type owl:Ontology ;
+  rdfs:label "Test of sh:or at node shape 001" ;
+  owl:imports <http://datashapes.org/dash> ;
+  owl:versionInfo "Created with TopBraid Composer" ;
+.
+ex:GraphValidationTestCase
+  rdf:type dash:GraphValidationTestCase ;
+  dash:expectedResult [
+      rdf:type sh:ValidationReport ;
+      sh:conforms "false"^^xsd:boolean ;
+      sh:result [
+          rdf:type sh:ValidationResult ;
+          sh:focusNode ex:InvalidRectangle1 ;
+          sh:resultSeverity sh:Violation ;
+          sh:sourceConstraintComponent sh:OrConstraintComponent ;
+          sh:sourceShape ex:RectangleWithArea ;
+          sh:value ex:InvalidRectangle1 ;
+        ] ;
+      sh:result [
+          rdf:type sh:ValidationResult ;
+          sh:focusNode ex:InvalidRectangle2 ;
+          sh:resultSeverity sh:Violation ;
+          sh:sourceConstraintComponent sh:OrConstraintComponent ;
+          sh:sourceShape ex:RectangleWithArea ;
+          sh:value ex:InvalidRectangle2 ;
+        ] ;
+    ] ;
+.
+ex:InvalidRectangle1
+  rdf:type ex:RectangleWithArea ;
+  ex:height 3 ;
+.
+ex:InvalidRectangle2
+  rdf:type ex:RectangleWithArea ;
+.
+ex:RectangleWithArea
+  rdf:type rdfs:Class ;
+  rdf:type sh:NodeShape ;
+  rdfs:subClassOf rdfs:Resource ;
+  sh:or (
+      [
+        sh:property [
+            sh:path ex:height ;
+            sh:minCount 1 ;
+          ] ;
+        sh:property [
+            sh:path ex:width ;
+            sh:minCount 1 ;
+          ] ;
+      ]
+      [
+        sh:property [
+            sh:path ex:area ;
+            sh:minCount 1 ;
+          ] ;
+      ]
+    ) ;
+.
+ex:ValidRectangle1
+  rdf:type ex:RectangleWithArea ;
+  ex:height 3 ;
+  ex:width 2 ;
+.
+ex:ValidRectangle2
+  rdf:type ex:RectangleWithArea ;
+  ex:area 6 ;
+  ex:height 3 ;
+  ex:width 2 ;
+.
+ex:ValidRectangle3
+  rdf:type ex:RectangleWithArea ;
+  ex:area 6 ;
+  ex:height 3 ;
+.

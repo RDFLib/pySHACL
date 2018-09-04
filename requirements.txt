@@ -1,0 +1,3 @@
+rdflib
+rdflib-jsonld
+git+git://github.com/RDFLib/OWL-RL.git@py3#egg=RDFClosure

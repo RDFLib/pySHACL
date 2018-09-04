@@ -1,0 +1,121 @@
+# baseURI: http://datashapes.org/shasf/tests/rules/triple/functions-permutations.test
+# imports: http://datashapes.org/dash
+# prefix: ex
+
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix ex: <http://datashapes.org/shasf/tests/rules/triple/functions-permutations.test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://datashapes.org/shasf/tests/rules/triple/functions-permutations.test>
+  rdf:type owl:Ontology ;
+  rdfs:label "Test of functions-permutations" ;
+  owl:imports <http://datashapes.org/dash> ;
+  owl:versionInfo "Created with TopBraid Composer" ;
+.
+ex:InferencingTestCase
+  rdf:type dash:InferencingTestCase ;
+  dash:expectedResult [
+      rdf:object "1a 2a 3a " ;
+      rdf:predicate ex:target ;
+      rdf:subject ex:TestInstance ;
+    ] ;
+  dash:expectedResult [
+      rdf:object "1a 2a 3b " ;
+      rdf:predicate ex:target ;
+      rdf:subject ex:TestInstance ;
+    ] ;
+  dash:expectedResult [
+      rdf:object "1a 2a 3c " ;
+      rdf:predicate ex:target ;
+      rdf:subject ex:TestInstance ;
+    ] ;
+  dash:expectedResult [
+      rdf:object "1b 2a 3a " ;
+      rdf:predicate ex:target ;
+      rdf:subject ex:TestInstance ;
+    ] ;
+  dash:expectedResult [
+      rdf:object "1b 2a 3b " ;
+      rdf:predicate ex:target ;
+      rdf:subject ex:TestInstance ;
+    ] ;
+  dash:expectedResult [
+      rdf:object "1b 2a 3c " ;
+      rdf:predicate ex:target ;
+      rdf:subject ex:TestInstance ;
+    ] ;
+.
+ex:TestInstance
+  rdf:type ex:TestShapeClass ;
+  ex:p1 "1a " ;
+  ex:p1 "1b " ;
+  ex:p2 "2a " ;
+  ex:p3 "3a " ;
+  ex:p3 "3b " ;
+  ex:p3 "3c " ;
+  rdfs:label "Test instance" ;
+.
+ex:TestShapeClass
+  rdf:type rdfs:Class ;
+  rdf:type sh:NodeShape ;
+  rdfs:label "Test shape class" ;
+  rdfs:subClassOf rdfs:Resource ;
+  sh:rule [
+      rdf:type sh:TripleRule ;
+      sh:object [
+          ex:testFunction (
+              [
+                sh:path ex:p1 ;
+              ]
+              [
+                sh:path ex:p2 ;
+              ]
+              [
+                sh:path ex:p3 ;
+              ]
+            ) ;
+        ] ;
+      sh:predicate ex:target ;
+      sh:subject sh:this ;
+    ] ;
+.
+ex:p1
+  rdf:type rdf:Property ;
+  rdfs:domain ex:TestShapeClass ;
+  rdfs:label "p1" ;
+  rdfs:range xsd:string ;
+.
+ex:p2
+  rdf:type rdf:Property ;
+  rdfs:domain ex:TestShapeClass ;
+  rdfs:label "p2" ;
+  rdfs:range xsd:string ;
+.
+ex:p3
+  rdf:type rdf:Property ;
+  rdfs:domain ex:TestShapeClass ;
+  rdfs:label "p3" ;
+  rdfs:range xsd:string ;
+.
+ex:testFunction
+  rdf:type sh:SPARQLFunction ;
+  sh:parameter [
+      sh:path ex:arg1 ;
+    ] ;
+  sh:parameter [
+      sh:path ex:arg2 ;
+    ] ;
+  sh:parameter [
+      sh:path ex:arg3 ;
+    ] ;
+  sh:returnType xsd:string ;
+  sh:select """
+	SELECT ?result
+	WHERE {
+		BIND (CONCAT($arg1, $arg2, $arg3) AS ?result) .
+	} """ ;
+.

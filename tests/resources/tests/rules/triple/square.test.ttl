@@ -1,0 +1,77 @@
+# baseURI: http://datashapes.org/shasf/tests/rules/triple/square.test
+# imports: http://datashapes.org/dash
+# prefix: ex
+
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix ex: <http://datashapes.org/shasf/tests/rules/triple/square.test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://datashapes.org/shasf/tests/rules/triple/square.test>
+  rdf:type owl:Ontology ;
+  rdfs:label "Test of classification using squares" ;
+  owl:imports <http://datashapes.org/dash> ;
+.
+ex:InferencingTestCase
+  rdf:type dash:InferencingTestCase ;
+  dash:expectedResult [
+      rdf:object ex:Square ;
+      rdf:predicate rdf:type ;
+      rdf:subject ex:SquareRectangle ;
+    ] ;
+.
+ex:InvalidRectangle
+  rdf:type ex:Rectangle ;
+  rdfs:label "Invalid rectangle" ;
+.
+ex:NonSquareRectangle
+  rdf:type ex:Rectangle ;
+  ex:height 2 ;
+  ex:width 3 ;
+.
+ex:Rectangle
+  rdf:type rdfs:Class ;
+  rdf:type sh:NodeShape ;
+  rdfs:label "Rectangle" ;
+  rdfs:subClassOf rdfs:Resource ;
+  sh:property [
+      sh:path ex:height ;
+      sh:datatype xsd:integer ;
+      sh:maxCount 1 ;
+      sh:minCount 1 ;
+      sh:name "height" ;
+    ] ;
+  sh:property [
+      sh:path ex:width ;
+      sh:datatype xsd:integer ;
+      sh:maxCount 1 ;
+      sh:minCount 1 ;
+      sh:name "width" ;
+    ] ;
+  sh:rule [
+      rdf:type sh:TripleRule ;
+      sh:condition ex:Rectangle ;
+      sh:condition [
+          sh:property [
+              sh:path ex:width ;
+              sh:equals ex:height ;
+            ] ;
+        ] ;
+      sh:object ex:Square ;
+      sh:predicate rdf:type ;
+      sh:subject sh:this ;
+    ] ;
+.
+ex:Square
+  rdf:type rdfs:Class ;
+  rdfs:label "Square" ;
+.
+ex:SquareRectangle
+  rdf:type ex:Rectangle ;
+  ex:height 4 ;
+  ex:width 4 ;
+  rdfs:label "Square rectangle" ;
+.
