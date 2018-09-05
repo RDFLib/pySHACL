@@ -57,6 +57,7 @@ class Validator(object):
             results[s.node] = r
         return results
 
+# TODO: check out rdflib.util.guess_format() for format. I think it works well except for perhaps JSON-LD
 def _load_into_graph(target):
     if isinstance(target, rdflib.Graph):
         return target
