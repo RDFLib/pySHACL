@@ -90,7 +90,7 @@ ex:Person
   rdfs:subClassOf rdfs:Resource ;
   sh:property [
       sh:path ex:email ;
-      ex:datatype xsd:string ;
+      sh:datatype xsd:string ;
       rdfs:label "email" ;
     ] ;
   sh:property [

@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 import rdflib
 import RDFClosure as owl_rl
-
-from pyshacl.shape import find_shapes
-
 if owl_rl.json_ld_available:
     import rdflib_jsonld
-
+from pyshacl.shape import find_shapes
+from pyshacl.consts import RDF_type, SH_conforms, \
+    SH_result, SH_ValidationReport
 import logging
 
-logging.basicConfig()
+logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 
@@ -32,7 +31,30 @@ class Validator(object):
             log.error("Error while running OWL-RL Deductive Closure")
             raise e
 
-    def __init__(self, target_graph, *args, shacl_graph=None, options=None, **kwargs):
+    @classmethod
+    def create_validation_report(cls, conforms, results):
+        v_text = "Validation Report\nConforms: {}\n".format(str(conforms))
+        result_len = len(results)
+        if not conforms:
+            assert result_len > 0, \
+                "A Non-Conformant Validation Report must have at least one result."
+        if result_len > 0:
+            v_text += "Results ({}):\n".format(str(result_len))
+        vg = rdflib.Graph()
+        vr = rdflib.BNode()
+        vg.add((vr, RDF_type, SH_ValidationReport))
+        vg.add((vr, SH_conforms, rdflib.Literal(conforms)))
+        for result in iter(results):
+            _d, _bn, _tr = result
+            v_text += _d
+            vg.add((vr, SH_result, _bn))
+            for tr in iter(_tr):
+                vg.add(tr)
+        log.info(v_text)
+        return vg
+
+    def __init__(self, target_graph, *args,
+                 shacl_graph=None, options=None, **kwargs):
         if options is None:
             options = {}
         self._load_default_options(options)
@@ -46,16 +68,19 @@ class Validator(object):
             "shacl_graph must be a rdflib Graph object"
         self.shacl_graph = shacl_graph
 
-
     def run(self):
-        if self.options['inference']:
+        if self.options.get('inference', True):
             self._run_pre_inference(self.target_graph)
         shapes = find_shapes(self.shacl_graph)
-        results = {}
+        fails = []
+        non_conformant = False
         for s in shapes:
-            r = s.validate(self.target_graph)
-            results[s.node] = r
-        return results
+            _is_conform, _fails = s.validate(self.target_graph)
+            non_conformant = non_conformant or (not _is_conform)
+            fails.extend(_fails)
+        report = self.create_validation_report((not non_conformant), fails)
+        return (not non_conformant), report
+
 
 # TODO: check out rdflib.util.guess_format() for format. I think it works well except for perhaps JSON-LD
 def _load_into_graph(target):

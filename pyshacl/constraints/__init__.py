@@ -1,9 +1,17 @@
 # -*- coding: utf-8 -*-
 
-from .value_constraints import ClassConstraintComponent
+from .value_constraints import ClassConstraintComponent, DatatypeConstraintComponent, NodeKindConstraintComponent
+from .cardinality_constraints import MinCountConstraintComponent, MaxCountConstraintComponent
+from .shape_based_constraints import NodeShapeComponent, PropertyShapeComponent
 
 ALL_CONSTRAINT_COMPONENTS = [
-    ClassConstraintComponent
+    ClassConstraintComponent,
+    DatatypeConstraintComponent,
+    NodeKindConstraintComponent,
+    MinCountConstraintComponent,
+    MaxCountConstraintComponent,
+    NodeShapeComponent,
+    PropertyShapeComponent
 ]
 
 CONSTRAINT_PARAMETERS_MAP = {p: c for c in ALL_CONSTRAINT_COMPONENTS
