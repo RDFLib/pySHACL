@@ -126,6 +126,61 @@ def validate(target_graph, *args, shacl_graph=None, inference=True, abort_on_err
     validator = Validator(
         target_graph, shacl_graph,
         options={'inference': inference, 'abort_on_error': abort_on_error})
-    return validator.run()
+    conforms, report_graph = validator.run()
+    if kwargs.get('check_expected_result', False):
+        return check_expected_result(report_graph, shacl_graph or target_graph)
+
+
+def check_expected_result(report_graph, expected_result_graph):
+    DASH = rdflib.namespace.Namespace('http://datashapes.org/dash#')
+    DASH_TestCase = DASH.term('GraphValidationTestCase')
+    DASH_expectedResult = DASH.term('expectedResult')
+
+    test_cases = expected_result_graph.subjects(RDF_type, DASH_TestCase)
+    test_cases = set(test_cases)
+    if len(test_cases) < 1:
+        raise RuntimeError("Cannot check the expected result, the given expected result graph does not have a GraphValidationTestCase.")
+    test_case = next(iter(test_cases))
+    expected_results = expected_result_graph.objects(test_case, DASH_expectedResult)
+    expected_results = set(expected_results)
+    if len(expected_results) < 1:
+        raise RuntimeError("Cannot check the expected result, the given GraphValidationTestCase does not have an expectedResult.")
+    expected_result = next(iter(expected_results))
+    expected_conforms = expected_result_graph.objects(expected_result, SH_conforms)
+    expected_conforms = set(expected_conforms)
+    if len(expected_conforms) < 1:
+        raise RuntimeError("Cannot check the expected result, the given expectedResult does not have an sh:conforms.")
+    expected_conforms = next(iter(expected_conforms))
+    expected_result_nodes = expected_result_graph.objects(expected_result, SH_result)
+    expected_result_nodes = set(expected_result_nodes)
+    expected_result_node_count = len(expected_result_nodes)
+
+    validation_reports = report_graph.subjects(RDF_type, SH_ValidationReport)
+    validation_reports = set(validation_reports)
+    if len(validation_reports) < 1:
+        raise RuntimeError("Cannot check the validation report, the report graph does not contain a ValidationReport")
+    validation_report = next(iter(validation_reports))
+    report_conforms = report_graph.objects(validation_report, SH_conforms)
+    report_conforms = set(report_conforms)
+    if len(report_conforms) < 1:
+        raise RuntimeError("Cannot check the validation report, the report graph does not have an sh:conforms.")
+    report_conforms = next(iter(report_conforms))
+
+    if bool(expected_conforms.value) != bool(report_conforms.value):
+        log.error("Expected Result Conforms value is different from Validation Report's Conforms value.")
+        return False
+    report_result_nodes = report_graph.objects(validation_report, SH_result)
+    report_result_nodes = set(report_result_nodes)
+    report_result_node_count = len(report_result_nodes)
+
+    if expected_result_node_count != report_result_node_count:
+        log.error("Number of expected result's sh:result entries is different from Validation Report's sh:result entries.\n"
+                  "Expected {}, got {}.".format(expected_result_node_count, report_result_node_count))
+        return False
+    # Note it is not easily achievable with this method to compare actual result entries, because they are all blank nodes.
+    return True
+
+
+
 
 

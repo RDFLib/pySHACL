@@ -146,11 +146,13 @@ class DatatypeConstraintComponent(ConstraintComponent):
                 matches = False
                 if isinstance(v, Literal):
                     datatype = v.datatype
+                    lang = v.language
                     if datatype == dtype_rule:
                         matches = self._assert_actual_datatype(v, dtype_rule)
-                    elif datatype is None and dtype_rule == XSD_string:
+                    elif datatype is None and lang is None and \
+                            dtype_rule == XSD_string:
                         matches = self._assert_actual_datatype(v, dtype_rule)
-                    elif dtype_rule == RDF_langString and v.language:
+                    elif dtype_rule == RDF_langString and lang:
                         matches = self._assert_actual_datatype(v, dtype_rule)
                 if not matches:
                     non_conformant = True

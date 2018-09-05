@@ -43,7 +43,12 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         desc = "{} in {} ({}):\n\tShape: {}\n\tFocus Node: {}\n"\
             .format(severity_desc, constraint_name, str(constraint), str(self.shape.node), str(focus_node))
         if value_node is not None:
-            desc += "\tValue Node: {}\n".format(str(value_node))
+            if isinstance(value_node, rdflib.Literal):
+                val_node_string = "Literal({}, lang={}, datatype={})".format(
+                    str(value_node.value), str(value_node.language), str(value_node.datatype))
+            else:
+                val_node_string = str(value_node)
+            desc += "\tValue Node: {}\n".format(val_node_string)
         if self.shape.is_property_shape:
             result_path = self.shape.path()
             if result_path is not None:

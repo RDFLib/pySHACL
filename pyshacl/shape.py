@@ -129,6 +129,18 @@ class Shape(object):
         # TODO: The other two types of targets
         return found_node_targets.union(found_target_instances)
 
+    def _value_nodes_from_path(self, focus, path, target_graph):
+        find_inverse = set(self.sg.objects(path, SH_inversePath))
+        if len(find_inverse) > 0:
+            inverse_path = next(iter(find_inverse))
+            return set(target_graph.subjects(inverse_path, focus))
+        else:
+            raise NotImplementedError(
+                "That path method to get value nodes of property shapes is not yet implmented.")
+
+
+
+
     def value_nodes(self, target_graph, focus):
         """
         For each focus node, you can get a set of value nodes.
@@ -147,8 +159,10 @@ class Shape(object):
         for f in focus:
             if isinstance(path, rdflib.URIRef):
                 values = set(target_graph.objects(f, path))
+            elif isinstance(path, rdflib.BNode):
+                values = self._value_nodes_from_path(f, path, target_graph)
             else:
-                raise NotImplementedError("value nodes of property shapes are not yet implmented.")
+                raise NotImplementedError("That path method to get value nodes of property shapes is not yet implmented.")
             focus_dict[f] = values
         return focus_dict
 
