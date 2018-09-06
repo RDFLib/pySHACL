@@ -50,10 +50,10 @@
 ###[Logical Constraint Components](https://www.w3.org/TR/shacl/#core-components-logical)
 | Parameter  | Constraint                 |  Link 	                      |      Status   	    |  Comments	|
 |:---------- |:-------------              |:------:	                      |:-------------:	    |:------	|
-| `sh:not`   | `NotConstraintComponent`   | [▶][NotConstraintComponent]   | ![status-missing] 	|           |
-| `sh:and`   | `AndConstraintComponent`   | [▶][AndConstraintComponent]   | ![status-missing] 	|           |
-| `sh:or`    | `OrConstraintComponent`    | [▶][OrConstraintComponent]    | ![status-missing] 	|           |
-| `sh:xone`  | `XoneConstraintComponent`  | [▶][XoneConstraintComponent]  | ![status-missing] 	|           |
+| `sh:not`   | `NotConstraintComponent`   | [▶][NotConstraintComponent]   | ![status-complete] 	|           |
+| `sh:and`   | `AndConstraintComponent`   | [▶][AndConstraintComponent]   | ![status-complete] 	|           |
+| `sh:or`    | `OrConstraintComponent`    | [▶][OrConstraintComponent]    | ![status-complete] 	|           |
+| `sh:xone`  | `XoneConstraintComponent`  | [▶][XoneConstraintComponent]  | ![status-complete] 	|           |
 
 
 ###[Shape-based Constraint Components](https://www.w3.org/TR/shacl/#core-components-shape)
