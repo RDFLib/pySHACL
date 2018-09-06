@@ -19,5 +19,5 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - Initial version, limited functionality
 
 [Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a2.dev20180906...HEAD
-[0.1.0a1.dev20180904]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a1.dev20180904...v0.1.0a2.dev20180906
+[0.1.0a2.dev20180906]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a1.dev20180904...v0.1.0a2.dev20180906
 
