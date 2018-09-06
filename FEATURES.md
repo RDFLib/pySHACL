@@ -31,8 +31,8 @@
 ###[String-based Constraint Components](https://www.w3.org/TR/shacl/#core-components-string)
 | Parameter         | Constraint                        |  Link 	                            |      Status      	    |  Comments	             |
 |:----------        |:-------------                     |:------:	                            |:-------------:	    |:------	             |
-| `sh:minLength`    | `MinLengthConstraintComponent`    | [▶][MinLengthConstraintComponent]     | ![status-missing] 	|                        |
-| `sh:maxLength`    | `MaxLengthConstraintComponent`    | [▶][MaxLengthConstraintComponent]     | ![status-missing] 	|                        |
+| `sh:minLength`    | `MinLengthConstraintComponent`    | [▶][MinLengthConstraintComponent]     | ![status-complete] 	|                        |
+| `sh:maxLength`    | `MaxLengthConstraintComponent`    | [▶][MaxLengthConstraintComponent]     | ![status-complete] 	|                        |
 | `sh:pattern`      | `PatternConstraintComponent`      | [▶][PatternConstraintComponent]       | ![status-complete]  	| includes `sh:flags`    |
 | `sh:languageIn`   | `LanguageInConstraintComponent`   | [▶][LanguageInConstraintComponent]    | ![status-missing] 	|                        |
 | `sh:uniqueLang`   | `UniqueLangConstraintComponent`   | [▶][UniqueLangConstraintComponent]    | ![status-missing] 	|                        |
