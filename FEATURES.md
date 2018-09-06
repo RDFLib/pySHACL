@@ -1,5 +1,8 @@
 # pySHACL Features Matrix
+
+
 ##[Core Constraint Components](https://www.w3.org/TR/shacl/#core-components)
+
 
 ###[Value Type Constraint Components](https://www.w3.org/TR/shacl/#core-components-value-type)
 | Parameter         | Constraint                        |  Link 	                            |      Status      	    |  Comments	|
@@ -8,11 +11,13 @@
 | `sh:datatype`     | `DatatypeConstraintComponent`     | [▶][DatatypeConstraintComponent]      | ![status-complete]    |           |
 | `sh:nodeKind`     | `NodeKindConstraintComponent`     | [▶][NodeKindConstraintComponent]      | ![status-complete]    |           |
 
+
 ###[Cardinality Constraint Components](https://www.w3.org/TR/shacl/#core-components-count)
 | Parameter         | Constraint                        |  Link 	                            |      Status      	    |  Comments	|
 |:----------        |:-------------                     |:------:	                            |:-------------:	    |:------	|
 | `sh:minCount`     | `MinCountConstraintComponent`     | [▶][MinCountConstraintComponent]      | ![status-complete] 	|           |
 | `sh:maxCount`     | `MaxCountConstraintComponent`     | [▶][MaxCountConstraintComponent]      | ![status-complete] 	|           |
+
 
 ###[Value Range Constraint Components](https://www.w3.org/TR/shacl/#core-components-range)
 | Parameter         | Constraint                        |  Link 	                            |      Status      	    |  Comments	|
@@ -21,6 +26,7 @@
 | `sh:minInclusive` | `MinInclusiveConstraintComponent` | [▶][MinInclusiveConstraintComponent]  | ![status-missing] 	|           |
 | `sh:maxExclusive` | `MaxExclusiveConstraintComponent` | [▶][MaxExclusiveConstraintComponent]  | ![status-missing] 	|           |
 | `sh:maxInclusive` | `MaxInclusiveConstraintComponent` | [▶][MaxInclusiveConstraintComponent]  | ![status-missing] 	|           |
+
 
 ###[String-based Constraint Components](https://www.w3.org/TR/shacl/#core-components-string)
 | Parameter         | Constraint                        |  Link 	                            |      Status      	    |  Comments	             |
@@ -31,6 +37,7 @@
 | `sh:languageIn`   | `LanguageInConstraintComponent`   | [▶][LanguageInConstraintComponent]    | ![status-missing] 	|                        |
 | `sh:uniqueLang`   | `UniqueLangConstraintComponent`   | [▶][UniqueLangConstraintComponent]    | ![status-missing] 	|                        |
 
+
 ###[Property Pair Constraint Components](https://www.w3.org/TR/shacl/#core-components-property-pairs)
 | Parameter               | Constraint                              |  Link 	                                |      Status      	    |  Comments	|
 |:----------              |:-------------                           |:------:	                                |:-------------:	    |:------	|
@@ -38,6 +45,7 @@
 | `sh:disjoint`           | `DisjointConstraintComponent`           | [▶][DisjointConstraintComponent]          | ![status-missing] 	|           |
 | `sh:lessThan`           | `LessThanConstraintComponent`           | [▶][LessThanConstraintComponent]          | ![status-missing]  	|           |
 | `sh:lessThanOrEquals`   | `LessThanOrEqualsConstraintComponent`   | [▶][LessThanOrEqualsConstraintComponent]  | ![status-missing] 	|           |
+
 
 ###[Logical Constraint Components](https://www.w3.org/TR/shacl/#core-components-logical)
 | Parameter  | Constraint                 |  Link 	                      |      Status   	    |  Comments	|
@@ -47,12 +55,14 @@
 | `sh:or`    | `OrConstraintComponent`    | [▶][OrConstraintComponent]    | ![status-missing] 	|           |
 | `sh:xone`  | `XoneConstraintComponent`  | [▶][XoneConstraintComponent]  | ![status-missing] 	|           |
 
+
 ###[Shape-based Constraint Components](https://www.w3.org/TR/shacl/#core-components-shape)
 | Parameter                 | Constraint                                |  Link 	                                   |      Status      	  |  Comments                                     |
 |:----------                |:-------------                             |:------:	                                   |:-------------:	      |:------	                                      |
 | `sh:node`                 | `NodeConstraintComponent`                 | [▶][NodeConstraintComponent]                 | ![status-complete]   |                                               |
 | `sh:property`             | `PropertyConstraintComponent`             | [▶][PropertyConstraintComponent]             | ![status-partial] 	  | See SHACL Property Paths feature table below  |
 | `sh:qualifiedValueShape`  | `QualifiedValueShapeConstraintComponent`  | [▶][QualifiedValueShapeConstraintComponent]  | ![status-missing] 	  |                                               |
+
 
 ###[Other Constraint Components](https://www.w3.org/TR/shacl/#core-components-others)
 | Parameter               | Constraint                    |  Link 	                          |      Status      	|  Comments	                 |
@@ -73,6 +83,7 @@
 | Zero-Or-More Paths  | [▶][ZeroOrMorePath]      | ![status-missing] 	|           |
 | One-Or-More Paths   | [▶][OneOrMorePath]       | ![status-missing] 	|           |
 | Zero-Or-One Paths   | [▶][ZeroOrOnePath]       | ![status-missing] 	|           |
+
 
 ##[Non-Validating Shape Characteristics](https://www.w3.org/TR/shacl/#nonValidation)
 | Path                |  Link 	                 |      Status      	|  Comments	|
