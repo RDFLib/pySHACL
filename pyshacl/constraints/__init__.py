@@ -2,9 +2,11 @@
 
 from .value_constraints import ClassConstraintComponent, DatatypeConstraintComponent, NodeKindConstraintComponent
 from .cardinality_constraints import MinCountConstraintComponent, MaxCountConstraintComponent
+from .value_range_constraints import MinExclusiveConstraintComponent, MinInclusiveConstraintComponent, MaxExclusiveConstraintComponent, MaxInclusiveConstraintComponent
 from .string_based_constraints import MinLengthConstraintComponent, MaxLengthConstraintComponent, PatternConstraintComponent
 from .logical_constraints import NotConstraintComponent, AndConstraintComponent, OrConstraintComponent, XoneConstraintComponent
 from .shape_based_constraints import NodeShapeComponent, PropertyShapeComponent
+from .other_constraints import InConstraintComponent
 
 ALL_CONSTRAINT_COMPONENTS = [
     ClassConstraintComponent,
@@ -12,6 +14,10 @@ ALL_CONSTRAINT_COMPONENTS = [
     NodeKindConstraintComponent,
     MinCountConstraintComponent,
     MaxCountConstraintComponent,
+    MinExclusiveConstraintComponent,
+    MinInclusiveConstraintComponent,
+    MaxExclusiveConstraintComponent,
+    MaxInclusiveConstraintComponent,
     NotConstraintComponent,
     AndConstraintComponent,
     OrConstraintComponent,
@@ -20,7 +26,8 @@ ALL_CONSTRAINT_COMPONENTS = [
     MaxLengthConstraintComponent,
     PatternConstraintComponent,
     NodeShapeComponent,
-    PropertyShapeComponent
+    PropertyShapeComponent,
+    InConstraintComponent
 ]
 
 CONSTRAINT_PARAMETERS_MAP = {p: c for c in ALL_CONSTRAINT_COMPONENTS

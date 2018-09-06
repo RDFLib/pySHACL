@@ -4,8 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
-##[Unreleased]
-- tbd
+##[Unreleased]  
+- tbd  
+
+##[0.1.0a4.dev20180906]  
+### Added  
+- Added 4 value-range constraint
+  - MinExclusive, MinInclusive
+  - MaxExclusive, MaxInclusive
+- Added a misc constraint: InComponentConstraint
+### Changed  
+- Fixed some other edge cases so that more tests pass
+- 52 tests now passing
+- Bumped version number
+
 
 ## [0.1.0a3.dev20180906]  
 ### Added  
@@ -18,6 +30,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
   - Renamed `fails`, `failures`, `f`, etc to "Reports", because failures in SHACL are a different thing, reports are their correct name.  
 - Fixed some minor issues to get more tests passing  
 - 40 Tests now passing
+
 
 ## [0.1.0a2.dev20180906] - 2018-09-06  
 ### Added  
@@ -34,12 +47,14 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - Bug fixes since previous version  
 - 10+ tests are passing.  
 
+
 ## 0.1.0a1.dev20180904 - 2018-09-04  
 ### Added  
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a2.dev20180906...HEAD  
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a4.dev20180906...HEAD  
+[0.1.0a4.dev20180906]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a3.dev20180906...v0.1.0a4.dev20180906 
 [0.1.0a3.dev20180906]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a2.dev20180906...v0.1.0a3.dev20180906 
 [0.1.0a2.dev20180906]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a1.dev20180904...v0.1.0a2.dev20180906  
 

@@ -22,10 +22,10 @@
 ###[Value Range Constraint Components](https://www.w3.org/TR/shacl/#core-components-range)
 | Parameter         | Constraint                        |  Link 	                            |      Status      	    |  Comments	|
 |:----------        |:-------------                     |:------:	                            |:-------------:	    |:------	|
-| `sh:minExclusive` | `MinExclusiveConstraintComponent` | [▶][MinExclusiveConstraintComponent]  | ![status-missing] 	|           |
-| `sh:minInclusive` | `MinInclusiveConstraintComponent` | [▶][MinInclusiveConstraintComponent]  | ![status-missing] 	|           |
-| `sh:maxExclusive` | `MaxExclusiveConstraintComponent` | [▶][MaxExclusiveConstraintComponent]  | ![status-missing] 	|           |
-| `sh:maxInclusive` | `MaxInclusiveConstraintComponent` | [▶][MaxInclusiveConstraintComponent]  | ![status-missing] 	|           |
+| `sh:minExclusive` | `MinExclusiveConstraintComponent` | [▶][MinExclusiveConstraintComponent]  | ![status-complete] 	|           |
+| `sh:minInclusive` | `MinInclusiveConstraintComponent` | [▶][MinInclusiveConstraintComponent]  | ![status-complete] 	|           |
+| `sh:maxExclusive` | `MaxExclusiveConstraintComponent` | [▶][MaxExclusiveConstraintComponent]  | ![status-complete] 	|           |
+| `sh:maxInclusive` | `MaxInclusiveConstraintComponent` | [▶][MaxInclusiveConstraintComponent]  | ![status-complete] 	|           |
 
 
 ###[String-based Constraint Components](https://www.w3.org/TR/shacl/#core-components-string)
@@ -70,7 +70,7 @@
 | `sh:closed`             | `ClosedConstraintComponent`   | [▶][ClosedConstraintComponent]    | ![status-missing] 	| Will be hard to implement  |
 | `sh:ignoredProperties`  | `ClosedConstraintComponent`   | [▶][ClosedConstraintComponent]    | ![status-missing] 	|                            |
 | `sh:hasValue`           | `HasValueConstraintComponent` | [▶][HasValueConstraintComponent]  | ![status-missing] 	|                            |
-| `sh:in`                 | `InConstraintComponent`       | [▶][InConstraintComponent]        | ![status-missing] 	|                            |
+| `sh:in`                 | `InConstraintComponent`       | [▶][InConstraintComponent]        | ![status-complete] 	|                            |
 
 
 ##[SHACL Property Paths](https://www.w3.org/TR/shacl/#property-paths)
