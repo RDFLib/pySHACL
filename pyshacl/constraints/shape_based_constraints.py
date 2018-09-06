@@ -47,27 +47,27 @@ class PropertyShapeComponent(ConstraintComponent):
         :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
         """
-        fails = []
+        reports = []
         non_conformant = False
 
         for p_shape in self.property_shapes:
-            _nc, _f = self._evaluate_property_shape(p_shape, target_graph, focus_value_nodes)
+            _nc, _r = self._evaluate_property_shape(p_shape, target_graph, focus_value_nodes)
             non_conformant = non_conformant or _nc
-            fails.extend(_f)
-        return (not non_conformant), fails
+            reports.extend(_r)
+        return (not non_conformant), reports
 
     def _evaluate_property_shape(self, prop_shape, target_graph, f_v_dict):
-        fails = []
+        reports = []
         non_conformant = False
         prop_shape = self.shape.get_other_shape(prop_shape)
         if not prop_shape or not prop_shape.is_property_shape:
             raise RuntimeError("Shape pointed to by sh:property does not exist or is not a well-formed SHACL PropertyShape.")
         for f, value_nodes in f_v_dict.items():
             for v in value_nodes:
-                _is_conform, _f = prop_shape.validate(target_graph, focus=v)
+                _is_conform, _r = prop_shape.validate(target_graph, focus=v)
                 non_conformant = non_conformant or (not _is_conform)
-                fails.extend(_f)
-        return non_conformant, fails
+                reports.extend(_r)
+        return non_conformant, reports
 
 
 class NodeShapeComponent(ConstraintComponent):
@@ -106,27 +106,27 @@ class NodeShapeComponent(ConstraintComponent):
         :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
         """
-        fails = []
+        reports = []
         non_conformant = False
 
         for n_shape in self.node_shapes:
-            _nc, _f = self._evaluate_node_shape(n_shape, target_graph, focus_value_nodes)
+            _nc, _r = self._evaluate_node_shape(n_shape, target_graph, focus_value_nodes)
             non_conformant = non_conformant or _nc
-            fails.extend(_f)
-        return (not non_conformant), fails
+            reports.extend(_r)
+        return (not non_conformant), reports
 
     def _evaluate_node_shape(self, node_shape, target_graph, f_v_dict):
-        fails = []
+        reports = []
         non_conformant = False
         node_shape = self.shape.get_other_shape(node_shape)
         if not node_shape or node_shape.is_property_shape:
             raise RuntimeError("Shape pointed to by sh:node does not exist or is not a well-formed SHACL NodeShape.")
         for f, value_nodes in f_v_dict.items():
             for v in value_nodes:
-                _is_conform, _f = node_shape.validate(target_graph, focus=v)
+                _is_conform, _r = node_shape.validate(target_graph, focus=v)
                 # ignore the fails from the node, create our own fail
-                if (not _is_conform) or len(_f) > 0:
+                if (not _is_conform) or len(_r) > 0:
                     non_conformant = True
-                    fail = self.make_failure(f, value_node=v)
-                    fails.append(fail)
-        return non_conformant, fails
+                    rept = self.make_v_report(f, value_node=v)
+                    reports.append(rept)
+        return non_conformant, reports

@@ -74,16 +74,16 @@ class MinCountConstraintComponent(ConstraintComponent):
         if min_count == 0:
             # MinCount of zero always passes
             return True, []
-        fails = []
+        reports = []
         non_conformant = False
 
         for f, value_nodes in focus_value_nodes.items():
             flag = len(value_nodes) >= min_count
             if not flag:
                 non_conformant = True
-                fail = self.make_failure(f)
-                fails.append(fail)
-        return (not non_conformant), fails
+                rept = self.make_v_report(f)
+                reports.append(rept)
+        return (not non_conformant), reports
 
 
 class MaxCountConstraintComponent(ConstraintComponent):
@@ -139,14 +139,14 @@ class MaxCountConstraintComponent(ConstraintComponent):
         :type target_graph: rdflib.Graph
         """
         max_count = int(self.max_count.value)
-        fails = []
+        reports = []
         non_conformant = False
 
         for f, value_nodes in focus_value_nodes.items():
             flag = len(value_nodes) <= max_count
             if not flag:
                 non_conformant = True
-                fail = self.make_failure(f)
-                fails.append(fail)
-        return (not non_conformant), fails
+                rept = self.make_v_report(f)
+                reports.append(rept)
+        return (not non_conformant), reports
 

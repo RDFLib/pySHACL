@@ -3,6 +3,7 @@
 from .value_constraints import ClassConstraintComponent, DatatypeConstraintComponent, NodeKindConstraintComponent
 from .cardinality_constraints import MinCountConstraintComponent, MaxCountConstraintComponent
 from .string_based_constraints import MinLengthConstraintComponent, MaxLengthConstraintComponent, PatternConstraintComponent
+from .logical_constraints import NotConstraintComponent, AndConstraintComponent, OrConstraintComponent, XoneConstraintComponent
 from .shape_based_constraints import NodeShapeComponent, PropertyShapeComponent
 
 ALL_CONSTRAINT_COMPONENTS = [
@@ -11,6 +12,10 @@ ALL_CONSTRAINT_COMPONENTS = [
     NodeKindConstraintComponent,
     MinCountConstraintComponent,
     MaxCountConstraintComponent,
+    NotConstraintComponent,
+    AndConstraintComponent,
+    OrConstraintComponent,
+    XoneConstraintComponent,
     MinLengthConstraintComponent,
     MaxLengthConstraintComponent,
     PatternConstraintComponent,

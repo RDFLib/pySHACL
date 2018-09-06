@@ -45,7 +45,7 @@ ex:GraphValidationTestCase
           sh:resultSeverity sh:Violation ;
           sh:sourceConstraintComponent sh:OrConstraintComponent ;
           sh:sourceShape ex:TestShape-comment ;
-          sh:value "none"^^xsd:boolean ;
+          sh:value "abc"^^xsd:float ;
         ] ;
     ] ;
 .
@@ -54,7 +54,7 @@ ex:InvalidResource1
   rdfs:comment owl:Thing ;
   rdfs:comment 42 ;
   rdfs:comment "A string" ;
-  rdfs:comment "none"^^xsd:boolean ;
+  rdfs:comment "abc"^^xsd:float ;
   rdfs:label "Invalid resource1" ;
 .
 ex:TestShape
@@ -77,7 +77,7 @@ ex:TestShape-comment
         sh:datatype rdf:langString ;
       ]
       [
-        sh:datatype xsd:boolean ;
+        sh:datatype xsd:float ;
       ]
     ) ;
 .

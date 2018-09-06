@@ -64,17 +64,17 @@ class ClassConstraintComponent(ConstraintComponent):
         :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
         """
-        fails = []
+        reports = []
         non_conformant = False
         for c in self.class_rules:
-            _n, _f = self._evaluate_class_rules(
+            _n, _r = self._evaluate_class_rules(
                 target_graph, focus_value_nodes, c)
             non_conformant = non_conformant or _n
-            fails.extend(_f)
-        return (not non_conformant), fails
+            reports.extend(_r)
+        return (not non_conformant), reports
 
     def _evaluate_class_rules(self, target_graph, f_v_dict, class_rule):
-        fails = []
+        reports = []
         non_conformant = False
         for f, value_nodes in f_v_dict.items():
             for v in value_nodes:
@@ -93,9 +93,9 @@ class ClassConstraintComponent(ConstraintComponent):
                         break
                 if not found:
                     non_conformant = True
-                    fail = self.make_failure(f, value_node=v)
-                    fails.append(fail)
-        return non_conformant, fails
+                    rept = self.make_v_report(f, value_node=v)
+                    reports.append(rept)
+        return non_conformant, reports
 
 
 class DatatypeConstraintComponent(ConstraintComponent):
@@ -138,7 +138,7 @@ class DatatypeConstraintComponent(ConstraintComponent):
         :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
         """
-        fails = []
+        reports = []
         non_conformant = False
         dtype_rule = self.datatype_rule
         for f, value_nodes in focus_value_nodes.items():
@@ -156,9 +156,9 @@ class DatatypeConstraintComponent(ConstraintComponent):
                         matches = self._assert_actual_datatype(v, dtype_rule)
                 if not matches:
                     non_conformant = True
-                    fail = self.make_failure(f, value_node=v)
-                    fails.append(fail)
-        return (not non_conformant), fails
+                    rept = self.make_v_report(f, value_node=v)
+                    reports.append(rept)
+        return (not non_conformant), reports
 
     def _assert_actual_datatype(self, value_node, datatype_rule):
         value = value_node.value
@@ -221,7 +221,7 @@ class NodeKindConstraintComponent(ConstraintComponent):
         :type target_graph: rdflib.Graph
         """
         n_rule = self.nodekind_rule
-        fails = []
+        reports = []
         non_conformant = False
         for f, value_nodes in focus_value_nodes.items():
             for v in value_nodes:
@@ -237,12 +237,12 @@ class NodeKindConstraintComponent(ConstraintComponent):
                         match = True
                 if not match:
                     non_conformant = True
-                    fail = self.make_failure(f, value_node=v)
-                    fails.append(fail)
-        return (not non_conformant), fails
+                    rept = self.make_v_report(f, value_node=v)
+                    reports.append(rept)
+        return (not non_conformant), reports
 
     def _evaluate_nodekind_rules(self, target_graph, f_v_pairs, nodekind_rule):
-        fails = []
+        reports = []
         non_conformant = False
 
-        return non_conformant, fails
+        return non_conformant, reports

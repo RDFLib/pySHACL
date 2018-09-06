@@ -72,14 +72,14 @@ class Validator(object):
         if self.options.get('inference', True):
             self._run_pre_inference(self.target_graph)
         shapes = find_shapes(self.shacl_graph)
-        fails = []
+        reports = []
         non_conformant = False
         for s in shapes:
-            _is_conform, _fails = s.validate(self.target_graph)
+            _is_conform, _reports = s.validate(self.target_graph)
             non_conformant = non_conformant or (not _is_conform)
-            fails.extend(_fails)
-        report = self.create_validation_report((not non_conformant), fails)
-        return (not non_conformant), report
+            reports.extend(_reports)
+        vreport = self.create_validation_report((not non_conformant), reports)
+        return (not non_conformant), vreport
 
 
 # TODO: check out rdflib.util.guess_format() for format. I think it works well except for perhaps JSON-LD

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import rdflib
+
+from pyshacl.constraints.logical_constraints import SH_not, SH_and, SH_or, SH_xone
 from pyshacl.consts import *
 import logging
 
@@ -180,7 +182,7 @@ class Shape(object):
             return True, []
         run_count = 0
         parameters = self.parameters()
-        fails = []
+        reports = []
         focus_value_nodes = self.value_nodes(target_graph, focus)
         non_conformant = False
         done_constraints = set()
@@ -189,16 +191,17 @@ class Shape(object):
             if constraint_component in done_constraints:
                 continue
             c = constraint_component(self)
-            _is_conform, _fails = c.evaluate(target_graph, focus_value_nodes)
+            _is_conform, _r = c.evaluate(target_graph, focus_value_nodes)
             non_conformant = non_conformant or (not _is_conform)
-            fails.extend(_fails)
+            reports.extend(_r)
             run_count += 1
             done_constraints.add(constraint_component)
             if non_conformant and bail_on_error:
                 break
         if run_count < 1:
             raise RuntimeError("A SHACL Shape should have at least one parameter or attached property shape.")
-        return (not non_conformant), fails
+        return (not non_conformant), reports
+
 
 """
 A shape is an IRI or blank node s that fulfills at least one of the following conditions in the shapes graph:
@@ -209,7 +212,8 @@ A shape is an IRI or blank node s that fulfills at least one of the following co
     s is a value of a shape-expecting, non-list-taking parameter such as sh:node, or a member of a SHACL list that is a value of a shape-expecting and list-taking parameter such as sh:or.
 """
 
-def find_shapes(g, infer_shapes=False):
+
+def find_shapes(g):
     """
     :param g: The Shapes Graph (SG)
     :type g: rdflib.Graph
@@ -249,10 +253,22 @@ def find_shapes(g, infer_shapes=False):
 
     value_of_property = {o for s, o in g.subject_objects(SH_property)}
     value_of_node = {o for s, o in g.subject_objects(SH_node)}
-    value_of_shapes = set(value_of_property).union(set(value_of_node))
+    value_of_not = {o for s, o in g.subject_objects(SH_not)}
+    value_of_shape_expecting = set(value_of_property).union(set(value_of_node).union(set(value_of_not)))
 
-    if infer_shapes:
-        log.warning("Inferring shapes is not yet supported")
+    value_of_and = {o for s, o in g.subject_objects(SH_and)}
+    value_of_or = {o for s, o in g.subject_objects(SH_or)}
+    value_of_xone = {o for s, o in g.subject_objects(SH_xone)}
+    value_of_s_list_expecting = set(value_of_and).union(set(value_of_or).union(set(value_of_xone)))
+
+    for l in value_of_s_list_expecting:
+        list_contents = set(g.items(l))
+        if len(list_contents) < 1:
+            raise ShapeLoadError(
+                "A Shape-Expecting & List-Expecting predicate should get a well-formed RDF list with 1 or more members.",
+                "https://www.w3.org/TR/shacl/#shapes-recursion")
+        for s in list_contents:
+            value_of_shape_expecting.add(s)
 
     found_node_shapes = set()
     found_prop_shapes = set()
@@ -269,7 +285,7 @@ def find_shapes(g, infer_shapes=False):
         else:
             found_prop_shapes.add(s)
             found_prop_shapes_paths[s] = path_vals[0]
-    for s in value_of_shapes:
+    for s in value_of_shape_expecting:
         if s in defined_node_shapes or s in defined_prop_shapes or \
                 s in found_prop_shapes or s in found_node_shapes:
             continue
