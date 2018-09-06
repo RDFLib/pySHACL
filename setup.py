@@ -34,11 +34,12 @@ setup(
     description='Python SHACL Validator',
     author='Nicholas Car',
     author_email='nicholas.car@csiro.au',
-    url='https://github.com/CSIRO-enviro-informatics/pyshacl',
-    download_url='https://github.com/CSIRO-enviro-informatics/'
-                    'pyshacl/archive/v{:s}.tar.gz'.format(version),
+    url='https://github.com/RDFLib/pySHACL/',
+    download_url='https://github.com/RDFLib/pySHACL/'
+                    'archive/v{:s}.tar.gz'.format(version),
     license='LICENSE.txt',
-    keywords=['Linked Data', 'Semantic Web', 'Flask', 'Python', 'SHACL', 'Schema', 'Validate'],
+    keywords=['Linked Data', 'Semantic Web', 'Flask', 'Python',
+              'SHACL', 'Shapes', 'Schema', 'Validate'],
     long_description=long_description,
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -54,8 +55,8 @@ setup(
     ],
     project_urls={
         'Bug Reports':
-            'https://github.com/CSIRO-enviro-informatics/pyshacl/issues',
-        'Source': 'https://github.com/CSIRO-enviro-informatics/pyshacl/',
+            'https://github.com/RDFLib/pySHACL/issues',
+        'Source': 'https://github.com/RDFLib/pySHACL/',
     },
     install_requires=install_requires,
 )
