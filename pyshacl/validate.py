@@ -3,6 +3,7 @@ import rdflib
 import RDFClosure as owl_rl
 if owl_rl.json_ld_available:
     import rdflib_jsonld
+from pyshacl.inference import CustomRDFSSemantics, CustomRDFSOWLRLSemantics
 from pyshacl.shape import find_shapes
 from pyshacl.consts import RDF_type, SH_conforms, \
     SH_result, SH_ValidationReport
@@ -15,13 +16,23 @@ log = logging.getLogger(__name__)
 class Validator(object):
     @classmethod
     def _load_default_options(cls, options_dict):
-        options_dict['inference'] = True
+        options_dict['inference'] = 'rdfs'
         options_dict['abort_on_error'] = False
 
     @classmethod
-    def _run_pre_inference(cls, target_graph):
+    def _run_pre_inference(cls, target_graph, inference_option):
         try:
-            inferencer = owl_rl.DeductiveClosure(owl_rl.RDFS_OWLRL_Semantics)
+            if inference_option == 'rdfs':
+                inferencer = owl_rl.DeductiveClosure(CustomRDFSSemantics)
+            elif inference_option == 'owlrl':
+                inferencer = owl_rl.DeductiveClosure(owl_rl.OWLRL_Semantics)
+            elif inference_option == 'both' or inference_option == 'all'\
+                    or inference_option == 'rdfsowlrl':
+                inferencer = owl_rl.DeductiveClosure(CustomRDFSOWLRLSemantics)
+            else:
+                raise RuntimeError(
+                    "Don't know how to do '{}' type inferencing."
+                    .format(inference_option))
         except Exception as e:
             log.error("Error during creation of OWL-RL Deductive Closure")
             raise e
@@ -53,6 +64,21 @@ class Validator(object):
         log.info(v_text)
         return vg
 
+    @classmethod
+    def clone_graph(cls, source_graph, identifier=None):
+        """
+
+        :param source_graph:
+        :type source_graph: rdflib.Graph
+        :param identifier:
+        :type identifier: str | None
+        :return:
+        """
+        g = rdflib.Graph(identifier=identifier)
+        for t in iter(source_graph):
+            g.add(t)
+        return g
+
     def __init__(self, target_graph, *args,
                  shacl_graph=None, options=None, **kwargs):
         if options is None:
@@ -63,14 +89,16 @@ class Validator(object):
             "target_graph must be a rdflib Graph object"
         self.target_graph = target_graph
         if shacl_graph is None:
-            shacl_graph = target_graph
+            shacl_graph = self.clone_graph(target_graph, 'shacl')
         assert isinstance(shacl_graph, rdflib.Graph),\
             "shacl_graph must be a rdflib Graph object"
         self.shacl_graph = shacl_graph
 
     def run(self):
-        if self.options.get('inference', True):
-            self._run_pre_inference(self.target_graph)
+
+        inference_option = self.options.get('inference', 'rdfs')
+        if inference_option and str(inference_option) != "none":
+            self._run_pre_inference(self.target_graph, inference_option)
         shapes = find_shapes(self.shacl_graph)
         reports = []
         non_conformant = False

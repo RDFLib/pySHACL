@@ -1,6 +1,6 @@
 # pySHACL Features Matrix
 
-
+_See a correctly rendered view of this table [here](http://dynalon.github.io/mdwiki/#!https://raw.githubusercontent.com/RDFLib/pySHACL/master/FEATURES.md)._
 ##[Core Constraint Components](https://www.w3.org/TR/shacl/#core-components)
 
 
@@ -67,7 +67,7 @@
 ###[Other Constraint Components](https://www.w3.org/TR/shacl/#core-components-others)
 | Parameter               | Constraint                    |  Link 	                          |      Status      	|  Comments	                 |
 |:----------              |:-------------                 |:------:	                          |:-------------:	    |:------	                 |
-| `sh:closed`             | `ClosedConstraintComponent`   | [▶][ClosedConstraintComponent]    | ![status-missing] 	| Will be hard to implement  |
+| `sh:closed`             | `ClosedConstraintComponent`   | [▶][ClosedConstraintComponent]    | ![status-complete]	|                            |
 | `sh:ignoredProperties`  | `ClosedConstraintComponent`   | [▶][ClosedConstraintComponent]    | ![status-missing] 	|                            |
 | `sh:hasValue`           | `HasValueConstraintComponent` | [▶][HasValueConstraintComponent]  | ![status-missing] 	|                            |
 | `sh:in`                 | `InConstraintComponent`       | [▶][InConstraintComponent]        | ![status-complete] 	|                            |
@@ -88,8 +88,8 @@
 ##[Non-Validating Shape Characteristics](https://www.w3.org/TR/shacl/#nonValidation)
 | Path                |  Link 	                 |      Status      	|  Comments	|
 |:----------          |:------:	                 |:-------------:	    |:------	|
-| `sh:name`           | [▶][ShapeName]           | ![status-missing] 	|           |
-| `sh:description`    | [▶][ShapeName]           | ![status-missing] 	|           |
+| `sh:name`           | [▶][ShapeName]           | ![status-complete]	|           |
+| `sh:description`    | [▶][ShapeName]           | ![status-complete]	|           |
 | `sh:order`          | [▶][ShapeOrder]          | ![status-missing] 	|           |
 | `sh:group`          | [▶][ShapeGroup]          | ![status-missing] 	|           |
 | `sh:defaultValue`   | [▶][ShapeDefaultValue]   | ![status-missing] 	|           |

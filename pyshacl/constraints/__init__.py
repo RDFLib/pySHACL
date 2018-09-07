@@ -6,7 +6,7 @@ from .value_range_constraints import MinExclusiveConstraintComponent, MinInclusi
 from .string_based_constraints import MinLengthConstraintComponent, MaxLengthConstraintComponent, PatternConstraintComponent
 from .logical_constraints import NotConstraintComponent, AndConstraintComponent, OrConstraintComponent, XoneConstraintComponent
 from .shape_based_constraints import NodeShapeComponent, PropertyShapeComponent
-from .other_constraints import InConstraintComponent
+from .other_constraints import ClosedConstraintComponent, InConstraintComponent
 
 ALL_CONSTRAINT_COMPONENTS = [
     ClassConstraintComponent,
@@ -27,6 +27,7 @@ ALL_CONSTRAINT_COMPONENTS = [
     PatternConstraintComponent,
     NodeShapeComponent,
     PropertyShapeComponent,
+    ClosedConstraintComponent,
     InConstraintComponent
 ]
 

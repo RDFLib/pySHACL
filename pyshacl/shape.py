@@ -27,6 +27,41 @@ class Shape(object):
         self._path = path
         self.__class__.all_shapes[(id(sg), node)] = self
 
+        deactivated_vals = set(self.objects(SH_deactivated))
+        if len(deactivated_vals) > 1:
+            raise ShapeLoadError("A SHACL Shape cannot have more than one sh:deactivated predicate.",
+                                 "https://www.w3.org/TR/shacl/#deactivated")
+        elif len(deactivated_vals) < 1:
+            self._deactivated = False
+        else:
+            d = next(iter(deactivated_vals))
+            if not isinstance(d, rdflib.Literal):
+                raise ShapeLoadError(
+                    "The value of sh:deactivated predicate on a SHACL Shape must be a Literal.",
+                    "https://www.w3.org/TR/shacl/#deactivated")
+            self._deactivated = bool(d.value)
+        severity = set(self.objects(SH_severity))
+        if len(severity):
+            self._severity = next(iter(severity))
+        else:
+            self._severity = SH_Violation
+        messages = set(self.objects(SH_message))
+        if len(messages):
+            self._messages = iter(messages)
+        else:
+            self._messages = None
+        names = set(self.objects(SH_name))
+        if len(names):
+            self._names = iter(names)
+        else:
+            self._names = None
+        descriptions = set(self.objects(SH_description))
+        if len(descriptions):
+            self._descriptions = iter(descriptions)
+        else:
+            self._descriptions = None
+
+
     def get_other_shape(self, shape_node):
         try:
             return self.__class__.all_shapes[(id(self.sg), shape_node)]
@@ -40,6 +75,34 @@ class Shape(object):
     def property_shapes(self):
         return self.sg.objects(self.node, SH_property)
 
+    @property
+    def deactivated(self):
+        return self._deactivated
+
+    @property
+    def severity(self):
+        return self._severity
+
+    @property
+    def message(self):
+        if self._messages is None:
+            return
+        for m in self._messages:
+            yield m
+
+    @property
+    def name(self):
+        if self._names is None:
+            return
+        for n in self._names:
+            yield n
+
+    @property
+    def description(self):
+        if self._descriptions is None:
+            return
+        for d in self._descriptions:
+            yield d
 
     def parameters(self):
         return (p for p, v in self.sg.predicate_objects(self.node)
@@ -71,14 +134,7 @@ class Shape(object):
             return None
         if self._path is not None:
             return self._path
-        return next(list(self.objects(SH_path)))
-
-    def severity(self):
-        severity = list(self.objects(SH_severity))
-        if len(severity):
-            return severity[0]
-        else:
-            return SH_Violation
+        return list(self.objects(SH_path))[0]
 
     def target(self):
         """
@@ -103,7 +159,8 @@ class Shape(object):
         specified as explicit input to the SHACL processor for validating a specific RDF term against a shape
         :return:
         """
-        (target_nodes, target_classes, implicit_classes, _, _) = self.target()
+        (target_nodes, target_classes, implicit_classes,
+         target_objects_of, target_subjects_of) = self.target()
         found_node_targets = set()
         for n in iter(target_nodes):
             # Note, a node_target _can_ be a literal.
@@ -121,15 +178,24 @@ class Shape(object):
         found_target_instances = set()
         for tc in target_classes:
             s = target_graph.subjects(RDF_type, tc)
-            for subject in iter(s):
-                found_target_instances.add(subject)
+            found_target_instances.update(s)
             subc = target_graph.subjects(RDFS_subClassOf, tc)
             for subclass in iter(subc):
                 s1 = target_graph.subjects(RDF_type, subclass)
-                for subject in iter(s1):
-                    found_target_instances.add(subject)
-        # TODO: The other two types of targets
-        return found_node_targets.union(found_target_instances)
+                found_target_instances.update(s1)
+        found_node_targets.update(found_target_instances)
+        found_target_subject_of = set()
+        for s_of in target_subjects_of:
+            subs = {s for s, o in target_graph.subject_objects(s_of)}
+            found_target_subject_of.update(subs)
+        found_node_targets.update(found_target_subject_of)
+        found_target_object_of = set()
+        for o_of in target_objects_of:
+            objs = {o for s, o in target_graph.subject_objects(o_of)}
+            found_target_object_of.update(objs)
+        found_node_targets.update(found_target_object_of)
+
+        return found_node_targets
 
     def _value_nodes_from_path(self, focus, path, target_graph):
         find_inverse = set(self.sg.objects(path, SH_inversePath))
@@ -171,6 +237,8 @@ class Shape(object):
 
     def validate(self, target_graph, focus=None, bail_on_error=False):
         assert isinstance(target_graph, rdflib.Graph)
+        if self.deactivated:
+            return True, []
         if focus is not None:
             if not isinstance(focus, (tuple, list, set)):
                 focus = [focus]
@@ -180,12 +248,12 @@ class Shape(object):
             # Its possible for shapes to have _no_ focus nodes
             # (they are called in other ways)
             return True, []
-        run_count = 0
         parameters = self.parameters()
         reports = []
         focus_value_nodes = self.value_nodes(target_graph, focus)
         non_conformant = False
         done_constraints = set()
+        run_count = 0
         for p in iter(parameters):
             constraint_component = CONSTRAINT_PARAMETERS_MAP[p]
             if constraint_component in done_constraints:
@@ -198,8 +266,8 @@ class Shape(object):
             done_constraints.add(constraint_component)
             if non_conformant and bail_on_error:
                 break
-        if run_count < 1:
-            raise RuntimeError("A SHACL Shape should have at least one parameter or attached property shape.")
+        #if run_count < 1:
+            #raise RuntimeError("A SHACL Shape should have at least one parameter or attached property shape.")
         return (not non_conformant), reports
 
 

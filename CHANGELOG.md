@@ -5,7 +5,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
 ##[Unreleased]  
-- tbd  
+- tbd 
+
+##[0.1.0a5.dev20180907]  
+### Added  
+- Added new ConstraintComponent:  
+  - Closed Constraint  
+- Added a new custom RDFS semantic closure for the OWL-RL reasoner.  
+- Added new properties to Shape objects as per the SHACL spec:  
+  - `sh:deactivated` to turn off a shape  
+  - `sh:name` to name/title a shape when represented in a form  
+  - `sh:description` to describe a shape when represented in a form  
+  - `sh:message` a shape's message to include in the shape report output  
+- Added new Shape Target types:  
+  - `sh:targetSubjectsOf` and `sh:targetObjectsOf`  
+- Added the Shape's message to the message output of the ValidationReport  
+- Added a link to a correctly rendered view of the FEATURES table  
+
+### Changed  
+- Changed the default pre-inferencing type. Now only do RDFS by default, not RDFS+OWLRL  
+  - The SHACL validator run approx 10-15x faster when the target graph is inferenced using RDFS rather than RDFS+OWLRL.  
+  - And all the the tests still pass, so OWL-RL inferencing is not required for normal SHACL validation.  
+- Changed the RDFS Semantic closure for inferencing to our new custom one which ignores the 'hidden' rules.  
+- 61 tests now passing  
+- Updated FEATURES list.  
+- Bumped version number  
+
 
 ##[0.1.0a4.dev20180906]  
 ### Added  
@@ -54,6 +79,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - Initial version, limited functionality  
 
 [Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a4.dev20180906...HEAD  
+[0.1.0a5.dev20180907]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a4.dev20180906...v0.1.0a5.dev20180907
 [0.1.0a4.dev20180906]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a3.dev20180906...v0.1.0a4.dev20180906 
 [0.1.0a3.dev20180906]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a2.dev20180906...v0.1.0a3.dev20180906 
 [0.1.0a2.dev20180906]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a1.dev20180904...v0.1.0a2.dev20180906  
