@@ -104,7 +104,7 @@ _See a correctly rendered view of this table [here](http://dynalon.github.io/mdw
 [DatatypeConstraintComponent]: https://www.w3.org/TR/shacl/#DatatypeConstraintComponent
 [NodeKindConstraintComponent]: https://www.w3.org/TR/shacl/#NodeKindConstraintComponent
 [MinCountConstraintComponent]: https://www.w3.org/TR/shacl/#MinCountConstraintComponent
-[MinCountConstraintComponent]: https://www.w3.org/TR/shacl/#MaxCountConstraintComponent
+[MaxCountConstraintComponent]: https://www.w3.org/TR/shacl/#MaxCountConstraintComponent
 [MinExclusiveConstraintComponent]: https://www.w3.org/TR/shacl/#MinExclusiveConstraintComponent
 [MinInclusiveConstraintComponent]: https://www.w3.org/TR/shacl/#MinInclusiveConstraintComponent
 [MaxExclusiveConstraintComponent]: https://www.w3.org/TR/shacl/#MaxExclusiveConstraintComponent

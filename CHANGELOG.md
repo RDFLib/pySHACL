@@ -4,10 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
-##[Unreleased]  
+## [Unreleased]  
 - tbd 
 
-##[0.1.0a5.dev20180907]  
+## [0.1.0a5.dev20180907]  
 ### Added  
 - Added new ConstraintComponent:  
   - Closed Constraint  
@@ -32,7 +32,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - Bumped version number  
 
 
-##[0.1.0a4.dev20180906]  
+## [0.1.0a4.dev20180906]  
 ### Added  
 - Added 4 value-range constraint
   - MinExclusive, MinInclusive
