@@ -1,10 +1,9 @@
 # pySHACL Features Matrix
 
-_See a correctly rendered view of this table [here](http://dynalon.github.io/mdwiki/#!https://raw.githubusercontent.com/RDFLib/pySHACL/master/FEATURES.md)._
-##[Core Constraint Components](https://www.w3.org/TR/shacl/#core-components)
+## [Core Constraint Components](https://www.w3.org/TR/shacl/#core-components)
 
 
-###[Value Type Constraint Components](https://www.w3.org/TR/shacl/#core-components-value-type)
+### [Value Type Constraint Components](https://www.w3.org/TR/shacl/#core-components-value-type)
 | Parameter         | Constraint                        |  Link 	                            |      Status      	    |  Comments	|
 |:----------        |:-------------                     |:------:	                            |:-------------:	    |:------	|
 | `sh:class`  	    | `ClassConstraintComponent`        | [▶][ClassConstraintComponent]         | ![status-complete] 	|           |
@@ -12,14 +11,14 @@ _See a correctly rendered view of this table [here](http://dynalon.github.io/mdw
 | `sh:nodeKind`     | `NodeKindConstraintComponent`     | [▶][NodeKindConstraintComponent]      | ![status-complete]    |           |
 
 
-###[Cardinality Constraint Components](https://www.w3.org/TR/shacl/#core-components-count)
+### [Cardinality Constraint Components](https://www.w3.org/TR/shacl/#core-components-count)
 | Parameter         | Constraint                        |  Link 	                            |      Status      	    |  Comments	|
 |:----------        |:-------------                     |:------:	                            |:-------------:	    |:------	|
 | `sh:minCount`     | `MinCountConstraintComponent`     | [▶][MinCountConstraintComponent]      | ![status-complete] 	|           |
 | `sh:maxCount`     | `MaxCountConstraintComponent`     | [▶][MaxCountConstraintComponent]      | ![status-complete] 	|           |
 
 
-###[Value Range Constraint Components](https://www.w3.org/TR/shacl/#core-components-range)
+### [Value Range Constraint Components](https://www.w3.org/TR/shacl/#core-components-range)
 | Parameter         | Constraint                        |  Link 	                            |      Status      	    |  Comments	|
 |:----------        |:-------------                     |:------:	                            |:-------------:	    |:------	|
 | `sh:minExclusive` | `MinExclusiveConstraintComponent` | [▶][MinExclusiveConstraintComponent]  | ![status-complete] 	|           |
@@ -28,7 +27,7 @@ _See a correctly rendered view of this table [here](http://dynalon.github.io/mdw
 | `sh:maxInclusive` | `MaxInclusiveConstraintComponent` | [▶][MaxInclusiveConstraintComponent]  | ![status-complete] 	|           |
 
 
-###[String-based Constraint Components](https://www.w3.org/TR/shacl/#core-components-string)
+### [String-based Constraint Components](https://www.w3.org/TR/shacl/#core-components-string)
 | Parameter         | Constraint                        |  Link 	                            |      Status      	    |  Comments	             |
 |:----------        |:-------------                     |:------:	                            |:-------------:	    |:------	             |
 | `sh:minLength`    | `MinLengthConstraintComponent`    | [▶][MinLengthConstraintComponent]     | ![status-complete] 	|                        |
@@ -38,7 +37,7 @@ _See a correctly rendered view of this table [here](http://dynalon.github.io/mdw
 | `sh:uniqueLang`   | `UniqueLangConstraintComponent`   | [▶][UniqueLangConstraintComponent]    | ![status-missing] 	|                        |
 
 
-###[Property Pair Constraint Components](https://www.w3.org/TR/shacl/#core-components-property-pairs)
+### [Property Pair Constraint Components](https://www.w3.org/TR/shacl/#core-components-property-pairs)
 | Parameter               | Constraint                              |  Link 	                                |      Status      	    |  Comments	|
 |:----------              |:-------------                           |:------:	                                |:-------------:	    |:------	|
 | `sh:equals`             | `EqualsConstraintComponent`             | [▶][EqualsConstraintComponent]            | ![status-missing] 	|           |
@@ -47,7 +46,7 @@ _See a correctly rendered view of this table [here](http://dynalon.github.io/mdw
 | `sh:lessThanOrEquals`   | `LessThanOrEqualsConstraintComponent`   | [▶][LessThanOrEqualsConstraintComponent]  | ![status-missing] 	|           |
 
 
-###[Logical Constraint Components](https://www.w3.org/TR/shacl/#core-components-logical)
+### [Logical Constraint Components](https://www.w3.org/TR/shacl/#core-components-logical)
 | Parameter  | Constraint                 |  Link 	                      |      Status   	    |  Comments	|
 |:---------- |:-------------              |:------:	                      |:-------------:	    |:------	|
 | `sh:not`   | `NotConstraintComponent`   | [▶][NotConstraintComponent]   | ![status-complete] 	|           |
@@ -56,7 +55,7 @@ _See a correctly rendered view of this table [here](http://dynalon.github.io/mdw
 | `sh:xone`  | `XoneConstraintComponent`  | [▶][XoneConstraintComponent]  | ![status-complete] 	|           |
 
 
-###[Shape-based Constraint Components](https://www.w3.org/TR/shacl/#core-components-shape)
+### [Shape-based Constraint Components](https://www.w3.org/TR/shacl/#core-components-shape)
 | Parameter                 | Constraint                                |  Link 	                                   |      Status      	  |  Comments                                     |
 |:----------                |:-------------                             |:------:	                                   |:-------------:	      |:------	                                      |
 | `sh:node`                 | `NodeConstraintComponent`                 | [▶][NodeConstraintComponent]                 | ![status-complete]   |                                               |
@@ -64,7 +63,7 @@ _See a correctly rendered view of this table [here](http://dynalon.github.io/mdw
 | `sh:qualifiedValueShape`  | `QualifiedValueShapeConstraintComponent`  | [▶][QualifiedValueShapeConstraintComponent]  | ![status-missing] 	  |                                               |
 
 
-###[Other Constraint Components](https://www.w3.org/TR/shacl/#core-components-others)
+### [Other Constraint Components](https://www.w3.org/TR/shacl/#core-components-others)
 | Parameter               | Constraint                    |  Link 	                          |      Status      	|  Comments	                 |
 |:----------              |:-------------                 |:------:	                          |:-------------:	    |:------	                 |
 | `sh:closed`             | `ClosedConstraintComponent`   | [▶][ClosedConstraintComponent]    | ![status-complete]	|                            |
@@ -73,7 +72,7 @@ _See a correctly rendered view of this table [here](http://dynalon.github.io/mdw
 | `sh:in`                 | `InConstraintComponent`       | [▶][InConstraintComponent]        | ![status-complete] 	|                            |
 
 
-##[SHACL Property Paths](https://www.w3.org/TR/shacl/#property-paths)
+## [SHACL Property Paths](https://www.w3.org/TR/shacl/#property-paths)
 | Path                |  Link 	                 |      Status      	|  Comments	|
 |:----------          |:------:	                 |:-------------:	    |:------	|
 | Predicate Path      | [▶][PredicatePath]       | ![status-complete] 	|           |
@@ -85,7 +84,7 @@ _See a correctly rendered view of this table [here](http://dynalon.github.io/mdw
 | Zero-Or-One Paths   | [▶][ZeroOrOnePath]       | ![status-missing] 	|           |
 
 
-##[Non-Validating Shape Characteristics](https://www.w3.org/TR/shacl/#nonValidation)
+## [Non-Validating Shape Characteristics](https://www.w3.org/TR/shacl/#nonValidation)
 | Path                |  Link 	                 |      Status      	|  Comments	|
 |:----------          |:------:	                 |:-------------:	    |:------	|
 | `sh:name`           | [▶][ShapeName]           | ![status-complete]	|           |
