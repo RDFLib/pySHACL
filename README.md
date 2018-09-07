@@ -6,7 +6,7 @@ A python validator for SHACL.
 A features matrix is kept in the [FEATURES file](FEATURES.md).
 
 
-## Features
+## Changelog
 A comprehensive changelog is kept in the [CHANGELOG file](CHANGELOG.md).
 
 
