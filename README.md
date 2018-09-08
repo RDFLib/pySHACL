@@ -35,7 +35,7 @@ A comprehensive changelog is kept in the [CHANGELOG file](CHANGELOG.md).
 
 
 ## License
-This repository is licensed under Creative Commons 4.0 International. See the [LICENSE deed](LICENSE.txt) for details.  
+This repository is licensed under Apache License, Version 2.0. See the [LICENSE deed](LICENSE.txt) for details.  
 
 
 ## Contacts
