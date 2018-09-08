@@ -25,7 +25,16 @@ with open_local(['README.md']) as readme:
     long_description = readme.read()
 
 with open_local(['requirements.txt']) as req:
-    install_requires = req.read().split("\n")
+    found_requirements = req.read().split("\n")
+    dependency_links = []
+    requirements = []
+    for f in found_requirements:
+        if 'git+' in f:
+            pkg = f.split('#')[-1]
+            dependency_links.append(f.strip() + '-9876543210')
+            requirements.append(pkg.replace('egg=', '').rstrip())
+        else:
+            requirements.append(f.strip())
 
 setup(
     name='pyshacl',
@@ -38,7 +47,7 @@ setup(
     download_url='https://github.com/RDFLib/pySHACL/'
                     'archive/v{:s}.tar.gz'.format(version),
     license='LICENSE.txt',
-    keywords=['Linked Data', 'Semantic Web', 'Flask', 'Python',
+    keywords=['Linked Data', 'Semantic Web', 'Python',
               'SHACL', 'Shapes', 'Schema', 'Validate'],
     long_description=long_description,
     classifiers=[
@@ -50,6 +59,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
@@ -58,6 +68,7 @@ setup(
             'https://github.com/RDFLib/pySHACL/issues',
         'Source': 'https://github.com/RDFLib/pySHACL/',
     },
-    install_requires=install_requires,
+    install_requires=requirements,
+    dependency_links=dependency_links
 )
 
