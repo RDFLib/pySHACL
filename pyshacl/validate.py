@@ -16,8 +16,8 @@ log = logging.getLogger(__name__)
 class Validator(object):
     @classmethod
     def _load_default_options(cls, options_dict):
-        options_dict['inference'] = 'rdfs'
-        options_dict['abort_on_error'] = False
+        options_dict.setdefault('inference', 'none')
+        options_dict.setdefault('abort_on_error', False)
 
     @classmethod
     def _run_pre_inference(cls, target_graph, inference_option):
@@ -95,8 +95,7 @@ class Validator(object):
         self.shacl_graph = shacl_graph
 
     def run(self):
-
-        inference_option = self.options.get('inference', 'rdfs')
+        inference_option = self.options.get('inference', 'none')
         if inference_option and str(inference_option) != "none":
             self._run_pre_inference(self.target_graph, inference_option)
         shapes = find_shapes(self.shacl_graph)
@@ -106,8 +105,8 @@ class Validator(object):
             _is_conform, _reports = s.validate(self.target_graph)
             non_conformant = non_conformant or (not _is_conform)
             reports.extend(_reports)
-        vreport = self.create_validation_report((not non_conformant), reports)
-        return (not non_conformant), vreport
+        v_report = self.create_validation_report((not non_conformant), reports)
+        return (not non_conformant), v_report
 
 
 # TODO: check out rdflib.util.guess_format() for format. I think it works well except for perhaps JSON-LD
@@ -147,7 +146,18 @@ def _load_into_graph(target):
     return g
 
 
-def validate(target_graph, *args, shacl_graph=None, inference=True, abort_on_error=False, **kwargs):
+def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_error=False, **kwargs):
+    """
+    :param target_graph:
+    :type target_graph: rdflib.Graph | str
+    :param args:
+    :param shacl_graph:
+    :param inference:
+    :type inference: str | None
+    :param abort_on_error:
+    :param kwargs:
+    :return:
+    """
     target_graph = _load_into_graph(target_graph)
     if shacl_graph is not None:
         shacl_graph = _load_into_graph(shacl_graph)

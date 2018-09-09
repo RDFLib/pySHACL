@@ -5,7 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
 ## [Unreleased]  
-- tbd 
+- tbd
+
+## [0.1.0a6.dev20180909]  
+### Added
+- Added a benchmark file, run it on your computer to see how fast you can do a validation.
+
+### Changed
+- Changed the default inferencing method to 'none' to make the validator both faster and more predictable
+- Fixed the default_options function, it no longer incorrectly overwrites a passed in option.
+- Removed the stray main.py file which served no purpose anymore.
+- Bumped version number
+
 
 ## [0.1.0a5.dev20180907]  
 ### Added  
@@ -78,7 +89,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a4.dev20180906...HEAD  
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a6.dev20180909...HEAD  
+[0.1.0a6.dev20180909]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a5.dev20180907...v0.1.0a6.dev20180909
 [0.1.0a5.dev20180907]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a4.dev20180906...v0.1.0a5.dev20180907
 [0.1.0a4.dev20180906]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a3.dev20180906...v0.1.0a4.dev20180906 
 [0.1.0a3.dev20180906]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a2.dev20180906...v0.1.0a3.dev20180906 
