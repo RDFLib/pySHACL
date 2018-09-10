@@ -7,6 +7,11 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]  
 - tbd
 
+## [0.1.0a8.dev20180910]  
+### Changed  
+- Bug: Fixed setup.py to also install the pyshacl submodules
+
+
 ## [0.1.0a7.dev20180910]  
 ### Added  
 - Added the ability to specify a rdf_format string (for the target graph and/or the shacl graph) on the main `validate` callable.  
@@ -100,7 +105,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a7.dev20180910...HEAD  
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a8.dev20180910...HEAD  
+[0.1.0a8.dev20180910]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a7.dev20180910...v0.1.0a8.dev20180910
 [0.1.0a7.dev20180910]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a6.dev20180909...v0.1.0a7.dev20180910
 [0.1.0a6.dev20180909]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a5.dev20180907...v0.1.0a6.dev20180909
 [0.1.0a5.dev20180907]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a4.dev20180906...v0.1.0a5.dev20180907
