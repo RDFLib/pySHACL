@@ -7,6 +7,17 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]  
 - tbd
 
+## [0.1.0a7.dev20180910]  
+### Added  
+- Added the ability to specify a rdf_format string (for the target graph and/or the shacl graph) on the main `validate` callable.  
+- Added the ability to ingest and validate RDF n-triples .nt files (as the target graph, or the shacl graph)  
+- Added the option to serialize the output ValidationReport graph  
+- Added an example script to show a full working example of how to use the validator  
+
+### Changed  
+- Fixed the main validate function so that it actually returns the results to the caller
+
+
 ## [0.1.0a6.dev20180909]  
 ### Added
 - Added a benchmark file, run it on your computer to see how fast you can do a validation.
@@ -89,7 +100,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a6.dev20180909...HEAD  
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a7.dev20180910...HEAD  
+[0.1.0a7.dev20180910]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a6.dev20180909...v0.1.0a7.dev20180910
 [0.1.0a6.dev20180909]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a5.dev20180907...v0.1.0a6.dev20180909
 [0.1.0a5.dev20180907]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a4.dev20180906...v0.1.0a5.dev20180907
 [0.1.0a4.dev20180906]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a3.dev20180906...v0.1.0a4.dev20180906 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import timeit
 
 # set up code is not included in the benchmark

@@ -3,6 +3,6 @@
 from pyshacl.validate import validate
 
 # version compliant with https://www.python.org/dev/peps/pep-0440/
-__version__ = '0.1.0a6.dev20180909'
+__version__ = '0.1.0a7.dev20180910'
 
 __all__ = ['validate', '__version__']

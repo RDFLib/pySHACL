@@ -110,12 +110,11 @@ class Validator(object):
 
 
 # TODO: check out rdflib.util.guess_format() for format. I think it works well except for perhaps JSON-LD
-def _load_into_graph(target):
+def _load_into_graph(target, rdf_format=None):
     if isinstance(target, rdflib.Graph):
         return target
     target_is_file = False
     target_is_text = False
-    rdf_format = None
     if isinstance(target, str):
         if target.startswith('file://'):
             target_is_file = True
@@ -123,13 +122,16 @@ def _load_into_graph(target):
         elif len(target) < 240:
             if target.endswith('.ttl'):
                 target_is_file = True
-                rdf_format = 'turtle'
+                rdf_format = rdf_format or 'turtle'
+            if target.endswith('.nt'):
+                target_is_file = True
+                rdf_format = rdf_format or 'nt'
             elif target.endswith('.xml'):
                 target_is_file = True
-                rdf_format = 'xml'
+                rdf_format = rdf_format or 'xml'
             elif target.endswith('.json'):
                 target_is_file = True
-                rdf_format = 'json-ld'
+                rdf_format = rdf_format or 'json-ld'
         if not target_is_file:
             target_is_text = True
     else:
@@ -158,15 +160,24 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
     :param kwargs:
     :return:
     """
-    target_graph = _load_into_graph(target_graph)
+    target_graph = _load_into_graph(target_graph,
+                                    rdf_format=kwargs.pop('target_graph_format', None))
     if shacl_graph is not None:
-        shacl_graph = _load_into_graph(shacl_graph)
+        shacl_graph = _load_into_graph(shacl_graph,
+                                       rdf_format=kwargs.pop('shacl_graph_format', None))
     validator = Validator(
         target_graph, shacl_graph,
         options={'inference': inference, 'abort_on_error': abort_on_error})
     conforms, report_graph = validator.run()
-    if kwargs.get('check_expected_result', False):
+    if kwargs.pop('check_expected_result', False):
         return check_expected_result(report_graph, shacl_graph or target_graph)
+    do_serialize_report_graph = kwargs.pop('serialize_report_graph', False)
+    if do_serialize_report_graph:
+        if not (isinstance(do_serialize_report_graph, str)):
+            do_serialize_report_graph = 'turtle'
+        report_graph = report_graph.serialize(None, encoding='utf-8',
+                                              format=do_serialize_report_graph)
+    return conforms, report_graph
 
 
 def check_expected_result(report_graph, expected_result_graph):
