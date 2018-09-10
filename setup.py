@@ -38,7 +38,7 @@ with open_local(['requirements.txt']) as req:
 
 setup(
     name='pyshacl',
-    packages=['pyshacl'],
+    packages=['pyshacl', 'pyshacl.constraints', 'pyshacl.inference'],
     version=version,
     description='Python SHACL Validator',
     author='Nicholas Car',

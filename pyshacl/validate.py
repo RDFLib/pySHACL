@@ -144,7 +144,7 @@ def _load_into_graph(target, rdf_format=None):
             g.parse(source=None, publicID=None, format=rdf_format,
                     location=None, file=file)
     elif target_is_text:
-        g.parse(source=target)
+        g.parse(data=target, format=rdf_format)
     return g
 
 
