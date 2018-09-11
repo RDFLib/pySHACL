@@ -2,6 +2,7 @@
 import rdflib
 
 from pyshacl.constraints.logical_constraints import SH_not, SH_and, SH_or, SH_xone
+from pyshacl.constraints.shape_based_constraints import SH_qualifiedValueShape
 from pyshacl.consts import *
 import logging
 
@@ -206,9 +207,6 @@ class Shape(object):
             raise NotImplementedError(
                 "That path method to get value nodes of property shapes is not yet implmented.")
 
-
-
-
     def value_nodes(self, target_graph, focus):
         """
         For each focus node, you can get a set of value nodes.
@@ -233,7 +231,6 @@ class Shape(object):
                 raise NotImplementedError("That path method to get value nodes of property shapes is not yet implmented.")
             focus_dict[f] = values
         return focus_dict
-
 
     def validate(self, target_graph, focus=None, bail_on_error=False):
         assert isinstance(target_graph, rdflib.Graph)
@@ -322,7 +319,8 @@ def find_shapes(g):
     value_of_property = {o for s, o in g.subject_objects(SH_property)}
     value_of_node = {o for s, o in g.subject_objects(SH_node)}
     value_of_not = {o for s, o in g.subject_objects(SH_not)}
-    value_of_shape_expecting = set(value_of_property).union(set(value_of_node).union(set(value_of_not)))
+    value_of_qvs = {o for s, o in g.subject_objects(SH_qualifiedValueShape)}
+    value_of_shape_expecting = set(value_of_property).union(set(value_of_node).union(set(value_of_not).union(set(value_of_qvs))))
 
     value_of_and = {o for s, o in g.subject_objects(SH_and)}
     value_of_or = {o for s, o in g.subject_objects(SH_or)}

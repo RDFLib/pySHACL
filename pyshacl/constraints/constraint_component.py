@@ -38,8 +38,8 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
     def evaluate(self, target_graph, focus_value_nodes):
         return NotImplementedError()
 
-    def make_v_report_description(self, severity, focus_node, value_node=None, result_path=None):
-        constraint = self.shacl_constraint_class()
+    def make_v_report_description(self, severity, focus_node, value_node=None, result_path=None, constraint=None):
+        constraint = constraint or self.shacl_constraint_class()
         constraint_name = self.constraint_name()
         if severity == SH_Violation:
             severity_desc = "Constraint Violation"
@@ -65,8 +65,8 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
                 desc += "\tMessage: {}\n".format(str(m))
         return desc
 
-    def make_v_report(self, focus_node, value_node=None, result_path=None):
-        constraint = self.shacl_constraint_class()
+    def make_v_report(self, focus_node, value_node=None, result_path=None, constraint=None):
+        constraint = constraint or self.shacl_constraint_class()
         severity = self.shape.severity
         r_triples = list()
         f_node = BNode()
@@ -76,7 +76,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         r_triples.append((f_node, SH_resultSeverity, severity))
         r_triples.append((f_node, SH_focusNode, focus_node))
         desc = self.make_v_report_description(severity, focus_node, value_node,
-                                              result_path=result_path)
+                                              result_path=result_path, constraint=constraint)
         if value_node:
             r_triples.append((f_node, SH_value, value_node))
         if result_path is None and self.shape.is_property_shape:

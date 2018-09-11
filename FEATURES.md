@@ -60,7 +60,9 @@
 |:----------                |:-------------                             |:------:	                                   |:-------------:	      |:------	                                      |
 | `sh:node`                 | `NodeConstraintComponent`                 | [▶][NodeConstraintComponent]                 | ![status-complete]   |                                               |
 | `sh:property`             | `PropertyConstraintComponent`             | [▶][PropertyConstraintComponent]             | ![status-partial] 	  | See SHACL Property Paths feature table below  |
-| `sh:qualifiedValueShape`  | `QualifiedValueShapeConstraintComponent`  | [▶][QualifiedValueShapeConstraintComponent]  | ![status-missing] 	  |                                               |
+| `sh:qualifiedValueShape`  | `QualifiedValueShapeConstraintComponent`  | [▶][QualifiedValueShapeConstraintComponent]  | ![status-complete]   | includes `sh:qualifiedValueShapesDisjoint`    |
+| `sh:qualifiedMinCount`    | `QualifiedMinCountConstraintComponent`    | [▶][QualifiedValueShapeConstraintComponent]  | ![status-complete]   |                                               |
+| `sh:qualifiedMaxCount`    | `QualifiedMaxCountConstraintComponent`    | [▶][QualifiedValueShapeConstraintComponent]  | ![status-complete]   |                                               |
 
 
 ### [Other Constraint Components](https://www.w3.org/TR/shacl/#core-components-others)

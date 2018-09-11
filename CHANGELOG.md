@@ -7,7 +7,20 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]  
 - tbd
 
-## [0.1.0a9.dev20180911]  
+## [0.1.0a10.dev20180911] - 2018-09-11  
+### Added  
+- Added 3 more new constraints!
+  - sh:qualifiedValueShape - QualifiedValueShapeConstraintComponent
+  - sh:qualifiedMinCount - QualifiedMinCountConstraintComponent
+  - sh:qualifiedMaxCount - QualifiedMaxCountConstraintComponent
+
+### Changed  
+- the make_v_report function can now take an argument to overwrite the target failing component with a custom value.
+  - this is required to allow QualifiedValueShapeConstraintComponent to output the correct type of failure
+- Bumped version number
+- 73 tests now passing!
+
+## [0.1.0a9.dev20180911] - 2018-09-11  
 ### Added  
 - Added 5 more new constraints!
   - sh:equals - EqualsConstraintComponenet
@@ -20,13 +33,13 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - 70 tests now passing!
 
 
-## [0.1.0a8.dev20180910]  
+## [0.1.0a8.dev20180910] - 2018-09-10  
 ### Changed  
 - Bug: Fixed setup.py to also install the pyshacl submodules
 - Bug: Use the correct parse parameters when parsing plain-text RDF as a graph input source
 
 
-## [0.1.0a7.dev20180910]  
+## [0.1.0a7.dev20180910] - 2018-09-10   
 ### Added  
 - Added the ability to specify a rdf_format string (for the target graph and/or the shacl graph) on the main `validate` callable.  
 - Added the ability to ingest and validate RDF n-triples .nt files (as the target graph, or the shacl graph)  
@@ -37,7 +50,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - Bug: Fixed the main validate function so that it actually returns the results to the caller
 
 
-## [0.1.0a6.dev20180909]  
+## [0.1.0a6.dev20180909] - 2018-09-09  
 ### Added
 - Added a benchmark file, run it on your computer to see how fast you can do a validation.
 
@@ -48,7 +61,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - Bumped version number
 
 
-## [0.1.0a5.dev20180907]  
+## [0.1.0a5.dev20180907] - 2018-09-07  
 ### Added  
 - Added new ConstraintComponent:  
   - Closed Constraint  
@@ -73,7 +86,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - Bumped version number  
 
 
-## [0.1.0a4.dev20180906]  
+## [0.1.0a4.dev20180906] - 2018-09-06  
 ### Added  
 - Added 4 value-range constraint
   - MinExclusive, MinInclusive
@@ -85,7 +98,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - Bumped version number
 
 
-## [0.1.0a3.dev20180906]  
+## [0.1.0a3.dev20180906] - 2018-09-06  
 ### Added  
 - Added string-based min-length and max-length constraints  
 - Added logic-shape constraints (not, or, and, xone)  
@@ -119,7 +132,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a9.dev20180911...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a10.dev20180911...HEAD 
+[0.1.0a10.dev20180911]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a9.dev20180911...v0.1.0a10.dev20180911
 [0.1.0a9.dev20180911]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a8.dev20180910...v0.1.0a9.dev20180911
 [0.1.0a8.dev20180910]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a7.dev20180910...v0.1.0a8.dev20180910
 [0.1.0a7.dev20180910]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a6.dev20180909...v0.1.0a7.dev20180910
