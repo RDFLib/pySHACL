@@ -169,7 +169,7 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
             min_count = None
         elif len(min_count) > 1:
             raise ConstraintLoadError(
-                "QualifiedMinCountConstraintComponent must have at least most sh:qualifiedMinCount predicate.",
+                "QualifiedMinCountConstraintComponent must have at most one sh:qualifiedMinCount predicate.",
                 "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent")
         else:
             min_count = next(iter(min_count))
@@ -181,7 +181,7 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
             max_count = None
         elif len(max_count) > 1:
             raise ConstraintLoadError(
-                "QualifiedMaxCountConstraintComponent must have at least most sh:qualifiedMaxCount predicate.",
+                "QualifiedMaxCountConstraintComponent must have at most one sh:qualifiedMaxCount predicate.",
                 "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent")
         else:
             max_count = next(iter(max_count))
