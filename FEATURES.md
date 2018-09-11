@@ -40,10 +40,10 @@
 ### [Property Pair Constraint Components](https://www.w3.org/TR/shacl/#core-components-property-pairs)
 | Parameter               | Constraint                              |  Link 	                                |      Status      	    |  Comments	|
 |:----------              |:-------------                           |:------:	                                |:-------------:	    |:------	|
-| `sh:equals`             | `EqualsConstraintComponent`             | [▶][EqualsConstraintComponent]            | ![status-missing] 	|           |
-| `sh:disjoint`           | `DisjointConstraintComponent`           | [▶][DisjointConstraintComponent]          | ![status-missing] 	|           |
-| `sh:lessThan`           | `LessThanConstraintComponent`           | [▶][LessThanConstraintComponent]          | ![status-missing]  	|           |
-| `sh:lessThanOrEquals`   | `LessThanOrEqualsConstraintComponent`   | [▶][LessThanOrEqualsConstraintComponent]  | ![status-missing] 	|           |
+| `sh:equals`             | `EqualsConstraintComponent`             | [▶][EqualsConstraintComponent]            | ![status-complete] 	|           |
+| `sh:disjoint`           | `DisjointConstraintComponent`           | [▶][DisjointConstraintComponent]          | ![status-complete] 	|           |
+| `sh:lessThan`           | `LessThanConstraintComponent`           | [▶][LessThanConstraintComponent]          | ![status-complete]  	|           |
+| `sh:lessThanOrEquals`   | `LessThanOrEqualsConstraintComponent`   | [▶][LessThanOrEqualsConstraintComponent]  | ![status-complete] 	|           |
 
 
 ### [Logical Constraint Components](https://www.w3.org/TR/shacl/#core-components-logical)
@@ -67,8 +67,8 @@
 | Parameter               | Constraint                    |  Link 	                          |      Status      	|  Comments	                 |
 |:----------              |:-------------                 |:------:	                          |:-------------:	    |:------	                 |
 | `sh:closed`             | `ClosedConstraintComponent`   | [▶][ClosedConstraintComponent]    | ![status-complete]	|                            |
-| `sh:ignoredProperties`  | `ClosedConstraintComponent`   | [▶][ClosedConstraintComponent]    | ![status-missing] 	|                            |
-| `sh:hasValue`           | `HasValueConstraintComponent` | [▶][HasValueConstraintComponent]  | ![status-missing] 	|                            |
+| `sh:ignoredProperties`  | `ClosedConstraintComponent`   | [▶][ClosedConstraintComponent]    | ![status-complete] 	|                            |
+| `sh:hasValue`           | `HasValueConstraintComponent` | [▶][HasValueConstraintComponent]  | ![status-complete] 	|                            |
 | `sh:in`                 | `InConstraintComponent`       | [▶][InConstraintComponent]        | ![status-complete] 	|                            |
 
 

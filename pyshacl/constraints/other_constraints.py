@@ -10,9 +10,11 @@ from pyshacl.errors import ConstraintLoadError
 
 SH_InConstraintComponent = SH.term('InConstraintComponent')
 SH_ClosedConstraintComponent = SH.term('ClosedConstraintComponent')
+SH_HasValueConstraintComponent = SH.term('HasValueConstraintComponent')
 SH_in = SH.term('in')
 SH_closed = SH.term('closed')
 SH_ignoredProperties = SH.term('ignoredProperties')
+SH_hasValue = SH.term('hasValue')
 
 
 class InConstraintComponent(ConstraintComponent):
@@ -155,3 +157,68 @@ class ClosedConstraintComponent(ConstraintComponent):
                     rept = self.make_v_report(f, value_node=o, result_path=p)
                     reports.append(rept)
         return (not non_conformant), reports
+
+class HasValueConstraintComponent(ConstraintComponent):
+    """
+    sh:equals specifies the condition that the set of all value nodes is equal to the set of objects of the triples that have the focus node as subject and the value of sh:equals as predicate.
+    Link:
+    https://www.w3.org/TR/shacl/#HasValueConstraintComponent
+    Textual Definition:
+    For each value node that does not exist as a value of the property $equals at the focus node, there is a validation result with the value node as sh:value. For each value of the property $equals at the focus node that is not one of the value nodes, there is a validation result with the value as sh:value.
+    """
+
+    def __init__(self, shape):
+        super(HasValueConstraintComponent, self).__init__(shape)
+        has_value_set = set(self.shape.objects(SH_hasValue))
+        if len(has_value_set) < 1:
+            raise ConstraintLoadError(
+                "HasValueConstraintComponent must have at least one sh:hasValue predicate.",
+                "https://www.w3.org/TR/shacl/#HasValueConstraintComponent")
+        self.has_value_set = has_value_set
+
+
+    @classmethod
+    def constraint_parameters(cls):
+        return [SH_hasValue]
+
+    @classmethod
+    def constraint_name(cls):
+        return "HasValueConstraintComponent"
+
+    @classmethod
+    def shacl_constraint_class(cls):
+        return SH_HasValueConstraintComponent
+
+    def evaluate(self, target_graph, focus_value_nodes):
+        """
+
+        :type focus_value_nodes: dict
+        :type target_graph: rdflib.Graph
+        """
+        reports = []
+        non_conformant = False
+
+        for hv in iter(self.has_value_set):
+            _nc, _r = self._evaluate_has_value(hv, focus_value_nodes)
+            non_conformant = non_conformant or _nc
+            reports.extend(_r)
+        return (not non_conformant), reports
+
+    def _evaluate_has_value(self, hv, f_v_dict):
+        reports = []
+        non_conformant = False
+        for f, value_nodes in f_v_dict.items():
+            conformant = False
+            for v_node in value_nodes:
+                if v_node == hv:
+                    conformant = True
+                    break
+            if not conformant:
+                non_conformant = True
+                if len(value_nodes) == 1:
+                    a_value_node = next(iter(value_nodes))
+                    rept = self.make_v_report(f, value_node=a_value_node)
+                else:
+                    rept = self.make_v_report(f, value_node=None)
+                reports.append(rept)
+        return non_conformant, reports

@@ -11,6 +11,10 @@ log = logging.getLogger(__name__)
 
 
 class ConstraintComponent(object, metaclass=abc.ABCMeta):
+    """
+    Abstract Constraint Component Class
+    All Constraint Components must inherit from this class.
+    """
 
     def __init__(self, shape):
         self.shape = shape
@@ -40,7 +44,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         if severity == SH_Violation:
             severity_desc = "Constraint Violation"
         else:
-            severity_desc = "Failure"
+            severity_desc = "Constraint Report"
         desc = "{} in {} ({}):\n\tShape: {}\n\tFocus Node: {}\n"\
             .format(severity_desc, constraint_name, str(constraint), str(self.shape.node), str(focus_node))
         if value_node is not None:

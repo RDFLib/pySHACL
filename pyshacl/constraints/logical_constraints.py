@@ -135,7 +135,6 @@ class AndConstraintComponent(ConstraintComponent):
     def _evaluate_and_constraint(self, and_c, target_graph, f_v_dict):
         reports = []
         non_conformant = False
-        print(and_c)
         and_list = set(self.shape.sg.items(and_c))
         if len(and_list) < 1:
             raise RuntimeError("The list associated with sh:and is not a valid RDF list.")
@@ -209,7 +208,6 @@ class OrConstraintComponent(ConstraintComponent):
     def _evaluate_or_constraint(self, or_c, target_graph, f_v_dict):
         reports = []
         non_conformant = False
-        print(or_c)
         or_list = set(self.shape.sg.items(or_c))
         if len(or_list) < 1:
             raise RuntimeError("The list associated with sh:or is not a valid RDF list.")
@@ -279,11 +277,10 @@ class XoneConstraintComponent(ConstraintComponent):
             reports.extend(_r)
         return (not non_conformant), reports
 
-    def _evaluate_xone_constraint(self, xone_C, target_graph, f_v_dict):
+    def _evaluate_xone_constraint(self, xone_c, target_graph, f_v_dict):
         reports = []
         non_conformant = False
-        print(xone_C)
-        xone_list = set(self.shape.sg.items(xone_C))
+        xone_list = set(self.shape.sg.items(xone_c))
         if len(xone_list) < 1:
             raise RuntimeError("The list associated with sh:xone is not a valid RDF list.")
         xone_shapes = set()

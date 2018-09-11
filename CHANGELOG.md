@@ -7,6 +7,19 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]  
 - tbd
 
+## [0.1.0a9.dev20180911]  
+### Added  
+- Added 5 more new constraints!
+  - sh:equals - EqualsConstraintComponenet
+  - sh:disjoint - DisjointConstraintComponent
+  - sh:lessThan - LessThanConstraintComponent
+  - sh:lessThanOrEqual - LessThanOrEqualConstraintComponent
+  - sh:hasValue - HasValueConstraintComponent
+### Changed  
+- Bumped version number
+- 70 tests now passing!
+
+
 ## [0.1.0a8.dev20180910]  
 ### Changed  
 - Bug: Fixed setup.py to also install the pyshacl submodules
@@ -106,7 +119,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a8.dev20180910...HEAD  
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a9.dev20180911...HEAD 
+[0.1.0a9.dev20180911]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a8.dev20180910...v0.1.0a9.dev20180911
 [0.1.0a8.dev20180910]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a7.dev20180910...v0.1.0a8.dev20180910
 [0.1.0a7.dev20180910]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a6.dev20180909...v0.1.0a7.dev20180910
 [0.1.0a6.dev20180909]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a5.dev20180907...v0.1.0a6.dev20180909
