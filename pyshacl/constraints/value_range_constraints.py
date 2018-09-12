@@ -5,7 +5,7 @@ https://www.w3.org/TR/shacl/#core-components-range
 import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
-from pyshacl.errors import ConstraintLoadError
+from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
 
 SH_MinExclusiveConstraintComponent = SH.term('MinExclusiveConstraintComponent')
 SH_MinInclusiveConstraintComponent = SH.term('MinInclusiveConstraintComponent')
@@ -84,7 +84,8 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
                     else:
                         flag = bool(m_val < v)
                 else:
-                    raise RuntimeError("Not sure how to compare anything else.")
+                    raise ReportableRuntimeError(
+                        "Not sure how to compare anything else.")
                 if not flag:
                     non_conformant = True
                     rept = self.make_v_report(f, value_node=v)
@@ -158,7 +159,8 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
                     else:
                         flag = bool(m_val <= v)
                 else:
-                    raise RuntimeError("Not sure how to compare anything else.")
+                    raise ReportableRuntimeError(
+                        "Not sure how to compare anything else.")
                 if not flag:
                     non_conformant = True
                     rept = self.make_v_report(f, value_node=v)
@@ -233,7 +235,8 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
                     else:
                         flag = bool(m_val > v)
                 else:
-                    raise RuntimeError("Not sure how to compare anything else.")
+                    raise ReportableRuntimeError(
+                        "Not sure how to compare anything else.")
                 if not flag:
                     non_conformant = True
                     rept = self.make_v_report(f, value_node=v)
@@ -308,7 +311,8 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
                     else:
                         flag = bool(m_val >= v)
                 else:
-                    raise RuntimeError("Not sure how to compare anything else.")
+                    raise ReportableRuntimeError(
+                        "Not sure how to compare anything else.")
                 if not flag:
                     non_conformant = True
                     rept = self.make_v_report(f, value_node=v)

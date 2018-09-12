@@ -50,3 +50,19 @@ class ConstraintLoadError(RuntimeError):
 
     def __repr__(self):
         return "ShapeLoadError: {}".format(self.__str__())
+
+
+class ReportableRuntimeError(RuntimeError):
+    def __init__(self, message):
+        self.message = message
+
+    @property
+    def args(self):
+        return [self.message]
+
+    def __str__(self):
+        return str(self.message)
+
+    def __repr__(self):
+        return "ReportableRuntimeError: {}".format(self.__str__())
+

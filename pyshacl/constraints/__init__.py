@@ -3,7 +3,7 @@
 from .value_constraints import ClassConstraintComponent, DatatypeConstraintComponent, NodeKindConstraintComponent
 from .cardinality_constraints import MinCountConstraintComponent, MaxCountConstraintComponent
 from .value_range_constraints import MinExclusiveConstraintComponent, MinInclusiveConstraintComponent, MaxExclusiveConstraintComponent, MaxInclusiveConstraintComponent
-from .string_based_constraints import MinLengthConstraintComponent, MaxLengthConstraintComponent, PatternConstraintComponent
+from .string_based_constraints import MinLengthConstraintComponent, MaxLengthConstraintComponent, PatternConstraintComponent, LanguageInConstraintComponent, UniqueLangConstraintComponent
 from .property_pair_constraints import EqualsConstraintComponent, DisjointConstraintComponent, LessThanConstraintComponent, LessThanOrEqualsConstraintComponent
 from .logical_constraints import NotConstraintComponent, AndConstraintComponent, OrConstraintComponent, XoneConstraintComponent
 from .shape_based_constraints import NodeShapeComponent, PropertyShapeComponent, QualifiedValueShapeConstraintComponent
@@ -26,6 +26,8 @@ ALL_CONSTRAINT_COMPONENTS = [
     MinLengthConstraintComponent,
     MaxLengthConstraintComponent,
     PatternConstraintComponent,
+    LanguageInConstraintComponent,
+    UniqueLangConstraintComponent,
     EqualsConstraintComponent,
     DisjointConstraintComponent,
     LessThanConstraintComponent,

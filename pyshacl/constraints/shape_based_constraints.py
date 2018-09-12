@@ -5,7 +5,7 @@ https://www.w3.org/TR/shacl/#core-components-shape
 import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH, SH_property, SH_node
-from pyshacl.errors import ConstraintLoadError, ValidationFailure
+from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError
 
 SH_PropertyShapeComponent = SH.term('PropertyShapeComponent')
 SH_NodeShapeComponent = SH.term('NodeShapeComponent')
@@ -70,7 +70,9 @@ class PropertyShapeComponent(ConstraintComponent):
         non_conformant = False
         prop_shape = self.shape.get_other_shape(prop_shape)
         if not prop_shape or not prop_shape.is_property_shape:
-            raise RuntimeError("Shape pointed to by sh:property does not exist or is not a well-formed SHACL PropertyShape.")
+            raise ReportableRuntimeError(
+                "Shape pointed to by sh:property does not exist "
+                "or is not a well-formed SHACL PropertyShape.")
         for f, value_nodes in f_v_dict.items():
             for v in value_nodes:
                 _is_conform, _r = prop_shape.validate(target_graph, focus=v)
@@ -129,7 +131,9 @@ class NodeShapeComponent(ConstraintComponent):
         non_conformant = False
         node_shape = self.shape.get_other_shape(node_shape)
         if not node_shape or node_shape.is_property_shape:
-            raise RuntimeError("Shape pointed to by sh:node does not exist or is not a well-formed SHACL NodeShape.")
+            raise ReportableRuntimeError(
+                "Shape pointed to by sh:node does not exist or "
+                "is not a well-formed SHACL NodeShape.")
         for f, value_nodes in f_v_dict.items():
             for v in value_nodes:
                 _is_conform, _r = node_shape.validate(target_graph, focus=v)
@@ -236,7 +240,9 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
         non_conformant = False
         other_shape = self.shape.get_other_shape(v_shape)
         if not other_shape:
-            raise RuntimeError("Shape pointed to by sh:property does not exist or is not a well-formed SHACL Shape.")
+            raise ReportableRuntimeError(
+                "Shape pointed to by sh:property does not "
+                "exist or is not a well-formed SHACL Shape.")
         if self.is_disjoint:
             # Textual Definition of Sibling Shapes:
             # Let Q be a shape in shapes graph G that declares a qualified cardinality constraint (by having values for sh:qualifiedValueShape and at least one of sh:qualifiedMinCount or sh:qualifiedMaxCount). Let ps be the set of shapes in G that have Q as a value of sh:property. If Q has true as a value for sh:qualifiedValueShapesDisjoint then the set of sibling shapes for Q is defined as the set of all values of the SPARQL property path sh:property/sh:qualifiedValueShape for any shape in ps minus the value of sh:qualifiedValueShape of Q itself. The set of sibling shapes is empty otherwise.

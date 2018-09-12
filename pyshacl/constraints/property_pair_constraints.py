@@ -7,7 +7,7 @@ from rdflib.term import Literal
 from rdflib.namespace import XSD
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
-from pyshacl.errors import ConstraintLoadError
+from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
 
 SH_equals = SH.term('equals')
 SH_disjoint = SH.term('disjoint')
@@ -199,7 +199,8 @@ class LessThanConstraintComponent(ConstraintComponent):
         for lt in iter(self.property_compare_set):
             if isinstance(lt, rdflib.Literal) or\
                isinstance(lt, rdflib.BNode):
-                raise RuntimeError("Value of sh:lessThan MUST be a URI Identifier.")
+                raise ReportableRuntimeError(
+                    "Value of sh:lessThan MUST be a URI Identifier.")
             _nc, _r = self._evaluate_less_than(lt, target_graph, focus_value_nodes)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
@@ -214,7 +215,8 @@ class LessThanConstraintComponent(ConstraintComponent):
 
             for value_node in iter(value_node_set):
                 if isinstance(value_node, rdflib.BNode):
-                    raise RuntimeError("Cannot use sh:lessThan to compare a BlankNode.")
+                    raise ReportableRuntimeError(
+                        "Cannot use sh:lessThan to compare a BlankNode.")
                 value_is_string = False
                 if isinstance(value_node, rdflib.URIRef):
                     value_node = str(value_node)
@@ -226,7 +228,8 @@ class LessThanConstraintComponent(ConstraintComponent):
 
                 for compare_value in compare_values:
                     if isinstance(compare_value, rdflib.BNode):
-                        raise RuntimeError("Cannot use sh:lessThan to compare a BlankNode.")
+                        raise ReportableRuntimeError(
+                            "Cannot use sh:lessThan to compare a BlankNode.")
                     compare_is_string = False
                     if isinstance(compare_value, rdflib.URIRef):
                         compare_value = str(compare_value)
@@ -294,7 +297,8 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
         for lt in iter(self.property_compare_set):
             if isinstance(lt, rdflib.Literal) or\
                isinstance(lt, rdflib.BNode):
-                raise RuntimeError("Value of sh:lessThanOrEquals MUST be a URI Identifier.")
+                raise ReportableRuntimeError(
+                    "Value of sh:lessThanOrEquals MUST be a URI Identifier.")
             _nc, _r = self._evaluate_ltoe(lt, target_graph, focus_value_nodes)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
@@ -309,7 +313,8 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
 
             for value_node in iter(value_node_set):
                 if isinstance(value_node, rdflib.BNode):
-                    raise RuntimeError("Cannot use sh:lessThanOrEquals to compare a BlankNode.")
+                    raise ReportableRuntimeError(
+                        "Cannot use sh:lessThanOrEquals to compare a BlankNode.")
                 value_is_string = False
                 if isinstance(value_node, rdflib.URIRef):
                     value_node = str(value_node)
@@ -321,7 +326,8 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
 
                 for compare_value in compare_values:
                     if isinstance(compare_value, rdflib.BNode):
-                        raise RuntimeError("Cannot use sh:lessThanOrEquals to compare a BlankNode.")
+                        raise ReportableRuntimeError(
+                            "Cannot use sh:lessThanOrEquals to compare a BlankNode.")
                     compare_is_string = False
                     if isinstance(compare_value, rdflib.URIRef):
                         compare_value = str(compare_value)

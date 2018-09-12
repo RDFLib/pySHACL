@@ -6,7 +6,7 @@ from pyshacl.constraints.shape_based_constraints import SH_qualifiedValueShape
 from pyshacl.consts import *
 import logging
 
-from pyshacl.errors import ShapeLoadError
+from pyshacl.errors import ShapeLoadError, ReportableRuntimeError
 from pyshacl.constraints import ALL_CONSTRAINT_PARAMETERS, CONSTRAINT_PARAMETERS_MAP
 
 log = logging.getLogger(__name__)
@@ -198,14 +198,113 @@ class Shape(object):
 
         return found_node_targets
 
-    def _value_nodes_from_path(self, focus, path, target_graph):
-        find_inverse = set(self.sg.objects(path, SH_inversePath))
+    def _value_nodes_from_path(self, focus, path_val, target_graph, recursion=0):
+        # Link: https://www.w3.org/TR/shacl/#property-paths
+        if isinstance(path_val, rdflib.URIRef):
+            return set(target_graph.objects(focus, path_val))
+        elif isinstance(path_val, rdflib.Literal):
+            raise ReportableRuntimeError(
+                    "Values of a property path cannot be a Literal.")
+        # At this point, path_val _must_ be a BNode
+        # TODO, the path_val BNode must be value of exactly one sh:path subject in the SG.
+        if recursion >= 10:
+            raise ReportableRuntimeError("Path traversal depth is too much!")
+        find_list = set(self.sg.objects(path_val, RDF.first))
+        if len(find_list) > 0:
+            first_node = next(iter(find_list))
+            rest_nodes = set(self.sg.objects(path_val, RDF.rest))
+            go_deeper = True
+            if len(rest_nodes) < 1:
+                if recursion == 0:
+                    raise ReportableRuntimeError(
+                        "A list of SHACL Paths must contain at least "
+                        "two path items.")
+                else:
+                    go_deeper = False
+            rest_node = next(iter(rest_nodes))
+            if rest_node == RDF.nil:
+                if recursion == 0:
+                    raise ReportableRuntimeError(
+                        "A list of SHACL Paths must contain at least "
+                        "two path items.")
+                else:
+                    go_deeper = False
+            this_level_nodes = self._value_nodes_from_path(
+                focus, first_node, target_graph, recursion=recursion+1)
+            if not go_deeper:
+                return this_level_nodes
+            found_value_nodes = set()
+            for tln in iter(this_level_nodes):
+                value_nodes = self._value_nodes_from_path(
+                    tln, rest_node, target_graph, recursion=recursion+1)
+                found_value_nodes.update(value_nodes)
+            return found_value_nodes
+
+        find_inverse = set(self.sg.objects(path_val, SH_inversePath))
         if len(find_inverse) > 0:
             inverse_path = next(iter(find_inverse))
             return set(target_graph.subjects(inverse_path, focus))
-        else:
-            raise NotImplementedError(
-                "That path method to get value nodes of property shapes is not yet implmented.")
+
+        find_alternatives = set(self.sg.objects(path_val, SH_alternativePath))
+        if len(find_alternatives) > 0:
+            alternatives_list = next(iter(find_alternatives))
+            all_collected = set()
+            for a in self.sg.items(alternatives_list):
+                found_nodes = self._value_nodes_from_path(
+                    focus, a, target_graph, recursion=recursion+1)
+                all_collected.update(found_nodes)
+            return all_collected
+
+        find_zero_or_more = set(self.sg.objects(path_val, SH_zeroOrMorePath))
+        if len(find_zero_or_more) > 0:
+            zero_or_more_path = next(iter(find_zero_or_more))
+            collection_set = set()
+            # Note, the zero-or-more path always includes the current subject too!
+            collection_set.add(focus)
+            found_nodes = self._value_nodes_from_path(
+                focus, zero_or_more_path, target_graph, recursion=recursion+1)
+            search_deeper_nodes = set(iter(found_nodes))
+            while len(search_deeper_nodes) > 0:
+                current_node = search_deeper_nodes.pop()
+                if current_node in collection_set:
+                    continue
+                collection_set.add(current_node)
+                found_more_nodes = self._value_nodes_from_path(
+                    current_node, zero_or_more_path, target_graph, recursion=recursion+1)
+                search_deeper_nodes.update(found_more_nodes)
+            return collection_set
+
+        find_one_or_more = set(self.sg.objects(path_val, SH_oneOrMorePath))
+        if len(find_one_or_more) > 0:
+            one_or_more_path = next(iter(find_one_or_more))
+            collection_set = set()
+            found_nodes = self._value_nodes_from_path(
+                focus, one_or_more_path, target_graph, recursion=recursion + 1)
+            # Note, the one-or-more path should _not_ include the current focus
+            search_deeper_nodes = set(iter(found_nodes))
+            while len(search_deeper_nodes) > 0:
+                current_node = search_deeper_nodes.pop()
+                if current_node in collection_set:
+                    continue
+                collection_set.add(current_node)
+                found_more_nodes = self._value_nodes_from_path(
+                    current_node, one_or_more_path, target_graph, recursion=recursion + 1)
+                search_deeper_nodes.update(found_more_nodes)
+            return collection_set
+
+        find_zero_or_one = set(self.sg.objects(path_val, SH_zeroOrOnePath))
+        if len(find_zero_or_one) > 0:
+            zero_or_one_path = next(iter(find_zero_or_one))
+            collection_set = set()
+            # Note, the zero-or-one path always includes the current subject too!
+            collection_set.add(focus)
+            found_nodes = self._value_nodes_from_path(
+                focus, zero_or_one_path, target_graph, recursion=recursion+1)
+            collection_set.update(found_nodes)
+            return collection_set
+
+        raise NotImplementedError(
+            "That path method to get value nodes of property shapes is not yet implmented.")
 
     def value_nodes(self, target_graph, focus):
         """
@@ -220,16 +319,10 @@ class Shape(object):
             focus = [focus]
         if not self.is_property_shape:
             return {f: set((f,)) for f in focus}
-        path = self.path()
+        path_val = self.path()
         focus_dict = {}
         for f in focus:
-            if isinstance(path, rdflib.URIRef):
-                values = set(target_graph.objects(f, path))
-            elif isinstance(path, rdflib.BNode):
-                values = self._value_nodes_from_path(f, path, target_graph)
-            else:
-                raise NotImplementedError("That path method to get value nodes of property shapes is not yet implmented.")
-            focus_dict[f] = values
+            focus_dict[f] = self._value_nodes_from_path(f, path_val, target_graph)
         return focus_dict
 
     def validate(self, target_graph, focus=None, bail_on_error=False):

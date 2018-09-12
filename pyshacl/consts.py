@@ -47,3 +47,8 @@ SH_value = SH.term('value')
 SH_conforms = SH.term('conforms')
 SH_result = SH.term('result')
 SH_inversePath = SH.term('inversePath')
+SH_alternativePath = SH.term('alternativePath')
+SH_zeroOrMorePath = SH.term('zeroOrMorePath')
+SH_oneOrMorePath = SH.term('oneOrMorePath')
+SH_zeroOrOnePath = SH.term('zeroOrOnePath')
+

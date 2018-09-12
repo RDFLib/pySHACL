@@ -5,7 +5,7 @@ https://www.w3.org/TR/shacl/#core-components-logical
 import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
-from pyshacl.errors import ConstraintLoadError, ValidationFailure
+from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError
 
 SH_not = SH.term('not')
 SH_and = SH.term('and')
@@ -72,7 +72,9 @@ class NotConstraintComponent(ConstraintComponent):
         non_conformant = False
         not_shape = self.shape.get_other_shape(not_c)
         if not not_shape:
-            raise RuntimeError("Shape pointed to by sh:not does not exist or is not a well-formed SHACL Shape.")
+            raise ReportableRuntimeError(
+                "Shape pointed to by sh:not does not exist or is not "
+                "a well-formed SHACL Shape.")
         for f, value_nodes in f_v_dict.items():
             for v in value_nodes:
                 try:
@@ -137,12 +139,16 @@ class AndConstraintComponent(ConstraintComponent):
         non_conformant = False
         and_list = set(self.shape.sg.items(and_c))
         if len(and_list) < 1:
-            raise RuntimeError("The list associated with sh:and is not a valid RDF list.")
+            raise ReportableRuntimeError(
+                "The list associated with sh:and is not a "
+                "valid RDF list.")
         and_shapes = set()
         for a in and_list:
             and_shape = self.shape.get_other_shape(a)
             if not and_shape:
-                raise RuntimeError("Shape pointed to by sh:and does not exist or is not a well-formed SHACL Shape.")
+                raise ReportableRuntimeError(
+                    "Shape pointed to by sh:and does not exist or "
+                    "is not a well-formed SHACL Shape.")
             and_shapes.add(and_shape)
         for f, value_nodes in f_v_dict.items():
             for v in value_nodes:
@@ -210,12 +216,16 @@ class OrConstraintComponent(ConstraintComponent):
         non_conformant = False
         or_list = set(self.shape.sg.items(or_c))
         if len(or_list) < 1:
-            raise RuntimeError("The list associated with sh:or is not a valid RDF list.")
+            raise ReportableRuntimeError(
+                "The list associated with sh:or "
+                "is not a valid RDF list.")
         or_shapes = set()
         for o in or_list:
             or_shape = self.shape.get_other_shape(o)
             if not or_shape:
-                raise RuntimeError("Shape pointed to by sh:or does not exist or is not a well-formed SHACL Shape.")
+                raise ReportableRuntimeError(
+                    "Shape pointed to by sh:or does not exist or "
+                    "is not a well-formed SHACL Shape.")
             or_shapes.add(or_shape)
         for f, value_nodes in f_v_dict.items():
             for v in value_nodes:
@@ -231,6 +241,7 @@ class OrConstraintComponent(ConstraintComponent):
                     rept = self.make_v_report(f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
+
 
 class XoneConstraintComponent(ConstraintComponent):
     """
@@ -282,12 +293,16 @@ class XoneConstraintComponent(ConstraintComponent):
         non_conformant = False
         xone_list = set(self.shape.sg.items(xone_c))
         if len(xone_list) < 1:
-            raise RuntimeError("The list associated with sh:xone is not a valid RDF list.")
+            raise ReportableRuntimeError(
+                "The list associated with sh:xone is not "
+                "a valid RDF list.")
         xone_shapes = set()
         for x in xone_list:
             xone_shape = self.shape.get_other_shape(x)
             if not xone_shape:
-                raise RuntimeError("Shape pointed to by sh:xone does not exist or is not a well-formed SHACL Shape.")
+                raise ReportableRuntimeError(
+                    "Shape pointed to by sh:xone does not exist "
+                    "or is not a well-formed SHACL Shape.")
             xone_shapes.add(xone_shape)
         for f, value_nodes in f_v_dict.items():
             for v in value_nodes:

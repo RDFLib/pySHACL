@@ -33,8 +33,8 @@
 | `sh:minLength`    | `MinLengthConstraintComponent`    | [▶][MinLengthConstraintComponent]     | ![status-complete] 	|                        |
 | `sh:maxLength`    | `MaxLengthConstraintComponent`    | [▶][MaxLengthConstraintComponent]     | ![status-complete] 	|                        |
 | `sh:pattern`      | `PatternConstraintComponent`      | [▶][PatternConstraintComponent]       | ![status-complete]  	| includes `sh:flags`    |
-| `sh:languageIn`   | `LanguageInConstraintComponent`   | [▶][LanguageInConstraintComponent]    | ![status-missing] 	|                        |
-| `sh:uniqueLang`   | `UniqueLangConstraintComponent`   | [▶][UniqueLangConstraintComponent]    | ![status-missing] 	|                        |
+| `sh:languageIn`   | `LanguageInConstraintComponent`   | [▶][LanguageInConstraintComponent]    | ![status-complete] 	|                        |
+| `sh:uniqueLang`   | `UniqueLangConstraintComponent`   | [▶][UniqueLangConstraintComponent]    | ![status-complete] 	|                        |
 
 
 ### [Property Pair Constraint Components](https://www.w3.org/TR/shacl/#core-components-property-pairs)
@@ -59,7 +59,7 @@
 | Parameter                 | Constraint                                |  Link 	                                   |      Status      	  |  Comments                                     |
 |:----------                |:-------------                             |:------:	                                   |:-------------:	      |:------	                                      |
 | `sh:node`                 | `NodeConstraintComponent`                 | [▶][NodeConstraintComponent]                 | ![status-complete]   |                                               |
-| `sh:property`             | `PropertyConstraintComponent`             | [▶][PropertyConstraintComponent]             | ![status-partial] 	  | See SHACL Property Paths feature table below  |
+| `sh:property`             | `PropertyConstraintComponent`             | [▶][PropertyConstraintComponent]             | ![status-complete]   | See SHACL Property Paths feature table below  |
 | `sh:qualifiedValueShape`  | `QualifiedValueShapeConstraintComponent`  | [▶][QualifiedValueShapeConstraintComponent]  | ![status-complete]   | includes `sh:qualifiedValueShapesDisjoint`    |
 | `sh:qualifiedMinCount`    | `QualifiedMinCountConstraintComponent`    | [▶][QualifiedValueShapeConstraintComponent]  | ![status-complete]   |                                               |
 | `sh:qualifiedMaxCount`    | `QualifiedMaxCountConstraintComponent`    | [▶][QualifiedValueShapeConstraintComponent]  | ![status-complete]   |                                               |
@@ -78,12 +78,12 @@
 | Path                |  Link 	                 |      Status      	|  Comments	|
 |:----------          |:------:	                 |:-------------:	    |:------	|
 | Predicate Path      | [▶][PredicatePath]       | ![status-complete] 	|           |
-| Sequence Paths      | [▶][SequencePath]        | ![status-missing] 	|           |
-| Alternative Paths   | [▶][AlternativePath]     | ![status-missing] 	|           |
+| Sequence Paths      | [▶][SequencePath]        | ![status-complete] 	|           |
+| Alternative Paths   | [▶][AlternativePath]     | ![status-complete] 	|           |
 | Inverse Paths       | [▶][InversePath]         | ![status-complete] 	|           |
-| Zero-Or-More Paths  | [▶][ZeroOrMorePath]      | ![status-missing] 	|           |
-| One-Or-More Paths   | [▶][OneOrMorePath]       | ![status-missing] 	|           |
-| Zero-Or-One Paths   | [▶][ZeroOrOnePath]       | ![status-missing] 	|           |
+| Zero-Or-More Paths  | [▶][ZeroOrMorePath]      | ![status-complete] 	|           |
+| One-Or-More Paths   | [▶][OneOrMorePath]       | ![status-complete] 	|           |
+| Zero-Or-One Paths   | [▶][ZeroOrOnePath]       | ![status-complete] 	|           |
 
 
 ## [Non-Validating Shape Characteristics](https://www.w3.org/TR/shacl/#nonValidation)

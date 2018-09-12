@@ -7,9 +7,25 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]  
 - tbd
 
+
+## [0.1.0b1.dev20180912]  
+### Added  
+- The SHACL Core functionality is Feature-Complete!
+- Added languageIn and uniqueLang constraint components!
+- Added the rest of the SHACL Property Path functionality
+- Added a new error type, ReportableRuntimeError, which is a RuntimeError which is desgned to pass information back to the user (via commandline, or web interface).
+
+### Changed  
+- Changed most RuntimeErrors to ReportableRuntimeErrors
+- Adding the new property path rules required refactoring the way shapes generate their targets. It is much more complicated now.
+- Updated Features Matrix
+- Bumped Version, changed Alpha to Beta
+- All 84 Core tests now passing!
+
+
 ## [0.1.0a10.dev20180911] - 2018-09-11  
 ### Added  
-- Added 3 more new constraints!
+- Added 3 more new constraint components!
   - sh:qualifiedValueShape - QualifiedValueShapeConstraintComponent
   - sh:qualifiedMinCount - QualifiedMinCountConstraintComponent
   - sh:qualifiedMaxCount - QualifiedMaxCountConstraintComponent
@@ -20,9 +36,10 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - Bumped version number
 - 73 tests now passing!
 
+
 ## [0.1.0a9.dev20180911] - 2018-09-11  
 ### Added  
-- Added 5 more new constraints!
+- Added 5 more new constraint components!
   - sh:equals - EqualsConstraintComponenet
   - sh:disjoint - DisjointConstraintComponent
   - sh:lessThan - LessThanConstraintComponent
@@ -132,7 +149,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a10.dev20180911...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.1.0b1.dev20180912...HEAD 
+[0.1.0b1.dev20180912]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a10.dev20180911...v0.1.0b1.dev20180912
 [0.1.0a10.dev20180911]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a9.dev20180911...v0.1.0a10.dev20180911
 [0.1.0a9.dev20180911]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a8.dev20180910...v0.1.0a9.dev20180911
 [0.1.0a8.dev20180910]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a7.dev20180910...v0.1.0a8.dev20180910

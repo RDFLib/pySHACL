@@ -2,7 +2,7 @@ import pytest
 from os import path, walk
 import glob
 import pyshacl
-
+from pyshacl.errors import ReportableRuntimeError
 
 here_dir = path.abspath(path.dirname(__file__))
 test_files_dir = path.join(here_dir, 'resources', 'tests')
@@ -80,7 +80,12 @@ for x in walk(path.join(test_files_dir, 'rules')):
 
 @pytest.mark.parametrize('target_file, shacl_file', test_core_files)
 def test_validate_all_core(target_file, shacl_file):
-    assert pyshacl.validate(target_file, shacl_file, check_expected_result=True)
+    try:
+        val = pyshacl.validate(target_file, shacl_file, inference='rdfs', check_expected_result=True)
+    except (NotImplementedError, ReportableRuntimeError) as e:
+        print(e)
+        val = False
+    assert val
     return True
 
 # @pytest.mark.parametrize('target_file, shacl_file', test_rules_files)

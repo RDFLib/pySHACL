@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import rdflib
 import RDFClosure as owl_rl
+
+from pyshacl.errors import ReportableRuntimeError
+
 if owl_rl.json_ld_available:
     import rdflib_jsonld
 from pyshacl.inference import CustomRDFSSemantics, CustomRDFSOWLRLSemantics
@@ -30,17 +33,19 @@ class Validator(object):
                     or inference_option == 'rdfsowlrl':
                 inferencer = owl_rl.DeductiveClosure(CustomRDFSOWLRLSemantics)
             else:
-                raise RuntimeError(
+                raise ReportableRuntimeError(
                     "Don't know how to do '{}' type inferencing."
                     .format(inference_option))
         except Exception as e:
             log.error("Error during creation of OWL-RL Deductive Closure")
-            raise e
+            raise ReportableRuntimeError("Error during creation of OWL-RL Deductive Closure\n"
+                                         "{}".format(str(e.args[0])))
         try:
             inferencer.expand(target_graph)
         except Exception as e:
             log.error("Error while running OWL-RL Deductive Closure")
-            raise e
+            raise ReportableRuntimeError("Error while running OWL-RL Deductive Closure\n"
+                                         "{}".format(str(e.args[0])))
 
     @classmethod
     def create_validation_report(cls, conforms, results):
@@ -135,7 +140,7 @@ def _load_into_graph(target, rdf_format=None):
         if not target_is_file:
             target_is_text = True
     else:
-        raise RuntimeError("Cannot determine the format of the input graph")
+        raise ReportableRuntimeError("Cannot determine the format of the input graph")
     g = rdflib.Graph()
     if target_is_file:
         import os
@@ -188,17 +193,17 @@ def check_expected_result(report_graph, expected_result_graph):
     test_cases = expected_result_graph.subjects(RDF_type, DASH_TestCase)
     test_cases = set(test_cases)
     if len(test_cases) < 1:
-        raise RuntimeError("Cannot check the expected result, the given expected result graph does not have a GraphValidationTestCase.")
+        raise ReportableRuntimeError("Cannot check the expected result, the given expected result graph does not have a GraphValidationTestCase.")
     test_case = next(iter(test_cases))
     expected_results = expected_result_graph.objects(test_case, DASH_expectedResult)
     expected_results = set(expected_results)
     if len(expected_results) < 1:
-        raise RuntimeError("Cannot check the expected result, the given GraphValidationTestCase does not have an expectedResult.")
+        raise ReportableRuntimeError("Cannot check the expected result, the given GraphValidationTestCase does not have an expectedResult.")
     expected_result = next(iter(expected_results))
     expected_conforms = expected_result_graph.objects(expected_result, SH_conforms)
     expected_conforms = set(expected_conforms)
     if len(expected_conforms) < 1:
-        raise RuntimeError("Cannot check the expected result, the given expectedResult does not have an sh:conforms.")
+        raise ReportableRuntimeError("Cannot check the expected result, the given expectedResult does not have an sh:conforms.")
     expected_conforms = next(iter(expected_conforms))
     expected_result_nodes = expected_result_graph.objects(expected_result, SH_result)
     expected_result_nodes = set(expected_result_nodes)
@@ -207,12 +212,12 @@ def check_expected_result(report_graph, expected_result_graph):
     validation_reports = report_graph.subjects(RDF_type, SH_ValidationReport)
     validation_reports = set(validation_reports)
     if len(validation_reports) < 1:
-        raise RuntimeError("Cannot check the validation report, the report graph does not contain a ValidationReport")
+        raise ReportableRuntimeError("Cannot check the validation report, the report graph does not contain a ValidationReport")
     validation_report = next(iter(validation_reports))
     report_conforms = report_graph.objects(validation_report, SH_conforms)
     report_conforms = set(report_conforms)
     if len(report_conforms) < 1:
-        raise RuntimeError("Cannot check the validation report, the report graph does not have an sh:conforms.")
+        raise ReportableRuntimeError("Cannot check the validation report, the report graph does not have an sh:conforms.")
     report_conforms = next(iter(report_conforms))
 
     if bool(expected_conforms.value) != bool(report_conforms.value):

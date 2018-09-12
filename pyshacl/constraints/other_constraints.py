@@ -6,7 +6,7 @@ import rdflib
 from rdflib.namespace import RDF, RDFS
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import RDF_type, SH, SH_property, SH_path
-from pyshacl.errors import ConstraintLoadError
+from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
 
 SH_InConstraintComponent = SH.term('InConstraintComponent')
 SH_ClosedConstraintComponent = SH.term('ClosedConstraintComponent')
@@ -129,13 +129,13 @@ class ClosedConstraintComponent(ConstraintComponent):
         if not self.is_closed:
             return True, []
 
-
         working_shapes = set()
         for p_shape in self.property_shapes:
             property_shape = self.shape.get_other_shape(p_shape)
             if not property_shape or not property_shape.is_property_shape:
-                raise RuntimeError("The shape pointed to by sh:property does "
-                                   "not exist, or is not a well defined SHACL PropertyShape.")
+                raise ReportableRuntimeError(
+                    "The shape pointed to by sh:property does "
+                    "not exist, or is not a well defined SHACL PropertyShape.")
             working_shapes.add(property_shape)
         working_paths = set()
         for w in working_shapes:
@@ -157,6 +157,7 @@ class ClosedConstraintComponent(ConstraintComponent):
                     rept = self.make_v_report(f, value_node=o, result_path=p)
                     reports.append(rept)
         return (not non_conformant), reports
+
 
 class HasValueConstraintComponent(ConstraintComponent):
     """
