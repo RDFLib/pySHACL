@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: latin-1 -*-
 import codecs
 import re
@@ -39,6 +39,7 @@ with open_local(['requirements.txt']) as req:
 setup(
     name='pyshacl',
     packages=['pyshacl', 'pyshacl.constraints', 'pyshacl.inference'],
+    scripts=['bin/pyshacl'],
     version=version,
     description='Python SHACL Validator',
     author='Nicholas Car',

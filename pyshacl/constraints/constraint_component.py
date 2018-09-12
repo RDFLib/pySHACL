@@ -7,9 +7,6 @@ from rdflib import BNode
 from pyshacl.consts import *
 import logging
 
-log = logging.getLogger(__name__)
-
-
 class ConstraintComponent(object, metaclass=abc.ABCMeta):
     """
     Abstract Constraint Component Class
@@ -85,5 +82,5 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
             r_triples.append((f_node, SH_resultPath, result_path))
         for m in self.shape.message:
             r_triples.append((f_node, SH_resultMessage, m))
-        log.info(desc)
+        self.shape.logger.debug(desc)
         return desc, f_node, r_triples

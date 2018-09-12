@@ -81,7 +81,7 @@ for x in walk(path.join(test_files_dir, 'rules')):
 @pytest.mark.parametrize('target_file, shacl_file', test_core_files)
 def test_validate_all_core(target_file, shacl_file):
     try:
-        val = pyshacl.validate(target_file, shacl_file, inference='rdfs', check_expected_result=True)
+        val, _, _ = pyshacl.validate(target_file, shacl_file, inference='rdfs', check_expected_result=True)
     except (NotImplementedError, ReportableRuntimeError) as e:
         print(e)
         val = False

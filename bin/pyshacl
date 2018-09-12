@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+from os import path
+import sys
+import argparse
+
+# Prevent python from importing _this_ file (named pyshacl)
+# when we do `from pyshacl import ...` below.
+HERE_DIR = path.abspath(path.dirname(__file__))
+PARENT_DIR = path.dirname(HERE_DIR)
+if HERE_DIR in sys.path:
+    sys.path.remove(HERE_DIR)
+if PARENT_DIR not in sys.path:
+    sys.path.append(PARENT_DIR)
+
+from pyshacl import validate
+
+parser = argparse.ArgumentParser(description='Run the pySHACL validator from the command line.')
+parser.add_argument('data', metavar='DataGraph', type=argparse.FileType('rb'),
+                    help='The file containing the Target Data Graph.')
+parser.add_argument('-s', '--shacl', dest='shacl', action='store', nargs='?',
+                    type=argparse.FileType('rb'),
+                    help='[Optional] The file containing the SHACL Shapes Graph.')
+parser.add_argument('-i', '--inference', dest='inference', action='store',
+                    default='none', choices=('none', 'rdfs', 'owlrl', 'both'),
+                    help='[Optional] Choose a type of inferencing to run against the Data Graph before validating.')
+parser.add_argument('-a', '--abort', dest='abort', action='store_true',
+                    default=False, help='[Optional] Abort on first error.')
+parser.add_argument('-d', '--debug', dest='debug', action='store_true',
+                    default=False, help='[Optional] Output additional runtime messages.')
+parser.add_argument('-f', '--format', dest='format', action='store',
+                    help='[Optional] Choose an output format. Default is \"human\".',
+                    default='human', choices=('human', 'turtle', 'xml', 'json-ld', 'nt'))
+parser.add_argument('-o', '--output', dest='output', nargs='?', type=argparse.FileType('w'),
+                    help='[Optional] Send output to a file (defaults to stdout).',
+                    default=sys.stdout)
+
+args = parser.parse_args()
+
+validator_kwargs = {'debug': args.debug}
+if args.shacl is not None:
+    validator_kwargs['shacl_graph'] = args.shacl
+if args.format != 'human':
+    validator_kwargs['serialize_report_graph'] = args.format
+if args.inference != 'none':
+    validator_kwargs['inference'] = args.inference
+if args.abort:
+    validator_kwargs['abort_on_error'] = True
+is_conform, v_graph, v_text = validate(args.data, **validator_kwargs)
+if args.format == 'human':
+    args.output.write(v_text)
+else:
+    if isinstance(v_graph, bytes):
+        v_graph = v_graph.decode('utf-8')
+    args.output.write(v_graph)
+args.output.close()
+if is_conform:
+    sys.exit(0)
+else:
+    sys.exit(1)
+

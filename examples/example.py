@@ -6,6 +6,8 @@ target_ttl_file = \
     '../tests/resources/tests/core/complex/personexample.test.ttl'
 target_ttl_file = path.abspath(target_ttl_file)
 
-conforms, output = validate(target_ttl_file, shacl_graph=None, inference='rdfs',
-                            serialize_report_graph=True)
-print(conforms, output)
+conforms, v_graph, v_text = validate(target_ttl_file, shacl_graph=None, inference='rdfs',
+                                     serialize_report_graph=True)
+print(conforms)
+print(v_graph)
+print(v_text)

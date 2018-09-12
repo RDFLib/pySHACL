@@ -7,8 +7,19 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]  
 - tbd
 
+## [0.8.0] - 2018-09-12 
+### Added  
+- Added the CLI script. pySHACL can now be easily run from the command-line.
+- Added the ability for the `validate` function to work on already-open file descriptors for target data file, and for shacl file.
 
-## [0.1.0b1.dev20180912]  
+### Changed  
+- Main `validation` function now outputs a three-item-tuple: `(conformance: bool, validation_report_graph: rdflib.Graph, validation_report_text: str)`
+- Level for seeing runtime output is now DEBUG
+- Changed the way a single logging interface is used across the whole application
+- Bumped version number way to show project maturity
+
+
+## [0.1.0b1.dev20180912] - 2018-09-12 
 ### Added  
 - The SHACL Core functionality is Feature-Complete!
 - Added languageIn and uniqueLang constraint components!
@@ -149,7 +160,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.1.0b1.dev20180912...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.8.0...HEAD 
+[0.8.0]: https://github.com/RDFLib/pySHACL/compare/v0.1.0b1.dev20180912...v0.8.0
 [0.1.0b1.dev20180912]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a10.dev20180911...v0.1.0b1.dev20180912
 [0.1.0a10.dev20180911]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a9.dev20180911...v0.1.0a10.dev20180911
 [0.1.0a9.dev20180911]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a8.dev20180910...v0.1.0a9.dev20180911

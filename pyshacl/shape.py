@@ -1,27 +1,26 @@
 # -*- coding: utf-8 -*-
 import rdflib
-
+import logging
 from pyshacl.constraints.logical_constraints import SH_not, SH_and, SH_or, SH_xone
 from pyshacl.constraints.shape_based_constraints import SH_qualifiedValueShape
 from pyshacl.consts import *
-import logging
 
 from pyshacl.errors import ShapeLoadError, ReportableRuntimeError
 from pyshacl.constraints import ALL_CONSTRAINT_PARAMETERS, CONSTRAINT_PARAMETERS_MAP
 
-log = logging.getLogger(__name__)
-
-
 class Shape(object):
     all_shapes = {}
 
-    def __init__(self, sg, node, p=False, path=None):
+    def __init__(self, sg, node, p=False, path=None, logger=None):
         """
 
         :type sg: rdflib.Graph
         :type node: rdflib.term.Node
         :type p: bool
         """
+        if logger is None:
+            logger = logging.getLogger(__name__)
+        self.logger = logger
         self.sg = sg
         self.node = node
         self._p = p
@@ -61,7 +60,6 @@ class Shape(object):
             self._descriptions = iter(descriptions)
         else:
             self._descriptions = None
-
 
     def get_other_shape(self, shape_node):
         try:
@@ -149,7 +147,6 @@ class Shape(object):
         target_subjects_of = self.target_subjects_of()
         return (target_nodes, target_classes, implicit_targets,
                 target_objects_of, target_subjects_of)
-
 
     def focus_nodes(self, target_graph):
         """
@@ -371,12 +368,16 @@ A shape is an IRI or blank node s that fulfills at least one of the following co
 """
 
 
-def find_shapes(g):
+def find_shapes(g, logger=None):
     """
     :param g: The Shapes Graph (SG)
     :type g: rdflib.Graph
+    :param logger: The output log
+    :type logger: logging.Logger
     :returns: [Shape]
     """
+    if logger is None:
+        logger = logging.getLogger(__name__)
     defined_node_shapes = set(g.subjects(RDF_type, SH_NodeShape))
     for s in defined_node_shapes:
         path_vals = list(g.objects(s, SH_path))
@@ -460,11 +461,11 @@ def find_shapes(g):
             found_prop_shapes_paths[s] = path_vals[0]
     created_node_shapes = set()
     for node_shape in defined_node_shapes.union(found_node_shapes):
-        s = Shape(g, node_shape, False)
+        s = Shape(g, node_shape, False, logger=logger)
         created_node_shapes.add(s)
     created_prop_shapes = set()
     for prop_shape in defined_prop_shapes.union(found_prop_shapes):
         prop_shape_path = found_prop_shapes_paths[prop_shape]
-        s = Shape(g, prop_shape, True, path=prop_shape_path)
+        s = Shape(g, prop_shape, True, path=prop_shape_path, logger=logger)
         created_prop_shapes.add(s)
     return list(created_node_shapes.union(created_prop_shapes))

@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from io import IOBase
+from sys import stderr
+
 import rdflib
 import RDFClosure as owl_rl
 
@@ -12,8 +15,13 @@ from pyshacl.consts import RDF_type, SH_conforms, \
     SH_result, SH_ValidationReport
 import logging
 
-logging.basicConfig(level=logging.INFO)
+log_handler = logging.StreamHandler(stderr)
 log = logging.getLogger(__name__)
+for h in log.handlers:
+    log.removeHandler(h)
+log.addHandler(log_handler)
+log.setLevel(logging.INFO)
+log_handler.setLevel(logging.INFO)
 
 
 class Validator(object):
@@ -21,9 +29,10 @@ class Validator(object):
     def _load_default_options(cls, options_dict):
         options_dict.setdefault('inference', 'none')
         options_dict.setdefault('abort_on_error', False)
+        if 'logger' not in options_dict:
+            options_dict['logger'] = logging.getLogger(__name__)
 
-    @classmethod
-    def _run_pre_inference(cls, target_graph, inference_option):
+    def _run_pre_inference(self, target_graph, inference_option):
         try:
             if inference_option == 'rdfs':
                 inferencer = owl_rl.DeductiveClosure(CustomRDFSSemantics)
@@ -37,13 +46,13 @@ class Validator(object):
                     "Don't know how to do '{}' type inferencing."
                     .format(inference_option))
         except Exception as e:
-            log.error("Error during creation of OWL-RL Deductive Closure")
+            self.logger.error("Error during creation of OWL-RL Deductive Closure")
             raise ReportableRuntimeError("Error during creation of OWL-RL Deductive Closure\n"
                                          "{}".format(str(e.args[0])))
         try:
             inferencer.expand(target_graph)
         except Exception as e:
-            log.error("Error while running OWL-RL Deductive Closure")
+            self.logger.error("Error while running OWL-RL Deductive Closure")
             raise ReportableRuntimeError("Error while running OWL-RL Deductive Closure\n"
                                          "{}".format(str(e.args[0])))
 
@@ -66,8 +75,7 @@ class Validator(object):
             vg.add((vr, SH_result, _bn))
             for tr in iter(_tr):
                 vg.add(tr)
-        log.info(v_text)
-        return vg
+        return vg, v_text
 
     @classmethod
     def clone_graph(cls, source_graph, identifier=None):
@@ -90,6 +98,7 @@ class Validator(object):
             options = {}
         self._load_default_options(options)
         self.options = options
+        self.logger = options['logger']
         assert isinstance(target_graph, rdflib.Graph),\
             "target_graph must be a rdflib Graph object"
         self.target_graph = target_graph
@@ -103,51 +112,59 @@ class Validator(object):
         inference_option = self.options.get('inference', 'none')
         if inference_option and str(inference_option) != "none":
             self._run_pre_inference(self.target_graph, inference_option)
-        shapes = find_shapes(self.shacl_graph)
+        shapes = find_shapes(self.shacl_graph, self.logger)
         reports = []
         non_conformant = False
         for s in shapes:
             _is_conform, _reports = s.validate(self.target_graph)
             non_conformant = non_conformant or (not _is_conform)
             reports.extend(_reports)
-        v_report = self.create_validation_report((not non_conformant), reports)
-        return (not non_conformant), v_report
+        v_report, v_text = self.create_validation_report((not non_conformant), reports)
+        return (not non_conformant), v_report, v_text
 
 
 # TODO: check out rdflib.util.guess_format() for format. I think it works well except for perhaps JSON-LD
 def _load_into_graph(target, rdf_format=None):
     if isinstance(target, rdflib.Graph):
         return target
+    target_is_open = False
     target_is_file = False
     target_is_text = False
-    if isinstance(target, str):
+    filename = None
+    if isinstance(target, IOBase) and hasattr(target, 'read'):
+        target_is_file = True
+        target_is_open = True
+        filename = target.name
+    elif isinstance(target, str):
         if target.startswith('file://'):
             target_is_file = True
-            target = target[7:]
+            filename = target[7:]
         elif len(target) < 240:
-            if target.endswith('.ttl'):
-                target_is_file = True
-                rdf_format = rdf_format or 'turtle'
-            if target.endswith('.nt'):
-                target_is_file = True
-                rdf_format = rdf_format or 'nt'
-            elif target.endswith('.xml'):
-                target_is_file = True
-                rdf_format = rdf_format or 'xml'
-            elif target.endswith('.json'):
-                target_is_file = True
-                rdf_format = rdf_format or 'json-ld'
+            target_is_file = True
+            filename = target
         if not target_is_file:
             target_is_text = True
     else:
         raise ReportableRuntimeError("Cannot determine the format of the input graph")
+    if filename:
+        if filename.endswith('.ttl'):
+            rdf_format = rdf_format or 'turtle'
+        if filename.endswith('.nt'):
+            rdf_format = rdf_format or 'nt'
+        elif filename.endswith('.xml'):
+            rdf_format = rdf_format or 'xml'
+        elif filename.endswith('.json'):
+            rdf_format = rdf_format or 'json-ld'
     g = rdflib.Graph()
-    if target_is_file:
+    if target_is_file and filename and not target_is_open:
         import os
-        file_name = os.path.abspath(target)
-        with open(file_name, mode='rb') as file:
-            g.parse(source=None, publicID=None, format=rdf_format,
-                    location=None, file=file)
+        filename = os.path.abspath(filename)
+        target = open(filename, mode='rb')
+        target_is_open = True
+    if target_is_open:
+        g.parse(source=None, publicID=None, format=rdf_format,
+                location=None, file=target)
+        target.close()
     elif target_is_text:
         g.parse(data=target, format=rdf_format)
     return g
@@ -165,6 +182,9 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
     :param kwargs:
     :return:
     """
+    if kwargs.get('debug', False):
+        log_handler.setLevel(logging.DEBUG)
+        log.setLevel(logging.DEBUG)
     target_graph = _load_into_graph(target_graph,
                                     rdf_format=kwargs.pop('target_graph_format', None))
     if shacl_graph is not None:
@@ -172,17 +192,19 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
                                        rdf_format=kwargs.pop('shacl_graph_format', None))
     validator = Validator(
         target_graph, shacl_graph,
-        options={'inference': inference, 'abort_on_error': abort_on_error})
-    conforms, report_graph = validator.run()
+        options={'inference': inference, 'abort_on_error': abort_on_error,
+                 'logger': log})
+    conforms, report_graph, report_text = validator.run()
     if kwargs.pop('check_expected_result', False):
-        return check_expected_result(report_graph, shacl_graph or target_graph)
+        passes = check_expected_result(report_graph, shacl_graph or target_graph)
+        return passes, None, None
     do_serialize_report_graph = kwargs.pop('serialize_report_graph', False)
     if do_serialize_report_graph:
         if not (isinstance(do_serialize_report_graph, str)):
             do_serialize_report_graph = 'turtle'
         report_graph = report_graph.serialize(None, encoding='utf-8',
                                               format=do_serialize_report_graph)
-    return conforms, report_graph
+    return conforms, report_graph, report_text
 
 
 def check_expected_result(report_graph, expected_result_graph):
