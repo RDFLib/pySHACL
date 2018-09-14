@@ -10,8 +10,8 @@ This module is developed to adhere to the SHACL Recommendation:
 For basic use, of this module, you can just call the `validate` function of the `pyshacl` module like this:
 
 ```
-from pyldapi import validate
-validate(target_graph, shacl_graph, inference='rdfs', abort_on_error=False):
+from pyshacl import validate
+validate(target_graph, shacl_graph, inference='rdfs', abort_on_error=False)
 ```
 where:  
 * `target_graph` is an rdflib `Graph` object, the graph to be validated
