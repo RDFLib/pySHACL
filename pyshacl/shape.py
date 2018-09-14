@@ -8,6 +8,7 @@ from pyshacl.consts import *
 from pyshacl.errors import ShapeLoadError, ReportableRuntimeError
 from pyshacl.constraints import ALL_CONSTRAINT_PARAMETERS, CONSTRAINT_PARAMETERS_MAP
 
+
 class Shape(object):
     all_shapes = {}
 
@@ -47,7 +48,7 @@ class Shape(object):
             self._severity = SH_Violation
         messages = set(self.objects(SH_message))
         if len(messages):
-            self._messages = iter(messages)
+            self._messages = messages
         else:
             self._messages = None
         names = set(self.objects(SH_name))
@@ -246,10 +247,16 @@ class Shape(object):
         if len(find_alternatives) > 0:
             alternatives_list = next(iter(find_alternatives))
             all_collected = set()
+            visited_alternatives = 0
             for a in self.sg.items(alternatives_list):
                 found_nodes = self._value_nodes_from_path(
                     focus, a, target_graph, recursion=recursion+1)
+                visited_alternatives += 1
                 all_collected.update(found_nodes)
+            if visited_alternatives < 2:
+                raise ReportableRuntimeError(
+                    "List of SHACL alternate paths "
+                    "must have alt least two path items.")
             return all_collected
 
         find_zero_or_more = set(self.sg.objects(path_val, SH_zeroOrMorePath))
@@ -301,7 +308,7 @@ class Shape(object):
             return collection_set
 
         raise NotImplementedError(
-            "That path method to get value nodes of property shapes is not yet implmented.")
+            "That path method to get value nodes of property shapes is not yet implemented.")
 
     def value_nodes(self, target_graph, focus):
         """

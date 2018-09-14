@@ -84,7 +84,7 @@ class NotConstraintComponent(ConstraintComponent):
                 if _is_conform:
                     # in this case, we _dont_ want to conform!
                     non_conformant = True
-                    rept = self.make_v_report(f, value_node=v)
+                    rept = self.make_v_result(f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
 
@@ -161,7 +161,7 @@ class AndConstraintComponent(ConstraintComponent):
                     passed_all = passed_all and _is_conform
                 if not passed_all:
                     non_conformant = True
-                    rept = self.make_v_report(f, value_node=v)
+                    rept = self.make_v_result(f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
 
@@ -238,7 +238,7 @@ class OrConstraintComponent(ConstraintComponent):
                     passed_any = passed_any or _is_conform
                 if not passed_any:
                     non_conformant = True
-                    rept = self.make_v_report(f, value_node=v)
+                    rept = self.make_v_result(f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
 
@@ -316,7 +316,7 @@ class XoneConstraintComponent(ConstraintComponent):
                         passed_count += 1
                 if not (passed_count == 1):
                     non_conformant = True
-                    rept = self.make_v_report(f, value_node=v)
+                    rept = self.make_v_result(f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
 

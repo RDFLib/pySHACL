@@ -7,11 +7,16 @@ from pyshacl.errors import ReportableRuntimeError
 here_dir = path.abspath(path.dirname(__file__))
 test_files_dir = path.join(here_dir, 'resources', 'tests')
 test_core_files = []
+test_sparql_files = []
 test_rules_files = []
 
 for x in walk(path.join(test_files_dir, 'core')):
     for y in glob.glob(path.join(x[0], '*.ttl')):
         test_core_files.append((y, None))
+
+for x in walk(path.join(test_files_dir, 'sparql')):
+    for y in glob.glob(path.join(x[0], '*.ttl')):
+        test_sparql_files.append((y, None))
 
 for x in walk(path.join(test_files_dir, 'rules')):
     for y in glob.glob(path.join(x[0], '*.ttl')):
@@ -81,11 +86,27 @@ for x in walk(path.join(test_files_dir, 'rules')):
 @pytest.mark.parametrize('target_file, shacl_file', test_core_files)
 def test_validate_all_core(target_file, shacl_file):
     try:
-        val, _, _ = pyshacl.validate(target_file, shacl_file, inference='rdfs', check_expected_result=True)
+        val, _, v_text = pyshacl.validate(target_file, shacl_file, inference='rdfs', check_expected_result=True)
     except (NotImplementedError, ReportableRuntimeError) as e:
         print(e)
         val = False
+        v_text = ""
     assert val
+    print(v_text)
+    print(v_text)
+    return True
+
+@pytest.mark.parametrize('target_file, shacl_file', test_sparql_files)
+def test_validate_all_sparql(target_file, shacl_file):
+    try:
+        val, _, v_text = pyshacl.validate(
+            target_file, shacl_file, inference='rdfs', check_expected_result=True, debug=True)
+    except (NotImplementedError, ReportableRuntimeError) as e:
+        print(e)
+        val = False
+        v_text = ""
+    assert val
+    print(v_text)
     return True
 
 # @pytest.mark.parametrize('target_file, shacl_file', test_rules_files)

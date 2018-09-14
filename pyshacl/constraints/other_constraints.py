@@ -64,7 +64,7 @@ class InConstraintComponent(ConstraintComponent):
             for v in value_nodes:
                 if v not in in_vals:
                     non_conformant = True
-                    rept = self.make_v_report(f, value_node=v)
+                    rept = self.make_v_result(f, value_node=v)
                     reports.append(rept)
         return (not non_conformant), reports
 
@@ -154,7 +154,7 @@ class ClosedConstraintComponent(ConstraintComponent):
                     elif p in working_paths:
                         continue
                     non_conformant = True
-                    rept = self.make_v_report(f, value_node=o, result_path=p)
+                    rept = self.make_v_result(f, value_node=o, result_path=p)
                     reports.append(rept)
         return (not non_conformant), reports
 
@@ -218,8 +218,8 @@ class HasValueConstraintComponent(ConstraintComponent):
                 non_conformant = True
                 if len(value_nodes) == 1:
                     a_value_node = next(iter(value_nodes))
-                    rept = self.make_v_report(f, value_node=a_value_node)
+                    rept = self.make_v_result(f, value_node=a_value_node)
                 else:
-                    rept = self.make_v_report(f, value_node=None)
+                    rept = self.make_v_result(f, value_node=None)
                 reports.append(rept)
         return non_conformant, reports

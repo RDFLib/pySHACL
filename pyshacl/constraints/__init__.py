@@ -8,6 +8,7 @@ from .property_pair_constraints import EqualsConstraintComponent, DisjointConstr
 from .logical_constraints import NotConstraintComponent, AndConstraintComponent, OrConstraintComponent, XoneConstraintComponent
 from .shape_based_constraints import NodeShapeComponent, PropertyShapeComponent, QualifiedValueShapeConstraintComponent
 from .other_constraints import ClosedConstraintComponent, InConstraintComponent, HasValueConstraintComponent
+from .sparql_constraints import SPARQLBasedConstraint
 
 ALL_CONSTRAINT_COMPONENTS = [
     ClassConstraintComponent,
@@ -38,6 +39,7 @@ ALL_CONSTRAINT_COMPONENTS = [
     ClosedConstraintComponent,
     HasValueConstraintComponent,
     InConstraintComponent,
+    SPARQLBasedConstraint
 
 ]
 

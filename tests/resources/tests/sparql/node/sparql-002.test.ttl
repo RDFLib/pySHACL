@@ -43,7 +43,7 @@ ex:InvalidCountry
 .
 ex:LanguageExampleShape
   rdf:type sh:NodeShape ;
-  rdf:type sh:SPARQLConstraint ;
+  rdf:type sh:SPARQLConstraintObject ;
   sh:message "Values are literals with German language tag." ;
   sh:prefixes <http://datashapes.org/sh/tests/sparql/node/sparql-002.test> ;
   sh:select """

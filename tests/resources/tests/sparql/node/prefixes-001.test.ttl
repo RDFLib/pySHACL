@@ -15,11 +15,6 @@
   rdfs:label "Test of sh:prefixes 001" ;
   owl:imports <http://datashapes.org/dash> ;
   owl:versionInfo "Created with TopBraid Composer" ;
-  sh:declare [
-      rdf:type sh:PrefixDeclaration ;
-      sh:namespace "http://datashapes.org/sh/tests/sparql/node/prefixes-001.test#"^^xsd:anyURI ;
-      sh:prefix "ex" ;
-    ] ;
 .
 ex:GraphValidationTestCase
   rdf:type dash:GraphValidationTestCase ;

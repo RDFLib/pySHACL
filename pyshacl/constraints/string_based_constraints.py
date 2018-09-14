@@ -128,7 +128,7 @@ class MinLengthConstraintComponent(StringBasedConstraintBase):
                     flag = len(v_string) >= min_len
                 if not flag:
                     non_conformant = True
-                    rept = self.make_v_report(f, value_node=v)
+                    rept = self.make_v_result(f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
 
@@ -186,7 +186,7 @@ class MaxLengthConstraintComponent(StringBasedConstraintBase):
                     flag = len(v_string) <= max_len
                 if not flag:
                     non_conformant = True
-                    rept = self.make_v_report(f, value_node=v)
+                    rept = self.make_v_result(f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
 
@@ -255,7 +255,7 @@ class PatternConstraintComponent(StringBasedConstraintBase):
                         match = re_matcher.search(v_string)
                 if not match:
                     non_conformant = True
-                    rept = self.make_v_report(f, value_node=v)
+                    rept = self.make_v_result(f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
 
@@ -331,7 +331,7 @@ class LanguageInConstraintComponent(StringBasedConstraintBase):
                                 flag = True
                 if not flag:
                     non_conformant = True
-                    rept = self.make_v_report(f, value_node=v)
+                    rept = self.make_v_result(f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
 
@@ -407,6 +407,6 @@ class UniqueLangConstraintComponent(StringBasedConstraintBase):
                         #     flag = True
             for d in iter(found_duplicates):
                 non_conformant = True
-                rept = self.make_v_report(f)
+                rept = self.make_v_result(f)
                 reports.append(rept)
         return non_conformant, reports

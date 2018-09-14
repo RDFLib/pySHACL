@@ -93,7 +93,7 @@ class ClassConstraintComponent(ConstraintComponent):
                         break
                 if not found:
                     non_conformant = True
-                    rept = self.make_v_report(f, value_node=v)
+                    rept = self.make_v_result(f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
 
@@ -156,7 +156,7 @@ class DatatypeConstraintComponent(ConstraintComponent):
                         matches = self._assert_actual_datatype(v, dtype_rule)
                 if not matches:
                     non_conformant = True
-                    rept = self.make_v_report(f, value_node=v)
+                    rept = self.make_v_result(f, value_node=v)
                     reports.append(rept)
         return (not non_conformant), reports
 
@@ -237,7 +237,7 @@ class NodeKindConstraintComponent(ConstraintComponent):
                         match = True
                 if not match:
                     non_conformant = True
-                    rept = self.make_v_report(f, value_node=v)
+                    rept = self.make_v_result(f, value_node=v)
                     reports.append(rept)
         return (not non_conformant), reports
 

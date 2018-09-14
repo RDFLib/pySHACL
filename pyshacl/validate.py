@@ -197,7 +197,7 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
     conforms, report_graph, report_text = validator.run()
     if kwargs.pop('check_expected_result', False):
         passes = check_expected_result(report_graph, shacl_graph or target_graph)
-        return passes, None, None
+        return passes, report_graph, report_text
     do_serialize_report_graph = kwargs.pop('serialize_report_graph', False)
     if do_serialize_report_graph:
         if not (isinstance(do_serialize_report_graph, str)):

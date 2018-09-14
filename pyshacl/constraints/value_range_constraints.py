@@ -88,7 +88,7 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
                         "Not sure how to compare anything else.")
                 if not flag:
                     non_conformant = True
-                    rept = self.make_v_report(f, value_node=v)
+                    rept = self.make_v_result(f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
 
@@ -163,7 +163,7 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
                         "Not sure how to compare anything else.")
                 if not flag:
                     non_conformant = True
-                    rept = self.make_v_report(f, value_node=v)
+                    rept = self.make_v_result(f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
 
@@ -239,7 +239,7 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
                         "Not sure how to compare anything else.")
                 if not flag:
                     non_conformant = True
-                    rept = self.make_v_report(f, value_node=v)
+                    rept = self.make_v_result(f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
 
@@ -315,6 +315,6 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
                         "Not sure how to compare anything else.")
                 if not flag:
                     non_conformant = True
-                    rept = self.make_v_report(f, value_node=v)
+                    rept = self.make_v_result(f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports

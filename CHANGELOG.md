@@ -7,6 +7,18 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]  
 - tbd
 
+## [0.8.1] - 2018-09-14 
+### Added  
+- Basic SPARQL Query functionality.
+- SPARQL Prefix support capability
+
+### Changed  
+- Changed make_v_report function name to make_v_result, because it actually makes individual validation results, not reports.
+- Changed one of the SPARQL prefix tests to better test the SPARQL uri shortening functionality
+- Bumped version number
+- 88 Tests now passing
+
+
 ## [0.8.0] - 2018-09-12 
 ### Added  
 - Added the CLI script. pySHACL can now be easily run from the command-line.
@@ -16,7 +28,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - Main `validation` function now outputs a three-item-tuple: `(conformance: bool, validation_report_graph: rdflib.Graph, validation_report_text: str)`
 - Level for seeing runtime output is now DEBUG
 - Changed the way a single logging interface is used across the whole application
-- Bumped version number way to show project maturity
+- Bumped version number way up to show project maturity
 
 
 ## [0.1.0b1.dev20180912] - 2018-09-12 
@@ -42,7 +54,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
   - sh:qualifiedMaxCount - QualifiedMaxCountConstraintComponent
 
 ### Changed  
-- the make_v_report function can now take an argument to overwrite the target failing component with a custom value.
+- the make_v_result function can now take an argument to overwrite the target failing component with a custom value.
   - this is required to allow QualifiedValueShapeConstraintComponent to output the correct type of failure
 - Bumped version number
 - 73 tests now passing!
@@ -160,7 +172,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.8.0...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.8.1...HEAD 
+[0.8.1]: https://github.com/RDFLib/pySHACL/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/RDFLib/pySHACL/compare/v0.1.0b1.dev20180912...v0.8.0
 [0.1.0b1.dev20180912]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a10.dev20180911...v0.1.0b1.dev20180912
 [0.1.0a10.dev20180911]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a9.dev20180911...v0.1.0a10.dev20180911

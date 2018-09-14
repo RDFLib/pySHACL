@@ -14,6 +14,11 @@
   rdf:type owl:Ontology ;
   rdfs:label "Test of sh:sparql at property shape 001" ;
   owl:imports <http://datashapes.org/dash> ;
+  sh:declare [
+      rdf:type sh:PrefixDeclaration ;
+      sh:namespace "http://datashapes.org/sh/tests/sparql/property/sparql-001.test#"^^xsd:anyURI ;
+      sh:prefix "ex" ;
+  ] ;
 .
 ex:Country
   rdf:type rdfs:Class ;
@@ -46,9 +51,9 @@ ex:LanguageExamplePropertyShape
   sh:targetClass ex:Country ;
 .
 ex:LanguageExamplePropertyShape-sparql
-  rdf:type sh:SPARQLConstraint ;
+  rdf:type sh:SPARQLConstraintObject ;
   sh:message "Values are literals with German language tag." ;
-  sh:prefixes ex: ;
+  sh:prefixes <http://datashapes.org/sh/tests/sparql/property/sparql-001.test> ;
   sh:select """
 		SELECT $this ?value
 		WHERE {
