@@ -41,6 +41,9 @@ This project includes a script to measure the difference in performance of valid
 This repository is licensed under Apache License, Version 2.0. See the [LICENSE deed](LICENSE.txt) for details.  
 
 
+## Contributors
+See the [CONTRIBUTORS file](CONTRIBUTORS.mb)
+
 ## Contacts  
 Project Lead:  
 **Nicholas Car**  

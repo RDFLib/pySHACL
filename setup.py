@@ -51,6 +51,7 @@ setup(
     keywords=['Linked Data', 'Semantic Web', 'Python',
               'SHACL', 'Shapes', 'Schema', 'Validate'],
     long_description=long_description,
+    long_description_content_type='text/markdown',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Topic :: Utilities',
@@ -64,11 +65,6 @@ setup(
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    project_urls={
-        'Bug Reports':
-            'https://github.com/RDFLib/pySHACL/issues',
-        'Source': 'https://github.com/RDFLib/pySHACL/',
-    },
     install_requires=requirements,
     dependency_links=dependency_links
 )
