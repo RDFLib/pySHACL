@@ -26,23 +26,23 @@ on return:
   
 
 ## Features  
-A features matrix is kept in the [FEATURES file](FEATURES.md).  
+A features matrix is kept in the [FEATURES file](https://github.com/RDFLib/pySHACL/blob/master/FEATURES.md).
 
 
 ## Changelog  
-A comprehensive changelog is kept in the [CHANGELOG file](CHANGELOG.md).  
+A comprehensive changelog is kept in the [CHANGELOG file](https://github.com/RDFLib/pySHACL/blob/master/CHANGELOG.md).
 
 
 ## Benchmarks  
-This project includes a script to measure the difference in performance of validatating the same source graph that has been inferenced using each of the four different inferencing options. Run it on your computer to see how fast the validator operates for you.  
+This project includes a script to measure the difference in performance of validating the same source graph that has been inferenced using each of the four different inferencing options. Run it on your computer to see how fast the validator operates for you.
 
 
 ## License  
-This repository is licensed under Apache License, Version 2.0. See the [LICENSE deed](LICENSE.txt) for details.  
+This repository is licensed under Apache License, Version 2.0. See the [LICENSE deed](https://github.com/RDFLib/pySHACL/blob/master/LICENSE.txt) for details.
 
 
 ## Contributors
-See the [CONTRIBUTORS file](CONTRIBUTORS.mb)
+See the [CONTRIBUTORS file](https://github.com/RDFLib/pySHACL/blob/master/CONTRIBUTORS.md)
 
 ## Contacts  
 Project Lead:  
