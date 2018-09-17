@@ -7,7 +7,13 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]  
 - tbd
 
-## [0.8.1] - 2018-09-14 
+## [0.8.2] - 2018-09-16  
+### Added   
+- Added a CONTRIBUTORS file  
+- Minor fixes for PyPI upload compatibility  
+
+
+## [0.8.1] - 2018-09-14  
 ### Added  
 - Basic SPARQL Query functionality.
 - SPARQL Prefix support capability
@@ -19,7 +25,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - 88 Tests now passing
 
 
-## [0.8.0] - 2018-09-12 
+## [0.8.0] - 2018-09-12  
 ### Added  
 - Added the CLI script. pySHACL can now be easily run from the command-line.
 - Added the ability for the `validate` function to work on already-open file descriptors for target data file, and for shacl file.
@@ -31,7 +37,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - Bumped version number way up to show project maturity
 
 
-## [0.1.0b1.dev20180912] - 2018-09-12 
+## [0.1.0b1.dev20180912] - 2018-09-12  
 ### Added  
 - The SHACL Core functionality is Feature-Complete!
 - Added languageIn and uniqueLang constraint components!
@@ -172,7 +178,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.8.1...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.8.2...HEAD 
+[0.8.2]: https://github.com/RDFLib/pySHACL/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/RDFLib/pySHACL/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/RDFLib/pySHACL/compare/v0.1.0b1.dev20180912...v0.8.0
 [0.1.0b1.dev20180912]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a10.dev20180911...v0.1.0b1.dev20180912

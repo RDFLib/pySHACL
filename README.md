@@ -7,11 +7,12 @@ This module is developed to adhere to the SHACL Recommendation:
 > Holger Knublauch; Dimitris Kontokostas. *Shapes Constraint Language (SHACL)*. 20 July 2017. W3C Recommendation. URL: <https://www.w3.org/TR/shacl/> ED: <https://w3c.github.io/data-shapes/shacl/>
 
 ## Use
-For basic use, of this module, you can just call the `validate` function of the `pyshacl` module like this:
+For basic use of this module, you can just call the `validate` function of the `pyshacl` module like this:
 
 ```
 from pyshacl import validate
-validate(target_graph, shacl_graph, inference='rdfs', abort_on_error=False)
+r = validate(target_graph, shacl_graph, inference='rdfs', abort_on_error=False)
+conforms, results_graph, results_text = r
 ```
 where:  
 * `target_graph` is an rdflib `Graph` object, the graph to be validated
@@ -23,14 +24,18 @@ on return:
 * a `tuple` containing:
   * `conforms` a `bool`, indicating whether or not the `target_graph` conforms to the `shacl_graph`
   * `results_graph` an rdflib `Graph` object built according to the SHACL specification's [Validation Report](https://www.w3.org/TR/shacl/#validation-report) semantics
+  * `results_text` python string representing a verbose textual representation of the [Validation Report](https://www.w3.org/TR/shacl/#validation-report) 
   
 
+PySHACL is a Python3 library. For best compatibility Python v3.5 or greater. This library _does not_ support Python 2.7.x or below.
+
+
 ## Features  
-A features matrix is kept in the [FEATURES file](https://github.com/RDFLib/pySHACL/blob/master/FEATURES.md).
+A features matrix is kept in the [FEATURES file](https://github.com/RDFLib/pySHACL/blob/master/FEATURES.md).  
 
 
 ## Changelog  
-A comprehensive changelog is kept in the [CHANGELOG file](https://github.com/RDFLib/pySHACL/blob/master/CHANGELOG.md).
+A comprehensive changelog is kept in the [CHANGELOG file](https://github.com/RDFLib/pySHACL/blob/master/CHANGELOG.md).  
 
 
 ## Benchmarks  
@@ -42,7 +47,8 @@ This repository is licensed under Apache License, Version 2.0. See the [LICENSE 
 
 
 ## Contributors
-See the [CONTRIBUTORS file](https://github.com/RDFLib/pySHACL/blob/master/CONTRIBUTORS.md)
+See the [CONTRIBUTORS file](https://github.com/RDFLib/pySHACL/blob/master/CONTRIBUTORS.md).  
+
 
 ## Contacts  
 Project Lead:  
