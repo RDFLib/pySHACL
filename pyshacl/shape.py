@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 import rdflib
 import logging
-from pyshacl.constraints.logical_constraints import SH_not, SH_and, SH_or, SH_xone
-from pyshacl.constraints.shape_based_constraints import SH_qualifiedValueShape
+from pyshacl.constraints.core.logical_constraints import \
+    SH_not, SH_and, SH_or, SH_xone
+from pyshacl.constraints.core.shape_based_constraints import \
+    SH_qualifiedValueShape
 from pyshacl.consts import *
 
 from pyshacl.errors import ShapeLoadError, ReportableRuntimeError
-from pyshacl.constraints import ALL_CONSTRAINT_PARAMETERS, CONSTRAINT_PARAMETERS_MAP
+from pyshacl.constraints import ALL_CONSTRAINT_PARAMETERS, \
+    CONSTRAINT_PARAMETERS_MAP
 
 
 class Shape(object):
@@ -274,7 +277,8 @@ class Shape(object):
                     continue
                 collection_set.add(current_node)
                 found_more_nodes = self._value_nodes_from_path(
-                    current_node, zero_or_more_path, target_graph, recursion=recursion+1)
+                    current_node, zero_or_more_path, target_graph,
+                    recursion=recursion+1)
                 search_deeper_nodes.update(found_more_nodes)
             return collection_set
 
@@ -292,7 +296,8 @@ class Shape(object):
                     continue
                 collection_set.add(current_node)
                 found_more_nodes = self._value_nodes_from_path(
-                    current_node, one_or_more_path, target_graph, recursion=recursion + 1)
+                    current_node, one_or_more_path, target_graph,
+                    recursion=recursion + 1)
                 search_deeper_nodes.update(found_more_nodes)
             return collection_set
 
@@ -326,7 +331,8 @@ class Shape(object):
         path_val = self.path()
         focus_dict = {}
         for f in focus:
-            focus_dict[f] = self._value_nodes_from_path(f, path_val, target_graph)
+            focus_dict[f] = self._value_nodes_from_path(
+                f, path_val, target_graph)
         return focus_dict
 
     def validate(self, target_graph, focus=None, bail_on_error=False):
@@ -415,18 +421,26 @@ def find_shapes(g, logger=None):
     has_target_node = {s for s, o in g.subject_objects(SH_targetNode)}
     has_target_objects_of = {s for s, o in g.subject_objects(SH_targetObjectsOf)}
     has_target_subjects_of = {s for s, o in g.subject_objects(SH_targetSubjectsOf)}
-    subject_shapes = set(has_target_class).union(set(has_target_node).union(set(has_target_objects_of).union(set(has_target_subjects_of))))
+    subject_shapes = set(has_target_class).union(
+        set(has_target_node).union(
+            set(has_target_objects_of).union(
+                set(has_target_subjects_of))))
 
     value_of_property = {o for s, o in g.subject_objects(SH_property)}
     value_of_node = {o for s, o in g.subject_objects(SH_node)}
     value_of_not = {o for s, o in g.subject_objects(SH_not)}
     value_of_qvs = {o for s, o in g.subject_objects(SH_qualifiedValueShape)}
-    value_of_shape_expecting = set(value_of_property).union(set(value_of_node).union(set(value_of_not).union(set(value_of_qvs))))
+    value_of_shape_expecting = set(value_of_property).union(
+        set(value_of_node).union(
+            set(value_of_not).union(
+                set(value_of_qvs))))
 
     value_of_and = {o for s, o in g.subject_objects(SH_and)}
     value_of_or = {o for s, o in g.subject_objects(SH_or)}
     value_of_xone = {o for s, o in g.subject_objects(SH_xone)}
-    value_of_s_list_expecting = set(value_of_and).union(set(value_of_or).union(set(value_of_xone)))
+    value_of_s_list_expecting = set(value_of_and).union(
+        set(value_of_or).union(
+            set(value_of_xone)))
 
     for l in value_of_s_list_expecting:
         list_contents = set(g.items(l))

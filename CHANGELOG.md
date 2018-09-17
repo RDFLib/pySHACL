@@ -5,7 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
 ## [Unreleased]  
-- tbd
+### Added
+- More SPARQL Constraint Components
+
+## [0.8.3] - 2018-09-17  
+### Added
+- Another example, this one with separate SHACL and Target files.
+
+### Changed  
+- Fixed an issue where the content of a separate SHACL graph was ignored by the validator  
+- Fixed a crash caused by the result generator receiving a value node that was a string but not an RDF literal.
+- Refactored constraint file layouts, in preparation for the new SPARQL constraint component functionality
+- Bumped version number
+
 
 ## [0.8.2] - 2018-09-16  
 ### Added   
@@ -178,7 +190,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.8.2...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.8.3...HEAD 
+[0.8.3]: https://github.com/RDFLib/pySHACL/compare/v0.8.2...v0.8.3
 [0.8.2]: https://github.com/RDFLib/pySHACL/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/RDFLib/pySHACL/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/RDFLib/pySHACL/compare/v0.1.0b1.dev20180912...v0.8.0

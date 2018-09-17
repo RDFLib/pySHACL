@@ -218,6 +218,7 @@ class LessThanConstraintComponent(ConstraintComponent):
                     raise ReportableRuntimeError(
                         "Cannot use sh:lessThan to compare a BlankNode.")
                 value_is_string = False
+                orig_value_node = value_node
                 if isinstance(value_node, rdflib.URIRef):
                     value_node = str(value_node)
                     value_is_string = True
@@ -241,11 +242,11 @@ class LessThanConstraintComponent(ConstraintComponent):
                     if (value_is_string and not compare_is_string) or\
                        (compare_is_string and not value_is_string):
                         non_conformant = True
-                        rept = self.make_v_result(f, value_node=value_node)
+                        rept = self.make_v_result(f, value_node=orig_value_node)
                         reports.append(rept)
                     elif not value_node < compare_value:
                         non_conformant = True
-                        rept = self.make_v_result(f, value_node=value_node)
+                        rept = self.make_v_result(f, value_node=orig_value_node)
                         reports.append(rept)
         return non_conformant, reports
 
@@ -316,6 +317,7 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
                     raise ReportableRuntimeError(
                         "Cannot use sh:lessThanOrEquals to compare a BlankNode.")
                 value_is_string = False
+                orig_value_node = value_node
                 if isinstance(value_node, rdflib.URIRef):
                     value_node = str(value_node)
                     value_is_string = True
@@ -339,10 +341,10 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
                     if (value_is_string and not compare_is_string) or\
                        (compare_is_string and not value_is_string):
                         non_conformant = True
-                        rept = self.make_v_result(f, value_node=value_node)
+                        rept = self.make_v_result(f, value_node=orig_value_node)
                         reports.append(rept)
                     elif not value_node <= compare_value:
                         non_conformant = True
-                        rept = self.make_v_result(f, value_node=value_node)
+                        rept = self.make_v_result(f, value_node=orig_value_node)
                         reports.append(rept)
         return non_conformant, reports

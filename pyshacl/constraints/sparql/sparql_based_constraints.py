@@ -16,9 +16,6 @@ SH_select = SH.term('select')
 SH_declare = SH.term('declare')
 
 SH_SPARQLConstraintComponent = SH.term('SPARQLConstraintComponent')
-SH_AndConstraintComponent = SH.term('AndConstraintComponent')
-SH_OrConstraintComponent = SH.term('OrConstraintComponent')
-SH_XoneConstraintComponent = SH.term('XoneConstraintComponent')
 
 
 class SPARQLConstraintObject(object):

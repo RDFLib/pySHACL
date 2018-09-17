@@ -191,7 +191,7 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
         shacl_graph = _load_into_graph(shacl_graph,
                                        rdf_format=kwargs.pop('shacl_graph_format', None))
     validator = Validator(
-        target_graph, shacl_graph,
+        target_graph, shacl_graph=shacl_graph,
         options={'inference': inference, 'abort_on_error': abort_on_error,
                  'logger': log})
     conforms, report_graph, report_text = validator.run()
