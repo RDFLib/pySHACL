@@ -1,0 +1,13 @@
+# pre steps
+    * ensure version number is greater than current distribution (in pySHACL/__init__.py)
+
+# build the distribution egg - no Py2
+python3 setup.py sdist bdist_wheel
+
+
+# push dist to test PyPI
+twine upload --repository testpypi dist/*
+
+
+# push to real PyPI
+twine upload --repository pypi dist/*
