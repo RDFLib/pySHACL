@@ -55,7 +55,7 @@
 | `sh:xone`  | `XoneConstraintComponent`  | [▶][XoneConstraintComponent]  | ![status-complete] 	|           |
 
 
-### [Shape-based Constraint Components](https://www.w3.org/TR/shacl/#core-components-shape)
+### [Shape-based Constraint Components](https://www.w3.org/TR/shacl/#core-components-shape)  
 | Parameter                 | Constraint                                |  Link 	                                   |      Status      	  |  Comments                                     |
 |:----------                |:-------------                             |:------:	                                   |:-------------:	      |:------	                                      |
 | `sh:node`                 | `NodeConstraintComponent`                 | [▶][NodeConstraintComponent]                 | ![status-complete]   |                                               |
@@ -65,13 +65,27 @@
 | `sh:qualifiedMaxCount`    | `QualifiedMaxCountConstraintComponent`    | [▶][QualifiedValueShapeConstraintComponent]  | ![status-complete]   |                                               |
 
 
-### [Other Constraint Components](https://www.w3.org/TR/shacl/#core-components-others)
+### [Other Constraint Components](https://www.w3.org/TR/shacl/#core-components-others)  
 | Parameter               | Constraint                    |  Link 	                          |      Status      	|  Comments	                 |
 |:----------              |:-------------                 |:------:	                          |:-------------:	    |:------	                 |
 | `sh:closed`             | `ClosedConstraintComponent`   | [▶][ClosedConstraintComponent]    | ![status-complete]	|                            |
 | `sh:ignoredProperties`  | `ClosedConstraintComponent`   | [▶][ClosedConstraintComponent]    | ![status-complete] 	|                            |
 | `sh:hasValue`           | `HasValueConstraintComponent` | [▶][HasValueConstraintComponent]  | ![status-complete] 	|                            |
 | `sh:in`                 | `InConstraintComponent`       | [▶][InConstraintComponent]        | ![status-complete] 	|                            |
+
+
+## [SPARQL Based Constraints](https://www.w3.org/TR/shacl/#sparql-constraints)  
+| Parameter               | Constraint                    |  Link 	                          |      Status      	|  Comments	                 |
+|:----------              |:-------------                 |:------:	                          |:-------------:	    |:------	                 |
+| `sh:sparql`             | `SPARQLConstraintComponent`   | [▶][SPARQLConstraintComponent]    | ![status-complete]	|                            |
+
+
+## [SPARQL Based Constraint Components](https://www.w3.org/TR/shacl/#dfn-sparql-based-constraint-component)  
+| Parameter               | Constraint                    |  Link 	                          |      Status      	|  Comments	                 |
+|:----------              |:-------------                 |:------:	                          |:-------------:	    |:------	                 |
+| `sh:validator`          | `ConstraintComponent`         | [▶][ConstraintComponent]          | ![status-complete]	|                            |
+| `sh:select`             | `SPARQLSelectValidator`       | [▶][SPARQLSelectValidator]        | ![status-complete]	|                            |
+| `sh:ask`                | `SPARQLAskValidator`          | [▶][SPARQLAskValidator]           | ![status-complete]	|                            |
 
 
 ## [SHACL Property Paths](https://www.w3.org/TR/shacl/#property-paths)
@@ -129,6 +143,11 @@
 [ClosedConstraintComponent]: https://www.w3.org/TR/shacl/#ClosedConstraintComponent
 [HasValueConstraintComponent]: https://www.w3.org/TR/shacl/#HasValueConstraintComponent
 [InConstraintComponent]: https://www.w3.org/TR/shacl/#InConstraintComponent
+
+[SPARQLConstraintComponent]: https://www.w3.org/TR/shacl/#dfn-sparql-based-constraints
+[ConstraintComponent]: https://www.w3.org/TR/shacl/#dfn-sparql-based-constraint-component
+[SPARQLAskValidator]: https://www.w3.org/TR/shacl/#SPARQLAskValidator
+[SPARQLSelectValidator]: https://www.w3.org/TR/shacl/#SPARQLSelectValidator
 
 [PredicatePath]: https://www.w3.org/TR/shacl/#property-path-predicate
 [SequencePath]: https://www.w3.org/TR/shacl/#property-path-sequence

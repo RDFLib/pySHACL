@@ -137,7 +137,8 @@ class AndConstraintComponent(ConstraintComponent):
     def _evaluate_and_constraint(self, and_c, target_graph, f_v_dict):
         reports = []
         non_conformant = False
-        and_list = set(self.shape.sg.items(and_c))
+        sg = self.shape.sg.graph
+        and_list = set(sg.items(and_c))
         if len(and_list) < 1:
             raise ReportableRuntimeError(
                 "The list associated with sh:and is not a "
@@ -214,7 +215,8 @@ class OrConstraintComponent(ConstraintComponent):
     def _evaluate_or_constraint(self, or_c, target_graph, f_v_dict):
         reports = []
         non_conformant = False
-        or_list = set(self.shape.sg.items(or_c))
+        sg = self.shape.sg.graph
+        or_list = set(sg.items(or_c))
         if len(or_list) < 1:
             raise ReportableRuntimeError(
                 "The list associated with sh:or "
@@ -291,7 +293,8 @@ class XoneConstraintComponent(ConstraintComponent):
     def _evaluate_xone_constraint(self, xone_c, target_graph, f_v_dict):
         reports = []
         non_conformant = False
-        xone_list = set(self.shape.sg.items(xone_c))
+        sg = self.shape.sg.graph
+        xone_list = set(sg.items(xone_c))
         if len(xone_list) < 1:
             raise ReportableRuntimeError(
                 "The list associated with sh:xone is not "

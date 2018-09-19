@@ -10,7 +10,7 @@ from pyshacl.errors import ReportableRuntimeError
 if owl_rl.json_ld_available:
     import rdflib_jsonld
 from pyshacl.inference import CustomRDFSSemantics, CustomRDFSOWLRLSemantics
-from pyshacl.shape import find_shapes
+from pyshacl.shacl_graph import SHACLGraph
 from pyshacl.consts import RDF_type, SH_conforms, \
     SH_result, SH_ValidationReport
 import logging
@@ -106,16 +106,15 @@ class Validator(object):
             shacl_graph = self.clone_graph(target_graph, 'shacl')
         assert isinstance(shacl_graph, rdflib.Graph),\
             "shacl_graph must be a rdflib Graph object"
-        self.shacl_graph = shacl_graph
+        self.shacl_graph = SHACLGraph(shacl_graph, self.logger)
 
     def run(self):
         inference_option = self.options.get('inference', 'none')
         if inference_option and str(inference_option) != "none":
             self._run_pre_inference(self.target_graph, inference_option)
-        shapes = find_shapes(self.shacl_graph, self.logger)
         reports = []
         non_conformant = False
-        for s in shapes:
+        for s in self.shacl_graph.shapes:
             _is_conform, _reports = s.validate(self.target_graph)
             non_conformant = non_conformant or (not _is_conform)
             reports.extend(_reports)
@@ -170,6 +169,25 @@ def _load_into_graph(target, rdf_format=None):
     return g
 
 
+def meta_validate(shacl_graph, inference='rdfs', **kwargs):
+    shacl_shacl_graph = meta_validate.shacl_shacl_graph
+    if shacl_shacl_graph is None:
+        from os import path
+        import pickle
+        here_dir = path.dirname(__file__)
+        pickle_file = path.join(here_dir, "shacl-shacl.pickle")
+        with open(pickle_file, 'rb') as shacl_pickle:
+            u = pickle.Unpickler(shacl_pickle, fix_imports=False)
+            shacl_shacl_store = u.load()
+        shacl_shacl_graph = rdflib.Graph(store=shacl_shacl_store, identifier="http://www.w3.org/ns/shacl-shacl")
+        meta_validate.shacl_shacl_graph = shacl_shacl_graph
+    shacl_graph = _load_into_graph(shacl_graph,
+                                   rdf_format=kwargs.pop('shacl_graph_format', None))
+    _ = kwargs.pop('meta_shacl', None)
+    return validate(shacl_graph, shacl_graph=shacl_shacl_graph, inference=inference, **kwargs)
+meta_validate.shacl_shacl_graph = None
+
+
 def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_error=False, **kwargs):
     """
     :param target_graph:
@@ -185,6 +203,17 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
     if kwargs.get('debug', False):
         log_handler.setLevel(logging.DEBUG)
         log.setLevel(logging.DEBUG)
+    do_check_expected_result = kwargs.pop('check_expected_result', False)
+    if kwargs.get('meta_shacl', False):
+        if shacl_graph is None:
+            shacl_graph = target_graph
+        conforms, v_r, v_t = meta_validate(shacl_graph, inference=inference, **kwargs)
+        if not conforms:
+            msg = "Shacl File does not validate against the Shacl Shapes Shacl file.\n{}"\
+                  .format(v_t)
+            log.error(msg)
+            raise ReportableRuntimeError(msg)
+
     target_graph = _load_into_graph(target_graph,
                                     rdf_format=kwargs.pop('target_graph_format', None))
     if shacl_graph is not None:
@@ -195,7 +224,7 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
         options={'inference': inference, 'abort_on_error': abort_on_error,
                  'logger': log})
     conforms, report_graph, report_text = validator.run()
-    if kwargs.pop('check_expected_result', False):
+    if do_check_expected_result:
         passes = check_expected_result(report_graph, shacl_graph or target_graph)
         return passes, report_graph, report_text
     do_serialize_report_graph = kwargs.pop('serialize_report_graph', False)

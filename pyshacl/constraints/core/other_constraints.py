@@ -59,7 +59,8 @@ class InConstraintComponent(ConstraintComponent):
         """
         reports = []
         non_conformant = False
-        in_vals = set(self.shape.sg.items(self.in_list))
+        sg = self.shape.sg.graph
+        in_vals = set(sg.items(self.in_list))
         for f, value_nodes in focus_value_nodes.items():
             for v in value_nodes:
                 if v not in in_vals:
@@ -82,6 +83,7 @@ class ClosedConstraintComponent(ConstraintComponent):
 
     def __init__(self, shape):
         super(ClosedConstraintComponent, self).__init__(shape)
+        sg = self.shape.sg.graph
         closed_vals = list(self.shape.objects(SH_closed))
         if len(closed_vals) < 1:
             raise ConstraintLoadError(
@@ -97,7 +99,7 @@ class ClosedConstraintComponent(ConstraintComponent):
         self.ignored_props = set()
         for i in ignored_vals:
             try:
-                items = set(self.shape.sg.items(i))
+                items = set(sg.items(i))
                 for list_item in items:
                     self.ignored_props.add(list_item)
             except ValueError:

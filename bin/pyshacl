@@ -15,6 +15,7 @@ if PARENT_DIR not in sys.path:
     sys.path.append(PARENT_DIR)
 
 from pyshacl import validate
+from pyshacl.errors import ReportableRuntimeError
 
 parser = argparse.ArgumentParser(description='Run the pySHACL validator from the command line.')
 parser.add_argument('data', metavar='DataGraph', type=argparse.FileType('rb'),
@@ -25,6 +26,9 @@ parser.add_argument('-s', '--shacl', dest='shacl', action='store', nargs='?',
 parser.add_argument('-i', '--inference', dest='inference', action='store',
                     default='none', choices=('none', 'rdfs', 'owlrl', 'both'),
                     help='[Optional] Choose a type of inferencing to run against the Data Graph before validating.')
+parser.add_argument('-m', '--metashacl', dest='metashacl', action='store_true',
+                    default=False, help='[Optional] Validate the SHACL Shapes graph against the shacl-shacl '
+                    'Shapes Graph before before validating the Data Graph.')
 parser.add_argument('-a', '--abort', dest='abort', action='store_true',
                     default=False, help='[Optional] Abort on first error.')
 parser.add_argument('-d', '--debug', dest='debug', action='store_true',
@@ -45,9 +49,25 @@ if args.format != 'human':
     validator_kwargs['serialize_report_graph'] = args.format
 if args.inference != 'none':
     validator_kwargs['inference'] = args.inference
+if args.metashacl:
+    validator_kwargs['meta_shacl'] = True
 if args.abort:
     validator_kwargs['abort_on_error'] = True
-is_conform, v_graph, v_text = validate(args.data, **validator_kwargs)
+try:
+    is_conform, v_graph, v_text = validate(args.data, **validator_kwargs)
+except ReportableRuntimeError as rre:
+    sys.stderr.write("Validator encountered a Runtime Error:\n")
+    sys.stderr.write(str(rre.message))
+    sys.exit(2)
+except NotImplementedError as nie:
+    sys.stderr.write("Validator feature is not implemented:\n")
+    sys.stderr.write(str(nie.args[0]))
+    sys.exit(3)
+except RuntimeError as re:
+    sys.stderr.write("Validator encountered a Runtime Error.")
+    sys.exit(2)
+
+
 if args.format == 'human':
     args.output.write(v_text)
 else:

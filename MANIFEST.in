@@ -1,2 +1,4 @@
 include *.txt *.md
-recursive-include docs *.txt
+include pyshacl/*.pickle
+recursive-include docs *.txt *.md
+

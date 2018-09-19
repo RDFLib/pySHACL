@@ -41,7 +41,6 @@ ex:SPARQLAskValidator
 ex:TestConstraintComponent
   rdf:type ex:ConstraintComponent ;
   rdfs:comment """A simple test component with two parameters, which flags all values as invalid unless they are the concatenation of the two parameters.
-
 Part of this test is to also use various subclasses of the system classes.""" ;
   rdfs:label "Test constraint component" ;
   sh:parameter ex:TestParameter1 ;

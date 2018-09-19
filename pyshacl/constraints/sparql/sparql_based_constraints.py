@@ -18,8 +18,9 @@ SH_declare = SH.term('declare')
 SH_SPARQLConstraintComponent = SH.term('SPARQLConstraintComponent')
 
 
-class SPARQLConstraintObject(object):
+class SPARQLQueryHelper(object):
     bind_this_regex = re.compile(r"([\s{}()])[\$\?]this", flags=re.M)
+    bind_value_regex = re.compile(r"([\s{}()])[\$\?]value", flags=re.M)
     bind_path_regex = re.compile(r"([\s{}()])[\$\?]PATH", flags=re.M)
     bind_sg_regex = re.compile(r"([\s{}()])[\$\?]shapesGraph", flags=re.M)
     bind_cs_regex = re.compile(r"([\s{}()])[\$\?]currentShape", flags=re.M)
@@ -33,7 +34,7 @@ class SPARQLConstraintObject(object):
         self.prefixes = {}
 
     def collect_prefixes(self):
-        sg = self.shape.sg
+        sg = self.shape.sg.graph
         prefixes_vals = set(sg.objects(self.node, SH_prefixes))
         if len(prefixes_vals) < 1:
             return
@@ -45,14 +46,10 @@ class SPARQLConstraintObject(object):
                         "sh:declare value must be either a URIRef or a BNode.",
                         "https://www.w3.org/TR/shacl/#sparql-prefixes")
                 prefix_vals = set(sg.objects(dec, SH_prefix))
-                if len(prefix_vals) < 1:
+                if len(prefix_vals) < 1 or len(prefix_vals) > 1:
                     raise ConstraintLoadError(
-                        "sh:declare must have at least one sh:prefix predicate.",
+                        "sh:declare must have exactly one sh:prefix predicate.",
                          "https://www.w3.org/TR/shacl/#sparql-prefixes")
-                elif len(prefix_vals) > 1:
-                    raise ConstraintLoadError(
-                        "sh:declare must have at most one sh:prefix predicate.",
-                        "https://www.w3.org/TR/shacl/#sparql-prefixes")
                 prefix = next(iter(prefix_vals))
                 if not (isinstance(prefix, rdflib.Literal) and
                         isinstance(prefix.value, str)):
@@ -61,13 +58,9 @@ class SPARQLConstraintObject(object):
                         "https://www.w3.org/TR/shacl/#sparql-prefixes")
                 prefix = str(prefix.value)
                 namespace_vals = set(sg.objects(dec, SH_namespace))
-                if len(namespace_vals) < 1:
+                if len(namespace_vals) < 1 or len(namespace_vals) > 1:
                     raise ConstraintLoadError(
-                        "sh:declare must have at least one sh:namespace predicate.",
-                        "https://www.w3.org/TR/shacl/#sparql-prefixes")
-                elif len(namespace_vals) > 1:
-                    raise ConstraintLoadError(
-                        "sh:declare must have at most one sh:namespace predicate.",
+                        "sh:declare must have exactly one sh:namespace predicate.",
                         "https://www.w3.org/TR/shacl/#sparql-prefixes")
                 namespace = next(iter(namespace_vals))
                 if not (isinstance(namespace, rdflib.Literal) and
@@ -193,12 +186,17 @@ class SPARQLConstraintObject(object):
             return node
         raise NotImplementedError("Cannot turn that kind of node into text.")
 
-    def pre_bind_variables(self, thisnode):
+    def pre_bind_variables(self, thisnode, valuenode=None):
         new_query_text = ""+self.select_text
         init_bindings = {}
         found_this = self.bind_this_regex.search(new_query_text)
         if found_this:
             init_bindings['this'] = thisnode
+
+        if valuenode:
+            found_value = self.bind_value_regex.search(new_query_text)
+            if found_value:
+                init_bindings['value'] = valuenode
 
         found_cs = self.bind_cs_regex.search(new_query_text)
         if found_cs:
@@ -241,6 +239,7 @@ class SPARQLBasedConstraint(ConstraintComponent):
 
     def __init__(self, shape):
         super(SPARQLBasedConstraint, self).__init__(shape)
+        sg = self.shape.sg.graph
         sparql_node_list = set(self.shape.objects(SH_sparql))
         if len(sparql_node_list) < 1:
             raise ConstraintLoadError(
@@ -248,7 +247,7 @@ class SPARQLBasedConstraint(ConstraintComponent):
                 "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent")
         sparql_constraints = set()
         for s in iter(sparql_node_list):
-            select_node_list = set(self.shape.sg.objects(s, SH_select))
+            select_node_list = set(sg.objects(s, SH_select))
             if len(select_node_list) < 1:
                 raise ConstraintLoadError(
                     "SPARQLConstraintComponent value for sh:select must have "
@@ -266,8 +265,8 @@ class SPARQLBasedConstraint(ConstraintComponent):
                     "SPARQLConstraintComponent value for sh:select must be "
                     "a Literal with type xsd:string.",
                     "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent")
-            sparql = SPARQLConstraintObject(self.shape, s, select_node.value)
-            message_node_list = set(self.shape.sg.objects(s, SH_message))
+            query_helper = SPARQLQueryHelper(self.shape, s, select_node.value)
+            message_node_list = set(sg.objects(s, SH_message))
             if len(message_node_list) > 0:
                 message = next(iter(message_node_list))
                 if not (isinstance(message, rdflib.Literal) and
@@ -276,8 +275,8 @@ class SPARQLBasedConstraint(ConstraintComponent):
                         "SPARQLConstraintComponent value for sh:message must be "
                         "a Literal with type xsd:string.",
                         "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent")
-                sparql.messages = message_node_list
-            deactivated_node_list = set(self.shape.sg.objects(s, SH_deactivated))
+                query_helper.messages = message_node_list
+            deactivated_node_list = set(sg.objects(s, SH_deactivated))
             if len(deactivated_node_list) > 0:
                 deactivated = next(iter(deactivated_node_list))
                 if not (isinstance(deactivated, rdflib.Literal) and
@@ -286,9 +285,9 @@ class SPARQLBasedConstraint(ConstraintComponent):
                         "SPARQLConstraintComponent value for sh:deactivated must be "
                         "a Literal with type xsd:boolean.",
                         "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent")
-                sparql.deactivated = deactivated.value
-            sparql.collect_prefixes()
-            sparql_constraints.add(sparql)
+                query_helper.deactivated = deactivated.value
+            query_helper.collect_prefixes()
+            sparql_constraints.add(query_helper)
         self.sparql_constraints = sparql_constraints
 
 
@@ -313,11 +312,11 @@ class SPARQLBasedConstraint(ConstraintComponent):
         reports = []
         non_conformant = False
 
-        for sparql_constraint in self.sparql_constraints:
-            if sparql_constraint.deactivated:
+        for query_helper in self.sparql_constraints:
+            if query_helper.deactivated:
                 continue
             _nc, _r = self._evaluate_sparql_constraint(
-                sparql_constraint, target_graph, focus_value_nodes)
+                query_helper, target_graph, focus_value_nodes)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
@@ -349,8 +348,9 @@ class SPARQLBasedConstraint(ConstraintComponent):
                     rept = self.make_v_result(
                         f, **rept_kwargs)
                 elif isinstance(v, tuple):
+                    t, p, v = v
                     rept = self.make_v_result(
-                        f, value_node=v[0], result_path=v[1],
+                        t or f, value_node=v, result_path=p,
                         **rept_kwargs)
                 else:
                     rept = self.make_v_result(
@@ -368,19 +368,23 @@ class SPARQLBasedConstraint(ConstraintComponent):
             try:
                 p = r['path']
             except KeyError:
-                p = False
+                p = None
             try:
                 v = r['value']
-                if p:
-                    v = (v, p)
-                violations.add(v)
             except KeyError:
+                v = None
                 pass
             try:
-                f = r['failure']
-                violations.add(True)
+                t = r['this']
             except KeyError:
-                pass
+                t = None
+            if p or v or t:
+                violations.add((t, p, v))
+            else:
+                try:
+                    f = r['failure']
+                    violations.add(True)
+                except KeyError:
+                    pass
         return violations
-
 

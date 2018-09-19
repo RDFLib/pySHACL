@@ -299,8 +299,9 @@ class LanguageInConstraintComponent(StringBasedConstraintBase):
         reports = []
         non_conformant = False
         languages_need = set()
+        sg = self.shape.sg.graph
         try:
-            for l in iter(self.shape.sg.items(r)):
+            for l in iter(sg.items(r)):
                 try:
                     assert isinstance(l, rdflib.Literal)
                     assert isinstance(l.value, str)
