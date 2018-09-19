@@ -1,0 +1,55 @@
+# baseURI: http://datashapes.org/sh/tests/core/misc/severity-002.test
+# imports: http://datashapes.org/dash
+# prefix: ex
+
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix ex: <http://datashapes.org/sh/tests/core/misc/severity-002.test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://datashapes.org/sh/tests/core/misc/severity-002.test>
+  rdf:type owl:Ontology ;
+  rdfs:label "Test of sh:severity 002" ;
+  owl:imports <http://datashapes.org/dash> ;
+.
+ex:GraphValidationTestCase
+  rdf:type dash:GraphValidationTestCase ;
+  dash:expectedResult [
+      rdf:type sh:ValidationReport ;
+      sh:conforms "false"^^xsd:boolean ;
+      sh:result [
+          rdf:type sh:ValidationResult ;
+          sh:focusNode ex:InvalidResource1 ;
+          sh:resultPath ex:property ;
+          sh:resultSeverity sh:Info ;
+          sh:sourceConstraintComponent sh:DatatypeConstraintComponent ;
+          sh:sourceShape ex:TestShape2 ;
+          sh:value "true"^^xsd:boolean ;
+        ] ;
+      sh:result [
+          rdf:type sh:ValidationResult ;
+          sh:focusNode ex:InvalidResource1 ;
+          sh:resultSeverity ex:MySeverity ;
+          sh:sourceConstraintComponent sh:NodeKindConstraintComponent ;
+          sh:sourceShape ex:TestShape1 ;
+          sh:value ex:InvalidResource1 ;
+        ] ;
+    ] ;
+.
+ex:InvalidResource1
+  ex:property "true"^^xsd:boolean ;
+.
+ex:TestShape1
+  sh:nodeKind sh:BlankNode ;
+  sh:property ex:TestShape2 ;
+  sh:severity ex:MySeverity ;
+  sh:targetNode ex:InvalidResource1 ;
+.
+ex:TestShape2
+  sh:path ex:property ;
+  sh:datatype xsd:integer ;
+  sh:severity sh:Info ;
+.

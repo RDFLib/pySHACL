@@ -1,0 +1,86 @@
+# baseURI: http://datashapes.org/sh/tests/core/path/path-complex-001.test
+# imports: http://datashapes.org/dash
+# prefix: ex
+
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix ex: <http://datashapes.org/sh/tests/core/path/path-complex-001.test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://datashapes.org/sh/tests/core/path/path-complex-001.test>
+  rdf:type owl:Ontology ;
+  rdfs:label "Test of path complex (rdf:type/rdfs:subClassOf*) 001" ;
+  owl:imports <http://datashapes.org/dash> ;
+.
+ex:GraphValidationTestCase
+  rdf:type dash:GraphValidationTestCase ;
+  dash:expectedResult [
+      rdf:type sh:ValidationReport ;
+      sh:conforms "false"^^xsd:boolean ;
+      sh:result [
+          rdf:type sh:ValidationResult ;
+          sh:focusNode ex:InvalidResource1 ;
+          sh:resultPath (
+              rdf:type
+              [
+                sh:zeroOrMorePath rdfs:subClassOf ;
+              ]
+            ) ;
+          sh:resultSeverity sh:Violation ;
+          sh:sourceConstraintComponent sh:HasValueConstraintComponent ;
+          sh:sourceShape ex:TestShape ;
+        ] ;
+      sh:result [
+          rdf:type sh:ValidationResult ;
+          sh:focusNode ex:InvalidResource2 ;
+          sh:resultPath (
+              rdf:type
+              [
+                sh:zeroOrMorePath rdfs:subClassOf ;
+              ]
+            ) ;
+          sh:resultSeverity sh:Violation ;
+          sh:sourceConstraintComponent sh:HasValueConstraintComponent ;
+          sh:sourceShape ex:TestShape ;
+        ] ;
+    ] ;
+.
+ex:InvalidResource
+  rdf:type ex:Animal ;
+  rdfs:label "Invalid" ;
+.
+ex:MalePerson
+  rdf:type rdfs:Class ;
+  rdfs:subClassOf ex:Person ;
+.
+ex:Person
+  rdf:type rdfs:Class ;
+.
+ex:TestShape
+  rdf:type sh:PropertyShape ;
+  sh:path (
+      rdf:type
+      [
+        sh:zeroOrMorePath rdfs:subClassOf ;
+      ]
+    ) ;
+  sh:hasValue ex:Person ;
+  sh:targetNode ex:InvalidResource1 ;
+  sh:targetNode ex:InvalidResource2 ;
+  sh:targetNode ex:ValidResource1 ;
+  sh:targetNode ex:ValidResource2 ;
+  sh:targetNode ex:ValidResource3 ;
+.
+ex:ValidResource1
+  rdf:type ex:Person ;
+.
+ex:ValidResource2
+  rdf:type ex:MalePerson ;
+.
+ex:ValidResource3
+  rdf:type ex:Animal ;
+  rdf:type ex:MalePerson ;
+.

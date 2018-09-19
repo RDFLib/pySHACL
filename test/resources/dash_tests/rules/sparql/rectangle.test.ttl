@@ -1,0 +1,58 @@
+# baseURI: http://datashapes.org/shasf/tests/rules/sparql/rectangle.test
+# imports: http://datashapes.org/dash
+# prefix: ex
+
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix ex: <http://datashapes.org/shasf/tests/rules/sparql/rectangle.test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://datashapes.org/shasf/tests/rules/sparql/rectangle.test>
+  rdf:type owl:Ontology ;
+  rdfs:label "Test of rectangle" ;
+  owl:imports <http://datashapes.org/dash> ;
+  owl:versionInfo "Created with TopBraid Composer" ;
+  sh:declare [
+      rdf:type sh:PrefixDeclaration ;
+      sh:namespace "http://datashapes.org/shasf/tests/rules/sparql/rectangle.test#"^^xsd:anyURI ;
+      sh:prefix "ex" ;
+    ] ;
+.
+ex:ExampleRectangle
+  rdf:type ex:Rectangle ;
+  ex:height 8 ;
+  ex:width 7 ;
+.
+ex:InferencingTestCase
+  rdf:type dash:InferencingTestCase ;
+  dash:expectedResult [
+      rdf:object 56 ;
+      rdf:predicate ex:area ;
+      rdf:subject ex:ExampleRectangle ;
+    ] ;
+.
+ex:Rectangle
+  rdf:type rdfs:Class ;
+  rdfs:subClassOf rdfs:Resource ;
+.
+ex:RectangleShape
+  rdf:type sh:NodeShape ;
+  sh:rule [
+      rdf:type sh:SPARQLRule ;
+      sh:construct """
+			CONSTRUCT {
+				$this ex:area ?area .
+			}
+			WHERE {
+				$this ex:width ?width .
+				$this ex:height ?height .
+				BIND (?width * ?height AS ?area) .
+			}
+			""" ;
+      sh:prefixes <http://datashapes.org/shasf/tests/rules/sparql/rectangle.test> ;
+    ] ;
+  sh:targetClass ex:Rectangle ;
+.

@@ -1,0 +1,53 @@
+# baseURI: http://datashapes.org/sh/tests/sparql/function/simpleSPARQLFunction.test
+# imports: http://datashapes.org/dash
+# prefix: ex
+
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix ex: <http://datashapes.org/sh/tests/sparql/function/simpleSPARQLFunction.test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://datashapes.org/sh/tests/sparql/function/simpleSPARQLFunction.test>
+  rdf:type owl:Ontology ;
+  rdfs:label "Test of simpleSPARQLFunction" ;
+  owl:imports <http://datashapes.org/dash> ;
+  owl:versionInfo "Created with TopBraid Composer" ;
+.
+ex:booleanFunction
+  rdf:type sh:SPARQLFunction ;
+  rdfs:label "boolean function" ;
+  sh:ask """ASK {
+    FILTER (true) .
+}""" ;
+  sh:returnType xsd:boolean ;
+.
+ex:testBooleanFunction
+  rdf:type dash:FunctionTestCase ;
+  dash:expectedResult "true"^^xsd:boolean ;
+  dash:expression "ex:booleanFunction()" ;
+.
+ex:testWithArguments
+  rdf:type dash:FunctionTestCase ;
+  dash:expectedResult "A-B" ;
+  dash:expression "ex:withArguments(\"A\", \"B\")" ;
+.
+ex:withArguments
+  rdf:type sh:SPARQLFunction ;
+  rdfs:label "with arguments" ;
+  sh:parameter [
+      sh:path ex:arg1 ;
+      sh:name "arg1" ;
+    ] ;
+  sh:parameter [
+      sh:path ex:arg2 ;
+      sh:name "arg2" ;
+    ] ;
+  sh:returnType xsd:string ;
+  sh:select """SELECT ?result
+WHERE {
+    BIND (CONCAT($arg1, \"-\", $arg2) AS ?result)
+}""" ;
+.

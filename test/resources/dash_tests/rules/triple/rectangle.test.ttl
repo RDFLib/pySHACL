@@ -1,0 +1,73 @@
+# baseURI: http://datashapes.org/shasf/tests/rules/triple/rectangle.test
+# imports: http://datashapes.org/dash
+# prefix: ex
+
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix ex: <http://datashapes.org/shasf/tests/rules/triple/rectangle.test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://datashapes.org/shasf/tests/rules/triple/rectangle.test>
+  rdf:type owl:Ontology ;
+  rdfs:label "Test of a triple rule on rectangles" ;
+  owl:imports <http://datashapes.org/dash> ;
+.
+ex:ExampleRectangle
+  rdf:type ex:Rectangle ;
+  ex:height 8 ;
+  ex:width 7 ;
+.
+ex:InferencingTestCase
+  rdf:type dash:InferencingTestCase ;
+  dash:expectedResult [
+      rdf:object 56 ;
+      rdf:predicate ex:area ;
+      rdf:subject ex:ExampleRectangle ;
+    ] ;
+.
+ex:Rectangle
+  rdf:type rdfs:Class ;
+  rdfs:subClassOf rdfs:Resource ;
+.
+ex:RectangleShape
+  rdf:type sh:NodeShape ;
+  sh:rule [
+      rdf:type sh:TripleRule ;
+      sh:object [
+          ex:multiply (
+              [
+                sh:path ex:width ;
+              ]
+              [
+                sh:path ex:height ;
+              ]
+            ) ;
+        ] ;
+      sh:predicate ex:area ;
+      sh:subject sh:this ;
+    ] ;
+  sh:targetClass ex:Rectangle ;
+.
+ex:multiply
+  rdf:type sh:SPARQLFunction ;
+  rdfs:comment "Multiplies its two parameters $op1 and $op2." ;
+  sh:parameter [
+      sh:path ex:op1 ;
+      sh:datatype xsd:integer ;
+      sh:description "The first operand" ;
+    ] ;
+  sh:parameter [
+      sh:path ex:op2 ;
+      sh:datatype xsd:integer ;
+      sh:description "The second operand" ;
+    ] ;
+  sh:returnType xsd:integer ;
+  sh:select """
+		SELECT ($op1 * $op2 AS ?result)
+		WHERE {
+		}
+		""" ;
+.

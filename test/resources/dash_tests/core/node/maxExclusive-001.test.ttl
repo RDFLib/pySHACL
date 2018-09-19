@@ -1,0 +1,86 @@
+# baseURI: http://datashapes.org/sh/tests/core/node/maxExclusive-001.test
+# imports: http://datashapes.org/dash
+# prefix: ex
+
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix ex: <http://datashapes.org/sh/tests/core/node/maxExclusive-001.test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://datashapes.org/sh/tests/core/node/maxExclusive-001.test>
+  rdf:type owl:Ontology ;
+  rdfs:label "Test of sh:maxExclusive at node shape 001" ;
+  owl:imports <http://datashapes.org/dash> ;
+.
+ex:GraphValidationTestCase
+  rdf:type dash:GraphValidationTestCase ;
+  dash:expectedResult [
+      rdf:type sh:ValidationReport ;
+      sh:conforms "false"^^xsd:boolean ;
+      sh:result [
+          rdf:type sh:ValidationResult ;
+          sh:focusNode ex:John ;
+          sh:resultSeverity sh:Violation ;
+          sh:sourceConstraintComponent sh:MaxExclusiveConstraintComponent ;
+          sh:sourceShape ex:TestShape ;
+          sh:value ex:John ;
+        ] ;
+      sh:result [
+          rdf:type sh:ValidationResult ;
+          sh:focusNode 4 ;
+          sh:resultSeverity sh:Violation ;
+          sh:sourceConstraintComponent sh:MaxExclusiveConstraintComponent ;
+          sh:sourceShape ex:TestShape ;
+          sh:value 4 ;
+        ] ;
+      sh:result [
+          rdf:type sh:ValidationResult ;
+          sh:focusNode 4.0 ;
+          sh:resultSeverity sh:Violation ;
+          sh:sourceConstraintComponent sh:MaxExclusiveConstraintComponent ;
+          sh:sourceShape ex:TestShape ;
+          sh:value 4.0 ;
+        ] ;
+      sh:result [
+          rdf:type sh:ValidationResult ;
+          sh:focusNode 4.1 ;
+          sh:resultSeverity sh:Violation ;
+          sh:sourceConstraintComponent sh:MaxExclusiveConstraintComponent ;
+          sh:sourceShape ex:TestShape ;
+          sh:value 4.1 ;
+        ] ;
+      sh:result [
+          rdf:type sh:ValidationResult ;
+          sh:focusNode "Hello" ;
+          sh:resultSeverity sh:Violation ;
+          sh:sourceConstraintComponent sh:MaxExclusiveConstraintComponent ;
+          sh:sourceShape ex:TestShape ;
+          sh:value "Hello" ;
+        ] ;
+      sh:result [
+          rdf:type sh:ValidationResult ;
+          sh:focusNode _:b9649 ;
+          sh:resultSeverity sh:Violation ;
+          sh:sourceConstraintComponent sh:MaxExclusiveConstraintComponent ;
+          sh:sourceShape ex:TestShape ;
+          sh:value _:b9649 ;
+        ] ;
+    ] ;
+.
+ex:TestShape
+  rdf:type sh:NodeShape ;
+  sh:maxExclusive 4 ;
+  sh:targetNode ex:John ;
+  sh:targetNode 3.9 ;
+  sh:targetNode 4 ;
+  sh:targetNode 4.0 ;
+  sh:targetNode 4.1 ;
+  sh:targetNode "Hello" ;
+  sh:targetClass ex:TestClass ;
+.
+_:b9649
+  rdf:type ex:TestClass ;
+.

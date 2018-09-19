@@ -256,12 +256,12 @@ class XoneConstraintComponent(ConstraintComponent):
 
     def __init__(self, shape):
         super(XoneConstraintComponent, self).__init__(shape)
-        or_list = list(self.shape.objects(SH_xone))
-        if len(or_list) < 1:
+        xone_nodes = list(self.shape.objects(SH_xone))
+        if len(xone_nodes) < 1:
             raise ConstraintLoadError(
                 "XoneConstraintComponent must have at least one sh:xone predicate.",
                 "https://www.w3.org/TR/shacl/#XoneConstraintComponent")
-        self.or_list = or_list
+        self.xone_nodes = xone_nodes
 
     @classmethod
     def constraint_parameters(cls):
@@ -284,7 +284,7 @@ class XoneConstraintComponent(ConstraintComponent):
         reports = []
         non_conformant = False
 
-        for xone_c in self.or_list:
+        for xone_c in self.xone_nodes:
             _nc, _r = self._evaluate_xone_constraint(xone_c, target_graph, focus_value_nodes)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
@@ -294,19 +294,19 @@ class XoneConstraintComponent(ConstraintComponent):
         reports = []
         non_conformant = False
         sg = self.shape.sg.graph
-        xone_list = set(sg.items(xone_c))
+        xone_list = list(sg.items(xone_c))
         if len(xone_list) < 1:
             raise ReportableRuntimeError(
                 "The list associated with sh:xone is not "
                 "a valid RDF list.")
-        xone_shapes = set()
+        xone_shapes = list()
         for x in xone_list:
             xone_shape = self.shape.get_other_shape(x)
             if not xone_shape:
                 raise ReportableRuntimeError(
                     "Shape pointed to by sh:xone does not exist "
                     "or is not a well-formed SHACL Shape.")
-            xone_shapes.add(xone_shape)
+            xone_shapes.append(xone_shape)
         for f, value_nodes in f_v_dict.items():
             for v in value_nodes:
                 passed_count = 0

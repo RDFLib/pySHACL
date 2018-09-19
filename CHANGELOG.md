@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.9.1] - 2018-09-19  
+### Added  
+- A second testing framework is in place  
+  - this one tests against the [data-shapes-test-suite](https://w3c.github.io/data-shapes/data-shapes-test-suite).  
+
+### Changed  
+- Changed the layout and structure of the tests folder  
+- Fixed a bug in the XOne constraint, discovered indicated by the new tests
+- 199 of 212 tests are now passing.  
+
+
 ## [0.9.0] - 2018-09-19  
 ### Added
 - Sparql Based Constraint Components  
@@ -206,7 +217,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.0...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.1...HEAD 
+[0.9.1]: https://github.com/RDFLib/pySHACL/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/RDFLib/pySHACL/compare/v0.8.3...v0.9.0
 [0.8.3]: https://github.com/RDFLib/pySHACL/compare/v0.8.2...v0.8.3
 [0.8.2]: https://github.com/RDFLib/pySHACL/compare/v0.8.1...v0.8.2

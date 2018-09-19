@@ -1,0 +1,41 @@
+# baseURI: http://datashapes.org/sh/tests/core/node/pattern-002.test
+# imports: http://datashapes.org/dash
+# prefix: ex
+
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix ex: <http://datashapes.org/sh/tests/core/node/pattern-002.test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://datashapes.org/sh/tests/core/node/pattern-002.test>
+  rdf:type owl:Ontology ;
+  rdfs:label "Test of sh:pattern at node shape 002" ;
+  owl:imports <http://datashapes.org/dash> ;
+  owl:versionInfo "Created with TopBraid Composer" ;
+.
+ex:GraphValidationTestCase
+  rdf:type dash:GraphValidationTestCase ;
+  dash:expectedResult [
+      rdf:type sh:ValidationReport ;
+      sh:conforms "false"^^xsd:boolean ;
+      sh:result [
+          rdf:type sh:ValidationResult ;
+          sh:focusNode "Alti" ;
+          sh:resultSeverity sh:Violation ;
+          sh:sourceConstraintComponent sh:PatternConstraintComponent ;
+          sh:sourceShape ex:TestShape ;
+          sh:value "Alti" ;
+        ] ;
+    ] ;
+.
+ex:TestShape
+  rdf:type sh:NodeShape ;
+  sh:flags "i" ;
+  sh:pattern "Aldi" ;
+  sh:targetNode "Aldi" ;
+  sh:targetNode "Alti" ;
+  sh:targetNode "aLdI" ;
+.

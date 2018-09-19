@@ -5,7 +5,7 @@ from sys import stderr
 import rdflib
 import RDFClosure as owl_rl
 
-from pyshacl.errors import ReportableRuntimeError
+from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 
 if owl_rl.json_ld_available:
     import rdflib_jsonld
@@ -203,7 +203,8 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
     if kwargs.get('debug', False):
         log_handler.setLevel(logging.DEBUG)
         log.setLevel(logging.DEBUG)
-    do_check_expected_result = kwargs.pop('check_expected_result', False)
+    do_check_dash_result = kwargs.pop('check_dash_result', False)
+    do_check_sht_result = kwargs.pop('check_sht_result', False)
     if kwargs.get('meta_shacl', False):
         if shacl_graph is None:
             shacl_graph = target_graph
@@ -219,13 +220,25 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
     if shacl_graph is not None:
         shacl_graph = _load_into_graph(shacl_graph,
                                        rdf_format=kwargs.pop('shacl_graph_format', None))
-    validator = Validator(
-        target_graph, shacl_graph=shacl_graph,
-        options={'inference': inference, 'abort_on_error': abort_on_error,
-                 'logger': log})
-    conforms, report_graph, report_text = validator.run()
-    if do_check_expected_result:
-        passes = check_expected_result(report_graph, shacl_graph or target_graph)
+    try:
+        validator = Validator(
+            target_graph, shacl_graph=shacl_graph,
+            options={'inference': inference, 'abort_on_error': abort_on_error,
+                     'logger': log})
+        conforms, report_graph, report_text = validator.run()
+    except ValidationFailure as e:
+        if do_check_sht_result:
+            conforms = False
+            report_graph = e
+            report_text = "Validation Failure"
+        else:
+            raise e
+    if do_check_dash_result:
+        passes = check_dash_result(report_graph, shacl_graph or target_graph)
+        return passes, report_graph, report_text
+    if do_check_sht_result:
+        (sht_graph, sht_result_node) = kwargs.pop('sht_validate', (False, None))
+        passes = check_sht_result(report_graph, sht_graph or shacl_graph or target_graph, sht_result_node)
         return passes, report_graph, report_text
     do_serialize_report_graph = kwargs.pop('serialize_report_graph', False)
     if do_serialize_report_graph:
@@ -235,28 +248,13 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
                                               format=do_serialize_report_graph)
     return conforms, report_graph, report_text
 
-
-def check_expected_result(report_graph, expected_result_graph):
-    DASH = rdflib.namespace.Namespace('http://datashapes.org/dash#')
-    DASH_TestCase = DASH.term('GraphValidationTestCase')
-    DASH_expectedResult = DASH.term('expectedResult')
-
-    test_cases = expected_result_graph.subjects(RDF_type, DASH_TestCase)
-    test_cases = set(test_cases)
-    if len(test_cases) < 1:
-        raise ReportableRuntimeError("Cannot check the expected result, the given expected result graph does not have a GraphValidationTestCase.")
-    test_case = next(iter(test_cases))
-    expected_results = expected_result_graph.objects(test_case, DASH_expectedResult)
-    expected_results = set(expected_results)
-    if len(expected_results) < 1:
-        raise ReportableRuntimeError("Cannot check the expected result, the given GraphValidationTestCase does not have an expectedResult.")
-    expected_result = next(iter(expected_results))
-    expected_conforms = expected_result_graph.objects(expected_result, SH_conforms)
+def compare_validation_reports(report_graph, expected_graph, expected_result):
+    expected_conforms = expected_graph.objects(expected_result, SH_conforms)
     expected_conforms = set(expected_conforms)
     if len(expected_conforms) < 1:
         raise ReportableRuntimeError("Cannot check the expected result, the given expectedResult does not have an sh:conforms.")
     expected_conforms = next(iter(expected_conforms))
-    expected_result_nodes = expected_result_graph.objects(expected_result, SH_result)
+    expected_result_nodes = expected_graph.objects(expected_result, SH_result)
     expected_result_nodes = set(expected_result_nodes)
     expected_result_node_count = len(expected_result_nodes)
 
@@ -284,6 +282,40 @@ def check_expected_result(report_graph, expected_result_graph):
         return False
     # Note it is not easily achievable with this method to compare actual result entries, because they are all blank nodes.
     return True
+
+def check_dash_result(report_graph, expected_result_graph):
+    DASH = rdflib.namespace.Namespace('http://datashapes.org/dash#')
+    DASH_TestCase = DASH.term('GraphValidationTestCase')
+    DASH_expectedResult = DASH.term('expectedResult')
+
+    test_cases = expected_result_graph.subjects(RDF_type, DASH_TestCase)
+    test_cases = set(test_cases)
+    if len(test_cases) < 1:
+        raise ReportableRuntimeError("Cannot check the expected result, the given expected result graph does not have a GraphValidationTestCase.")
+    test_case = next(iter(test_cases))
+    expected_results = expected_result_graph.objects(test_case, DASH_expectedResult)
+    expected_results = set(expected_results)
+    if len(expected_results) < 1:
+        raise ReportableRuntimeError("Cannot check the expected result, the given GraphValidationTestCase does not have an expectedResult.")
+    expected_result = next(iter(expected_results))
+    return compare_validation_reports(report_graph, expected_result_graph, expected_result)
+
+def check_sht_result(report_graph, sht_graph, sht_result_node):
+    SHT = rdflib.namespace.Namespace('http://www.w3.org/ns/shacl-test#')
+    types = set(sht_graph.objects(sht_result_node, RDF_type))
+    expected_failure = (sht_result_node == SHT.Failure)
+    if expected_failure and isinstance(report_graph, ValidationFailure):
+        return True
+    elif isinstance(report_graph, ValidationFailure):
+        log.error("Validation Report indicates a Validation Failure, but the SHT entry does not expect a failure.")
+        return False
+    elif expected_failure:
+        log.error("SHT expects a Validation Failure, but the Validation Report does not indicate a Validation Failure.")
+        return False
+    if SH_ValidationReport not in types:
+        raise ReportableRuntimeError(
+            "SHT expected result must have type sh:ValidationReport")
+    return compare_validation_reports(report_graph, sht_graph, sht_result_node)
 
 
 

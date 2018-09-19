@@ -1,0 +1,63 @@
+# baseURI: http://datashapes.org/sh/tests/core/property/hasValue-001.test
+# imports: http://datashapes.org/dash
+# prefix: ex
+
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix ex: <http://datashapes.org/sh/tests/core/property/hasValue-001.test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://datashapes.org/sh/tests/core/property/hasValue-001.test>
+  rdf:type owl:Ontology ;
+  rdfs:label "Test of sh:hasValue at property shape 001" ;
+  owl:imports <http://datashapes.org/dash> ;
+.
+ex:GraphValidationTestCase
+  rdf:type dash:GraphValidationTestCase ;
+  dash:expectedResult [
+      rdf:type sh:ValidationReport ;
+      sh:conforms "false"^^xsd:boolean ;
+      sh:result [
+          rdf:type sh:ValidationResult ;
+          sh:focusNode ex:InvalidMalePerson ;
+          sh:resultPath ex:gender ;
+          sh:resultSeverity sh:Violation ;
+          sh:sourceConstraintComponent sh:HasValueConstraintComponent ;
+          sh:sourceShape ex:PersonShape-gender ;
+        ] ;
+    ] ;
+.
+ex:InvalidMalePerson
+  rdf:type ex:MalePerson ;
+  ex:gender "female" ;
+  rdfs:label "Invalid male person" ;
+.
+ex:MalePerson
+  rdf:type rdfs:Class ;
+  rdfs:label "Male person" ;
+  rdfs:subClassOf rdfs:Resource ;
+.
+ex:PersonShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "Person shape" ;
+  sh:property ex:PersonShape-gender ;
+  sh:targetClass ex:MalePerson ;
+.
+ex:PersonShape-gender
+  sh:path ex:gender ;
+  rdfs:label "gender" ;
+  sh:datatype xsd:string ;
+  sh:hasValue "male" ;
+.
+ex:ValidMalePerson1
+  rdf:type ex:MalePerson ;
+  ex:gender "male" ;
+.
+ex:ValidMalePerson2
+  rdf:type ex:MalePerson ;
+  ex:gender "female" ;
+  ex:gender "male" ;
+.
