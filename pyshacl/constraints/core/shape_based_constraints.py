@@ -5,7 +5,7 @@ https://www.w3.org/TR/shacl/#core-components-shape
 import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH, SH_property, SH_node
-from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError
+from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError, ConstraintLoadWarning
 
 SH_PropertyShapeComponent = SH.term('PropertyShapeComponent')
 SH_NodeShapeComponent = SH.term('NodeShapeComponent')
@@ -158,14 +158,15 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
 
     def __init__(self, shape):
         super(QualifiedValueShapeConstraintComponent, self).__init__(shape)
+        if not shape.is_property_shape:
+            # Note, this no longer throws an error, this constraint is simply ignored on NodeShapes.
+            raise ConstraintLoadWarning(
+                "QualifiedValueShapeConstraintComponent can only be present on a PropertyShape, not a NodeShape.",
+                "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent")
         value_shapes = set(self.shape.objects(SH_qualifiedValueShape))
         if len(value_shapes) < 1:
             raise ConstraintLoadError(
                 "QualifiedValueShapeConstraintComponent must have at least one sh:qualifiedValueShape predicate.",
-                "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent")
-        if not shape.is_property_shape:
-            raise ConstraintLoadError(
-                "QualifiedValueShapeConstraintComponent can only be present on a PropertyShape, not a NodeShape.",
                 "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent")
         self.value_shapes = value_shapes
         min_count = set(self.shape.objects(SH_qualifiedMinCount))

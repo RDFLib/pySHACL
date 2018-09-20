@@ -109,6 +109,17 @@
 | `sh:group`          | [▶][ShapeGroup]          | ![status-missing] 	|           |
 | `sh:defaultValue`   | [▶][ShapeDefaultValue]   | ![status-missing] 	|           |
 
+## SHACL Test Suite Failures:
+```
+- core/node/minInclusive-002.ttl : Comparing values of datetime with timezones doesn't currently work correctly.
+- core/node/minInclusive-003.ttl : Comparing values of datetime without timzone to datetimes with timezones doesn't currently work correctly.
+- core/property/datatype-ill-formed.ttl : Waiting on RDFLib support for determining ill-formed Literals https://github.com/RDFLib/rdflib/issues/848
+- sparql/pre-binding/pre-binding-007.ttl : Testing for a use of potentially pre-bound variables in nested Subquery SELECT statements is complicated. Just disallowing all nested SELECT statements for now.
+- sparql/pre-binding/shapesGraph-001.ttl : Prebinding to $shapesGraph is currently unsupported. This will be supported in the future.
+- sparql/pre-binding/unsupported-sparql-006.ttl : Potential problem with the test: https://github.com/w3c/data-shapes/issues/101
+```
+
+
 
 [status-complete]: https://img.shields.io/badge/status-complete-green.svg?longCache=true&style=popout
 [status-partial]: https://img.shields.io/badge/status-partial-yellow.svg?longCache=true&style=popout

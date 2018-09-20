@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 from io import IOBase
 from sys import stderr
-
+import logging
 import rdflib
 import RDFClosure as owl_rl
 
-from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 
 if owl_rl.json_ld_available:
     import rdflib_jsonld
+from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 from pyshacl.inference import CustomRDFSSemantics, CustomRDFSOWLRLSemantics
 from pyshacl.shacl_graph import SHACLGraph
 from pyshacl.consts import RDF_type, SH_conforms, \
     SH_result, SH_ValidationReport
-import logging
+from pyshacl.monkey import apply_patches
 
 log_handler = logging.StreamHandler(stderr)
 log = logging.getLogger(__name__)
@@ -193,16 +193,22 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
     :param target_graph:
     :type target_graph: rdflib.Graph | str
     :param args:
+    :type args: list
     :param shacl_graph:
+    :type shacl_graph: rdflib.Graph | str
     :param inference:
     :type inference: str | None
     :param abort_on_error:
+    :type abort_on_error: bool | None
     :param kwargs:
+    :type kwargs: dict
     :return:
     """
+
     if kwargs.get('debug', False):
         log_handler.setLevel(logging.DEBUG)
         log.setLevel(logging.DEBUG)
+    apply_patches()
     do_check_dash_result = kwargs.pop('check_dash_result', False)
     do_check_sht_result = kwargs.pop('check_sht_result', False)
     if kwargs.get('meta_shacl', False):

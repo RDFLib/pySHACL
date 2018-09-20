@@ -8,7 +8,7 @@ from pyshacl.constraints.core.shape_based_constraints import \
 from pyshacl.constraints.sparql.sparql_based_constraint_components import SH_ConstraintComponent
 from pyshacl.consts import *
 
-from pyshacl.errors import ShapeLoadError, ReportableRuntimeError
+from pyshacl.errors import ShapeLoadError, ReportableRuntimeError, ConstraintLoadWarning, ConstraintLoadError
 from pyshacl.constraints import ALL_CONSTRAINT_PARAMETERS, \
     CONSTRAINT_PARAMETERS_MAP
 
@@ -377,7 +377,14 @@ class Shape(object):
         for constraint_component in constraint_components:
             if constraint_component in done_constraints:
                 continue
-            c = constraint_component(self)
+            try:
+                c = constraint_component(self)
+            except ConstraintLoadWarning as w:
+                self.logger.warning(repr(w))
+                continue
+            except ConstraintLoadError as e:
+                self.logger.error(repr(e))
+                raise e
             _is_conform, _r = c.evaluate(target_graph, focus_value_nodes)
             non_conformant = non_conformant or (not _is_conform)
             reports.extend(_r)

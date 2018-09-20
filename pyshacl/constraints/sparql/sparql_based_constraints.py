@@ -24,6 +24,12 @@ class SPARQLQueryHelper(object):
     bind_path_regex = re.compile(r"([\s{}()])[\$\?]PATH", flags=re.M)
     bind_sg_regex = re.compile(r"([\s{}()])[\$\?]shapesGraph", flags=re.M)
     bind_cs_regex = re.compile(r"([\s{}()])[\$\?]currentShape", flags=re.M)
+    has_minus_regex = re.compile(r"[^\?\$]MINUS[\s\{]", flags=re.M | re.I)
+    has_values_regex = re.compile(r"[^\?\$]VALUES[\s\{]", flags=re.M | re.I)
+    has_service_regex = re.compile(r"[^\?\$]SERVICE[\s\<]", flags=re.M | re.I)
+    has_nested_select_regex = re.compile(r"SELECT[\s\(\)\$\?\a-z]*\{[^\}]*SELECT\s+((?:(?:[\?\$]\w+\s+)|(?:\*\s+)?)+)", flags=re.M | re.I)
+    has_as_var_regex = re.compile(r"[^\w]+AS[\s]+[\$\?](\w+)", flags=re.M | re.I)
+
 
     def __init__(self, shape, node, select_text, messages=None, deactivated=False):
         self.shape = shape
@@ -186,8 +192,31 @@ class SPARQLQueryHelper(object):
             return node
         raise NotImplementedError("Cannot turn that kind of node into text.")
 
+    def check_invalid_sparql(self, sparql_text):
+        has_minus = self.has_minus_regex.search(sparql_text)
+        if has_minus:
+            raise ValidationFailure("A SPARQL Constraint must not contain a MINUS clause.")
+        has_values = self.has_values_regex.search(sparql_text)
+        if has_values:
+            raise ValidationFailure("A SPARQL Constraint must not contain a VALUES clause.")
+        has_service = self.has_service_regex.search(sparql_text)
+        if has_service:
+            raise ValidationFailure("A SPARQL Constraint must not contain a federated query (SERVICE).")
+        has_nested_select = self.has_nested_select_regex.search(sparql_text)
+        if has_nested_select:
+            #TODO Check that all potentially pre-bound vars are in the 2nd select statement
+            raise ValidationFailure("Nested SELECT statements are currently not supported.")
+        has_as_var = self.has_as_var_regex.search(sparql_text)
+        if has_as_var:
+            var_name = has_as_var.group(1)
+            if var_name in ('this', 'shapesGraph', 'currentShape', 'value'):
+                raise ValidationFailure(
+                    "Cannot use AS to re-bind potentially pre-bound variables such as {}".format(var_name))
+        return True
+
     def pre_bind_variables(self, thisnode, valuenode=None):
         new_query_text = ""+self.select_text
+        valid = self.check_invalid_sparql(new_query_text)
         init_bindings = {}
         found_this = self.bind_this_regex.search(new_query_text)
         if found_this:
