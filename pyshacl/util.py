@@ -301,13 +301,13 @@ def compare_blank_node(graph1, bnode1, graph2, bnode2, recursion=0):
             return -1
         eq = 0
         for i1 in list_1_items:
-            found = False
+            found = None
             for i2 in list_2_items:
                 eq = compare_node(graph1, i1, graph2, i2, recursion=recursion+1)
                 if eq == 0:
                     found = i2
                     break
-            if found:
+            if found is not None:
                 list_2_items.remove(found)
             else:
                 eq = 1

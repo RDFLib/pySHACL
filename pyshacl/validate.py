@@ -209,23 +209,25 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
 def clean_validation_reports(actual_graph, actual_report, expected_graph, expected_report):
     # remove rdfs-added stuff
     # remove resultMessage if expected_report does not include result_message
-    expected_graph.remove((expected_report, RDF_type, RDFS_Resource))
-    actual_graph.remove((actual_report, RDF_type, RDFS_Resource))
+    # expected_graph.remove((expected_report, RDF_type, RDFS_Resource))
+    # actual_graph.remove((actual_report, RDF_type, RDFS_Resource))
+    expected_graph.remove((None, RDF_type, RDFS_Resource))
+    actual_graph.remove((None, RDF_type, RDFS_Resource))
     expected_results = list(expected_graph.objects(expected_report, SH_result))
     actual_results = list(actual_graph.objects(actual_report, SH_result))
     er_has_messages = None
     for er in expected_results:
         expected_graph.remove((er, RDF_type, RDFS_Resource))
         er_has_messages = list(expected_graph.objects(er, SH_resultMessage))
-        sourceShapes = list(expected_graph.objects(er, SH_sourceShape))
-        for s in sourceShapes:
-            expected_graph.remove((s, RDF_type, RDFS_Resource))
-        resultPaths = list(expected_graph.objects(er, SH_resultPath))
-        for r in resultPaths:
-            expected_graph.remove((r, RDF_type, RDFS_Resource))
-        sourceConstraints = list(expected_graph.objects(er, SH_sourceConstraint))
-        for s in sourceConstraints:
-            expected_graph.remove((s, RDF_type, RDFS_Resource))
+        # sourceShapes = list(expected_graph.objects(er, SH_sourceShape))
+        # for s in sourceShapes:
+        #     expected_graph.remove((s, RDF_type, RDFS_Resource))
+        # resultPaths = list(expected_graph.objects(er, SH_resultPath))
+        # for r in resultPaths:
+        #     expected_graph.remove((r, RDF_type, RDFS_Resource))
+        # sourceConstraints = list(expected_graph.objects(er, SH_sourceConstraint))
+        # for s in sourceConstraints:
+        #     expected_graph.remove((s, RDF_type, RDFS_Resource))
     if er_has_messages and len(er_has_messages) > 0:
         # keep messages in actual
         pass

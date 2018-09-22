@@ -4,9 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [Unreleased] - 2018-09-xx 
+### Added  
+
+
+### Changed
+- Graph cleaner now works in a much more agressive manner, to remove all rdfs:Resource added triples
+- Fixed SPARQL-based Constraint Component validator now outputs a default sh:value item if it is validating with a sourceShape that is a SHACL NodeShape
+- Fixed a tiny bug in the list-compare subsection of the blank-node deep-compare utility
+
+
 ## [0.9.3] - 2018-09-22  
 ### Added  
 - A new deep-compare feature to check actual validation-result blank-nodes against expected validation-result blank nodes
+- Added a validation-report graph cleaner, to remove all unwanted triples from a validation report graph.  
 - A new RDF Node deep-clone feature to properly clone nodes into the Validation Report graph, rather than copying them. 
 
 ### Changed
