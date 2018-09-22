@@ -88,7 +88,7 @@ ex:ValidResource1
           sh:resultSeverity sh:Violation ;
           sh:sourceConstraintComponent sh:OrConstraintComponent ;
           sh:sourceShape ex:TestShape-comment ;
-          sh:value "none"^^xsd:boolean ;
+          sh:value "forty two"^^xsd:integer ;
         ] ;
     ] ;
   mf:status sht:approved ;

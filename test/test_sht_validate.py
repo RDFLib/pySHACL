@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 import pytest
 from os import path, walk
@@ -150,6 +150,8 @@ tests_found_in_manifests = defaultdict(lambda: [])
 for m in manifests_with_entries:
     tests = m.collect_tests()
     tests_found_in_manifests[m.base].extend(tests)
+
+tests_found_in_manifests = OrderedDict(sorted(tests_found_in_manifests.items()))
 
 @pytest.mark.parametrize("base, index", [[base, i] for base,tests in tests_found_in_manifests.items() for i,t in enumerate(tests)])
 def test_sht_all(base, index):

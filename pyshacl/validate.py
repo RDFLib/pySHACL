@@ -4,7 +4,7 @@ from sys import stderr
 import logging
 import rdflib
 import RDFClosure as owl_rl
-
+from rdflib import RDFS
 
 if owl_rl.json_ld_available:
     import rdflib_jsonld
@@ -12,7 +12,10 @@ from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 from pyshacl.inference import CustomRDFSSemantics, CustomRDFSOWLRLSemantics
 from pyshacl.shacl_graph import SHACLGraph
 from pyshacl.consts import RDF_type, SH_conforms, \
-    SH_result, SH_ValidationReport
+    SH_result, SH_ValidationReport, RDFS_Resource, SH_resultMessage, \
+    SH_sourceShape, SH_sourceConstraint, SH_resultPath
+from pyshacl.util import load_into_graph, clone_graph, compare_node, \
+    clone_node, compare_blank_node
 from pyshacl.monkey import apply_patches
 
 log_handler = logging.StreamHandler(stderr)
@@ -57,7 +60,7 @@ class Validator(object):
                                          "{}".format(str(e.args[0])))
 
     @classmethod
-    def create_validation_report(cls, conforms, results):
+    def create_validation_report(cls, conforms, target_graph, shacl_graph, results):
         v_text = "Validation Report\nConforms: {}\n".format(str(conforms))
         result_len = len(results)
         if not conforms:
@@ -66,6 +69,9 @@ class Validator(object):
         if result_len > 0:
             v_text += "Results ({}):\n".format(str(result_len))
         vg = rdflib.Graph()
+        sg = shacl_graph.graph
+        for p, n in sg.namespace_manager.namespaces():
+            vg.namespace_manager.bind(p, n)
         vr = rdflib.BNode()
         vg.add((vr, RDF_type, SH_ValidationReport))
         vg.add((vr, SH_conforms, rdflib.Literal(conforms)))
@@ -74,23 +80,18 @@ class Validator(object):
             v_text += _d
             vg.add((vr, SH_result, _bn))
             for tr in iter(_tr):
-                vg.add(tr)
+                s, p, o = tr
+                if isinstance(o, tuple):
+                    source = o[0]
+                    node = o[1]
+                    if source == "S":
+                        o = clone_node(sg, node, vg)
+                    elif source == "D":
+                        o = clone_node(target_graph, node, vg)
+                    else:
+                        o = node
+                vg.add((s, p, o))
         return vg, v_text
-
-    @classmethod
-    def clone_graph(cls, source_graph, identifier=None):
-        """
-
-        :param source_graph:
-        :type source_graph: rdflib.Graph
-        :param identifier:
-        :type identifier: str | None
-        :return:
-        """
-        g = rdflib.Graph(identifier=identifier)
-        for t in iter(source_graph):
-            g.add(t)
-        return g
 
     def __init__(self, target_graph, *args,
                  shacl_graph=None, options=None, **kwargs):
@@ -103,7 +104,7 @@ class Validator(object):
             "target_graph must be a rdflib Graph object"
         self.target_graph = target_graph
         if shacl_graph is None:
-            shacl_graph = self.clone_graph(target_graph, 'shacl')
+            shacl_graph = clone_graph(target_graph, 'shacl')
         assert isinstance(shacl_graph, rdflib.Graph),\
             "shacl_graph must be a rdflib Graph object"
         self.shacl_graph = SHACLGraph(shacl_graph, self.logger)
@@ -118,55 +119,8 @@ class Validator(object):
             _is_conform, _reports = s.validate(self.target_graph)
             non_conformant = non_conformant or (not _is_conform)
             reports.extend(_reports)
-        v_report, v_text = self.create_validation_report((not non_conformant), reports)
+        v_report, v_text = self.create_validation_report((not non_conformant), self.target_graph, self.shacl_graph, reports)
         return (not non_conformant), v_report, v_text
-
-
-# TODO: check out rdflib.util.guess_format() for format. I think it works well except for perhaps JSON-LD
-def _load_into_graph(target, rdf_format=None):
-    if isinstance(target, rdflib.Graph):
-        return target
-    target_is_open = False
-    target_is_file = False
-    target_is_text = False
-    filename = None
-    if isinstance(target, IOBase) and hasattr(target, 'read'):
-        target_is_file = True
-        target_is_open = True
-        filename = target.name
-    elif isinstance(target, str):
-        if target.startswith('file://'):
-            target_is_file = True
-            filename = target[7:]
-        elif len(target) < 240:
-            target_is_file = True
-            filename = target
-        if not target_is_file:
-            target_is_text = True
-    else:
-        raise ReportableRuntimeError("Cannot determine the format of the input graph")
-    if filename:
-        if filename.endswith('.ttl'):
-            rdf_format = rdf_format or 'turtle'
-        if filename.endswith('.nt'):
-            rdf_format = rdf_format or 'nt'
-        elif filename.endswith('.xml'):
-            rdf_format = rdf_format or 'xml'
-        elif filename.endswith('.json'):
-            rdf_format = rdf_format or 'json-ld'
-    g = rdflib.Graph()
-    if target_is_file and filename and not target_is_open:
-        import os
-        filename = os.path.abspath(filename)
-        target = open(filename, mode='rb')
-        target_is_open = True
-    if target_is_open:
-        g.parse(source=None, publicID=None, format=rdf_format,
-                location=None, file=target)
-        target.close()
-    elif target_is_text:
-        g.parse(data=target, format=rdf_format)
-    return g
 
 
 def meta_validate(shacl_graph, inference='rdfs', **kwargs):
@@ -181,8 +135,8 @@ def meta_validate(shacl_graph, inference='rdfs', **kwargs):
             shacl_shacl_store = u.load()
         shacl_shacl_graph = rdflib.Graph(store=shacl_shacl_store, identifier="http://www.w3.org/ns/shacl-shacl")
         meta_validate.shacl_shacl_graph = shacl_shacl_graph
-    shacl_graph = _load_into_graph(shacl_graph,
-                                   rdf_format=kwargs.pop('shacl_graph_format', None))
+    shacl_graph = load_into_graph(shacl_graph,
+                                  rdf_format=kwargs.pop('shacl_graph_format', None))
     _ = kwargs.pop('meta_shacl', None)
     return validate(shacl_graph, shacl_graph=shacl_shacl_graph, inference=inference, **kwargs)
 meta_validate.shacl_shacl_graph = None
@@ -221,11 +175,11 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
             log.error(msg)
             raise ReportableRuntimeError(msg)
 
-    target_graph = _load_into_graph(target_graph,
-                                    rdf_format=kwargs.pop('target_graph_format', None))
+    target_graph = load_into_graph(target_graph,
+                                   rdf_format=kwargs.pop('target_graph_format', None))
     if shacl_graph is not None:
-        shacl_graph = _load_into_graph(shacl_graph,
-                                       rdf_format=kwargs.pop('shacl_graph_format', None))
+        shacl_graph = load_into_graph(shacl_graph,
+                                      rdf_format=kwargs.pop('shacl_graph_format', None))
     try:
         validator = Validator(
             target_graph, shacl_graph=shacl_graph,
@@ -233,12 +187,9 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
                      'logger': log})
         conforms, report_graph, report_text = validator.run()
     except ValidationFailure as e:
-        if do_check_sht_result:
-            conforms = False
-            report_graph = e
-            report_text = "Validation Failure"
-        else:
-            raise e
+        conforms = False
+        report_graph = e
+        report_text = "Validation Failure - {}".format(e.message)
     if do_check_dash_result:
         passes = check_dash_result(report_graph, shacl_graph or target_graph)
         return passes, report_graph, report_text
@@ -247,12 +198,41 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
         passes = check_sht_result(report_graph, sht_graph or shacl_graph or target_graph, sht_result_node)
         return passes, report_graph, report_text
     do_serialize_report_graph = kwargs.pop('serialize_report_graph', False)
-    if do_serialize_report_graph:
+    if do_serialize_report_graph and isinstance(report_graph, rdflib.Graph):
         if not (isinstance(do_serialize_report_graph, str)):
             do_serialize_report_graph = 'turtle'
         report_graph = report_graph.serialize(None, encoding='utf-8',
                                               format=do_serialize_report_graph)
     return conforms, report_graph, report_text
+
+
+def clean_validation_reports(actual_graph, actual_report, expected_graph, expected_report):
+    # remove rdfs-added stuff
+    # remove resultMessage if expected_report does not include result_message
+    expected_graph.remove((expected_report, RDF_type, RDFS_Resource))
+    actual_graph.remove((actual_report, RDF_type, RDFS_Resource))
+    expected_results = list(expected_graph.objects(expected_report, SH_result))
+    actual_results = list(actual_graph.objects(actual_report, SH_result))
+    er_has_messages = None
+    for er in expected_results:
+        expected_graph.remove((er, RDF_type, RDFS_Resource))
+        er_has_messages = list(expected_graph.objects(er, SH_resultMessage))
+        sourceShapes = list(expected_graph.objects(er, SH_sourceShape))
+        for s in sourceShapes:
+            expected_graph.remove((s, RDF_type, RDFS_Resource))
+        resultPaths = list(expected_graph.objects(er, SH_resultPath))
+        for r in resultPaths:
+            expected_graph.remove((r, RDF_type, RDFS_Resource))
+        sourceConstraints = list(expected_graph.objects(er, SH_sourceConstraint))
+        for s in sourceConstraints:
+            expected_graph.remove((s, RDF_type, RDFS_Resource))
+    if er_has_messages and len(er_has_messages) > 0:
+        # keep messages in actual
+        pass
+    else:
+        for ar in actual_results:
+            actual_graph.remove((ar, SH_resultMessage, None))
+    return True
 
 def compare_validation_reports(report_graph, expected_graph, expected_result):
     expected_conforms = expected_graph.objects(expected_result, SH_conforms)
@@ -269,6 +249,11 @@ def compare_validation_reports(report_graph, expected_graph, expected_result):
     if len(validation_reports) < 1:
         raise ReportableRuntimeError("Cannot check the validation report, the report graph does not contain a ValidationReport")
     validation_report = next(iter(validation_reports))
+    clean_validation_reports(
+        report_graph, validation_report, expected_graph, expected_result)
+    eq = compare_blank_node(report_graph, validation_report, expected_graph, expected_result)
+    if eq != 0:
+        return False
     report_conforms = report_graph.objects(validation_report, SH_conforms)
     report_conforms = set(report_conforms)
     if len(report_conforms) < 1:
@@ -278,6 +263,9 @@ def compare_validation_reports(report_graph, expected_graph, expected_result):
     if bool(expected_conforms.value) != bool(report_conforms.value):
         log.error("Expected Result Conforms value is different from Validation Report's Conforms value.")
         return False
+
+
+
     report_result_nodes = report_graph.objects(validation_report, SH_result)
     report_result_nodes = set(report_result_nodes)
     report_result_node_count = len(report_result_nodes)

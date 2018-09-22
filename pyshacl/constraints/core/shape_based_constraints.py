@@ -7,8 +7,8 @@ from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH, SH_property, SH_node
 from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError, ConstraintLoadWarning
 
-SH_PropertyShapeComponent = SH.term('PropertyShapeComponent')
-SH_NodeShapeComponent = SH.term('NodeShapeComponent')
+SH_PropertyConstraintComponent = SH.term('PropertyConstraintComponent')
+SH_NodeConstraintComponent = SH.term('NodeConstraintComponent')
 
 SH_QualifiedValueCountConstraintComponent = SH.term('QualifiedValueConstraintComponent')
 SH_QualifiedMaxCountConstraintComponent = SH.term('QualifiedMaxCountConstraintComponent')
@@ -20,22 +20,22 @@ SH_qualifiedMinCount = SH.term('qualifiedMinCount')
 SH_qualifiedMaxCount = SH.term('qualifiedMaxCount')
 
 
-class PropertyShapeComponent(ConstraintComponent):
+class PropertyConstraintComponent(ConstraintComponent):
     """
     sh:property can be used to specify that each value node has a given property shape.
     Link:
-    https://www.w3.org/TR/shacl/#PropertyShapeComponent
+    https://www.w3.org/TR/shacl/#PropertyConstraintComponent
     Textual Definition:
     For each value node v: A failure MUST be produced if the validation of v as focus node against the property shape $property produces a failure. Otherwise, the validation results are the results of validating v as focus node against the property shape $property.
     """
 
     def __init__(self, shape):
-        super(PropertyShapeComponent, self).__init__(shape)
+        super(PropertyConstraintComponent, self).__init__(shape)
         property_shapes = list(self.shape.objects(SH_property))
         if len(property_shapes) < 1:
             raise ConstraintLoadError(
-                "PropertyShapeComponent must have at least one sh:property predicate.",
-                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent")
+                "PropertyConstraintComponent must have at least one sh:property predicate.",
+                "https://www.w3.org/TR/shacl/#PropertyConstraintComponent")
         self.property_shapes = property_shapes
 
     @classmethod
@@ -44,11 +44,11 @@ class PropertyShapeComponent(ConstraintComponent):
 
     @classmethod
     def constraint_name(cls):
-        return "PropertyShapeComponent"
+        return "PropertyConstraintComponent"
 
     @classmethod
     def shacl_constraint_class(cls):
-        return SH_PropertyShapeComponent
+        return SH_PropertyConstraintComponent
 
     def evaluate(self, target_graph, focus_value_nodes):
         """
@@ -81,7 +81,7 @@ class PropertyShapeComponent(ConstraintComponent):
         return non_conformant, reports
 
 
-class NodeShapeComponent(ConstraintComponent):
+class NodeConstraintComponent(ConstraintComponent):
     """
     sh:node specifies the condition that each value node conforms to the given node shape.
     Link:
@@ -91,12 +91,12 @@ class NodeShapeComponent(ConstraintComponent):
     """
 
     def __init__(self, shape):
-        super(NodeShapeComponent, self).__init__(shape)
+        super(NodeConstraintComponent, self).__init__(shape)
         node_shapes = list(self.shape.objects(SH_node))
         if len(node_shapes) < 1:
             raise ConstraintLoadError(
-                "NodeShapeComponent must have at least one sh:node predicate.",
-                "https://www.w3.org/TR/shacl/#NodeShapeComponent")
+                "NodeConstraintComponent must have at least one sh:node predicate.",
+                "https://www.w3.org/TR/shacl/#NodeConstraintComponent")
         self.node_shapes = node_shapes
 
     @classmethod
@@ -105,11 +105,11 @@ class NodeShapeComponent(ConstraintComponent):
 
     @classmethod
     def constraint_name(cls):
-        return "NodeShapeComponent"
+        return "NodeConstraintComponent"
 
     @classmethod
     def shacl_constraint_class(cls):
-        return SH_NodeShapeComponent
+        return SH_NodeConstraintComponent
 
     def evaluate(self, target_graph, focus_value_nodes):
         """

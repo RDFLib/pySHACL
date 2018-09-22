@@ -28,17 +28,8 @@ ex:PersonShape
   sh:ignoredProperties (
       rdf:type
     ) ;
-  sh:property [
-      sh:path ex:ssn ;
-      sh:datatype xsd:string ;
-      sh:maxCount 1 ;
-      sh:pattern "^\\d{3}-\\d{2}-\\d{4}$" ;
-    ] ;
-  sh:property [
-      sh:path ex:worksFor ;
-      sh:class ex:Company ;
-      sh:nodeKind sh:IRI ;
-    ] ;
+  sh:property _:b61064 ;
+  sh:property _:b60054 ;
   sh:property [
       sh:path [
           sh:inversePath ex:worksFor ;
@@ -46,6 +37,17 @@ ex:PersonShape
       sh:name "employee" ;
     ] ;
   sh:targetClass ex:Person ;
+.
+_:b61064
+ sh:path ex:ssn ;
+ sh:datatype xsd:string ;
+ sh:maxCount 1 ;
+ sh:pattern "^\\d{3}-\\d{2}-\\d{4}$"
+.
+_:b60054
+ sh:path ex:worksFor ;
+ sh:class ex:Company ;
+ sh:nodeKind sh:IRI
 .
 <>
   rdf:type mf:Manifest ;
@@ -95,7 +97,7 @@ ex:PersonShape
           sh:resultPath ex:worksFor ;
           sh:resultSeverity sh:Violation ;
           sh:sourceConstraintComponent sh:ClassConstraintComponent ;
-          sh:sourceShape [] ;
+          sh:sourceShape _:b60054 ;
           sh:value ex:UntypedCompany ;
         ] ;
     ] ;

@@ -6,7 +6,7 @@ from pyshacl.constraints.core.value_range_constraints import MinExclusiveConstra
 from pyshacl.constraints.core.string_based_constraints import MinLengthConstraintComponent, MaxLengthConstraintComponent, PatternConstraintComponent, LanguageInConstraintComponent, UniqueLangConstraintComponent
 from pyshacl.constraints.core.property_pair_constraints import EqualsConstraintComponent, DisjointConstraintComponent, LessThanConstraintComponent, LessThanOrEqualsConstraintComponent
 from pyshacl.constraints.core.logical_constraints import NotConstraintComponent, AndConstraintComponent, OrConstraintComponent, XoneConstraintComponent
-from pyshacl.constraints.core.shape_based_constraints import NodeShapeComponent, PropertyShapeComponent, QualifiedValueShapeConstraintComponent
+from pyshacl.constraints.core.shape_based_constraints import NodeConstraintComponent, PropertyConstraintComponent, QualifiedValueShapeConstraintComponent
 from pyshacl.constraints.core.other_constraints import ClosedConstraintComponent, InConstraintComponent, HasValueConstraintComponent
 from pyshacl.constraints.sparql.sparql_based_constraints import SPARQLBasedConstraint
 from pyshacl.constraints.sparql.sparql_based_constraint_components import SPARQLConstraintComponent
@@ -34,8 +34,8 @@ ALL_CONSTRAINT_COMPONENTS = [
     DisjointConstraintComponent,
     LessThanConstraintComponent,
     LessThanOrEqualsConstraintComponent,
-    NodeShapeComponent,
-    PropertyShapeComponent,
+    NodeConstraintComponent,
+    PropertyConstraintComponent,
     QualifiedValueShapeConstraintComponent,
     ClosedConstraintComponent,
     HasValueConstraintComponent,

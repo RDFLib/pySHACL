@@ -312,7 +312,8 @@ class BoundShapeValidatorComponent(ConstraintComponent):
         non_conformant = False
         extra_messages = self.messages or None
         rept_kwargs = {
-            'source_constraint': self.validator.node,
+            # TODO, determine if we need sourceConstraint here
+            #'source_constraint': self.validator.node,
             'constraint_component': self.constraint.node,
             'extra_messages': extra_messages
         }

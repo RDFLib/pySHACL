@@ -15,7 +15,7 @@ if PARENT_DIR not in sys.path:
     sys.path.append(PARENT_DIR)
 
 from pyshacl import validate
-from pyshacl.errors import ReportableRuntimeError
+from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 
 parser = argparse.ArgumentParser(description='Run the pySHACL validator from the command line.')
 parser.add_argument('data', metavar='DataGraph', type=argparse.FileType('rb'),
@@ -55,6 +55,10 @@ if args.abort:
     validator_kwargs['abort_on_error'] = True
 try:
     is_conform, v_graph, v_text = validate(args.data, **validator_kwargs)
+except ValidationFailure as vf:
+    args.output.write("Validator generated a Validation Failure result:\n")
+    args.output.write(str(vf.message))
+    sys.exit(1)
 except ReportableRuntimeError as rre:
     sys.stderr.write("Validator encountered a Runtime Error:\n")
     sys.stderr.write(str(rre.message))

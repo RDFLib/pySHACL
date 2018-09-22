@@ -218,9 +218,13 @@ class HasValueConstraintComponent(ConstraintComponent):
                     break
             if not conformant:
                 non_conformant = True
-                if len(value_nodes) == 1:
-                    a_value_node = next(iter(value_nodes))
-                    rept = self.make_v_result(f, value_node=a_value_node)
+                # Note, including the value here causes this constraint to not pass SHT validation
+                # if len(value_nodes) == 1:
+                #     a_value_node = next(iter(value_nodes))
+                #     rept = self.make_v_result(f, value_node=a_value_node)
+                # else:
+                if not self.shape.is_property_shape:
+                    rept = self.make_v_result(f, value_node=f)
                 else:
                     rept = self.make_v_result(f, value_node=None)
                 reports.append(rept)

@@ -2,11 +2,12 @@
 import rdflib
 
 from rdflib.namespace import Namespace
-from rdflib import RDFS, RDF, OWL
+from rdflib import RDFS, RDF
 
 SH = Namespace('http://www.w3.org/ns/shacl#')
 
 # Classes
+RDFS_Resource = RDFS.term('Resource')
 RDFS_Class = RDFS.term('Class')
 SH_NodeShape = SH.term('NodeShape')
 SH_PropertyShape = SH.term('PropertyShape')
@@ -24,6 +25,8 @@ SH_IRIOrLiteral = SH.term('IRIOrLiteral')
 
 # predicates
 RDF_type = RDF.term('type')
+RDF_first = RDF.term('first')
+RDF_rest = RDF.term('rest')
 RDFS_subClassOf = RDFS.term('subClassOf')
 SH_path = SH.term('path')
 SH_deactivated = SH.term('deactivated')

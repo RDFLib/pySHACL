@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.9.3] - 2018-09-22  
+### Added  
+- A new deep-compare feature to check actual validation-result blank-nodes against expected validation-result blank nodes
+- A new RDF Node deep-clone feature to properly clone nodes into the Validation Report graph, rather than copying them. 
+
+### Changed
+- Removed old test suite directory accidentally left in  
+- Fixed some bugs identified by the new expected-result deep-compare feature
+- Changed incorrectly named constraint components (mislead by typo in the SHACL spec)
+  - PropertyShapeComponent -> PropertyConstraintComponent
+  - NodeShapeComponent -> NodeConstraintComponent
+- Fixed some bugs identified by the [data-shapes-test-suite](https://w3c.github.io/data-shapes/data-shapes-test-suite)
+- Bumped version number
+
+
 ## [0.9.2] - 2018-09-20  
 ### Added  
 - A feature to patch RDFLib Literal conversion functions, to fix some RDFLib bugs
@@ -230,7 +245,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.2...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.3...HEAD 
+[0.9.3]: https://github.com/RDFLib/pySHACL/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/RDFLib/pySHACL/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/RDFLib/pySHACL/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/RDFLib/pySHACL/compare/v0.8.3...v0.9.0

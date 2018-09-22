@@ -29,7 +29,7 @@ ex:LanguageConstraintComponentUsingASK
       sh:minLength 2 ;
       sh:name "language" ;
     ] ;
-  sh:propertyValidator ex:hasLang ;
+  sh:validator ex:hasLang ;  # This was changed by HK on 2018-09-21, see https://github.com/w3c/data-shapes/issues/101
 .
 ex:LanguageExampleShape
   rdf:type sh:NodeShape ;
