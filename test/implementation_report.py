@@ -12,7 +12,7 @@ from rdflib.namespace import Namespace, RDF, XSD
 
 from test.helpers import load_manifest, flatten_manifests
 
-EARL = Namespace("https://www.w3.org/ns/earl#")
+EARL = Namespace("http://www.w3.org/ns/earl#")
 DOAP = Namespace("http://usefulinc.com/ns/doap#")
 PASSED = EARL.term('passed')
 FAILED = EARL.term('failed')
