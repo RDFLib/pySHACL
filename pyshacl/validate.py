@@ -155,7 +155,6 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
     :param abort_on_error:
     :type abort_on_error: bool | None
     :param kwargs:
-    :type kwargs: dict
     :return:
     """
 

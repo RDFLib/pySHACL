@@ -4,14 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
-## [Unreleased] - 2018-09-xx 
-### Added  
 
+## [0.9.4] - 2018-09-24  
+### Added  
+- Additional required check that all potentially pre-bound variables are SELECTED from a nested SELECT statement in a SPARQL subquery.  
+- Better Literal less-than-or-equal and greater-than-or-equal comparison  
+  - fixes date-time comparisons with timezones, and other small issues  
+- Formal EARL validation report generator  
+- Submitted EARL validation report  
 
 ### Changed
-- Graph cleaner now works in a much more agressive manner, to remove all rdfs:Resource added triples
-- Fixed SPARQL-based Constraint Component validator now outputs a default sh:value item if it is validating with a sourceShape that is a SHACL NodeShape
-- Fixed a tiny bug in the list-compare subsection of the blank-node deep-compare utility
+- Graph cleaner now works in a much more agressive manner, to remove all rdfs:Resource added triples  
+- Fixed SPARQL-based Constraint Component validator now outputs a default sh:value item if it is validating with a sourceShape that is a SHACL NodeShape  
+- Fixed a tiny bug in the list-compare subsection of the blank-node deep-compare utility  
+- Changed OWL-RL dependency from @py3 to @master, because master branch is now on Py3.  
+- One test from the SHT test suite was changed by Holger, so it passes now.  
+- Two timezone-based datetime comparison tests now pass  
 
 
 ## [0.9.3] - 2018-09-22  
@@ -256,7 +264,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.3...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.4...HEAD 
+[0.9.4]: https://github.com/RDFLib/pySHACL/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/RDFLib/pySHACL/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/RDFLib/pySHACL/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/RDFLib/pySHACL/compare/v0.9.0...v0.9.1

@@ -27,7 +27,7 @@ class SPARQLQueryHelper(object):
     has_minus_regex = re.compile(r"[^\?\$]MINUS[\s\{]", flags=re.M | re.I)
     has_values_regex = re.compile(r"[^\?\$]VALUES[\s\{]", flags=re.M | re.I)
     has_service_regex = re.compile(r"[^\?\$]SERVICE[\s\<]", flags=re.M | re.I)
-    has_nested_select_regex = re.compile(r"SELECT[\s\(\)\$\?\a-z]*\{[^\}]*SELECT\s+((?:(?:[\?\$]\w+\s+)|(?:\*\s+)?)+)", flags=re.M | re.I)
+    has_nested_select_regex = re.compile(r"SELECT[\s\(\)\$\?\a-z]*\{[^\}]*SELECT\s+((?:(?:[\?\$]\w+\s+)|(?:\*\s+))+)", flags=re.M | re.I)
     has_as_var_regex = re.compile(r"[^\w]+AS[\s]+[\$\?](\w+)", flags=re.M | re.I)
 
 
@@ -192,7 +192,7 @@ class SPARQLQueryHelper(object):
             return node
         raise NotImplementedError("Cannot turn that kind of node into text.")
 
-    def check_invalid_sparql(self, sparql_text):
+    def check_invalid_sparql(self, sparql_text, valuenode=None, extravars=None):
         has_minus = self.has_minus_regex.search(sparql_text)
         if has_minus:
             raise ValidationFailure("A SPARQL Constraint must not contain a MINUS clause.")
@@ -202,21 +202,40 @@ class SPARQLQueryHelper(object):
         has_service = self.has_service_regex.search(sparql_text)
         if has_service:
             raise ValidationFailure("A SPARQL Constraint must not contain a federated query (SERVICE).")
+        potentially_prebound_variables = {'this', 'shapesGraph', 'currentShape'}
+        if valuenode is not None:
+            potentially_prebound_variables.add('value')
+        if extravars is not None and len(extravars) > 0:
+            potentially_prebound_variables.update(extravars)
         has_nested_select = self.has_nested_select_regex.search(sparql_text)
         if has_nested_select:
-            #TODO Check that all potentially pre-bound vars are in the 2nd select statement
-            raise ValidationFailure("Nested SELECT statements are currently not supported.")
+            var_string = has_nested_select.group(1)
+            vars = var_string.split()
+            if len(vars) == 0:
+                raise ValidationFailure("Ill-formed nested SELECT statement found.")
+            stripped_vars = [v.lstrip('$?').rstrip() for v in vars]
+            if len(stripped_vars) == 1 and stripped_vars[0] == "*":
+                raise ValidationFailure(
+                    "Using 'SELECT *' in a nested SELECT query does not select potentially pre-bound variables.\n"
+                    "See https://github.com/w3c/data-shapes/issues/84.")
+            for p in potentially_prebound_variables:
+                if p not in stripped_vars:
+                    # these are optional:
+                    if p == "shapesGraph" or p == "currentShape":
+                        continue
+                    raise ValidationFailure("All potentially pre-bound variables must be selected from a nested SELECT query.\n"
+                                            "Potentially pre-bound variables for this query are: {}.".format(", ".join(potentially_prebound_variables)))
         has_as_var = self.has_as_var_regex.search(sparql_text)
         if has_as_var:
             var_name = has_as_var.group(1)
-            if var_name in ('this', 'shapesGraph', 'currentShape', 'value'):
+            if var_name in potentially_prebound_variables:
                 raise ValidationFailure(
                     "Cannot use AS to re-bind potentially pre-bound variables such as {}".format(var_name))
         return True
 
-    def pre_bind_variables(self, thisnode, valuenode=None):
+    def pre_bind_variables(self, thisnode, valuenode=None, extravars=None):
         new_query_text = ""+self.select_text
-        valid = self.check_invalid_sparql(new_query_text)
+        valid = self.check_invalid_sparql(new_query_text, valuenode=valuenode, extravars=extravars)
         init_bindings = {}
         found_this = self.bind_this_regex.search(new_query_text)
         if found_this:
@@ -239,7 +258,7 @@ class SPARQLQueryHelper(object):
         else:
             found_path = self.bind_path_regex.search(new_query_text)
             if found_path:
-                raise RuntimeError(
+                raise ReportableRuntimeError(
                     "SPARQL Constraint text has $PATH in it, "
                     "but no path is known on this Shape.")
         #TODO: work out how to get shapesGraph binding from shape.sg
@@ -252,7 +271,7 @@ class SPARQLQueryHelper(object):
         else:
             found_sg = self.bind_sg_regex.search(new_query_text)
             if found_sg:
-                raise RuntimeError(
+                raise NotImplementedError(
                     "SPARQL Constraint text has $shapesGraph in it, "
                     "but Shapes Graph is not currently supported.")
 

@@ -82,7 +82,11 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
                     elif v_is_string and not min_is_string:
                         pass
                     else:
-                        flag = bool(m_val < v)
+                        try:
+                            r = m_val < v
+                            flag = r
+                        except (TypeError, NotImplementedError):
+                            flag = False
                 else:
                     raise ReportableRuntimeError(
                         "Not sure how to compare anything else.")
@@ -157,7 +161,11 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
                     elif v_is_string and not min_is_string:
                         pass
                     else:
-                        flag = bool(m_val <= v)
+                        try:
+                            r = m_val <= v
+                            flag = r
+                        except (TypeError, NotImplementedError):
+                            flag = False
                 else:
                     raise ReportableRuntimeError(
                         "Not sure how to compare anything else.")
@@ -233,7 +241,11 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
                     elif v_is_string and not max_is_string:
                         pass
                     else:
-                        flag = bool(m_val > v)
+                        try:
+                            r = m_val > v
+                            flag = r
+                        except (TypeError, NotImplementedError):
+                            flag = False
                 else:
                     raise ReportableRuntimeError(
                         "Not sure how to compare anything else.")
@@ -309,7 +321,11 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
                     elif v_is_string and not max_is_string:
                         pass
                     else:
-                        flag = bool(m_val >= v)
+                        try:
+                            r = m_val >= v
+                            flag = r
+                        except (TypeError, NotImplementedError):
+                            flag = False
                 else:
                     raise ReportableRuntimeError(
                         "Not sure how to compare anything else.")

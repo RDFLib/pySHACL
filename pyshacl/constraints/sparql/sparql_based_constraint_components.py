@@ -160,7 +160,7 @@ class AskConstraintValidator(SPARQLConstraintComponentValidator):
                 init_binds = {}
                 sparql_text = self.query_text
             else:
-                init_binds, sparql_text = query_helper.pre_bind_variables(focus, valuenode=v)
+                init_binds, sparql_text = query_helper.pre_bind_variables(focus, valuenode=v, extravars=bind_vals.keys())
                 sparql_text = query_helper.apply_prefixes(sparql_text)
                 init_binds.update(bind_vals)
             try:

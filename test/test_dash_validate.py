@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 import pytest
 from os import path, walk
 import glob
