@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.9.4.post1] - 2018-09-24  
+### Added  
+- Post-Release fixed a setup.py issue where it was not installing all of the required pySHACL modules.
+  - This has actually been a severe bug since 0.8.3, sorry!
+
 
 ## [0.9.4] - 2018-09-24  
 ### Added  
@@ -264,7 +269,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.4...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.4.post1...HEAD 
+[0.9.4.post1]: https://github.com/RDFLib/pySHACL/compare/v0.9.4...v0.9.4.post1
 [0.9.4]: https://github.com/RDFLib/pySHACL/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/RDFLib/pySHACL/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/RDFLib/pySHACL/compare/v0.9.1...v0.9.2
