@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.9.5] - 2018-09-25  
+### Added  
+- Added the missed 'proposed' test in the SHT conformance suite
+
+### Changed  
+- EARL namespace https->http
+- No longer publishing Binary Wheels for now, this is to force pip to run setup.py when installing the module, in order to process dependency links.
+
+
 ## [0.9.4.post1] - 2018-09-24  
 ### Added  
 - Post-Release fixed a setup.py issue where it was not installing all of the required pySHACL modules.
@@ -269,7 +278,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.4.post1...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.5...HEAD 
+[0.9.5]: https://github.com/RDFLib/pySHACL/compare/v0.9.4.post1...v0.9.5
 [0.9.4.post1]: https://github.com/RDFLib/pySHACL/compare/v0.9.4...v0.9.4.post1
 [0.9.4]: https://github.com/RDFLib/pySHACL/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/RDFLib/pySHACL/compare/v0.9.2...v0.9.3
