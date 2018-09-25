@@ -48,7 +48,7 @@ pyshacl [-h] [-s [SHACL]] [-i {none,rdfs,owlrl,both}] [-m] [-a] [-d]
                DataGraph
 
 positional arguments:
-  DataGraph             The file containing the Target Data Graph.
+  DataGraph             The file containing the Data Graph (target graph).
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -74,13 +74,13 @@ For basic use of this module, you can just call the `validate` function of the `
 
 ```
 from pyshacl import validate
-r = validate(target_graph, shacl_graph, inference='rdfs', abort_on_error=False, meta_shacl=False, debug=False)
+r = validate(data_graph, shacl_graph, inference='rdfs', abort_on_error=False, meta_shacl=False, debug=False)
 conforms, results_graph, results_text = r
 ```
 where:  
-* `target_graph` is an rdflib `Graph` object, the graph to be validated
-* `shacl_graph` is an rdflib `Graph` object, the graph containing the SHACL shapes to validate with, or None if the SHACL shapes are included in the target_graph.
-* `inference` is a Python string value to indicate whether or not to perform OWL inferencing expansion of the `target_graph` before validation. 
+* `data_graph` is an rdflib `Graph` object, the graph to be validated
+* `shacl_graph` is an rdflib `Graph` object, the graph containing the SHACL shapes to validate with, or None if the SHACL shapes are included in the data_graph.
+* `inference` is a Python string value to indicate whether or not to perform OWL inferencing expansion of the `data_graph` before validation. 
 Options are 'rdfs', 'owlrl', 'both', or 'none'. The default is 'none'.
 * `abort_on_error` (optional) a Python `bool` value to indicate whether or not the program should abort after encountering a validation error or to continue. Default is to continue.
 * `meta_shacl` (optional) a Python `bool` value to indicate whether or not the program should enable the Meta-SHACL feature. Default is False.
@@ -88,11 +88,27 @@ Options are 'rdfs', 'owlrl', 'both', or 'none'. The default is 'none'.
 
 on return:  
 * a three-component `tuple` containing:
-  * `conforms` a `bool`, indicating whether or not the `target_graph` conforms to the `shacl_graph`
+  * `conforms` a `bool`, indicating whether or not the `data_graph` conforms to the `shacl_graph`
   * `results_graph` an rdflib `Graph` object built according to the SHACL specification's [Validation Report](https://www.w3.org/TR/shacl/#validation-report) semantics
   * `results_text` python string representing a verbose textual representation of the [Validation Report](https://www.w3.org/TR/shacl/#validation-report) 
-  
 
+## Errors  
+Under certain circumstances pySHACL can produce a `Validation Failure`. This is a formal error defined by the SHACL specification and is required to be produced as a result of specific conditions within the SHACL graph.
+If the validator produces a `Validation Failure`, the `result_graph` variable returned by the `validate()` function will be an instance of `ValidationFailure`.
+Use see the `.message` attribute on that instance to get more information about the validation failure.  
+
+Other errors the validator can generate:  
+- `ShapeLoadError`: This error is thrown when a SHACL Shape in the SHACL graph is in an invalid state and cannot be loaded into the validation engine.
+- `ConstraintLoadError`: This error is thrown when a SHACL Constraint Component is in an invalid state and cannot be loaded into the validation engine.
+- `ReportableRuntimeError`: An error occurred for a different reason, and the reason should be communicated back to the user of the validator.
+- `RuntimeError`: The validator encountered a situation that caused it to throw an error, but the reason does concern the user.
+
+Unlike `ValidationFailure`, these errors are not passed back as a result by the `validate()` function, but thrown as exceptions by the validation engine and must be
+caught in a `try ... except` block.
+In the case of `ShapeLoadError` and `ConstraintLoadError`, see the `str()` string representation of the exception instance for the error message along with a link to the relevant section in the SHACL spec document.
+
+
+## Compatibility  
 PySHACL is a Python3 library. For best compatibility use Python v3.5 or greater. This library _**does not work**_ on Python 2.7.x or below.
 
 
