@@ -1,7 +1,7 @@
 # pySHACL
 A Python validator for SHACL.  
 
-[![PyPi](https://version-image.appspot.com/pypi/?name=pySHACL)](https://pypi.python.org/pypi/pySHACL)
+[![PyPI version](https://badge.fury.io/py/pyshacl.svg)](https://badge.fury.io/py/pyshacl)
 
 This is a pure Python module which allows for the validation of [RDF](https://www.w3.org/2001/sw/wiki/RDF) graphs against Shapes Constraint Language ([SHACL](https://www.w3.org/TR/shacl/)) graphs. This module uses the [rdflib](https://github.com/RDFLib/rdflib) Python library for working with RDF and is dependent on the [OWL-RL](https://github.com/RDFLib/OWL-RL) Python module for [OWL2 RL Profile](https://www.w3.org/TR/owl2-overview/#ref-owl-2-profiles)-based expansion of data graphs. 
 
