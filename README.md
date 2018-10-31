@@ -11,14 +11,14 @@ This module is developed to adhere to the SHACL Recommendation:
 ## Installation
 Install with PIP (Using the Python3 pip installer `pip3`)  
 ```bash
-$ pip3 install pyshacl
+$ pip3 install --process-dependency-links pyshacl
 ```
 
 Or in a python virtualenv _(these example commandline instructions are for a Linux/Unix based OS)_  
 ```bash
 $ python3 -m virtualenv --python=python3 --no-site-packages shaclvenv
 $ source ./shaclvenv/bin/activate
-$ pip3 install pyshacl
+$ pip3 install --process-dependency-links pyshacl
 ```
 To exit the virtual enviornment:  
 ```bash
