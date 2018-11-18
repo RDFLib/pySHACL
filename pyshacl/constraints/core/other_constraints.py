@@ -19,11 +19,11 @@ SH_hasValue = SH.term('hasValue')
 
 class InConstraintComponent(ConstraintComponent):
     """
-
+    sh:in specifies the condition that each value node is a member of a provided SHACL list.
     Link:
     https://www.w3.org/TR/shacl/#InConstraintComponent
     Textual Definition:
-    For each value node v where the SPARQL expression $minExclusive < v does not return true, there is a validation result with v as sh:value.
+    For each value node that is not a member of $in, there is a validation result with the value node as sh:value.
     """
 
     def __init__(self, shape):
@@ -38,6 +38,10 @@ class InConstraintComponent(ConstraintComponent):
                 "InConstraintComponent must have at most one sh:in predicate.",
                 "https://www.w3.org/TR/shacl/#InConstraintComponent")
         self.in_list = in_vals[0]
+        sg = self.shape.sg.graph
+
+        in_vals = set(sg.items(self.in_list))
+        self.in_vals = in_vals
 
     @classmethod
     def constraint_parameters(cls):
@@ -59,8 +63,7 @@ class InConstraintComponent(ConstraintComponent):
         """
         reports = []
         non_conformant = False
-        sg = self.shape.sg.graph
-        in_vals = set(sg.items(self.in_list))
+        in_vals = self.in_vals
         for f, value_nodes in focus_value_nodes.items():
             for v in value_nodes:
                 if v not in in_vals:
@@ -147,7 +150,7 @@ class ClosedConstraintComponent(ConstraintComponent):
 
         for f, value_nodes in focus_value_nodes.items():
             for v in value_nodes:
-                pred_obs = self.shape.sg.predicate_objects(v)
+                pred_obs = target_graph.predicate_objects(v)
                 for p, o in pred_obs:
                     if (p, o) in self.ALWAYS_IGNORE:
                         continue
@@ -218,7 +221,8 @@ class HasValueConstraintComponent(ConstraintComponent):
                     break
             if not conformant:
                 non_conformant = True
-                # Note, including the value here causes this constraint to not pass SHT validation
+                # Note, including the value in the report generation here causes this constraint to not pass SHT validation
+                # though IMHO the value _should_ be included
                 # if len(value_nodes) == 1:
                 #     a_value_node = next(iter(value_nodes))
                 #     rept = self.make_v_result(f, value_node=a_value_node)

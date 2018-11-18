@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.9.6] - 2018-11-18   
+### Added
+- CLI tool got two new options, `--shacl_file_format` (`-sf`) and `--data_file_format` (`-df`), for when the auto file format detection doesn't work for you.
+### Changed
+- The `validate` entrypoint, renamed `target_graph` to `data_graph`, and `target_graph_format` to `data_graph_format`
+  - Updated example files to match
+- Fixed a bug in sh:closed rule. It was incorrectly checking the rule against the shacl shapes graph, instead of the target graph
+
+
 ## [0.9.5] - 2018-09-25  
 ### Added  
 - Added the missed 'proposed' test in the SHT conformance suite
@@ -278,7 +287,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.5...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.6...HEAD 
+[0.9.6]: https://github.com/RDFLib/pySHACL/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/RDFLib/pySHACL/compare/v0.9.4.post1...v0.9.5
 [0.9.4.post1]: https://github.com/RDFLib/pySHACL/compare/v0.9.4...v0.9.4.post1
 [0.9.4]: https://github.com/RDFLib/pySHACL/compare/v0.9.3...v0.9.4

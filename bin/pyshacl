@@ -35,7 +35,13 @@ parser.add_argument('-d', '--debug', dest='debug', action='store_true',
                     default=False, help='[Optional] Output additional runtime messages.')
 parser.add_argument('-f', '--format', dest='format', action='store',
                     help='[Optional] Choose an output format. Default is \"human\".',
-                    default='human', choices=('human', 'turtle', 'xml', 'json-ld', 'nt'))
+                    default='human', choices=('human', 'turtle', 'xml', 'json-ld', 'nt', 'n3'))
+parser.add_argument('-df', '--data-file-format', dest='data_file_format', action='store',
+                    help='[Optional] Explicitly state the RDF File format of the input DataGraph file. Default=\"auto\".',
+                    default='auto', choices=('auto', 'turtle', 'xml', 'json-ld', 'nt', 'n3'))
+parser.add_argument('-sf', '--shacl-file-format', dest='shacl_file_format', action='store',
+                    help='[Optional] Explicitly state the RDF File format of the input SHACL file. Default=\"auto\".',
+                    default='auto', choices=('auto', 'turtle', 'xml', 'json-ld', 'nt', 'n3'))
 parser.add_argument('-o', '--output', dest='output', nargs='?', type=argparse.FileType('w'),
                     help='[Optional] Send output to a file (defaults to stdout).',
                     default=sys.stdout)
@@ -53,6 +59,14 @@ if args.metashacl:
     validator_kwargs['meta_shacl'] = True
 if args.abort:
     validator_kwargs['abort_on_error'] = True
+if args.shacl_file_format:
+    f = args.shacl_file_format
+    if f != "auto":
+        validator_kwargs['shacl_graph_format'] = f
+if args.data_file_format:
+    f = args.data_file_format
+    if f != "auto":
+        validator_kwargs['data_graph_format'] = f
 try:
     is_conform, v_graph, v_text = validate(args.data, **validator_kwargs)
 except ValidationFailure as vf:
@@ -62,10 +76,12 @@ except ValidationFailure as vf:
 except ReportableRuntimeError as rre:
     sys.stderr.write("Validator encountered a Runtime Error:\n")
     sys.stderr.write(str(rre.message))
+    sys.stderr.write("If you believe this is a bug in pyshacl, open an Issue on the pyshacl github page.\n")
     sys.exit(2)
 except NotImplementedError as nie:
     sys.stderr.write("Validator feature is not implemented:\n")
     sys.stderr.write(str(nie.args[0]))
+    sys.stderr.write("If your use-case requires this feature, open an Issue on the pyshacl github page.\n")
     sys.exit(3)
 except RuntimeError as re:
     sys.stderr.write("Validator encountered a Runtime Error.")

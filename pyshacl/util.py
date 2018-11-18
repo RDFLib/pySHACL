@@ -158,12 +158,14 @@ def load_into_graph(target, rdf_format=None):
     if filename:
         if filename.endswith('.ttl'):
             rdf_format = rdf_format or 'turtle'
-        if filename.endswith('.nt'):
+        elif filename.endswith('.nt'):
             rdf_format = rdf_format or 'nt'
-        elif filename.endswith('.xml'):
-            rdf_format = rdf_format or 'xml'
+        elif filename.endswith('.n3'):
+            rdf_format = rdf_format or 'n3'
         elif filename.endswith('.json'):
             rdf_format = rdf_format or 'json-ld'
+        elif filename.endswith('.xml') or filename.endswith('.rdf'):
+            rdf_format = rdf_format or 'xml'
     if target_is_file and filename and not target_is_open:
         filename = os.path.abspath(filename)
         if not public_id:
@@ -206,8 +208,8 @@ def load_into_graph(target, rdf_format=None):
             if not has_named_prefix:
                 g.namespace_manager.bind(uri_prefix, public_id)
         else:
-            has_blank_prefix = g.store.namespace('')
-            if not has_blank_prefix:
+            existing_blank_prefix = g.store.namespace('')
+            if not existing_blank_prefix:
                 g.namespace_manager.bind('', public_id)
     return g
 

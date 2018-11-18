@@ -46,8 +46,9 @@ System exit codes are:
 Full CLI Usage options:
 ```bash
 pyshacl [-h] [-s [SHACL]] [-i {none,rdfs,owlrl,both}] [-m] [-a] [-d]
-               [-f {human,turtle,xml,json-ld,nt}] [-o [OUTPUT]]
-               DataGraph
+        [-f {human,turtle,xml,json-ld,nt}] [-df {auto,turtle,xml,json-ld,nt}]
+        [-sf {auto,turtle,xml,json-ld,nt}] [-o [OUTPUT]]
+        /path/to/datagraph.rdf
 
 positional arguments:
   DataGraph             The file containing the Data Graph (target graph).
@@ -64,9 +65,15 @@ optional arguments:
                         Data Graph.
   -a, --abort           [Optional] Abort on first error.
   -d, --debug           [Optional] Output additional runtime messages.
-  -f {human,turtle,xml,json-ld,nt}, --format {human,turtle,xml,json-ld,nt}
-                        [Optional] Choose an output format. Default is
-                        "human".
+  -f {human,turtle,xml,json-ld,nt,n3}, --format {human,turtle,xml,json-ld,nt,n3}
+                        [Optional] Choose an output format. Default is "human".
+  -df {auto,turtle,xml,json-ld,nt,n3}, --data-file-format {auto,turtle,xml,json-ld,nt,n3}
+                        [Optional] Explicitly state the RDF File format of the
+                        input DataGraph file. Default="auto".
+  -sf {auto,turtle,xml,json-ld,nt,n3}, --shacl-file-format {auto,turtle,xml,json-ld,nt,n3}
+                        [Optional] Explicitly state the RDF File format of the
+                        input SHACL file. Default="auto".
+                      
   -o [OUTPUT], --output [OUTPUT]
                         [Optional] Send output to a file (defaults to stdout).
 ```

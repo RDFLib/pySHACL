@@ -142,10 +142,10 @@ def meta_validate(shacl_graph, inference='rdfs', **kwargs):
 meta_validate.shacl_shacl_graph = None
 
 
-def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_error=False, **kwargs):
+def validate(data_graph, *args, shacl_graph=None, inference=None, abort_on_error=False, **kwargs):
     """
-    :param target_graph:
-    :type target_graph: rdflib.Graph | str
+    :param data_graph:
+    :type data_graph: rdflib.Graph | str
     :param args:
     :type args: list
     :param shacl_graph:
@@ -162,26 +162,39 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
         log_handler.setLevel(logging.DEBUG)
         log.setLevel(logging.DEBUG)
     apply_patches()
+    depr_target_graph = kwargs.pop('target_graph', None)
+    if depr_target_graph:
+        msg = "The target_graph parameter is deprecated. Use data_graph instead."
+        log.warning(msg)
+        if data_graph is None:
+            data_graph = depr_target_graph
+    depr_target_graph_format = kwargs.pop('target_graph_format', None)
+    if depr_target_graph_format:
+        msg = "The target_graph_format parameter is deprecated. Use data_graph_format instead."
+        log.warning(msg)
     do_check_dash_result = kwargs.pop('check_dash_result', False)
     do_check_sht_result = kwargs.pop('check_sht_result', False)
     if kwargs.get('meta_shacl', False):
         if shacl_graph is None:
-            shacl_graph = target_graph
+            shacl_graph = data_graph
         conforms, v_r, v_t = meta_validate(shacl_graph, inference=inference, **kwargs)
         if not conforms:
             msg = "Shacl File does not validate against the Shacl Shapes Shacl file.\n{}"\
                   .format(v_t)
             log.error(msg)
             raise ReportableRuntimeError(msg)
-
-    target_graph = load_into_graph(target_graph,
-                                   rdf_format=kwargs.pop('target_graph_format', None))
+    data_graph_format = kwargs.pop('data_graph_format', None)
+    if data_graph_format is None:
+        data_graph_format = depr_target_graph_format
+    data_graph = load_into_graph(data_graph,
+                                 rdf_format=data_graph_format)
+    shacl_graph_format = kwargs.pop('shacl_graph_format', None)
     if shacl_graph is not None:
         shacl_graph = load_into_graph(shacl_graph,
-                                      rdf_format=kwargs.pop('shacl_graph_format', None))
+                                      rdf_format=shacl_graph_format)
     try:
         validator = Validator(
-            target_graph, shacl_graph=shacl_graph,
+            data_graph, shacl_graph=shacl_graph,
             options={'inference': inference, 'abort_on_error': abort_on_error,
                      'logger': log})
         conforms, report_graph, report_text = validator.run()
@@ -190,11 +203,11 @@ def validate(target_graph, *args, shacl_graph=None, inference=None, abort_on_err
         report_graph = e
         report_text = "Validation Failure - {}".format(e.message)
     if do_check_dash_result:
-        passes = check_dash_result(report_graph, shacl_graph or target_graph)
+        passes = check_dash_result(report_graph, shacl_graph or data_graph)
         return passes, report_graph, report_text
     if do_check_sht_result:
         (sht_graph, sht_result_node) = kwargs.pop('sht_validate', (False, None))
-        passes = check_sht_result(report_graph, sht_graph or shacl_graph or target_graph, sht_result_node)
+        passes = check_sht_result(report_graph, sht_graph or shacl_graph or data_graph, sht_result_node)
         return passes, report_graph, report_text
     do_serialize_report_graph = kwargs.pop('serialize_report_graph', False)
     if do_serialize_report_graph and isinstance(report_graph, rdflib.Graph):
