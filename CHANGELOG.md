@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.9.7] - 2018-11-23   
+### Added
+- A new tests directory for testing reported github issues, and ensuring they pass even in future versions of this tool
+### Changed
+- RDFClosure is now named `owlrl`, and is now published on PyPI.
+  - Use the new package name
+  - Use the version from pypi
+  - No longer need dependency_links when installing
+  - Resume issuing binary builds
+  - Remove dependency_links instructions from readme.md
+
+
 ## [0.9.6] - 2018-11-18   
 ### Added
 - CLI tool got two new options, `--shacl_file_format` (`-sf`) and `--data_file_format` (`-df`), for when the auto file format detection doesn't work for you.
@@ -287,7 +299,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.6...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.7...HEAD 
+[0.9.7]: https://github.com/RDFLib/pySHACL/compare/v0.9.6...v0.9.7
 [0.9.6]: https://github.com/RDFLib/pySHACL/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/RDFLib/pySHACL/compare/v0.9.4.post1...v0.9.5
 [0.9.4.post1]: https://github.com/RDFLib/pySHACL/compare/v0.9.4...v0.9.4.post1

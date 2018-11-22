@@ -43,8 +43,7 @@ data_file_text = """
 """
 
 def test_009():
-    res = validate(data_file_text, shacl_graph=shacl_file_text, data_graph_format='json-ld', shacl_graph_format='turtle', inference='rdfs', debug=True)
+    res = validate(data_file_text, shacl_graph=shacl_file_text, data_graph_format='json-ld', shacl_graph_format='turtle', inference='both', debug=True)
     conforms, graph, string = res
-    print(conforms)
-    print(string)
+    assert not conforms
 

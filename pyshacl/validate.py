@@ -3,10 +3,10 @@ from io import IOBase
 from sys import stderr
 import logging
 import rdflib
-import RDFClosure as owl_rl
+import owlrl
 from rdflib import RDFS
 
-if owl_rl.json_ld_available:
+if owlrl.json_ld_available:
     import rdflib_jsonld
 from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 from pyshacl.inference import CustomRDFSSemantics, CustomRDFSOWLRLSemantics
@@ -38,12 +38,12 @@ class Validator(object):
     def _run_pre_inference(self, target_graph, inference_option):
         try:
             if inference_option == 'rdfs':
-                inferencer = owl_rl.DeductiveClosure(CustomRDFSSemantics)
+                inferencer = owlrl.DeductiveClosure(CustomRDFSSemantics)
             elif inference_option == 'owlrl':
-                inferencer = owl_rl.DeductiveClosure(owl_rl.OWLRL_Semantics)
+                inferencer = owlrl.DeductiveClosure(owlrl.OWLRL_Semantics)
             elif inference_option == 'both' or inference_option == 'all'\
                     or inference_option == 'rdfsowlrl':
-                inferencer = owl_rl.DeductiveClosure(CustomRDFSOWLRLSemantics)
+                inferencer = owlrl.DeductiveClosure(CustomRDFSOWLRLSemantics)
             else:
                 raise ReportableRuntimeError(
                     "Don't know how to do '{}' type inferencing."
