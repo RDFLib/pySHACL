@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.9.8] - 2018-11-30   
+### Changed
+- Fixed a bug in 0.9.7 where some references to the RDFClosure module were still in use in the code.
+  - So v0.9.7 only worked if you had installed 0.9.6 and upgraded to 0.9.7. New installs didn't work.
+  - All references to RDFClosure are now changed to owlrl.
+- Bumped required owlrl version to the new 5.2 release, which is faster (doesn't use LiteralProxy anymore).
+
 ## [0.9.7] - 2018-11-23   
 ### Added
 - A new tests directory for testing reported github issues, and ensuring they pass even in future versions of this tool
@@ -299,7 +306,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.7...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.8...HEAD 
+[0.9.7]: https://github.com/RDFLib/pySHACL/compare/v0.9.7...v0.9.8
 [0.9.7]: https://github.com/RDFLib/pySHACL/compare/v0.9.6...v0.9.7
 [0.9.6]: https://github.com/RDFLib/pySHACL/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/RDFLib/pySHACL/compare/v0.9.4.post1...v0.9.5

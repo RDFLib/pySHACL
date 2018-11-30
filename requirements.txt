@@ -1,3 +1,3 @@
 rdflib>=4.2.2
 rdflib-jsonld
-owlrl>=5.1.0
+owlrl>=5.2.0
