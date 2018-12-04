@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.9.8.post1] - 2018-12-05    
+### Changed
+- Fixed a bug where files passed in to the command-line utility would get closed after being parsed, but sometimes 
+they would need to be reopened again, like in the case of doing metashacl. The fix detects when this is the case and 
+just leaves the files open. Now it is up to the command-line client to close the files.
+
 ## [0.9.8] - 2018-11-30   
 ### Changed
 - Fixed a bug in 0.9.7 where some references to the RDFClosure module were still in use in the code.
@@ -306,8 +312,9 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.8...HEAD 
-[0.9.7]: https://github.com/RDFLib/pySHACL/compare/v0.9.7...v0.9.8
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.8.post1...HEAD 
+[0.9.8.post1]: https://github.com/RDFLib/pySHACL/compare/v0.9.8...v0.9.8.post1
+[0.9.8]: https://github.com/RDFLib/pySHACL/compare/v0.9.7...v0.9.8
 [0.9.7]: https://github.com/RDFLib/pySHACL/compare/v0.9.6...v0.9.7
 [0.9.6]: https://github.com/RDFLib/pySHACL/compare/v0.9.5...v0.9.6
 [0.9.5]: https://github.com/RDFLib/pySHACL/compare/v0.9.4.post1...v0.9.5

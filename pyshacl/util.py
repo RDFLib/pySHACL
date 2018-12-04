@@ -121,6 +121,7 @@ def load_into_graph(target, rdf_format=None):
     if isinstance(target, rdflib.Graph):
         return target
     target_is_open = False
+    target_was_open = False
     target_is_file = False
     target_is_text = False
     filename = None
@@ -128,7 +129,13 @@ def load_into_graph(target, rdf_format=None):
     uri_prefix = None
     if isinstance(target, IOBase) and hasattr(target, 'read'):
         target_is_file = True
-        target_is_open = True
+        if hasattr(target, 'closed'):
+            target_is_open = not bool(target.closed)
+            target_was_open = target_is_open
+        else:
+            # Assume it is open now and it was open when we started.
+            target_is_open = True
+            target_was_open = True
         filename = target.name
         abs = os.path.abspath(filename)
         public_id = "file://{}#".format(abs)
@@ -174,7 +181,14 @@ def load_into_graph(target, rdf_format=None):
         target_is_open = True
     if target_is_open:
         data = target.read()
-        target.close()
+        # If the target was open to begin with, leave it open.
+        if not target_was_open:
+            target.close()
+        elif hasattr(target, 'seek'):
+            try:
+                target.seek(0)
+            except Exception:
+                pass
         target = data
         target_is_text = True
     g = rdflib.Graph()
