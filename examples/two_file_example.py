@@ -67,7 +67,7 @@ data_file = '''
 data_file_format = 'json-ld'
 
 conforms, v_graph, v_text = validate(data_file, shacl_graph=shapes_file,
-                                     target_graph_format=data_file_format,
+                                     data_graph_format=data_file_format,
                                      shacl_graph_format=shapes_file_format,
                                      inference='rdfs', debug=True,
                                      serialize_report_graph=True)

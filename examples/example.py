@@ -3,7 +3,7 @@ from pyshacl import validate
 from os import path
 
 data_ttl_file = \
-    '../tests/resources/tests/core/complex/personexample.test.ttl'
+    '../test/resources/dash_tests/core/complex/personexample.test.ttl'
 data_ttl_file = path.abspath(data_ttl_file)
 
 conforms, v_graph, v_text = validate(data_ttl_file, shacl_graph=None, inference='rdfs',
