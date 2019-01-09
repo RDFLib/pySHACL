@@ -1,0 +1,28 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <http://example.com/ex#> .
+
+ex:Animal a rdfs:Class ;
+    rdfs:comment "The parent class for Humans and Pets"@en ;
+    rdfs:subClassOf owl:Thing .
+
+ex:Human a rdfs:Class ;
+    rdfs:comment "A Human being"@en ;
+    rdfs:subClassOf ex:Animal .
+
+ex:Pet a rdfs:Class ;
+    rdfs:comment "An animal owned by a human"@en ;
+    rdfs:subClassOf ex:Animal .
+
+ex:hasPet a rdf:Property ;
+    rdfs:domain ex:Human ;
+    rdfs:range ex:Pet .
+
+ex:nlegs a rdf:Property ;
+    rdfs:domain ex:Animal ;
+    rdfs:range xsd:integer .
+
+ex:Lizard a rdfs:Class ;
+    rdfs:subClassOf ex:Pet .

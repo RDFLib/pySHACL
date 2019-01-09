@@ -1,0 +1,12 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <http://example.com/ex#> .
+
+ex:Human1 rdf:type ex:Human ;
+    rdf:label "Amy" ;
+    ex:nLegs "2"^^xsd:integer ;
+    ex:hasPet ex:Pet1 .
+
+ex:Pet1 rdf:type ex:Lizard ;
+    rdf:label "Sebastian" ;
+    ex:nLegs "4"^^xsd:integer .
