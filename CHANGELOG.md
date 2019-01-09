@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.9.9] - 2019-01-09 
+- This is a big release, building up to the major 1.0 release.
+- Expect some issues, there will be 0.9.9.postX releases with just bug fixes between now and 1.0
+
+## Added
+- Major new feature. Added the ability to pass in an extra ontology document which gets parsed and mixed with the 
+data graph before pre-inferencing. This helps in the cases where the target data graph contains a data snippet which 
+can only be fully expanded with the help of an external ontology document containing RDFS and OWL axioms.
+  - Use `ont_graph=path_to_graph` in the python module or
+  - Use `-e` or `--ont-graph` on the command line utility to take advantage of this feature.
+- SHACL graph or ONT graph can now be a Web URL, rather than a file path.
+  - This works from the module validator entrypoint or the commandline tool.
+- Added built in tests for issue#14 and for the commandline tool.  
+- Added new details to the README about the above new features.
+- Added coverage statistics to the README.
+- Started adding some hopefully-informative debugging output messages when debug mode is turned on. More to come.
+
+## Changed
+- Pre-inferencing can now only ever be run once per Validator instance, this is an attempt to prevent running 
+pre-inferencing multiple times unnecessarily.
+- Internal shapes lookup cache is now stored in the `ShapesGraph` instance, rather than in a global static class 
+variable on the `Shape` class
+- Fixed some bugs in the examples code, thanks @johannesloetzsch!
+- Lots of code coverage specific changes, and comments where we can improve coverage.
+ 
 ## [0.9.8.post1] - 2018-12-05    
 ### Changed
 - Fixed a bug where files passed in to the command-line utility would get closed after being parsed, but sometimes 
@@ -312,7 +337,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.8.post1...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.9...HEAD 
+[0.9.9]: https://github.com/RDFLib/pySHACL/compare/v0.9.8.post1...v0.9.9
 [0.9.8.post1]: https://github.com/RDFLib/pySHACL/compare/v0.9.8...v0.9.8.post1
 [0.9.8]: https://github.com/RDFLib/pySHACL/compare/v0.9.7...v0.9.8
 [0.9.7]: https://github.com/RDFLib/pySHACL/compare/v0.9.6...v0.9.7

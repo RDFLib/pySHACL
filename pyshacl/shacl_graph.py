@@ -24,6 +24,7 @@ class SHACLGraph(object):
         if logger is None:
             logger = logging.getLogger(__name__)
         self.logger = logger
+        self._node_shape_cache = {}
         self._shapes = None
         self._custom_constraints = None
 
@@ -64,16 +65,19 @@ class SHACLGraph(object):
             mandatory_params = []
             param_nodes = set(g.objects(c, SH_parameter))
             if len(param_nodes) < 1:
+                # TODO:coverage: we don't have any tests for invalid constraints
                 raise ConstraintLoadError(
                     "A sh:ConstraintComponent must have at least one value for sh:parameter",
                     "https://www.w3.org/TR/shacl/#constraint-components-parameters")
             for p in iter(param_nodes):
                 path_nodes = set(g.objects(p, SH_path))
                 if len(path_nodes) < 1:
+                    # TODO:coverage: we don't have any tests for invalid constraints
                     raise ConstraintLoadError(
                         "A sh:ConstraintComponent parameter value must have at least one value for sh:path",
                         "https://www.w3.org/TR/shacl/#constraint-components-parameters")
                 elif len(path_nodes) > 1:
+                    # TODO:coverage: we don't have any tests for invalid constraints
                     raise ConstraintLoadError(
                         "A sh:ConstraintComponent parameter value must have at most one value for sh:path",
                         "https://www.w3.org/TR/shacl/#constraint-components-parameters")
@@ -82,6 +86,7 @@ class SHACLGraph(object):
                 optional = set(g.objects(p, SH_optional))
                 for o in iter(optional):
                     if not (isinstance(o, rdflib.Literal) and isinstance(o.value, bool)):
+                        # TODO:coverage: we don't have any tests for invalid constraints
                         raise ConstraintLoadError(
                             "A sh:Parameter value for sh:optional must be a valid RDF Literal of type xsd:boolean.",
                             "https://www.w3.org/TR/shacl/#constraint-components-parameters")
@@ -92,6 +97,7 @@ class SHACLGraph(object):
                 else:
                     mandatory_params.append(parameter)
             if len(mandatory_params) < 1:
+                # TODO:coverage: we don't have any tests for invalid constraints
                 raise ConstraintLoadError(
                     "A sh:ConstraintComponent must have at least one non-optional parameter.",
                     "https://www.w3.org/TR/shacl/#constraint-components-parameters")
@@ -106,9 +112,9 @@ class SHACLGraph(object):
         :returns: [Shape]
         :rtype: list(pyshacl.shape.Shape)
         """
-        if self._shapes is None:
-            self._shapes = self._find_shapes()
-        return self._shapes
+        if len(self._node_shape_cache) < 1:
+            self._build_node_shape_cache()
+        return self._node_shape_cache.values()
 
     """
     A shape is an IRI or blank node s that fulfills at least one of the following conditions in the shapes graph:
@@ -119,7 +125,7 @@ class SHACLGraph(object):
         s is a value of a shape-expecting, non-list-taking parameter such as sh:node, or a member of a SHACL list that is a value of a shape-expecting and list-taking parameter such as sh:or.
     """
 
-    def _find_shapes(self):
+    def _build_node_shape_cache(self):
         """
         :returns: [Shape]
         :rtype: list(pyshacl.shape.Shape)
@@ -129,6 +135,7 @@ class SHACLGraph(object):
         for s in defined_node_shapes:
             path_vals = list(g.objects(s, SH_path))
             if len(path_vals) > 0:
+                # TODO:coverage: we don't have any tests for invalid shapes
                 raise ShapeLoadError(
                     "A shape defined as a NodeShape cannot be the subject of a 'sh:path' predicate.",
                     "https://www.w3.org/TR/shacl/#node-shapes")
@@ -137,15 +144,18 @@ class SHACLGraph(object):
         found_prop_shapes_paths = dict()
         for s in defined_prop_shapes:
             if s in defined_node_shapes:
+                # TODO:coverage: we don't have any tests for invalid shapes
                 raise ShapeLoadError(
                     "A shape defined as a NodeShape cannot also be defined as a PropertyShape.",
                     "https://www.w3.org/TR/shacl/#node-shapes")
             path_vals = list(g.objects(s, SH_path))
             if len(path_vals) < 1:
+                # TODO:coverage: we don't have any tests for invalid shapes
                 raise ShapeLoadError(
                     "A shape defined as a PropertyShape must be the subject of a 'sh:path' predicate.",
                     "https://www.w3.org/TR/shacl/#property-shapes")
             elif len(path_vals) > 1:
+                # TODO:coverage: we don't have any tests for invalid shapes
                 raise ShapeLoadError(
                     "A shape defined as a PropertyShape cannot have more than one 'sh:path' predicate.",
                     "https://www.w3.org/TR/shacl/#property-shapes")
@@ -179,6 +189,7 @@ class SHACLGraph(object):
         for l in value_of_s_list_expecting:
             list_contents = set(g.items(l))
             if len(list_contents) < 1:
+                # TODO:coverage: we don't have any tests for invalid shape lists
                 raise ShapeLoadError(
                     "A Shape-Expecting & List-Expecting predicate should get a well-formed RDF list with 1 or more members.",
                     "https://www.w3.org/TR/shacl/#shapes-recursion")
@@ -194,10 +205,12 @@ class SHACLGraph(object):
             if len(path_vals) < 1:
                 found_node_shapes.add(s)
             elif len(path_vals) > 1:
+                # TODO:coverage: we don't have any tests for invalid implicit shapes
                 raise ShapeLoadError(
                     "An implicit PropertyShape cannot have more than one 'sh:path' predicate.",
                     "https://www.w3.org/TR/shacl/#property-shapes")
             else:
+                # TODO:coverage: we don't have this case where an implicit shape is a property shape.
                 found_prop_shapes.add(s)
                 found_prop_shapes_paths[s] = path_vals[0]
         for s in value_of_shape_expecting:
@@ -208,20 +221,27 @@ class SHACLGraph(object):
             if len(path_vals) < 1:
                 found_node_shapes.add(s)
             elif len(path_vals) > 1:
+                # TODO:coverage: we don't have any tests for invalid implicit shapes
                 raise ShapeLoadError(
                     "An implicit PropertyShape cannot have more than one 'sh:path' predicate.",
                     "https://www.w3.org/TR/shacl/#property-shapes")
             else:
                 found_prop_shapes.add(s)
                 found_prop_shapes_paths[s] = path_vals[0]
-        created_node_shapes = set()
         for node_shape in defined_node_shapes.union(found_node_shapes):
-            s = Shape(self, node_shape, False, logger=self.logger)
-            created_node_shapes.add(s)
-        created_prop_shapes = set()
+            if node_shape in self._node_shape_cache:
+                # TODO:coverage: we don't have any tests where a shape is loaded twice
+                raise ShapeLoadError("That shape has already been loaded!",
+                                     "None")
+            s = Shape(self, node_shape, p=False, logger=self.logger)
+            self._node_shape_cache[node_shape] = s
         for prop_shape in defined_prop_shapes.union(found_prop_shapes):
+            if prop_shape in self._node_shape_cache:
+                # TODO:coverage: we don't have any tests where a shape is loaded twice
+                raise ShapeLoadError("That shape has already been loaded!",
+                                     "None")
             prop_shape_path = found_prop_shapes_paths[prop_shape]
-            s = Shape(self, prop_shape, True, path=prop_shape_path, logger=self.logger)
-            created_prop_shapes.add(s)
-        return list(created_node_shapes.union(created_prop_shapes))
+            s = Shape(self, prop_shape, p=True, path=prop_shape_path, logger=self.logger)
+            self._node_shape_cache[prop_shape] = s
+
 

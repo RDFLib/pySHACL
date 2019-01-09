@@ -30,10 +30,12 @@ class SHTValidate(object):
 class Manifest(object):
     def __init__(self, base, sht_graph, node, includes, entries=None, label=None):
         """
-
+        Manifest constructor
+        :param base: string
+        :type base: the "file://x" location uri of the base manifest graph
         :param sht_graph:
         :type sht_graph: rdflib.Graph
-        :param node:
+        :param node: The Graph Node of the manifest itself. (unused)
         :type node: rdflib.term.Identifier
         :param includes:
         :type includes: list(Manifest)
@@ -96,6 +98,15 @@ class Manifest(object):
 
 
 def load_manifest(filename, recursion=0):
+    """
+    Load a testing Manifest from a file location, return a Manifest object
+    :param filename: the filename of the manifest document.
+    :type filename: string
+    :param recursion: re-entry counter.
+    :type recursion: int
+    :return: the loaded Manifest object
+    :rtype: Manifest
+    """
     if recursion >= 10:
         return None
     graph = rdflib.Graph()
@@ -118,8 +129,10 @@ def load_manifest(filename, recursion=0):
             href = str(i)
             if href.startswith("file://"):
                 child_mf = load_manifest(href[7:], recursion=recursion+1)
+                if child_mf is None:
+                    raise RuntimeError("Manifest include chain is too deep!")
             else:
-                raise RuntimeError("Manifest include chain is too deep!")
+                raise RuntimeError("Manifest can only include file:// uris")
             include_manifests.append(child_mf)
     try:
         entries_list = next(iter(graph.objects(manifest, MF.entries)))
@@ -136,14 +149,17 @@ def load_manifest(filename, recursion=0):
 
 def flatten_manifests(root_manifest, only_with_entries=False, recursion=0):
     """
-
+    Convert a tree-structure Manifest into a flat list structured list of
+    Manifests.
     :param root_manifest:
     :type root_manifest: Manifest
-    :param only_with_entries:
+    :param only_with_entries: Switch to filter result to only those
+    manifests with entries.
     :type only_with_entries: bool
-    :param recursion:
+    :param recursion: re-entry counter.
     :type recursion: int
     :return:
+    :rtype: list
     """
     m_list = []
     if recursion >= 10:

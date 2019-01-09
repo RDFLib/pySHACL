@@ -79,18 +79,23 @@ class ClassConstraintComponent(ConstraintComponent):
         for f, value_nodes in f_v_dict.items():
             for v in value_nodes:
                 found = False
-                objs = target_graph.objects(v, RDF_type)
-                for ctype in iter(objs):
-                    if ctype == class_rule:
-                        found = True
-                        break
-                    # Note, this only ones _one_ level of subclass traversing.
-                    # For more levels, the whole target graph should be put through
-                    # a RDFS reasoning engine.
-                    subclasses = target_graph.objects(ctype, RDFS_subClassOf)
-                    if class_rule in iter(subclasses):
-                        found = True
-                        break
+                if isinstance(v, Literal):
+                    self.shape.logger.debug("Class Constraint won't work with Literals. "
+                                   "Attempting to match Literal node {} to class of {} will fail."
+                                   .format(v, class_rule))
+                else:
+                    objs = target_graph.objects(v, RDF_type)
+                    for ctype in iter(objs):
+                        if ctype == class_rule:
+                            found = True
+                            break
+                        # Note, this only ones _one_ level of subclass traversing.
+                        # For more levels, the whole target graph should be put through
+                        # a RDFS reasoning engine.
+                        subclasses = target_graph.objects(ctype, RDFS_subClassOf)
+                        if class_rule in iter(subclasses):
+                            found = True
+                            break
                 if not found:
                     non_conformant = True
                     rept = self.make_v_result(f, value_node=v)
@@ -154,6 +159,10 @@ class DatatypeConstraintComponent(ConstraintComponent):
                         matches = self._assert_actual_datatype(v, dtype_rule)
                     elif dtype_rule == RDF_langString and lang:
                         matches = self._assert_actual_datatype(v, dtype_rule)
+                else:
+                    self.shape.logger.debug("Datatype Constraint only works on Literal datatypes. "
+                                            "Attempting to match non-Literal node {} to datatype of {} will fail."
+                                            .format(v, dtype_rule))
                 if not matches:
                     non_conformant = True
                     rept = self.make_v_result(f, value_node=v)

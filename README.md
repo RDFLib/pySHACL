@@ -1,9 +1,9 @@
 # pySHACL
 A Python validator for SHACL.  
 
-[![PyPI version](https://badge.fury.io/py/pyshacl.svg)](https://badge.fury.io/py/pyshacl)
+[![PyPI version](https://badge.fury.io/py/pyshacl.svg)](https://badge.fury.io/py/pyshacl)  ![](https://img.shields.io/badge/coverage-84%25-yellowgreen.svg)  
 
-This is a pure Python module which allows for the validation of [RDF](https://www.w3.org/2001/sw/wiki/RDF) graphs against Shapes Constraint Language ([SHACL](https://www.w3.org/TR/shacl/)) graphs. This module uses the [rdflib](https://github.com/RDFLib/rdflib) Python library for working with RDF and is dependent on the [OWL-RL](https://github.com/RDFLib/OWL-RL) Python module for [OWL2 RL Profile](https://www.w3.org/TR/owl2-overview/#ref-owl-2-profiles)-based expansion of data graphs. 
+This is a pure Python module which allows for the validation of [RDF](https://www.w3.org/2001/sw/wiki/RDF) graphs against Shapes Constraint Language ([SHACL](https://www.w3.org/TR/shacl/)) graphs. This module uses the [rdflib](https://github.com/RDFLib/rdflib) Python library for working with RDF and is dependent on the [OWL-RL](https://github.com/RDFLib/OWL-RL) Python module for [OWL2 RL Profile](https://www.w3.org/TR/owl2-overview/#ref-owl-2-profiles)\-based expansion of data graphs. 
 
 This module is developed to adhere to the SHACL Recommendation:  
 > Holger Knublauch; Dimitris Kontokostas. *Shapes Constraint Language (SHACL)*. 20 July 2017. W3C Recommendation. URL: <https://www.w3.org/TR/shacl/> ED: <https://w3c.github.io/data-shapes/shacl/>
@@ -33,6 +33,7 @@ pyshacl -s /path/to/shapesGraph.ttl -m -i rdfs -f human /path/to/dataGraph.ttl
 ```
 Where
  - `-s` is an (optional) path to the shapes graph to use  
+ - `-e` is an (optional) path to an extra ontology graph to import
  - `-i` is the pre-inferencing option  
  - `-f` is the ValidationReport output format (`human` = human-readable validation report)  
  - `-m` enable the meta-shacl feature  
@@ -45,37 +46,46 @@ System exit codes are:
 
 Full CLI Usage options:
 ```bash
-pyshacl [-h] [-s [SHACL]] [-i {none,rdfs,owlrl,both}] [-m] [-a] [-d]
-        [-f {human,turtle,xml,json-ld,nt}] [-df {auto,turtle,xml,json-ld,nt}]
-        [-sf {auto,turtle,xml,json-ld,nt}] [-o [OUTPUT]]
-        /path/to/datagraph.rdf
+usage: pyshacl [-h] [-s [SHACL]] [-e [ONT]] [-i {none,rdfs,owlrl,both}] [-m]
+               [-a] [-d] [-f {human,turtle,xml,json-ld,nt,n3}]
+               [-df {auto,turtle,xml,json-ld,nt,n3}]
+               [-sf {auto,turtle,xml,json-ld,nt,n3}]
+               [-ef {auto,turtle,xml,json-ld,nt,n3}] [-o [OUTPUT]]
+               DataGraph
+
+Run the pySHACL validator from the command line.
 
 positional arguments:
-  DataGraph             The file containing the Data Graph (target graph).
+  DataGraph             The file containing the Target Data Graph.
 
 optional arguments:
   -h, --help            show this help message and exit
   -s [SHACL], --shacl [SHACL]
-                        [Optional] The file containing the SHACL Shapes Graph.
+                        A file containing the SHACL Shapes Graph.
+  -e [ONT], --ont-graph [ONT]
+                        A file path or URL to a docucument containing extra
+                        ontological information to mix into the data graph.
   -i {none,rdfs,owlrl,both}, --inference {none,rdfs,owlrl,both}
-                        [Optional] Choose a type of inferencing to run against
-                        the Data Graph before validating.
-  -m, --metashacl       [Optional] Validate the SHACL Shapes graph against the
-                        shacl-shacl Shapes Graph before before validating the
-                        Data Graph.
-  -a, --abort           [Optional] Abort on first error.
-  -d, --debug           [Optional] Output additional runtime messages.
+                        Choose a type of inferencing to run against the Data
+                        Graph before validating.
+  -m, --metashacl       Validate the SHACL Shapes graph against the shacl-
+                        shacl Shapes Graph before before validating the Data
+                        Graph.
+  -a, --abort           Abort on first error.
+  -d, --debug           Output additional runtime messages.
   -f {human,turtle,xml,json-ld,nt,n3}, --format {human,turtle,xml,json-ld,nt,n3}
-                        [Optional] Choose an output format. Default is "human".
+                        Choose an output format. Default is "human".
   -df {auto,turtle,xml,json-ld,nt,n3}, --data-file-format {auto,turtle,xml,json-ld,nt,n3}
-                        [Optional] Explicitly state the RDF File format of the
-                        input DataGraph file. Default="auto".
+                        Explicitly state the RDF File format of the input
+                        DataGraph file. Default="auto".
   -sf {auto,turtle,xml,json-ld,nt,n3}, --shacl-file-format {auto,turtle,xml,json-ld,nt,n3}
-                        [Optional] Explicitly state the RDF File format of the
-                        input SHACL file. Default="auto".
-                      
+                        Explicitly state the RDF File format of the input
+                        SHACL file. Default="auto".
+  -ef {auto,turtle,xml,json-ld,nt,n3}, --ont-file-format {auto,turtle,xml,json-ld,nt,n3}
+                        Explicitly state the RDF File format of the extra
+                        ontology file. Default="auto".
   -o [OUTPUT], --output [OUTPUT]
-                        [Optional] Send output to a file (defaults to stdout).
+                        Send output to a file (defaults to stdout).
 ```
 
 ## Python Module Use
@@ -83,12 +93,13 @@ For basic use of this module, you can just call the `validate` function of the `
 
 ```
 from pyshacl import validate
-r = validate(data_graph, shacl_graph, inference='rdfs', abort_on_error=False, meta_shacl=False, debug=False)
+r = validate(data_graph, shacl_graph=sg, ont_graph=og, inference='rdfs', abort_on_error=False, meta_shacl=False, debug=False)
 conforms, results_graph, results_text = r
 ```
 where:  
-* `data_graph` is an rdflib `Graph` object, the graph to be validated
-* `shacl_graph` is an rdflib `Graph` object, the graph containing the SHACL shapes to validate with, or None if the SHACL shapes are included in the data_graph.
+* `data_graph` is an rdflib `Graph` object or file path of the graph to be validated
+* `shacl_graph` is an rdflib `Graph` object or file path or Web URL of the graph containing the SHACL shapes to validate with, or None if the SHACL shapes are included in the data_graph.
+* `ont_graph` is an rdflib `Graph` object or file path or Web URL a graph containing extra ontological information, or None if not required.
 * `inference` is a Python string value to indicate whether or not to perform OWL inferencing expansion of the `data_graph` before validation. 
 Options are 'rdfs', 'owlrl', 'both', or 'none'. The default is 'none'.
 * `abort_on_error` (optional) a Python `bool` value to indicate whether or not the program should abort after encountering a validation error or to continue. Default is to continue.

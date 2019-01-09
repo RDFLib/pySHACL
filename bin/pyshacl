@@ -21,29 +21,33 @@ parser = argparse.ArgumentParser(description='Run the pySHACL validator from the
 parser.add_argument('data', metavar='DataGraph', type=argparse.FileType('rb'),
                     help='The file containing the Target Data Graph.')
 parser.add_argument('-s', '--shacl', dest='shacl', action='store', nargs='?',
-                    type=argparse.FileType('rb'),
-                    help='[Optional] The file containing the SHACL Shapes Graph.')
+                    help='A file containing the SHACL Shapes Graph.')
+parser.add_argument('-e', '--ont-graph', dest='ont', action='store', nargs='?',
+                    help='A file path or URL to a docucument containing extra ontological information to mix into the data graph.')
 parser.add_argument('-i', '--inference', dest='inference', action='store',
                     default='none', choices=('none', 'rdfs', 'owlrl', 'both'),
-                    help='[Optional] Choose a type of inferencing to run against the Data Graph before validating.')
+                    help='Choose a type of inferencing to run against the Data Graph before validating.')
 parser.add_argument('-m', '--metashacl', dest='metashacl', action='store_true',
-                    default=False, help='[Optional] Validate the SHACL Shapes graph against the shacl-shacl '
+                    default=False, help='Validate the SHACL Shapes graph against the shacl-shacl '
                     'Shapes Graph before before validating the Data Graph.')
 parser.add_argument('-a', '--abort', dest='abort', action='store_true',
-                    default=False, help='[Optional] Abort on first error.')
+                    default=False, help='Abort on first error.')
 parser.add_argument('-d', '--debug', dest='debug', action='store_true',
-                    default=False, help='[Optional] Output additional runtime messages.')
+                    default=False, help='Output additional runtime messages.')
 parser.add_argument('-f', '--format', dest='format', action='store',
-                    help='[Optional] Choose an output format. Default is \"human\".',
+                    help='Choose an output format. Default is \"human\".',
                     default='human', choices=('human', 'turtle', 'xml', 'json-ld', 'nt', 'n3'))
 parser.add_argument('-df', '--data-file-format', dest='data_file_format', action='store',
-                    help='[Optional] Explicitly state the RDF File format of the input DataGraph file. Default=\"auto\".',
+                    help='Explicitly state the RDF File format of the input DataGraph file. Default=\"auto\".',
                     default='auto', choices=('auto', 'turtle', 'xml', 'json-ld', 'nt', 'n3'))
 parser.add_argument('-sf', '--shacl-file-format', dest='shacl_file_format', action='store',
-                    help='[Optional] Explicitly state the RDF File format of the input SHACL file. Default=\"auto\".',
+                    help='Explicitly state the RDF File format of the input SHACL file. Default=\"auto\".',
+                    default='auto', choices=('auto', 'turtle', 'xml', 'json-ld', 'nt', 'n3'))
+parser.add_argument('-ef', '--ont-file-format', dest='ont_file_format', action='store',
+                    help='Explicitly state the RDF File format of the extra ontology file. Default=\"auto\".',
                     default='auto', choices=('auto', 'turtle', 'xml', 'json-ld', 'nt', 'n3'))
 parser.add_argument('-o', '--output', dest='output', nargs='?', type=argparse.FileType('w'),
-                    help='[Optional] Send output to a file (defaults to stdout).',
+                    help='Send output to a file (defaults to stdout).',
                     default=sys.stdout)
 
 args = parser.parse_args()
@@ -51,6 +55,8 @@ args = parser.parse_args()
 validator_kwargs = {'debug': args.debug}
 if args.shacl is not None:
     validator_kwargs['shacl_graph'] = args.shacl
+if args.ont is not None:
+    validator_kwargs['ont_graph'] = args.ont
 if args.format != 'human':
     validator_kwargs['serialize_report_graph'] = args.format
 if args.inference != 'none':
@@ -63,6 +69,10 @@ if args.shacl_file_format:
     f = args.shacl_file_format
     if f != "auto":
         validator_kwargs['shacl_graph_format'] = f
+if args.ont_file_format:
+    f = args.ont_file_format
+    if f != "auto":
+        validator_kwargs['ont_graph_format'] = f
 if args.data_file_format:
     f = args.data_file_format
     if f != "auto":

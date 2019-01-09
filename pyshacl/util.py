@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
-from collections import OrderedDict
 from io import IOBase, BytesIO
-
+from urllib import request
 import rdflib
 from rdflib.collection import Collection
-from rdflib.namespace import NamespaceManager
 from pyshacl.consts import SH, RDF_first, RDFS_Resource
 from pyshacl.errors import ReportableRuntimeError
 
@@ -24,10 +22,11 @@ def stringify_blank_node(graph, bnode, ns_manager=None, recursion=0):
             return cached
         except KeyError:
             pass
-    if ns_manager is None:
+    if ns_manager is None:  # pragma: no cover
         ns_manager = graph.namespace_manager
         ns_manager.bind("sh", SH)
     def stringify_list(node):
+        nonlocal graph, ns_manager, recursion
         item_texts = []
         for item in iter(graph.items(node)):
             item_text = stringify_node(graph, item, ns_manager=ns_manager,
@@ -69,10 +68,11 @@ def stringify_blank_node(graph, bnode, ns_manager=None, recursion=0):
     return blank_string
 stringify_blank_node.stringed_cache = None
 
+
 def stringify_literal(graph, node, ns_manager=None):
     lit_val_string = str(node.value)
     lex_val_string = str(node)
-    if ns_manager is None:
+    if ns_manager is None:  # pragma: no cover
         ns_manager = graph.namespace_manager
         ns_manager.bind("sh", SH)
     if lit_val_string != lex_val_string:
@@ -95,6 +95,7 @@ def stringify_literal(graph, node, ns_manager=None):
                 datatype_string)
     return node_string
 
+
 def stringify_node(graph, node, ns_manager=None, recursion=0):
     if ns_manager is None:
         ns_manager = graph.namespace_manager
@@ -111,12 +112,34 @@ def stringify_node(graph, node, ns_manager=None, recursion=0):
         node_string = str(node)
     return node_string
 
+
+def stringify_graph(graph):
+    string_builder = ""
+    for t in iter(graph):
+        node_string = stringify_node(graph, t, ns_manager=graph.namespace_manager)
+        string_builder += node_string
+        string_builder += "\n"
+    return string_builder
+
+
 def match_blank_nodes(graph1, bnode1, graph2, bnode2):
     string_1 = stringify_blank_node(graph1, bnode1)
     string_2 = stringify_blank_node(graph2, bnode2)
     return string_1 == string_2
 
-# baseURI: http://datashapes.org/sh/tests/sparql/property/sparql-001.test
+
+def get_rdf_from_web(url):
+    headers = {'Accept':
+               'text/turtle, application/rdf+xml, '
+               'application/ld+json, text/plain'}
+    r = request.Request(url, headers=headers)
+    resp = request.urlopen(r)
+    code = resp.getcode()
+    if not (200 <= code <= 210):
+        raise RuntimeError("Cannot pull RDF URL from the web: {}, code: {}"
+                           .format(url, str(code)))
+    return resp
+
 def load_into_graph(target, rdf_format=None):
     if isinstance(target, rdflib.Graph):
         return target
@@ -145,8 +168,10 @@ def load_into_graph(target, rdf_format=None):
             target_is_file = True
             filename = target[7:]
         elif target.startswith('http:') or target.startswith('https:'):
-            raise ReportableRuntimeError(
-                "Cannot import graph files from the web using this function.")
+            public_id = target
+            target = get_rdf_from_web(target)
+            target_is_open = True
+            filename = target.geturl()
         else:
             if target.startswith("/") or target.startswith("./"):
                 target_is_file = True
@@ -157,7 +182,7 @@ def load_into_graph(target, rdf_format=None):
             elif len(target) < 140:
                 target_is_file = True
                 filename = target
-        if not target_is_file:
+        if not target_is_file and not target_is_open:
             target = target.encode('utf-8')
             target_is_text = True
     else:
@@ -227,20 +252,44 @@ def load_into_graph(target, rdf_format=None):
                 g.namespace_manager.bind('', public_id)
     return g
 
-def clone_graph(source_graph, identifier=None):
-    """
 
+def clone_graph(source_graph, target_graph=None, identifier=None):
+    """
+    Make a clone of the source_graph by directly copying triples from source_graph to target_graph
     :param source_graph:
     :type source_graph: rdflib.Graph
+    :param target_graph:
+    :type target_graph: rdflib.Graph
     :param identifier:
     :type identifier: str | None
-    :return:
+    :return: The cloned graph
+    :rtype: rdflib.Graph
     """
-    g = rdflib.Graph(identifier=identifier)
-    for p, n in source_graph.namespace_manager.namespaces():
-        g.namespace_manager.bind(p, n)
+    if target_graph is None:
+        g = rdflib.Graph(identifier=identifier)
+        for p, n in source_graph.namespace_manager.namespaces():
+            g.namespace_manager.bind(p, n, override=True, replace=True)
+    else:
+        g = target_graph
+        for p, n in source_graph.namespace_manager.namespaces():
+            g.namespace_manager.bind(p, n, override=False, replace=False)
     for t in iter(source_graph):
         g.add(t)
+    return g
+
+
+def mix_graphs(source_graph1, source_graph2):
+    """
+    Make a clone of source_graph1 and add in the triples from source_graph2
+    :param source_graph1:
+    :type source_graph1: rdflib.Graph
+    :param source_graph2:
+    :type source_graph2: rdflib.Graph
+    :return: The cloned graph with mixed in triples from source_graph2
+    :rtype: rdflib.Graph
+    """
+    g = clone_graph(source_graph1, identifier=source_graph1.identifier)
+    g = clone_graph(source_graph2, target_graph=g)
     return g
 
 

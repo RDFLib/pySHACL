@@ -5,7 +5,7 @@ https://www.w3.org/TR/shacl/#core-components-value-type
 import abc
 from rdflib import BNode
 from pyshacl.consts import *
-from pyshacl.util import stringify_blank_node, stringify_node
+from pyshacl.util import stringify_node
 
 
 class ConstraintComponent(object, metaclass=abc.ABCMeta):
@@ -15,6 +15,11 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
     """
 
     def __init__(self, shape):
+        """
+
+        :param shape:
+        :type shape: pyshacl.shape.Shape
+        """
         self.shape = shape
 
     @classmethod

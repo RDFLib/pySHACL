@@ -1,20 +1,13 @@
 # -*- coding: utf-8 -*-
 import rdflib
 import logging
-from pyshacl.constraints.core.logical_constraints import \
-    SH_not, SH_and, SH_or, SH_xone
-from pyshacl.constraints.core.shape_based_constraints import \
-    SH_qualifiedValueShape
-from pyshacl.constraints.sparql.sparql_based_constraint_components import SH_ConstraintComponent
 from pyshacl.consts import *
-
 from pyshacl.errors import ShapeLoadError, ReportableRuntimeError, ConstraintLoadWarning, ConstraintLoadError
 from pyshacl.constraints import ALL_CONSTRAINT_PARAMETERS, \
     CONSTRAINT_PARAMETERS_MAP
 
 
 class Shape(object):
-    all_shapes = {}
 
     def __init__(self, sg, node, p=False, path=None, logger=None):
         """
@@ -22,20 +15,17 @@ class Shape(object):
         :type sg: pyshacl.shacl_graph.SHACLGraph
         :type node: rdflib.term.Node
         :type p: bool
+        :type path: rdflib.Node
         """
-        if logger is None:
-            logger = logging.getLogger(__name__)
-        self.logger = logger
+        self.logger = logger or logging.getLogger(__name__)
         self.sg = sg
         self.node = node
         self._p = p
         self._path = path
-        if (id(sg), node) in self.__class__.all_shapes:
-            raise ShapeLoadError("That shape has already been loaded!", "None")
-        self.__class__.all_shapes[(id(sg), node)] = self
 
         deactivated_vals = set(self.objects(SH_deactivated))
         if len(deactivated_vals) > 1:
+            # TODO:coverage: we don't have any tests for invalid shapes
             raise ShapeLoadError("A SHACL Shape cannot have more than one sh:deactivated predicate.",
                                  "https://www.w3.org/TR/shacl/#deactivated")
         elif len(deactivated_vals) < 1:
@@ -43,6 +33,7 @@ class Shape(object):
         else:
             d = next(iter(deactivated_vals))
             if not isinstance(d, rdflib.Literal):
+                # TODO:coverage: we don't have any tests for invalid shapes
                 raise ShapeLoadError(
                     "The value of sh:deactivated predicate on a SHACL Shape must be a Literal.",
                     "https://www.w3.org/TR/shacl/#deactivated")
@@ -70,8 +61,9 @@ class Shape(object):
 
     def get_other_shape(self, shape_node):
         try:
-            return self.__class__.all_shapes[(id(self.sg), shape_node)]
+            return self.sg._node_shape_cache[shape_node]
         except (KeyError, AttributeError):
+            # TODO:coverage: we never hit this during a successful test run
             return None
 
     @property
@@ -79,6 +71,7 @@ class Shape(object):
         return bool(self._p)
 
     def property_shapes(self):
+        # TODO:coverage: this is never used?
         return self.sg.graph.objects(self.node, SH_property)
 
     @property
@@ -98,6 +91,7 @@ class Shape(object):
 
     @property
     def name(self):
+        # TODO:coverage: this is never used?
         if self._names is None:
             return
         for n in self._names:
@@ -105,6 +99,7 @@ class Shape(object):
 
     @property
     def description(self):
+        # TODO:coverage: this is never used?
         if self._descriptions is None:
             return
         for d in self._descriptions:
@@ -136,7 +131,7 @@ class Shape(object):
             return None
         if self._path is not None:
             return self._path
-        return list(self.objects(SH_path))[0]
+        raise RuntimeError("property shape has no _path!")  # pragma: no cover
 
     def parameters(self):
         return (p for p, v in self.sg.predicate_objects(self.node)
@@ -186,6 +181,8 @@ class Shape(object):
             found_target_instances.update(s)
             subc = target_graph.subjects(RDFS_subClassOf, tc)
             for subclass in iter(subc):
+                if subclass == tc:
+                    continue
                 s1 = target_graph.subjects(RDF_type, subclass)
                 found_target_instances.update(s1)
         found_node_targets.update(found_target_instances)
@@ -355,7 +352,7 @@ class Shape(object):
 
 
     def validate(self, target_graph, focus=None, bail_on_error=False):
-        assert isinstance(target_graph, rdflib.Graph)
+        #assert isinstance(target_graph, rdflib.Graph)
         if self.deactivated:
             return True, []
         if focus is not None:
