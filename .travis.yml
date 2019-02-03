@@ -1,0 +1,48 @@
+language: generic
+dist: xenial
+services:
+- docker
+env:
+  global:
+  - GPG_SECRET_KEY_PASSPHRASE="passphrase"
+  - OWLRL_VERSION="5.2.0"
+  matrix:
+  - DEBIAN_VERSION=jessie OWLRL_BUILD=debian-8 STDEB3_SIGN_RESULTS=0 STDEB3_EXTRA_ARGS="--x-python3-version=\">=3.4\""
+  - DEBIAN_VERSION=stretch OWLRL_BUILD=debian-9 STDEB3_SIGN_RESULTS=1 STDEB3_EXTRA_ARGS="--dh-min=10.2.5 --dh-compat=10"
+  - DEBIAN_VERSION=buster OWLRL_BUILD=unknown STDEB3_SIGN_RESULTS=1 STDEB3_EXTRA_ARGS="--dh-min=11.5.2 --dh-compat=11"
+  - DEBIAN_VERSION=xenial OWLRL_BUILD=ubuntu-16.04 STDEB3_SIGN_RESULTS=0 STDEB3_EXTRA_ARGS="--dh-min=9.20160115ubuntu3 --dh-compat=9"
+  - DEBIAN_VERSION=bionic OWLRL_BUILD=ubuntu-18.04 STDEB3_SIGN_RESULTS=1 STDEB3_EXTRA_ARGS="--dh-min=11.1.6 --dh-compat=11"
+before_install:
+- export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH;
+  else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+- export REPO=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_REPO_SLUG;
+  else echo $TRAVIS_PULL_REQUEST_SLUG; fi)
+- echo "REPO=$REPO, TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
+- openssl aes-256-cbc -K $encrypted_xxx_key -iv $encrypted_xxx_iv
+  -in secretkey.asc.enc -out /tmp/secret_key.asc -d
+- mkdir -p /tmp/output
+- chmod 777 /tmp/output
+- docker pull ashleysommer/stdeb3:$DEBIAN_VERSION
+- echo "from ashleysommer/stdeb3:$DEBIAN_VERSION" > ./Dockerfile.deploy
+- echo "USER root" >> ./Dockerfile.deploy
+- echo "RUN apt-get install -y python3-rdflib python3-rdflib-jsonld python3-pytest" >> ./Dockerfile.deploy
+- echo "RUN wget https://github.com/ashleysommer/OWL-RL/releases/download/v${OWLRL_VERSION}-deb/python3-owlrl_${OWLRL_VERSION}-1_all+${OWLRL_BUILD}.deb"
+- echo "RUN dpkg --install python3-owlrl_${OWLRL_VERSION}-1_all+${OWLRL_BUILD}.deb"
+- echo "USER stdeb3" >> ./Dockerfile.deploy
+- docker build -t temp_image -f ./Dockerfile.deploy .
+before_script:
+- docker run -v /tmp/secret_key.asc:/tmp/secret_key.asc -e PYTHON_PROJECT_GIT="https://github.com/${REPO}.git"
+  -e PYTHON_PROJECT_BRANCH="${BRANCH}" -v /tmp/output:/home/stdeb3/output -e GPG_SECRET_KEY="/tmp/secret_key.asc"
+  -e GPG_SECRET_KEY_PASSPHRASE="${GPG_SECRET_KEY_PASSPHRASE}" -e STDEB3_SIGN_RESULTS="$STDEB3_SIGN_RESULTS"
+  -e STDEB3_EXTRA_ARGS="$STDEB3_EXTRA_ARGS" -t -i temp_image
+- ls -lah /tmp/output
+deploy:
+  provider: releases
+  api_key: "tempkey"
+  overwrite: true
+  file_glob: true
+  file: /tmp/output/*.deb
+  skip_cleanup: true
+  on:
+    branch: debian
+    tags: true
