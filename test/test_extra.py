@@ -148,7 +148,7 @@ def test_serialize_report_graph():
 
 def test_web_retrieve():
     import os
-    DEB_BUILD_ARCH=os.environ.get('DEB_BUILD_ARCH', None)
+    DEB_BUILD_ARCH = os.environ.get('DEB_BUILD_ARCH', None)
     DEB_HOST_ARCH = os.environ.get('DEB_HOST_ARCH', None)
     if DEB_BUILD_ARCH is not None or DEB_HOST_ARCH is not None:
         print("Cannot run web requests in debhelper tests.")
