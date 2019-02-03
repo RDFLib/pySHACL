@@ -1,4 +1,7 @@
 include *.txt *.md
 include pyshacl/*.pickle
+include test/*.py
+include test/issues/*.py
+recursive-include test/resources *.ttl
 recursive-include docs *.txt *.md
 
