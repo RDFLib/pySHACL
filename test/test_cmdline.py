@@ -20,23 +20,34 @@ scr_dir = "scripts-{}.{}".format(sys.version_info[0], sys.version_info[1])
 if in_test_dir:
     scr_dir = path.join('..', scr_dir)
 check_scrdir = path.join(path.abspath(os.getcwd()), scr_dir)
-has_scripts_dir = False
 if path.exists(check_scrdir) and path.isdir(check_scrdir):
     has_scripts_dir = True
 else:
     has_scripts_dir = False
 
+bin_dir = "bin"
+if in_test_dir:
+    bin_dir = path.join('..', bin_dir)
+check_bindir = path.join(path.abspath(os.getcwd()), bin_dir)
+if path.exists(check_bindir) and path.isdir(check_bindir):
+    has_bin_dir = True
+else:
+    has_bin_dir = False
+
 if has_scripts_dir:
     pyshacl_command = "{}/pyshacl".format(scr_dir)
+elif has_bin_dir:
+    pyshacl_command = "{}/pyshacl".format(bin_dir)
 else:
-    if in_test_dir:
-        pyshacl_command = "../bin/pyshacl"
-    else:
-        pyshacl_command = "bin/pyshacl"
+    pyshacl_command = "pyshacl"
 
 def test_cmdline():
     if not hasattr(subprocess, 'run'):
         print("Subprocess.run() not available, skip this test")
+        assert True
+        return True
+    if os.environ.get("PYBUILD_NAME", None) is not None:
+        print("We don't have access to scripts dir during pybuild process.")
         assert True
         return True
     graph_file = path.join(cmdline_files_dir, 'd1.ttl')
@@ -61,6 +72,10 @@ def test_cmdline_web():
         print("Subprocess.run() not available, skip this test")
         assert True
         return
+    if os.environ.get("PYBUILD_NAME", None) is not None:
+        print("We don't have access to scripts dir during pybuild process.")
+        assert True
+        return True
     DEB_BUILD_ARCH = os.environ.get('DEB_BUILD_ARCH', None)
     DEB_HOST_ARCH = os.environ.get('DEB_HOST_ARCH', None)
     if DEB_BUILD_ARCH is not None or DEB_HOST_ARCH is not None:
