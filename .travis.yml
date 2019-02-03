@@ -26,8 +26,8 @@ before_install:
 - echo "from ashleysommer/stdeb3:$DEBIAN_VERSION" > ./Dockerfile.deploy
 - echo "USER root" >> ./Dockerfile.deploy
 - echo "RUN apt-get install -y python3-rdflib python3-rdflib-jsonld python3-pytest" >> ./Dockerfile.deploy
-- echo "RUN wget https://github.com/ashleysommer/OWL-RL/releases/download/v${OWLRL_VERSION}-deb/python3-owlrl_${OWLRL_VERSION}-1_all+${OWLRL_BUILD}.deb"
-- echo "RUN dpkg --install python3-owlrl_${OWLRL_VERSION}-1_all+${OWLRL_BUILD}.deb"
+- echo "RUN wget https://github.com/ashleysommer/OWL-RL/releases/download/v${OWLRL_VERSION}-deb/python3-owlrl_${OWLRL_VERSION}-1_all+${OWLRL_BUILD}.deb" >> ./Dockerfile.deploy
+- echo "RUN dpkg --install python3-owlrl_${OWLRL_VERSION}-1_all+${OWLRL_BUILD}.deb" >> ./Dockerfile.deploy
 - echo "USER stdeb3" >> ./Dockerfile.deploy
 - docker build -t temp_image -f ./Dockerfile.deploy .
 before_script:
