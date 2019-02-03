@@ -147,6 +147,13 @@ def test_serialize_report_graph():
     assert isinstance(graph, (str, bytes))
 
 def test_web_retrieve():
+    import os
+    DEB_BUILD_ARCH=os.environ.get('DEB_BUILD_ARCH', None)
+    DEB_HOST_ARCH = os.environ.get('DEB_HOST_ARCH', None)
+    if DEB_BUILD_ARCH is not None or DEB_HOST_ARCH is not None:
+        print("Cannot run web requests in debhelper tests.")
+        assert True
+        return True
     shacl_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/s1.ttl"
     ont_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/o1.ttl"
     res = validate(data_file_text, shacl_graph=shacl_file, data_graph_format='turtle',
