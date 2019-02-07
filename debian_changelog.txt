@@ -1,5 +1,5 @@
 pyshacl (0.9.9-1) unstable; urgency=low
 
-  * packaged upstream version 0.9.9 for initial release in debian package (Closes: 919441)
+  * Initial release (Closes: 919441)
 
  -- Ashley Sommer <Ashley.Sommer@csiro.au>  Mon, 14 Jan 2019 21:51:28 +1000
