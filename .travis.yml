@@ -38,7 +38,7 @@ before_script:
 - docker run -v /tmp/secret_key.asc:/tmp/secret_key.asc -e PYTHON_PROJECT_GIT="https://github.com/${REPO}.git"
   -e PYTHON_PROJECT_BRANCH="${BRANCH}" -v /tmp/output:/home/stdeb3/output -e GPG_SECRET_KEY="/tmp/secret_key.asc"
   -e GPG_SECRET_KEY_PASSPHRASE="${GPG_SECRET_KEY_PASSPHRASE}" -e STDEB3_SIGN_RESULTS="$STDEB3_SIGN_RESULTS"
-  -e STDEB3_EXTRA_ARGS="$STDEB3_EXTRA_ARGS" -t -i temp_image
+  -e STDEB3_EXTRA_ARGS="$STDEB3_EXTRA_ARGS" -e PYBUILD_DISABLE="$PYBUILD_DISABLE" -t -i temp_image
 - ls -lah /tmp/output
 deploy:
   provider: releases
