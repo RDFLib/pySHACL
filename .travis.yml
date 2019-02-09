@@ -5,7 +5,7 @@ services:
 env:
   global:
   - OWLRL_VERSION="5.2.0"
-  - PYBUILD_DISABLE=test
+#  - PYBUILD_DISABLE=test
   - secure: EJCRSbrtmNbFP1caJjzEZlGFb8oVqmUtcfreapnkW+2NC9XmkQZbPFHmN3PCrUBwp77mqM3AU2Vj0/qXTFsX4XJYxd8Ml2l8jvtcZbli/TmRo2TWZ0k/j/IJ41R9XLj9KWvKmh046s/qivyO3cBJpV6uZ6heQybQ29x+o5VTAcP58A84Q4K646gdviWnATs5g/cz9cCqqMesHvmnuXB7rxcmt+uPgYk7PiaiVH8zw2VmMmzO/I4Gj9Voome9WF8oBU4Tz1LAqLQYlBAxnCKkqiOImbXfVOghpdxvLSflIzR1Q89xuxJN5TYenPyTeBJY5705hcftm7qF6LyH8z4EQQK744yJkfPHmtOp0PcMI9p0GndtkNN5erPMtuOoHBh0LYPiI/JwBmtCgjQl9SoUzNruxTIVh1mdgT0hmeBs/aXHuc0rMFf0YZwJ8DmuJiw9vNov6E93dpbRhcFojgB/uvgAj++BfP9gTpQQ8HNGnsB5oyTU9u8OIPMPA1arzK7kvan4ZoZ3VDQhC6SIFqv/4FCjNbmmy/cI3Yx/gRyuiAsEjcJuy3ry6ur9iPOQbOD4SmrYpsQ+/HEMNZMAMUEYYtSoqmQeMu2c006M6Uth/Hhgl5JryXWuy0R8K83Jgi+fB3oS686ekV7ziGfTPiSG01SfMitKj0zJxJHkFVfjUCY=
   matrix:
   - DEBIAN_VERSION=jessie OWLRL_BUILD=debian-8 STDEB3_SIGN_RESULTS=0 STDEB3_EXTRA_ARGS="--x-python3-version=\">=3.4\"" BUILD_DEPS="python3-rdflib python3-pytest"
