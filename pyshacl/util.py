@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import platform
 from io import IOBase, BytesIO
 from urllib import request
 import rdflib
@@ -160,10 +161,16 @@ def load_into_graph(target, rdf_format=None):
             target_is_open = True
             target_was_open = True
         filename = target.name
-        abs = os.path.abspath(filename)
-        public_id = "file://{}#".format(abs)
+        if platform.system() == "Windows":
+            public_id = "file:///{}#".format(os.path.abspath(filename).replace("\\", "/"))
+        else:
+            public_id = "file://{}#".format(os.path.abspath(filename))
     elif isinstance(target, str):
-        if target.startswith('file://'):
+        if platform.system() == "Windows" and target.startswith('file:///'):
+            public_id = target
+            target_is_file = True
+            filename = target[8:]
+        elif target.startswith('file://'):
             public_id = target
             target_is_file = True
             filename = target[7:]
@@ -173,7 +180,11 @@ def load_into_graph(target, rdf_format=None):
             target_is_open = True
             filename = target.geturl()
         else:
-            if target.startswith("/") or target.startswith("./"):
+            if platform.system() == "Windows" and (target.startswith("\\") or
+                (len(target) > 3 and target[1:3] == ":\\")):
+                    target_is_file = True
+                    filename = target
+            elif target.startswith("/") or target.startswith("./"):
                 target_is_file = True
                 filename = target
             elif target.startswith("#") or target.startswith("@") \
@@ -182,6 +193,8 @@ def load_into_graph(target, rdf_format=None):
             elif len(target) < 140:
                 target_is_file = True
                 filename = target
+        if public_id and public_id.endswith('#'):
+            public_id = "{}#".format(public_id)
         if not target_is_file and not target_is_open:
             target = target.encode('utf-8')
             target_is_text = True
@@ -201,7 +214,10 @@ def load_into_graph(target, rdf_format=None):
     if target_is_file and filename and not target_is_open:
         filename = os.path.abspath(filename)
         if not public_id:
-            public_id = "file://{}#".format(filename)
+            if platform.system() == "Windows":
+                public_id = "file:///{}#".format(filename.replace('\\', '/'))
+            else:
+                public_id = "file://{}#".format(filename)
         target = open(filename, mode='rb')
         target_is_open = True
     if target_is_open:

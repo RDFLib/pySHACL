@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 import sys
+import platform
 import os
 from os import path
 import subprocess
@@ -46,6 +47,10 @@ def test_cmdline():
         print("Subprocess.run() not available, skip this test")
         assert True
         return True
+    if platform.system() == "Windows":
+        print("Commandline tests cannot run on Windows.")
+        assert True
+        return True
     if os.environ.get("PYBUILD_NAME", None) is not None:
         print("We don't have access to scripts dir during pybuild process.")
         assert True
@@ -72,6 +77,10 @@ def test_cmdline_web():
         print("Subprocess.run() not available, skip this test")
         assert True
         return
+    if platform.system() == "Windows":
+        print("Commandline tests cannot run on Windows.")
+        assert True
+        return True
     if os.environ.get("PYBUILD_NAME", None) is not None:
         print("We don't have access to scripts dir during pybuild process.")
         assert True

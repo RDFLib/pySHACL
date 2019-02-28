@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #
+import platform
 from os import path, walk
 import rdflib
 from rdflib.namespace import Namespace, RDF, RDFS
@@ -111,7 +112,10 @@ def load_manifest(filename, recursion=0):
         return None
     graph = rdflib.Graph()
     with open(filename, 'rb') as manifest_file:
-        base = "file://{}".format(path.abspath(manifest_file.name))
+        if platform.system() == "Windows":
+            base = "file:///{}".format(path.abspath(manifest_file.name).replace("\\", "/"))
+        else:
+            base = "file://{}".format(path.abspath(manifest_file.name))
         graph.parse(file=manifest_file, format='turtle', publicID=base)
     try:
         manifest = next(iter(graph.subjects(RDF.type, MF.Manifest)))
@@ -127,12 +131,14 @@ def load_manifest(filename, recursion=0):
     for i in iter(include_objects):
         if isinstance(i, rdflib.URIRef):
             href = str(i)
-            if href.startswith("file://"):
-                child_mf = load_manifest(href[7:], recursion=recursion+1)
-                if child_mf is None:
-                    raise RuntimeError("Manifest include chain is too deep!")
+            if platform.system() == "Windows" and href.startswith("file:///"):
+                child_mf = load_manifest(href[8:], recursion=recursion+1)
+            elif href.startswith("file://"):
+                child_mf = load_manifest(href[7:], recursion=recursion + 1)
             else:
                 raise RuntimeError("Manifest can only include file:// uris")
+            if child_mf is None:
+                raise RuntimeError("Manifest include chain is too deep!")
             include_manifests.append(child_mf)
     try:
         entries_list = next(iter(graph.objects(manifest, MF.entries)))
