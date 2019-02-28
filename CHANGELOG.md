@@ -4,11 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.9.9.post1] - 2019-02-28 
+
+### Changed
+- Fixed an issue with loading RDF files on Windows
+- Fixed an issue running the test suite on Windows
+- Main pyshacl module now exports the Validator class by default d
+
 ## [0.9.9] - 2019-01-09 
 - This is a big release, building up to the major 1.0 release.
 - Expect some issues, there will be 0.9.9.postX releases with just bug fixes between now and 1.0
 
-## Added
+### Added
 - Major new feature. Added the ability to pass in an extra ontology document which gets parsed and mixed with the 
 data graph before pre-inferencing. This helps in the cases where the target data graph contains a data snippet which 
 can only be fully expanded with the help of an external ontology document containing RDFS and OWL axioms.
@@ -21,7 +28,7 @@ can only be fully expanded with the help of an external ontology document contai
 - Added coverage statistics to the README.
 - Started adding some hopefully-informative debugging output messages when debug mode is turned on. More to come.
 
-## Changed
+### Changed
 - Pre-inferencing can now only ever be run once per Validator instance, this is an attempt to prevent running 
 pre-inferencing multiple times unnecessarily.
 - Internal shapes lookup cache is now stored in the `ShapesGraph` instance, rather than in a global static class 
@@ -337,7 +344,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.9...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.9.post1...HEAD 
+[0.9.9.post1]: https://github.com/RDFLib/pySHACL/compare/v0.9.9...v0.9.9.post1
 [0.9.9]: https://github.com/RDFLib/pySHACL/compare/v0.9.8.post1...v0.9.9
 [0.9.8.post1]: https://github.com/RDFLib/pySHACL/compare/v0.9.8...v0.9.8.post1
 [0.9.8]: https://github.com/RDFLib/pySHACL/compare/v0.9.7...v0.9.8
