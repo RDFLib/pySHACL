@@ -1,7 +1,7 @@
 # pySHACL
 A Python validator for SHACL.  
 
-[![PyPI version](https://badge.fury.io/py/pyshacl.svg)](https://badge.fury.io/py/pyshacl)  ![](https://img.shields.io/badge/coverage-84%25-yellowgreen.svg)  
+[![PyPI version](https://badge.fury.io/py/pyshacl.svg)](https://badge.fury.io/py/pyshacl)  ![](https://img.shields.io/badge/coverage-86%25-yellowgreen.svg)  
 
 This is a pure Python module which allows for the validation of [RDF](https://www.w3.org/2001/sw/wiki/RDF) graphs against Shapes Constraint Language ([SHACL](https://www.w3.org/TR/shacl/)) graphs. This module uses the [rdflib](https://github.com/RDFLib/rdflib) Python library for working with RDF and is dependent on the [OWL-RL](https://github.com/RDFLib/OWL-RL) Python module for [OWL2 RL Profile](https://www.w3.org/TR/owl2-overview/#ref-owl-2-profiles)\-based expansion of data graphs. 
 
@@ -47,7 +47,7 @@ System exit codes are:
 Full CLI Usage options:
 ```bash
 usage: pyshacl [-h] [-s [SHACL]] [-e [ONT]] [-i {none,rdfs,owlrl,both}] [-m]
-               [-a] [-d] [-f {human,turtle,xml,json-ld,nt,n3}]
+               [--imports] [-a] [-d] [-f {human,turtle,xml,json-ld,nt,n3}]
                [-df {auto,turtle,xml,json-ld,nt,n3}]
                [-sf {auto,turtle,xml,json-ld,nt,n3}]
                [-ef {auto,turtle,xml,json-ld,nt,n3}] [-o [OUTPUT]]
@@ -71,6 +71,8 @@ optional arguments:
   -m, --metashacl       Validate the SHACL Shapes graph against the shacl-
                         shacl Shapes Graph before before validating the Data
                         Graph.
+  --imports             Allow import of sub-graphs defined in statements with
+                        ow:imports.
   -a, --abort           Abort on first error.
   -d, --debug           Output additional runtime messages.
   -f {human,turtle,xml,json-ld,nt,n3}, --format {human,turtle,xml,json-ld,nt,n3}
@@ -96,7 +98,8 @@ from pyshacl import validate
 r = validate(data_graph, shacl_graph=sg, ont_graph=og, inference='rdfs', abort_on_error=False, meta_shacl=False, debug=False)
 conforms, results_graph, results_text = r
 ```
-where:  
+
+Where:  
 * `data_graph` is an rdflib `Graph` object or file path of the graph to be validated
 * `shacl_graph` is an rdflib `Graph` object or file path or Web URL of the graph containing the SHACL shapes to validate with, or None if the SHACL shapes are included in the data_graph.
 * `ont_graph` is an rdflib `Graph` object or file path or Web URL a graph containing extra ontological information, or None if not required.
@@ -106,7 +109,16 @@ Options are 'rdfs', 'owlrl', 'both', or 'none'. The default is 'none'.
 * `meta_shacl` (optional) a Python `bool` value to indicate whether or not the program should enable the Meta-SHACL feature. Default is False.
 * `debug` (optional) a Python `bool` value to indicate whether or not the program should emit debugging output text. Default is False.
 
-on return:  
+Some other optional keyword variables available available on the `validate` function:
+* `data_graph_format`: Override the format detection for the given data graph source file.
+* `shacl_graph_format`: Override the format detection for the given shacl graph source file.
+* `ont_graph_format`: Override the format detection for the given extra ontology graph source file.
+* `do_owl_imports`: Enable the feature to allow the import of subgraphs using `owl:import` for the shapes graph and the ontology graph. Note, you explicitly cannot use this on the target data graph.
+* `serialize_report_graph`: Convert the report results_graph into a serialised representation (for example, 'turtle')
+* `check_dash_result`: Check the validation result against the given expected DASH test suite result.
+* `check_sht_result`: Check the validation result against the given expected SHT test suite result.
+
+Return value:  
 * a three-component `tuple` containing:
   * `conforms` a `bool`, indicating whether or not the `data_graph` conforms to the `shacl_graph`
   * `results_graph` an rdflib `Graph` object built according to the SHACL specification's [Validation Report](https://www.w3.org/TR/shacl/#validation-report) semantics

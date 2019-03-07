@@ -2,8 +2,9 @@
 #
 # Extra tests which are not part of the SHT or DASH test suites,
 # nor the discrete issues tests or the cmdline_test file.
-# The need for these tests are discovered by doing converage checks and these
+# The need for these tests are discovered by doing coverage checks and these
 # are added as required.
+import os
 from pyshacl import validate
 from pyshacl.errors import ReportableRuntimeError
 
@@ -12,30 +13,34 @@ ontology_file_text = """
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix ex: <http://example.com/ex#> .
+@prefix exOnt: <http://example.com/exOnt#> .
 
-ex:Animal a rdfs:Class ;
+<http://example.com/exOnt> a owl:Ontology ;
+    rdfs:label "An example extra-ontology file."@en .
+
+exOnt:Animal a rdfs:Class ;
     rdfs:comment "The parent class for Humans and Pets"@en ;
     rdfs:subClassOf owl:Thing .
 
-ex:Human a rdfs:Class ;
+exOnt:Human a rdfs:Class ;
     rdfs:comment "A Human being"@en ;
-    rdfs:subClassOf ex:Animal .
+    rdfs:subClassOf exOnt:Animal .
 
-ex:Pet a rdfs:Class ;
+exOnt:Pet a rdfs:Class ;
     rdfs:comment "An animal owned by a human"@en ;
-    rdfs:subClassOf ex:Animal .
+    rdfs:subClassOf exOnt:Animal .
 
-ex:hasPet a rdf:Property ;
-    rdfs:domain ex:Human ;
-    rdfs:range ex:Pet .
+exOnt:hasPet a rdf:Property ;
+    rdfs:domain exOnt:Human ;
+    rdfs:range exOnt:Pet .
 
-ex:nlegs a rdf:Property ;
-    rdfs:domain ex:Animal ;
-    rdfs:range xsd:integer .
+exOnt:nlegs a rdf:Property ;
+    rdfs:domain exOnt:Animal ;
+    rdfs:range exOnt:integer .
 
-ex:Lizard a rdfs:Class ;
-    rdfs:subClassOf ex:Pet .
+exOnt:Lizard a rdfs:Class ;
+    rdfs:subClassOf exOnt:Pet .
+
 """
 
 shacl_file_text = """
@@ -44,46 +49,66 @@ shacl_file_text = """
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix ex: <http://example.com/ex#> .
+@prefix exShape: <http://example.com/exShape#> .
+@prefix exOnt: <http://example.com/exOnt#> .
 
-ex:HumanShape a sh:NodeShape ;
+<http://example.com/exShape> a owl:Ontology ;
+    rdfs:label "Example Shapes File"@en .
+
+exShape:HumanShape a sh:NodeShape ;
     sh:property [
-        sh:class ex:Pet ;
-        sh:path ex:hasPet ;
+        sh:class exOnt:Pet ;
+        sh:path exOnt:hasPet ;
     ] ;
     sh:property [
         sh:datatype xsd:integer ;
-        sh:path ex:nLegs ;
+        sh:path exOnt:nLegs ;
         sh:maxInclusive 2 ;
         sh:minInclusive 2 ;
     ] ;
-    sh:targetClass ex:Human .
+    sh:targetClass exOnt:Human .
 
-ex:AnimalShape a sh:NodeShape ;
+exShape:AnimalShape a sh:NodeShape ;
     sh:property [
         sh:datatype xsd:integer ;
-        sh:path ex:nLegs ;
+        sh:path exOnt:nLegs ;
         sh:maxInclusive 4 ;
         sh:minInclusive 1 ;
     ] ;
-    sh:targetClass ex:Animal .  
+    sh:targetClass exOnt:Animal .
 """
 
 data_file_text = """
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix exOnt: <http://example.com/exOnt#> .
 @prefix ex: <http://example.com/ex#> .
 
-ex:Human1 rdf:type ex:Human ;
+ex:Human1 rdf:type exOnt:Human ;
     rdf:label "Amy" ;
-    ex:nLegs "2"^^xsd:integer ;
-    ex:hasPet ex:Pet1 .
+    exOnt:nLegs "2"^^xsd:integer ;
+    exOnt:hasPet ex:Pet1 .
 
-ex:Pet1 rdf:type ex:Lizard ;
+ex:Pet1 rdf:type exOnt:Lizard ;
     rdf:label "Sebastian" ;
-    ex:nLegs "4"^^xsd:integer .
+    exOnt:nLegs "4"^^xsd:integer .
 """
 
+data_file_text_bad = """
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix exOnt: <http://example.com/exOnt#> .
+@prefix ex: <http://example.com/ex#> .
+
+ex:Human1 rdf:type exOnt:Human ;
+    rdf:label "Amy" ;
+    exOnt:nLegs "2"^^xsd:integer ;
+    exOnt:hasPet "Sebastian"^^xsd:string .
+
+ex:Pet1 rdf:type exOnt:Lizard ;
+    rdf:label "Sebastian" ;
+    exOnt:nLegs "g"^^xsd:string .
+"""
 
 
 def test_metashacl_pass():
@@ -93,6 +118,7 @@ def test_metashacl_pass():
                    ont_graph_format="turtle", inference='both', debug=True)
     conforms, graph, string = res
     assert conforms
+
 
 def test_metashacl_fail():
     bad_shacl_text = """
@@ -138,6 +164,7 @@ ex:AnimalShape a sh:NodeShape ;
         did_error = True
     assert did_error
 
+
 def test_serialize_report_graph():
     res = validate(data_file_text, shacl_graph=shacl_file_text,
                    data_graph_format='turtle', serialize_report_graph=True,
@@ -146,8 +173,8 @@ def test_serialize_report_graph():
     conforms, graph, string = res
     assert isinstance(graph, (str, bytes))
 
+
 def test_web_retrieve():
-    import os
     DEB_BUILD_ARCH = os.environ.get('DEB_BUILD_ARCH', None)
     DEB_HOST_ARCH = os.environ.get('DEB_HOST_ARCH', None)
     if DEB_BUILD_ARCH is not None or DEB_HOST_ARCH is not None:
@@ -162,8 +189,74 @@ def test_web_retrieve():
     conforms, graph, string = res
     assert conforms
 
+
+def test_web_retrieve_fail():
+    DEB_BUILD_ARCH = os.environ.get('DEB_BUILD_ARCH', None)
+    DEB_HOST_ARCH = os.environ.get('DEB_HOST_ARCH', None)
+    if DEB_BUILD_ARCH is not None or DEB_HOST_ARCH is not None:
+        print("Cannot run web requests in debhelper tests.")
+        assert True
+        return True
+    shacl_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/s1.ttl"
+    ont_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/o1.ttl"
+    res = validate(data_file_text_bad, shacl_graph=shacl_file, data_graph_format='turtle',
+                   shacl_graph_format='turtle', ont_graph=ont_file,
+                   ont_graph_format="turtle", inference='both', debug=True)
+    conforms, graph, string = res
+    assert not conforms
+
+
+my_partial_shapes_text = """
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix ex: <http://example.com/ex1#> .
+
+<http://example.com/ex1> a owl:Ontology ;
+    owl:imports <https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/s1.ttl> .
+"""
+
+my_partial_ont_text = """
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix ex: <http://example.com/ex2#> .
+
+<http://example.com/ex2> a owl:Ontology ;
+    owl:imports <https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/o1.ttl> .
+"""
+
+
+def test_owl_imports():
+    DEB_BUILD_ARCH = os.environ.get('DEB_BUILD_ARCH', None)
+    DEB_HOST_ARCH = os.environ.get('DEB_HOST_ARCH', None)
+    if DEB_BUILD_ARCH is not None or DEB_HOST_ARCH is not None:
+        print("Cannot run owl:imports in debhelper tests.")
+        assert True
+        return True
+    res = validate(data_file_text, shacl_graph=my_partial_shapes_text, data_graph_format='turtle',
+                   shacl_graph_format='turtle', ont_graph=my_partial_ont_text,
+                   ont_graph_format="turtle", inference='both', debug=True, do_owl_imports=True)
+    conforms, graph, string = res
+    print(string)
+    assert conforms
+
+
+def test_owl_imports_fail():
+    DEB_BUILD_ARCH = os.environ.get('DEB_BUILD_ARCH', None)
+    DEB_HOST_ARCH = os.environ.get('DEB_HOST_ARCH', None)
+    if DEB_BUILD_ARCH is not None or DEB_HOST_ARCH is not None:
+        print("Cannot run owl:imports in debhelper tests.")
+        assert True
+        return True
+
+    res = validate(data_file_text_bad, shacl_graph=my_partial_shapes_text, data_graph_format='turtle',
+                   shacl_graph_format='turtle', ont_graph=my_partial_ont_text,
+                   ont_graph_format="turtle", inference='both', debug=True, do_owl_imports=True)
+    conforms, graph, string = res
+    print(string)
+    assert not conforms
+
+
 if __name__ == "__main__":
     test_metashacl_pass()
     test_metashacl_fail()
     test_web_retrieve()
     test_serialize_report_graph()
+    test_owl_imports()

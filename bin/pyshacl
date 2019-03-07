@@ -30,6 +30,8 @@ parser.add_argument('-i', '--inference', dest='inference', action='store',
 parser.add_argument('-m', '--metashacl', dest='metashacl', action='store_true',
                     default=False, help='Validate the SHACL Shapes graph against the shacl-shacl '
                     'Shapes Graph before before validating the Data Graph.')
+parser.add_argument('--imports', dest='imports', action='store_true',
+                    default=False, help='Allow import of sub-graphs defined in statements with ow:imports.')
 parser.add_argument('-a', '--abort', dest='abort', action='store_true',
                     default=False, help='Abort on first error.')
 parser.add_argument('-d', '--debug', dest='debug', action='store_true',
@@ -61,6 +63,8 @@ if args.format != 'human':
     validator_kwargs['serialize_report_graph'] = args.format
 if args.inference != 'none':
     validator_kwargs['inference'] = args.inference
+if args.imports:
+    validator_kwargs['do_owl_imports'] = True
 if args.metashacl:
     validator_kwargs['meta_shacl'] = True
 if args.abort:

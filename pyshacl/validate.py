@@ -193,20 +193,24 @@ def validate(data_graph, *args, shacl_graph=None, ont_graph=None, inference=None
                   .format(v_t)
             log.error(msg)
             raise ReportableRuntimeError(msg)
+    do_owl_imports = kwargs.pop('do_owl_imports', False)
     data_graph_format = kwargs.pop('data_graph_format', None)
     if data_graph_format is None:
         # TODO:coverage: will be fixed when we remove this deprecation
         data_graph_format = depr_target_graph_format
     data_graph = load_into_graph(data_graph,
-                                 rdf_format=data_graph_format)
+                                 rdf_format=data_graph_format,
+                                 do_owl_imports=False)  # no imports on data_graph
     ont_graph_format = kwargs.pop('ont_graph_format', None)
     if ont_graph is not None:
         ont_graph = load_into_graph(ont_graph,
-                                    rdf_format=ont_graph_format)
+                                    rdf_format=ont_graph_format,
+                                    do_owl_imports=do_owl_imports)
     shacl_graph_format = kwargs.pop('shacl_graph_format', None)
     if shacl_graph is not None:
         shacl_graph = load_into_graph(shacl_graph,
-                                      rdf_format=shacl_graph_format)
+                                      rdf_format=shacl_graph_format,
+                                      do_owl_imports=do_owl_imports)
     try:
         validator = Validator(
             data_graph, shacl_graph=shacl_graph, ont_graph=ont_graph,

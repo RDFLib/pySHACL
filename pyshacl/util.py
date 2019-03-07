@@ -141,9 +141,8 @@ def get_rdf_from_web(url):
                            .format(url, str(code)))
     return resp
 
-def load_into_graph(target, rdf_format=None):
-    if isinstance(target, rdflib.Graph):
-        return target
+def load_into_graph(target, g=None, rdf_format=None, do_owl_imports=False):
+    target_is_graph = False
     target_is_open = False
     target_was_open = False
     target_is_file = False
@@ -151,7 +150,9 @@ def load_into_graph(target, rdf_format=None):
     filename = None
     public_id = None
     uri_prefix = None
-    if isinstance(target, IOBase) and hasattr(target, 'read'):
+    if isinstance(target, rdflib.Graph):
+        target_is_graph = True
+    elif isinstance(target, IOBase) and hasattr(target, 'read'):
         target_is_file = True
         if hasattr(target, 'closed'):
             target_is_open = not bool(target.closed)
@@ -193,7 +194,7 @@ def load_into_graph(target, rdf_format=None):
             elif len(target) < 140:
                 target_is_file = True
                 filename = target
-        if public_id and public_id.endswith('#'):
+        if public_id and not public_id.endswith('#'):
             public_id = "{}#".format(public_id)
         if not target_is_file and not target_is_open:
             target = target.encode('utf-8')
@@ -232,14 +233,24 @@ def load_into_graph(target, rdf_format=None):
                 pass
         target = data
         target_is_text = True
-    g = rdflib.Graph()
+    if g is None:
+        if target_is_graph:
+            g = target
+        else:
+            g = rdflib.Graph()
+    else:
+        if target_is_graph:
+            raise RuntimeError("Cannot pass in both target=rdflib.Graph and g=graph.")
+        if not isinstance(g, rdflib.Graph):
+            raise RuntimeError("Passing in g must be a Graph.")
+
     if target_is_text:
         target = BytesIO(target)
         while True:
             try:
                 l = target.readline()
-                assert l is not None
-            except:
+                assert l is not None and len(l) > 0
+            except AssertionError:
                 break
             l = l.lstrip(b" ")
             if not l.startswith(b"#"):
@@ -254,18 +265,37 @@ def load_into_graph(target, rdf_format=None):
                 uri_prefix = spl[1].strip(b" \n").decode('utf-8')
         target.seek(0)
         g.parse(source=target, format=rdf_format, publicID=public_id)
-    else:
+        target_is_graph = True
+
+    if not target_is_graph:
         raise RuntimeError("Error opening graph from source.")
+
+    is_imported_graph = do_owl_imports and isinstance(do_owl_imports, int) and \
+                        do_owl_imports > 1
 
     if public_id:
         if uri_prefix:
-            has_named_prefix = g.store.namespace(uri_prefix)
-            if not has_named_prefix:
-                g.namespace_manager.bind(uri_prefix, public_id)
-        else:
+            if is_imported_graph and uri_prefix == '':
+                #Don't reassign blank prefix, when importing subgraph
+                pass
+            else:
+                has_named_prefix = g.store.namespace(uri_prefix)
+                if not has_named_prefix:
+                    g.namespace_manager.bind(uri_prefix, public_id)
+        elif not is_imported_graph:
             existing_blank_prefix = g.store.namespace('')
             if not existing_blank_prefix:
                 g.namespace_manager.bind('', public_id)
+    if do_owl_imports:
+        if isinstance(do_owl_imports, int):
+            if do_owl_imports > 3:
+                return g
+        else:
+            do_owl_imports = 1
+        owl_imports = g.objects(public_id, rdflib.OWL.imports)
+        for o in owl_imports:
+            load_into_graph(o, g=g, do_owl_imports=do_owl_imports + 1)
+
     return g
 
 
