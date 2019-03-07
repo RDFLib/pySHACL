@@ -6,8 +6,8 @@
 ex:Human1 rdf:type exOnt:Human ;
     rdf:label "Amy" ;
     exOnt:nLegs "2"^^xsd:integer ;
-    exOnt:hasPet ex:Pet1 .
+    exOnt:hasPet "Sebastian"^^xsd:string .
 
 ex:Pet1 rdf:type exOnt:Lizard ;
     rdf:label "Sebastian" ;
-    exOnt:nLegs "4"^^xsd:integer .
+    exOnt:nLegs "g"^^xsd:string .

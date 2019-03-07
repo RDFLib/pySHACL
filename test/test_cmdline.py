@@ -72,6 +72,36 @@ def test_cmdline():
     assert res.returncode == 0
     return True
 
+def test_cmdline_fail():
+    if not hasattr(subprocess, 'run'):
+        print("Subprocess.run() not available, skip this test")
+        assert True
+        return True
+    if platform.system() == "Windows":
+        print("Commandline tests cannot run on Windows.")
+        assert True
+        return True
+    if os.environ.get("PYBUILD_NAME", None) is not None:
+        print("We don't have access to scripts dir during pybuild process.")
+        assert True
+        return True
+    graph_file = path.join(cmdline_files_dir, 'd2.ttl')
+    shacl_file = path.join(cmdline_files_dir, 's1.ttl')
+    ont_file = path.join(cmdline_files_dir, 'o1.ttl')
+    cmd = [pyshacl_command]
+    args = [
+        graph_file,
+        '-s', shacl_file,
+        '-i', 'rdfs',
+        '-e', ont_file
+    ]
+    res = subprocess.run(cmd+args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    print("result = {}".format(res.returncode))
+    print(res.stdout.decode('utf-8'))
+    print(res.stderr.decode('utf-8'))
+    assert res.returncode == 1
+    return True
+
 def test_cmdline_web():
     if not hasattr(subprocess, 'run'):
         print("Subprocess.run() not available, skip this test")
@@ -110,4 +140,5 @@ def test_cmdline_web():
 
 if __name__ == "__main__":
     test_cmdline()
+    test_cmdline_fail()
     test_cmdline_web()
