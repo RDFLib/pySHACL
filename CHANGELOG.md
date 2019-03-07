@@ -8,14 +8,17 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 ### Added
 - Added the ability to for the graph loader to load multiple source files into a single graph.
-- This gives the ability honor owl:imports statements. We currently go max 3 levels of imports deep.
+- This gives the ability follow `owl:imports` statements. We currently go (base+3) levels of imports deep maximum.
 - Added `--imports` switch to the cmdline script, that turns on the owl:imports feature.
+- Added the ability for the web rdf retriever to inspect the HTTP headers for 'Content-Type' for the RDF format
 - Added documentation to the readme about `--imports` option.
 - Add more coverage tests. Bumped coverage to 86%.
 
 ### Changed
 - More potential Windows fixes
 - Fixed a bug where the graph_id and base_uri was calculated incorrectly in some cases.
+- Fix an issue when extracting base uri and prefix from comments in turtle when it was formatted in Windows line endings.
+- Hitting a HTTP error when importing a subgraph is no longer an issue, we just ignore that import statement.
 
 
 ## [0.9.9.post1] - 2019-02-28 

@@ -3,6 +3,8 @@ import os
 import platform
 from io import IOBase, BytesIO
 from urllib import request
+from urllib.error import HTTPError
+
 import rdflib
 from rdflib.collection import Collection
 from pyshacl.consts import SH, RDF_first, RDFS_Resource
@@ -132,16 +134,30 @@ def match_blank_nodes(graph1, bnode1, graph2, bnode2):
 def get_rdf_from_web(url):
     headers = {'Accept':
                'text/turtle, application/rdf+xml, '
-               'application/ld+json, text/plain'}
+               'application/ld+json, application/n-triples,'
+               'text/plain'}
     r = request.Request(url, headers=headers)
     resp = request.urlopen(r)
     code = resp.getcode()
     if not (200 <= code <= 210):
         raise RuntimeError("Cannot pull RDF URL from the web: {}, code: {}"
                            .format(url, str(code)))
-    return resp
+    known_format = None
+    content_type = resp.headers.get('Content-Type', None)
+    if content_type:
+        if content_type.startswith("text/turtle"):
+            known_format = "turtle"
+        elif content_type.startswith("application/rdf+xml"):
+            known_format = "xml"
+        elif content_type.startswith("application/xml"):
+            known_format = "xml"
+        elif content_type.startswith("application/ld+json"):
+            known_format = "json-ld"
+        elif content_type.startswith("application/n-triples"):
+            known_format = "nt"
+    return resp, known_format
 
-def load_into_graph(target, g=None, rdf_format=None, do_owl_imports=False):
+def load_into_graph(target, g=None, rdf_format=None, do_owl_imports=False, import_chain=None):
     target_is_graph = False
     target_is_open = False
     target_was_open = False
@@ -150,8 +166,14 @@ def load_into_graph(target, g=None, rdf_format=None, do_owl_imports=False):
     filename = None
     public_id = None
     uri_prefix = None
+    is_imported_graph = do_owl_imports and isinstance(do_owl_imports, int) and \
+                        do_owl_imports > 1
     if isinstance(target, rdflib.Graph):
         target_is_graph = True
+        if g is None:
+            g = target
+        else:
+            raise RuntimeError("Cannot pass in both target=rdflib.Graph and g=graph.")
     elif isinstance(target, IOBase) and hasattr(target, 'read'):
         target_is_file = True
         if hasattr(target, 'closed'):
@@ -177,7 +199,13 @@ def load_into_graph(target, g=None, rdf_format=None, do_owl_imports=False):
             filename = target[7:]
         elif target.startswith('http:') or target.startswith('https:'):
             public_id = target
-            target = get_rdf_from_web(target)
+            try:
+                target, rdf_format = get_rdf_from_web(target)
+            except HTTPError:
+                if is_imported_graph:
+                    return g
+                else:
+                    raise
             target_is_open = True
             filename = target.geturl()
         else:
@@ -201,6 +229,11 @@ def load_into_graph(target, g=None, rdf_format=None, do_owl_imports=False):
             target_is_text = True
     else:
         raise ReportableRuntimeError("Cannot determine the format of the input graph")
+    if g is None:
+        g = rdflib.Graph()
+    else:
+        if not isinstance(g, rdflib.Graph):
+            raise RuntimeError("Passing in g must be a Graph.")
     if filename:
         if filename.endswith('.ttl'):
             rdf_format = rdf_format or 'turtle'
@@ -233,16 +266,6 @@ def load_into_graph(target, g=None, rdf_format=None, do_owl_imports=False):
                 pass
         target = data
         target_is_text = True
-    if g is None:
-        if target_is_graph:
-            g = target
-        else:
-            g = rdflib.Graph()
-    else:
-        if target_is_graph:
-            raise RuntimeError("Cannot pass in both target=rdflib.Graph and g=graph.")
-        if not isinstance(g, rdflib.Graph):
-            raise RuntimeError("Passing in g must be a Graph.")
 
     if target_is_text:
         target = BytesIO(target)
@@ -270,9 +293,6 @@ def load_into_graph(target, g=None, rdf_format=None, do_owl_imports=False):
     if not target_is_graph:
         raise RuntimeError("Error opening graph from source.")
 
-    is_imported_graph = do_owl_imports and isinstance(do_owl_imports, int) and \
-                        do_owl_imports > 1
-
     if public_id:
         if uri_prefix:
             if is_imported_graph and uri_prefix == '':
@@ -292,10 +312,48 @@ def load_into_graph(target, g=None, rdf_format=None, do_owl_imports=False):
                 return g
         else:
             do_owl_imports = 1
-        owl_imports = g.objects(public_id, rdflib.OWL.imports)
-        for o in owl_imports:
-            load_into_graph(o, g=g, do_owl_imports=do_owl_imports + 1)
 
+        if import_chain is None:
+            import_chain = []
+        if public_id and (public_id.endswith('#') or public_id.endswith('/')):
+            root_id = rdflib.URIRef(public_id[:-1])
+        else:
+            root_id = rdflib.URIRef(public_id) if public_id else None
+        done_imports = 0
+        if root_id is not None:
+            owl_imports = list(g.objects(root_id, rdflib.OWL.imports))
+            if len(owl_imports) > 0:
+                import_chain.append(root_id)
+            for o in owl_imports:
+                if o in import_chain:
+                    continue
+                load_into_graph(o, g=g, do_owl_imports=do_owl_imports + 1, import_chain=import_chain)
+                done_imports += 1
+        if done_imports < 1 and public_id is not None and root_id != public_id:
+            public_id_uri = rdflib.URIRef(public_id)
+            owl_imports = list(g.objects(public_id_uri, rdflib.OWL.imports))
+            if len(owl_imports) > 0:
+                import_chain.append(public_id_uri)
+            for o in owl_imports:
+                if o in import_chain:
+                    continue
+                load_into_graph(o, g=g, do_owl_imports=do_owl_imports + 1, import_chain=import_chain)
+                done_imports += 1
+        if done_imports < 1:
+            ontologies = g.subjects(rdflib.RDF.type, rdflib.OWL.Ontology)
+            for ont in ontologies:
+                if ont == root_id or ont == public_id:
+                    continue
+                if ont in import_chain:
+                    continue
+                owl_imports = list(g.objects(ont, rdflib.OWL.imports))
+                if len(owl_imports) > 0:
+                    import_chain.append(ont)
+                for o in owl_imports:
+                    if o in import_chain:
+                        continue
+                    load_into_graph(o, g=g, do_owl_imports=do_owl_imports + 1, import_chain=import_chain)
+                    done_imports += 1
     return g
 
 
