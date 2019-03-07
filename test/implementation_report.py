@@ -2,6 +2,7 @@
 """
 https://w3c.github.io/data-shapes/data-shapes-test-suite/#submitting-implementation-reports
 """
+import platform
 from collections import defaultdict, OrderedDict
 from os import path
 from datetime import datetime
@@ -76,8 +77,12 @@ def make_assertion(base, index):
     tests = tests_found_in_manifests[base]
     t = tests[index]
     test_uri_string = str(t.node)
-    if test_uri_string.startswith("file://"):
-        test_uri_string = test_uri_string[7:]
+    if platform.system() == "Windows":
+        if test_uri_string.startswith("file:///"):
+            test_uri_string = test_uri_string[8:]
+    else:
+        if test_uri_string.startswith("file://"):
+            test_uri_string = test_uri_string[7:]
     test_uri_string = test_uri_string.replace(sht_files_dir, TEST_PREFIX)
     test_uri = rdflib.URIRef(test_uri_string)
     assertion.append((assertion_node, EARL.test, test_uri))

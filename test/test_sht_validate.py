@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 #
 from collections import defaultdict, OrderedDict
-import sys
+import platform
 import pytest
-from os import path, walk
-import glob
+from os import path
 import pyshacl
 from pyshacl.errors import ReportableRuntimeError
-import rdflib
 from rdflib.namespace import Namespace, RDF, RDFS
-print(sys.path)
 from test.helpers import load_manifest, flatten_manifests
 
 here_dir = path.abspath(path.dirname(__file__))
@@ -47,7 +44,10 @@ ALLOWABLE_FAILURES = [
 def test_sht_all(base, index):
     tests = tests_found_in_manifests[base]
     t = tests[index]
-    test_id = str(t.node).replace("file://", "")
+    if platform.system() == "Windows":
+        test_id = str(t.node).replace("file:///", "")
+    else:
+        test_id = str(t.node).replace("file://", "")
     label = t.label
     data_file = t.data_graph
     shacl_file = t.shapes_graph

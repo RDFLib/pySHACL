@@ -131,12 +131,16 @@ def load_manifest(filename, recursion=0):
     for i in iter(include_objects):
         if isinstance(i, rdflib.URIRef):
             href = str(i)
-            if platform.system() == "Windows" and href.startswith("file:///"):
-                child_mf = load_manifest(href[8:], recursion=recursion+1)
-            elif href.startswith("file://"):
-                child_mf = load_manifest(href[7:], recursion=recursion + 1)
+            if platform.system() == "Windows":
+                if href.startswith("file:///"):
+                    child_mf = load_manifest(href[8:], recursion=recursion+1)
+                else:
+                    raise RuntimeError("Manifest can only include file:/// uris")
             else:
-                raise RuntimeError("Manifest can only include file:// uris")
+                if href.startswith("file://"):
+                    child_mf = load_manifest(href[7:], recursion=recursion + 1)
+                else:
+                    raise RuntimeError("Manifest can only include file:// uris")
             if child_mf is None:
                 raise RuntimeError("Manifest include chain is too deep!")
             include_manifests.append(child_mf)
