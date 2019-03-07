@@ -260,9 +260,9 @@ def load_into_graph(target, g=None, rdf_format=None, do_owl_imports=False):
             if len(spl) < 1:
                 continue
             if spl[0].lower() == b"baseuri":
-                public_id = spl[1].strip(b" \n").decode('utf-8') + "#"
+                public_id = spl[1].strip(b" \r\n").decode('utf-8') + "#"
             elif spl[0].lower() == b"prefix":
-                uri_prefix = spl[1].strip(b" \n").decode('utf-8')
+                uri_prefix = spl[1].strip(b" \r\n").decode('utf-8')
         target.seek(0)
         g.parse(source=target, format=rdf_format, publicID=public_id)
         target_is_graph = True
