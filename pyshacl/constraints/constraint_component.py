@@ -5,7 +5,7 @@ https://www.w3.org/TR/shacl/#core-components-value-type
 import abc
 from rdflib import BNode
 from pyshacl.consts import *
-from pyshacl.util import stringify_node
+from pyshacl.rdfutil import stringify_node
 
 
 class ConstraintComponent(object, metaclass=abc.ABCMeta):

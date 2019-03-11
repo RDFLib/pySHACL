@@ -38,7 +38,7 @@ with open_local(['requirements.txt']) as req:
 
 setup(
     name='pyshacl',
-    packages=['pyshacl', 'pyshacl.constraints', 'pyshacl.constraints.core', 'pyshacl.constraints.sparql', 'pyshacl.inference', 'pyshacl.monkey'],
+    packages=['pyshacl', 'pyshacl.constraints', 'pyshacl.constraints.core', 'pyshacl.constraints.sparql', 'pyshacl.inference', 'pyshacl.rdfutil', 'pyshacl.monkey'],
     scripts=['bin/pyshacl'],
     package_dir={'pyshacl': './pyshacl'},
     package_data={'pyshacl': ['*.pickle']},
@@ -56,17 +56,21 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Topic :: Utilities',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Software Development :: Libraries :: Python Modules',
+        'Operating System :: OS Independent'
     ],
     install_requires=requirements,
     dependency_links=dependency_links

@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.9.10.post1] - 2019-03-11
+
+### Changed
+- More refinements to the RDF Source loader. Fixes some minor bugs.
+- Moved some of the SHACL-specific RDF Utility functions (into the RDF Source loader) into a submodule.
+  - This will one day be pulled out into its own RDF Utilities python module.
+- Listed some additional Trove Classifiers in the setup.py file.
+
+
 ## [0.9.10] - 2019-03-07 
 
 ### Added
@@ -363,7 +372,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.10...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.10.post1...HEAD 
+[0.9.10.post1]: https://github.com/RDFLib/pySHACL/compare/v0.9.10...v0.9.10.post1
 [0.9.10]: https://github.com/RDFLib/pySHACL/compare/v0.9.9.post1...v0.9.10
 [0.9.9.post1]: https://github.com/RDFLib/pySHACL/compare/v0.9.9...v0.9.9.post1
 [0.9.9]: https://github.com/RDFLib/pySHACL/compare/v0.9.8.post1...v0.9.9

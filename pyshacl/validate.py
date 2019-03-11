@@ -12,7 +12,7 @@ from pyshacl.shacl_graph import SHACLGraph
 from pyshacl.consts import RDF_type, SH_conforms, \
     SH_result, SH_ValidationReport, RDFS_Resource, SH_resultMessage, \
     SH_sourceShape, SH_sourceConstraint, SH_resultPath
-from pyshacl.util import load_into_graph, clone_graph, \
+from pyshacl.rdfutil import load_from_source, clone_graph, \
     clone_node, compare_blank_node, mix_graphs
 from pyshacl.monkey import apply_patches
 
@@ -142,7 +142,7 @@ def meta_validate(shacl_graph, inference='rdfs', **kwargs):
             shacl_shacl_store = u.load()
         shacl_shacl_graph = rdflib.Graph(store=shacl_shacl_store, identifier="http://www.w3.org/ns/shacl-shacl")
         meta_validate.shacl_shacl_graph = shacl_shacl_graph
-    shacl_graph = load_into_graph(shacl_graph,
+    shacl_graph = load_from_source(shacl_graph,
                                   rdf_format=kwargs.pop('shacl_graph_format', None))
     _ = kwargs.pop('meta_shacl', None)
     return validate(shacl_graph, shacl_graph=shacl_shacl_graph, inference=inference, **kwargs)
@@ -198,19 +198,19 @@ def validate(data_graph, *args, shacl_graph=None, ont_graph=None, inference=None
     if data_graph_format is None:
         # TODO:coverage: will be fixed when we remove this deprecation
         data_graph_format = depr_target_graph_format
-    data_graph = load_into_graph(data_graph,
-                                 rdf_format=data_graph_format,
-                                 do_owl_imports=False)  # no imports on data_graph
+    data_graph = load_from_source(data_graph,
+                                  rdf_format=data_graph_format,
+                                  do_owl_imports=False)  # no imports on data_graph
     ont_graph_format = kwargs.pop('ont_graph_format', None)
     if ont_graph is not None:
-        ont_graph = load_into_graph(ont_graph,
-                                    rdf_format=ont_graph_format,
-                                    do_owl_imports=do_owl_imports)
+        ont_graph = load_from_source(ont_graph,
+                                     rdf_format=ont_graph_format,
+                                     do_owl_imports=do_owl_imports)
     shacl_graph_format = kwargs.pop('shacl_graph_format', None)
     if shacl_graph is not None:
-        shacl_graph = load_into_graph(shacl_graph,
-                                      rdf_format=shacl_graph_format,
-                                      do_owl_imports=do_owl_imports)
+        shacl_graph = load_from_source(shacl_graph,
+                                       rdf_format=shacl_graph_format,
+                                       do_owl_imports=do_owl_imports)
     try:
         validator = Validator(
             data_graph, shacl_graph=shacl_graph, ont_graph=ont_graph,
