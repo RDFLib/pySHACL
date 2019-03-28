@@ -48,7 +48,7 @@ def load_from_source(source, g=None, rdf_format=None, do_owl_imports=False, impo
     source_is_open = False
     source_was_open = False
     source_is_file = False
-    source_is_text = False
+    source_is_bytes = False
     filename = None
     public_id = None
     uri_prefix = None
@@ -115,7 +115,23 @@ def load_from_source(source, g=None, rdf_format=None, do_owl_imports=False, impo
             public_id = "{}#".format(public_id)
         if not source_is_file and not source_is_open:
             source = source.encode('utf-8')
-            source_is_text = True
+            source_is_bytes = True
+    elif isinstance(source, bytes):
+        if source.startswith(b'file:///') or\
+           source.startswith(b'file://') or\
+           source.startswith(b'http:') or source.startswith(b'https:'):
+            raise ValueError("file:// and http:// strings should be given as str, not bytes.")
+        first_char = source[0:1]
+        if first_char == b'#' or first_char == b'@' \
+            or first_char == b'<' or first_char == b'\n' \
+                or first_char == b'{' or first_char == b'[':
+            # Contains some JSON or XML or Turtle stuff
+            source_is_file = False
+        elif len(source) < 140:
+            source_is_file = True
+            filename = source.decode('utf-8')
+        if not source_is_file:
+            source_is_bytes = True
     else:
         raise ValueError("Cannot determine the format of the input graph")
     if g is None:
@@ -154,9 +170,9 @@ def load_from_source(source, g=None, rdf_format=None, do_owl_imports=False, impo
             except Exception:
                 pass
         source = data
-        source_is_text = True
+        source_is_bytes = True
 
-    if source_is_text:
+    if source_is_bytes:
         source = BytesIO(source)
         if (rdf_format == "json-ld" or rdf_format == "json") and not has_json_ld:
             raise RuntimeError(

@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.9.10.post2] - 2019-03-28
+
+### Added
+- New ability for the RDF source loader to directly load a bytes string (for example, from a HTTP request body)
+  - To use, just put the bytes dump as the source parameter to the rdf load function
+
+
 ## [0.9.10.post1] - 2019-03-11
 
 ### Changed
@@ -372,7 +379,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.10.post1...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.10.post2...HEAD 
+[0.9.10.post2]: https://github.com/RDFLib/pySHACL/compare/v0.9.10.post1...v0.9.10.post2
 [0.9.10.post1]: https://github.com/RDFLib/pySHACL/compare/v0.9.10...v0.9.10.post1
 [0.9.10]: https://github.com/RDFLib/pySHACL/compare/v0.9.9.post1...v0.9.10
 [0.9.9.post1]: https://github.com/RDFLib/pySHACL/compare/v0.9.9...v0.9.9.post1
