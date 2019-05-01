@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.9.11] - 2019-05-01
+
+### Changed
+- When using the pySHACL `Validator` class directly, the `target_graph` property will now be correctly updated to always
+  refer to the fully expanded graph if inferencing is enabled, and will be the mixed graph if the ontology-mixin option 
+  is enabled.
+- Fixed a bug in the commandline tool when the validator throws a ValidationError, the `validator()` helper would catch 
+  and format the error, so the commandline tool would output the wrong text and return the wrong exit code.
+
+
 ## [0.9.10.post2] - 2019-03-28
 
 ### Added
@@ -379,7 +389,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.10.post2...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.11...HEAD 
+[0.9.11]: https://github.com/RDFLib/pySHACL/compare/v0.9.10.post2...v0.9.11
 [0.9.10.post2]: https://github.com/RDFLib/pySHACL/compare/v0.9.10.post1...v0.9.10.post2
 [0.9.10.post1]: https://github.com/RDFLib/pySHACL/compare/v0.9.10...v0.9.10.post1
 [0.9.10]: https://github.com/RDFLib/pySHACL/compare/v0.9.9.post1...v0.9.10

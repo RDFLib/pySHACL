@@ -83,6 +83,8 @@ if args.data_file_format:
         validator_kwargs['data_graph_format'] = f
 try:
     is_conform, v_graph, v_text = validate(args.data, **validator_kwargs)
+    if isinstance(v_graph, BaseException):
+        raise v_graph
 except ValidationFailure as vf:
     args.output.write("Validator generated a Validation Failure result:\n")
     args.output.write(str(vf.message))

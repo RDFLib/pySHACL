@@ -93,33 +93,41 @@ class Validator(object):
                 vg.add((s, p, o))
         return vg, v_text
 
-    def __init__(self, target_graph, *args, shacl_graph=None,
+    def __init__(self, data_graph, *args, shacl_graph=None,
                  ont_graph=None, options=None, **kwargs):
         options = options or {}
         self._load_default_options(options)
         self.options = options
         self.logger = options['logger']
         self.pre_inferenced = kwargs.pop('pre_inferenced', False)
-        assert isinstance(target_graph, rdflib.Graph),\
-            "target_graph must be a rdflib Graph object"
-        self.target_graph = target_graph
+        assert isinstance(data_graph, rdflib.Graph),\
+            "data_graph must be a rdflib Graph object"
+        self.data_graph = data_graph
+        self._target_graph = self.data_graph
         self.ont_graph = ont_graph
         if shacl_graph is None:
-            shacl_graph = clone_graph(target_graph, identifier='shacl')
+            shacl_graph = clone_graph(data_graph, identifier='shacl')
         assert isinstance(shacl_graph, rdflib.Graph),\
             "shacl_graph must be a rdflib Graph object"
         self.shacl_graph = SHACLGraph(shacl_graph, self.logger)
 
+    @property
+    def target_graph(self):
+        return self._target_graph
+
     def run(self):
         if self.ont_graph is not None:
-            the_target_graph = mix_graphs(self.target_graph, self.ont_graph)
+            the_target_graph = mix_graphs(self.data_graph, self.ont_graph)
         else:
-            the_target_graph = self.target_graph
+            the_target_graph = self.data_graph
         inference_option = self.options.get('inference', 'none')
-        if inference_option and not self.pre_inferenced and \
-                str(inference_option) != "none":
-            self._run_pre_inference(the_target_graph, inference_option)
-            self.pre_inferenced = True
+        if inference_option:
+            if self.pre_inferenced:
+                the_target_graph = self._target_graph
+            elif str(inference_option) != "none":
+                self._run_pre_inference(the_target_graph, inference_option)
+                self.pre_inferenced = True
+        self._target_graph = the_target_graph
         reports = []
         non_conformant = False
         for s in self.shacl_graph.shapes:
