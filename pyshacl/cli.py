@@ -80,20 +80,20 @@ def main():
     except ValidationFailure as vf:
         args.output.write("Validator generated a Validation Failure result:\n")
         args.output.write(str(vf.message))
-        return 1
+        sys.exit(1)
     except ReportableRuntimeError as rre:
         sys.stderr.write("Validator encountered a Runtime Error:\n")
         sys.stderr.write(str(rre.message))
         sys.stderr.write("If you believe this is a bug in pyshacl, open an Issue on the pyshacl github page.\n")
-        return 2
+        sys.exit(2)
     except NotImplementedError as nie:
         sys.stderr.write("Validator feature is not implemented:\n")
         sys.stderr.write(str(nie.args[0]))
         sys.stderr.write("If your use-case requires this feature, open an Issue on the pyshacl github page.\n")
-        return 3
+        sys.exit(3)
     except RuntimeError as re:
         sys.stderr.write("Validator encountered a Runtime Error.")
-        return 2
+        sys.exit(2)
 
     if args.format == 'human':
         args.output.write(v_text)
@@ -103,10 +103,10 @@ def main():
         args.output.write(v_graph)
     args.output.close()
     if is_conform:
-        return 0
+        sys.exit(0)
     else:
-        return 1
+        sys.exit(1)
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
