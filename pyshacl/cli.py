@@ -1,21 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from os import path
 import sys
 import argparse
 
-# Prevent python from importing _this_ file (named pyshacl)
-# when we do `from pyshacl import ...` below.
-HERE_DIR = path.abspath(path.dirname(__file__))
-PARENT_DIR = path.dirname(HERE_DIR)
-if HERE_DIR in sys.path:
-    sys.path.remove(HERE_DIR)
-if PARENT_DIR not in sys.path:
-    sys.path.append(PARENT_DIR)
-
-from pyshacl import validate
-from pyshacl.errors import ReportableRuntimeError, ValidationFailure
+from . import validate
+from .errors import ReportableRuntimeError, ValidationFailure
 
 parser = argparse.ArgumentParser(description='Run the pySHACL validator from the command line.')
 parser.add_argument('data', metavar='DataGraph', type=argparse.FileType('rb'),
@@ -52,67 +42,71 @@ parser.add_argument('-o', '--output', dest='output', nargs='?', type=argparse.Fi
                     help='Send output to a file (defaults to stdout).',
                     default=sys.stdout)
 
-args = parser.parse_args()
 
-validator_kwargs = {'debug': args.debug}
-if args.shacl is not None:
-    validator_kwargs['shacl_graph'] = args.shacl
-if args.ont is not None:
-    validator_kwargs['ont_graph'] = args.ont
-if args.format != 'human':
-    validator_kwargs['serialize_report_graph'] = args.format
-if args.inference != 'none':
-    validator_kwargs['inference'] = args.inference
-if args.imports:
-    validator_kwargs['do_owl_imports'] = True
-if args.metashacl:
-    validator_kwargs['meta_shacl'] = True
-if args.abort:
-    validator_kwargs['abort_on_error'] = True
-if args.shacl_file_format:
-    f = args.shacl_file_format
-    if f != "auto":
-        validator_kwargs['shacl_graph_format'] = f
-if args.ont_file_format:
-    f = args.ont_file_format
-    if f != "auto":
-        validator_kwargs['ont_graph_format'] = f
-if args.data_file_format:
-    f = args.data_file_format
-    if f != "auto":
-        validator_kwargs['data_graph_format'] = f
-try:
-    is_conform, v_graph, v_text = validate(args.data, **validator_kwargs)
-    if isinstance(v_graph, BaseException):
-        raise v_graph
-except ValidationFailure as vf:
-    args.output.write("Validator generated a Validation Failure result:\n")
-    args.output.write(str(vf.message))
-    sys.exit(1)
-except ReportableRuntimeError as rre:
-    sys.stderr.write("Validator encountered a Runtime Error:\n")
-    sys.stderr.write(str(rre.message))
-    sys.stderr.write("If you believe this is a bug in pyshacl, open an Issue on the pyshacl github page.\n")
-    sys.exit(2)
-except NotImplementedError as nie:
-    sys.stderr.write("Validator feature is not implemented:\n")
-    sys.stderr.write(str(nie.args[0]))
-    sys.stderr.write("If your use-case requires this feature, open an Issue on the pyshacl github page.\n")
-    sys.exit(3)
-except RuntimeError as re:
-    sys.stderr.write("Validator encountered a Runtime Error.")
-    sys.exit(2)
+def main():
+    args = parser.parse_args()
+
+    validator_kwargs = {'debug': args.debug}
+    if args.shacl is not None:
+        validator_kwargs['shacl_graph'] = args.shacl
+    if args.ont is not None:
+        validator_kwargs['ont_graph'] = args.ont
+    if args.format != 'human':
+        validator_kwargs['serialize_report_graph'] = args.format
+    if args.inference != 'none':
+        validator_kwargs['inference'] = args.inference
+    if args.imports:
+        validator_kwargs['do_owl_imports'] = True
+    if args.metashacl:
+        validator_kwargs['meta_shacl'] = True
+    if args.abort:
+        validator_kwargs['abort_on_error'] = True
+    if args.shacl_file_format:
+        f = args.shacl_file_format
+        if f != "auto":
+            validator_kwargs['shacl_graph_format'] = f
+    if args.ont_file_format:
+        f = args.ont_file_format
+        if f != "auto":
+            validator_kwargs['ont_graph_format'] = f
+    if args.data_file_format:
+        f = args.data_file_format
+        if f != "auto":
+            validator_kwargs['data_graph_format'] = f
+    try:
+        is_conform, v_graph, v_text = validate(args.data, **validator_kwargs)
+        if isinstance(v_graph, BaseException):
+            raise v_graph
+    except ValidationFailure as vf:
+        args.output.write("Validator generated a Validation Failure result:\n")
+        args.output.write(str(vf.message))
+        return 1
+    except ReportableRuntimeError as rre:
+        sys.stderr.write("Validator encountered a Runtime Error:\n")
+        sys.stderr.write(str(rre.message))
+        sys.stderr.write("If you believe this is a bug in pyshacl, open an Issue on the pyshacl github page.\n")
+        return 2
+    except NotImplementedError as nie:
+        sys.stderr.write("Validator feature is not implemented:\n")
+        sys.stderr.write(str(nie.args[0]))
+        sys.stderr.write("If your use-case requires this feature, open an Issue on the pyshacl github page.\n")
+        return 3
+    except RuntimeError as re:
+        sys.stderr.write("Validator encountered a Runtime Error.")
+        return 2
+
+    if args.format == 'human':
+        args.output.write(v_text)
+    else:
+        if isinstance(v_graph, bytes):
+            v_graph = v_graph.decode('utf-8')
+        args.output.write(v_graph)
+    args.output.close()
+    if is_conform:
+        return 0
+    else:
+        return 1
 
 
-if args.format == 'human':
-    args.output.write(v_text)
-else:
-    if isinstance(v_graph, bytes):
-        v_graph = v_graph.decode('utf-8')
-    args.output.write(v_graph)
-args.output.close()
-if is_conform:
-    sys.exit(0)
-else:
-    sys.exit(1)
-
+if __name__ == "__main__":
+    sys.exit(main())
