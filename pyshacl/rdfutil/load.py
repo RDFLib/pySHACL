@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-from os import path
 from io import IOBase, BytesIO
+from pathlib import Path
 import platform
 from urllib import request
 from urllib.error import HTTPError
@@ -70,10 +70,7 @@ def load_from_source(source, g=None, rdf_format=None, do_owl_imports=False, impo
             source_is_open = True
             source_was_open = True
         filename = source.name
-        if is_windows:
-            public_id = "file:///{}#".format(path.abspath(filename).replace("\\", "/"))
-        else:
-            public_id = "file://{}#".format(path.abspath(filename))
+        public_id = Path(filename).resolve().as_uri() + "#"
     elif isinstance(source, str):
         if is_windows and source.startswith('file:///'):
             public_id = source
@@ -151,12 +148,9 @@ def load_from_source(source, g=None, rdf_format=None, do_owl_imports=False, impo
         elif filename.endswith('.xml') or filename.endswith('.rdf'):
             rdf_format = rdf_format or 'xml'
     if source_is_file and filename and not source_is_open:
-        filename = path.abspath(filename)
+        filename = Path(filename).resolve()
         if not public_id:
-            if is_windows:
-                public_id = "file:///{}#".format(filename.replace('\\', '/'))
-            else:
-                public_id = "file://{}#".format(filename)
+            public_id = Path(filename).as_uri() + "#"
         source = open(filename, mode='rb')
         source_is_open = True
     if source_is_open:
