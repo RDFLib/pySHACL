@@ -39,7 +39,7 @@ with open_local(['requirements.txt']) as req:
 setup(
     name='pyshacl',
     packages=['pyshacl', 'pyshacl.constraints', 'pyshacl.constraints.core', 'pyshacl.constraints.sparql', 'pyshacl.inference', 'pyshacl.rdfutil', 'pyshacl.monkey'],
-    scripts=['bin/pyshacl'],
+    entry_points={'console_scripts': ['pyshacl = pyshacl.cli:main']},
     package_dir={'pyshacl': './pyshacl'},
     package_data={'pyshacl': ['*.pickle']},
     #data_files=[('pyshacl', ['pyshacl/shacl-shacl.pickle'])],
@@ -75,4 +75,3 @@ setup(
     install_requires=requirements,
     dependency_links=dependency_links
 )
-
