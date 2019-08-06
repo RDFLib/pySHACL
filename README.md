@@ -72,7 +72,7 @@ optional arguments:
                         shacl Shapes Graph before before validating the Data
                         Graph.
   --imports             Allow import of sub-graphs defined in statements with
-                        ow:imports.
+                        owl:import.
   -a, --abort           Abort on first error.
   -d, --debug           Output additional runtime messages.
   -f {human,turtle,xml,json-ld,nt,n3}, --format {human,turtle,xml,json-ld,nt,n3}
