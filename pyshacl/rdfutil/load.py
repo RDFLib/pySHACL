@@ -44,6 +44,19 @@ def get_rdf_from_web(url):
 
 
 def load_from_source(source, g=None, rdf_format=None, do_owl_imports=False, import_chain=None):
+    """
+
+    :param source:
+    :param g:
+    :type g: rdflib.Graph
+    :param rdf_format:
+    :type rdf_format: str
+    :param do_owl_imports:
+    :type do_owl_imports: bool
+    :param import_chain:
+    :type import_chain: dict
+    :return:
+    """
     source_is_graph = False
     source_is_open = False
     source_was_open = False
@@ -52,14 +65,14 @@ def load_from_source(source, g=None, rdf_format=None, do_owl_imports=False, impo
     filename = None
     public_id = None
     uri_prefix = None
-    is_imported_graph = do_owl_imports and isinstance(do_owl_imports, int) and \
-                        do_owl_imports > 1
-    if isinstance(source, rdflib.Graph):
+    is_imported_graph = do_owl_imports and isinstance(do_owl_imports, int) \
+                        and do_owl_imports > 1
+    if isinstance(source, (rdflib.Graph, rdflib.ConjunctiveGraph, rdflib.Dataset)):
         source_is_graph = True
         if g is None:
             g = source
         else:
-            raise RuntimeError("Cannot pass in both target=rdflib.Graph and g=graph.")
+            raise RuntimeError("Cannot pass in both target=rdflib.Graph/Dataset and g=graph.")
     elif isinstance(source, IOBase) and hasattr(source, 'read'):
         source_is_file = True
         if hasattr(source, 'closed'):
@@ -76,7 +89,7 @@ def load_from_source(source, g=None, rdf_format=None, do_owl_imports=False, impo
             public_id = source
             source_is_file = True
             filename = source[8:]
-        elif source.startswith('file://'):
+        elif not is_windows and source.startswith('file://'):
             public_id = source
             source_is_file = True
             filename = source[7:]
@@ -114,8 +127,8 @@ def load_from_source(source, g=None, rdf_format=None, do_owl_imports=False, impo
             source = source.encode('utf-8')
             source_is_bytes = True
     elif isinstance(source, bytes):
-        if source.startswith(b'file:///') or\
-           source.startswith(b'file://') or\
+        if (is_windows and source.startswith(b'file:///')) or \
+           (not is_windows and source.startswith(b'file://')) or \
            source.startswith(b'http:') or source.startswith(b'https:'):
             raise ValueError("file:// and http:// strings should be given as str, not bytes.")
         first_char = source[0:1]
@@ -132,9 +145,9 @@ def load_from_source(source, g=None, rdf_format=None, do_owl_imports=False, impo
     else:
         raise ValueError("Cannot determine the format of the input graph")
     if g is None:
-        g = rdflib.Graph()
+        g = rdflib.Dataset()
     else:
-        if not isinstance(g, rdflib.Graph):
+        if not isinstance(g, (rdflib.Graph, rdflib.Dataset, rdflib.ConjunctiveGraph)):
             raise RuntimeError("Passing in g must be a Graph.")
     if filename:
         if filename.endswith('.ttl'):
@@ -145,6 +158,10 @@ def load_from_source(source, g=None, rdf_format=None, do_owl_imports=False, impo
             rdf_format = rdf_format or 'n3'
         elif filename.endswith('.json'):
             rdf_format = rdf_format or 'json-ld'
+        elif filename.endswith('.nq') or filename.endswith('.nquads'):
+            rdf_format = rdf_format or 'nquads'
+        elif filename.endswith('.trig'):
+            rdf_format = rdf_format or 'trig'
         elif filename.endswith('.xml') or filename.endswith('.rdf'):
             rdf_format = rdf_format or 'xml'
     if source_is_file and filename and not source_is_open:

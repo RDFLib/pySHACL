@@ -22,7 +22,6 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - Fix owl:import typo [#27](https://github.com/RDFLib/pySHACL/pull/27)
 
 
-
 ## [0.9.11] - 2019-05-01
 
 ### Changed
