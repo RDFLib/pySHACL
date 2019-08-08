@@ -116,6 +116,10 @@ class SHACLGraph(object):
             self._build_node_shape_cache()
         return self._node_shape_cache.values()
 
+    def lookup_shape_from_node(self, node):
+        # This will throw a KeyError if it is not found. This is intentionally not caught here.
+        return self._node_shape_cache[node]
+
     """
     A shape is an IRI or blank node s that fulfills at least one of the following conditions in the shapes graph:
 
@@ -170,6 +174,14 @@ class SHACLGraph(object):
                 set(has_target_objects_of).union(
                     set(has_target_subjects_of))))
 
+        # implicit shapes: their subjects must be shapes
+        subject_of_property = {s for s, o in g.subject_objects(SH_property)}
+        subject_of_node = {s for s, o in g.subject_objects(SH_node)}
+        subject_shapes = subject_shapes.union(
+            set(subject_of_property).union(
+                set(subject_of_node)))
+
+        # shape-expecting properties, their values must be shapes.
         value_of_property = {o for s, o in g.subject_objects(SH_property)}
         value_of_node = {o for s, o in g.subject_objects(SH_node)}
         value_of_not = {o for s, o in g.subject_objects(SH_not)}

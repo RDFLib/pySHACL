@@ -2,13 +2,14 @@
 import rdflib
 
 from rdflib.namespace import Namespace
-from rdflib import RDFS, RDF
+from rdflib import RDFS, RDF, OWL
 
 SH = Namespace('http://www.w3.org/ns/shacl#')
 
 # Classes
 RDFS_Resource = RDFS.term('Resource')
 RDFS_Class = RDFS.term('Class')
+OWL_Ontology = OWL.term("Ontology")
 SH_NodeShape = SH.term('NodeShape')
 SH_PropertyShape = SH.term('PropertyShape')
 SH_ValidationResult = SH.term('ValidationResult')
@@ -22,11 +23,17 @@ SH_Literal = SH.term('Literal')
 SH_BlankNodeOrIRI = SH.term('BlankNodeOrIRI')
 SH_BlankNodeORLiteral = SH.term('BlankNodeOrLiteral')
 SH_IRIOrLiteral = SH.term('IRIOrLiteral')
+SH_SPARQLFunction = SH.term('SPARQLFunction')
+SH_SPARQLRule = SH.term('SPARQLRule')
+SH_TripleRule = SH.term('TripleRule')
 
 # predicates
 RDF_type = RDF.term('type')
 RDF_first = RDF.term('first')
 RDF_rest = RDF.term('rest')
+RDF_object = RDF.term('object')
+RDF_predicate = RDF.term('predicate')
+RDF_subject = RDF.term('subject')
 RDFS_subClassOf = RDFS.term('subClassOf')
 SH_path = SH.term('path')
 SH_deactivated = SH.term('deactivated')
@@ -58,4 +65,12 @@ SH_zeroOrOnePath = SH.term('zeroOrOnePath')
 SH_prefixes = SH.term('prefixes')
 SH_prefix = SH.term('prefix')
 SH_namespace = SH.term('namespace')
+SH_rule = SH.term('rule')
+SH_condition = SH.term('condition')
+SH_order = SH.term('order')
+SH_construct = SH.term('construct')
+SH_subject = SH.term('subject')
+SH_predicate = SH.term('predicate')
+SH_object = SH.term('object')
+SH_this = SH.term('this')
 

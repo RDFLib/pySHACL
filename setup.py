@@ -38,7 +38,12 @@ with open_local(['requirements.txt']) as req:
 
 setup(
     name='pyshacl',
-    packages=['pyshacl', 'pyshacl.constraints', 'pyshacl.constraints.core', 'pyshacl.constraints.sparql', 'pyshacl.inference', 'pyshacl.rdfutil', 'pyshacl.monkey'],
+    packages=[
+        'pyshacl',
+        'pyshacl.constraints', 'pyshacl.constraints.core', 'pyshacl.constraints.sparql',
+        'pyshacl.rules', 'pyshacl.rules.triple', 'pyshacl.rules.sparql',
+        'pyshacl.inference', 'pyshacl.rdfutil', 'pyshacl.monkey'
+    ],
     entry_points={'console_scripts': ['pyshacl = pyshacl.cli:main']},
     package_dir={'pyshacl': './pyshacl'},
     package_data={'pyshacl': ['*.pickle']},

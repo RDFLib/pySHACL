@@ -70,6 +70,8 @@ ex:Rectangle
     $this a ex:Square .
 }
 WHERE {
+    $this ?p ?o .
+    #Note, this where clause was added to ensure rdflib does not erase the $this variable.
 }""" ;
       sh:prefixes <http://datashapes.org/shasf/tests/rules/sparql/classify-square.test> ;
     ] ;

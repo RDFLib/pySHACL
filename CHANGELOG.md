@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.10.0] - 2019-08-08
+
+### Added
+- New features from SHACL Advanced Features spec:
+  - SHACL Triple Rules
+  - SHACL SPARQL Rules
+- New option in the cli application to enable advanced features with `--advanced`.
+  - Changed the `-a` shortcut to mean `--advanced` rather than `--abort`.
+- New tests for the advanced features
+
+### Changed
+- Changed usage of setup.py scripts, to proper cli entrypoints. [#23](https://github.com/RDFLib/pySHACL/pull/23)
+  - This should not affect end user usability of the pyshacl script.
+- Updated README.md to reflect changes including Advanced Features, and cli `--advanced` arg.
+- Updated feature matrix to add section for SHACL Advanced Features.
+- Fix owl:import typo [#27](https://github.com/RDFLib/pySHACL/pull/27)
+
+
+
 ## [0.9.11] - 2019-05-01
 
 ### Changed
@@ -389,7 +408,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.9.11...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.10.0...HEAD 
+[0.10.0]: https://github.com/RDFLib/pySHACL/compare/v0.9.11...v0.10.0
 [0.9.11]: https://github.com/RDFLib/pySHACL/compare/v0.9.10.post2...v0.9.11
 [0.9.10.post2]: https://github.com/RDFLib/pySHACL/compare/v0.9.10.post1...v0.9.10.post2
 [0.9.10.post1]: https://github.com/RDFLib/pySHACL/compare/v0.9.10...v0.9.10.post1

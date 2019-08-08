@@ -6,14 +6,16 @@ import owlrl
 
 if owlrl.json_ld_available:
     import rdflib_jsonld
+from rdflib import Literal, URIRef, BNode
 from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 from pyshacl.inference import CustomRDFSSemantics, CustomRDFSOWLRLSemantics
 from pyshacl.shacl_graph import SHACLGraph
 from pyshacl.consts import RDF_type, SH_conforms, \
     SH_result, SH_ValidationReport, RDFS_Resource, SH_resultMessage, \
-    SH_sourceShape, SH_sourceConstraint, SH_resultPath
+    SH_sourceShape, SH_sourceConstraint, SH_resultPath, RDF_object, RDF_subject, RDF_predicate
+from pyshacl.rules import gather_rules, apply_rules, gather_functions
 from pyshacl.rdfutil import load_from_source, clone_graph, \
-    clone_node, compare_blank_node, mix_graphs
+    clone_node, compare_blank_node, mix_graphs, compare_literal
 from pyshacl.monkey import apply_patches
 
 log_handler = logging.StreamHandler(stderr)
@@ -28,12 +30,23 @@ log_handler.setLevel(logging.INFO)
 class Validator(object):
     @classmethod
     def _load_default_options(cls, options_dict):
+        options_dict.setdefault('advanced', False)
         options_dict.setdefault('inference', 'none')
         options_dict.setdefault('abort_on_error', False)
         if 'logger' not in options_dict:
             options_dict['logger'] = logging.getLogger(__name__)
 
-    def _run_pre_inference(self, target_graph, inference_option):
+    @classmethod
+    def _run_pre_inference(cls, target_graph, inference_option, logger=None):
+        """
+        Note, this is the OWL/RDFS pre-inference,
+        it is not the SHACL-Rule inferencing step.
+        :param target_graph:
+        :param inference_option:
+        :return:
+        """
+        if logger is None:
+            logger = logging.getLogger(__name__)
         try:
             if inference_option == 'rdfs':
                 inferencer = owlrl.DeductiveClosure(CustomRDFSSemantics)
@@ -47,7 +60,7 @@ class Validator(object):
                     "Don't know how to do '{}' type inferencing."
                     .format(inference_option))
         except Exception as e:  # pragma: no cover
-            self.logger.error("Error during creation of OWL-RL Deductive Closure")
+            logger.error("Error during creation of OWL-RL Deductive Closure")
             if isinstance(e, ReportableRuntimeError):
                 raise e
             raise ReportableRuntimeError("Error during creation of OWL-RL Deductive Closure\n"
@@ -55,7 +68,7 @@ class Validator(object):
         try:
             inferencer.expand(target_graph)
         except Exception as e:  # pragma: no cover
-            self.logger.error("Error while running OWL-RL Deductive Closure")
+            logger.error("Error while running OWL-RL Deductive Closure")
             raise ReportableRuntimeError("Error while running OWL-RL Deductive Closure\n"
                                          "{}".format(str(e.args[0])))
 
@@ -72,9 +85,9 @@ class Validator(object):
         sg = shacl_graph.graph
         for p, n in sg.namespace_manager.namespaces():
             vg.namespace_manager.bind(p, n)
-        vr = rdflib.BNode()
+        vr = BNode()
         vg.add((vr, RDF_type, SH_ValidationReport))
-        vg.add((vr, SH_conforms, rdflib.Literal(conforms)))
+        vg.add((vr, SH_conforms, Literal(conforms)))
         for result in iter(results):
             _d, _bn, _tr = result
             v_text += _d
@@ -103,7 +116,7 @@ class Validator(object):
         assert isinstance(data_graph, rdflib.Graph),\
             "data_graph must be a rdflib Graph object"
         self.data_graph = data_graph
-        self._target_graph = self.data_graph
+        self._target_graph = None
         self.ont_graph = ont_graph
         if shacl_graph is None:
             shacl_graph = clone_graph(data_graph, identifier='shacl')
@@ -125,12 +138,17 @@ class Validator(object):
             if self.pre_inferenced:
                 the_target_graph = self._target_graph
             elif str(inference_option) != "none":
-                self._run_pre_inference(the_target_graph, inference_option)
+                self._run_pre_inference(the_target_graph, inference_option, self.logger)
                 self.pre_inferenced = True
         self._target_graph = the_target_graph
         reports = []
         non_conformant = False
-        for s in self.shacl_graph.shapes:
+        shapes = self.shacl_graph.shapes  # This property getter triggers shapes harvest.
+        if self.options['advanced'] is True:
+            functions = gather_functions(self.shacl_graph)
+            rules = gather_rules(self.shacl_graph)
+            apply_rules(rules, the_target_graph)
+        for s in shapes:
             _is_conform, _reports = s.validate(the_target_graph)
             non_conformant = non_conformant or (not _is_conform)
             reports.extend(_reports)
@@ -157,7 +175,7 @@ def meta_validate(shacl_graph, inference='rdfs', **kwargs):
 meta_validate.shacl_shacl_graph = None
 
 
-def validate(data_graph, *args, shacl_graph=None, ont_graph=None, inference=None, abort_on_error=False, **kwargs):
+def validate(data_graph, *args, shacl_graph=None, ont_graph=None, advanced=False, inference=None, abort_on_error=False, **kwargs):
     """
     :param data_graph: rdflib.Graph or file path or web url of the data to validate
     :type data_graph: rdflib.Graph | str
@@ -223,14 +241,14 @@ def validate(data_graph, *args, shacl_graph=None, ont_graph=None, inference=None
         validator = Validator(
             data_graph, shacl_graph=shacl_graph, ont_graph=ont_graph,
             options={'inference': inference, 'abort_on_error': abort_on_error,
-                     'logger': log})
+                     'advanced': advanced, 'logger': log})
         conforms, report_graph, report_text = validator.run()
     except ValidationFailure as e:
         conforms = False
         report_graph = e
         report_text = "Validation Failure - {}".format(e.message)
     if do_check_dash_result:
-        passes = check_dash_result(report_graph, shacl_graph or data_graph)
+        passes = check_dash_result(validator.target_graph, report_graph, shacl_graph or data_graph)
         return passes, report_graph, report_text
     if do_check_sht_result:
         (sht_graph, sht_result_node) = kwargs.pop('sht_validate', (False, None))
@@ -318,22 +336,83 @@ def compare_validation_reports(report_graph, expected_graph, expected_result):
         return False
     return True
 
-def check_dash_result(report_graph, expected_result_graph):
+def compare_inferencing_reports(data_graph, expected_graph, expected_result):
+    expected_object = set(expected_graph.objects(expected_result, RDF_object))
+    if len(expected_object) < 1:
+        raise ReportableRuntimeError(
+            "Cannot check the expected result, the given expectedResult does not have an rdf:object.")
+    expected_object = next(iter(expected_object))
+    expected_subject = set(expected_graph.objects(expected_result, RDF_subject))
+    if len(expected_subject) < 1:
+        raise ReportableRuntimeError(
+            "Cannot check the expected result, the given expectedResult does not have an rdf:subject.")
+    expected_subject = next(iter(expected_subject))
+    expected_predicate = set(expected_graph.objects(expected_result, RDF_predicate))
+    if len(expected_predicate) < 1:
+        raise ReportableRuntimeError(
+            "Cannot check the expected result, the given expectedResult does not have an rdf:predicate.")
+    expected_predicate = next(iter(expected_predicate))
+    if isinstance(expected_object, Literal):
+        found_objs = set(data_graph.objects(expected_subject, expected_predicate))
+        if len(found_objs) < 1:
+            return False
+        found = False
+        for o in found_objs:
+            if isinstance(o, Literal):
+                found = 0 == compare_literal(expected_graph, expected_object, data_graph, o)
+        return found
+
+    elif isinstance(expected_object, BNode):
+        found_objs = set(data_graph.objects(expected_subject, expected_predicate))
+        if len(found_objs) < 1:
+            return False
+        found = False
+        for o in found_objs:
+            if isinstance(o, BNode):
+                found = 0 == compare_blank_node(expected_graph, expected_object, data_graph, o)
+        return found
+    else:
+        found_triples = set(data_graph.triples((expected_subject, expected_predicate, expected_object)))
+        if len(found_triples) < 1:
+            return False
+    return True
+
+
+
+def check_dash_result(data_graph, report_graph, expected_result_graph):
     DASH = rdflib.namespace.Namespace('http://datashapes.org/dash#')
-    DASH_TestCase = DASH.term('GraphValidationTestCase')
+    DASH_GraphValidationTestCase = DASH.term('GraphValidationTestCase')
+    DASH_InferencingTestCase = DASH.term('InferencingTestCase')
     DASH_expectedResult = DASH.term('expectedResult')
 
-    test_cases = expected_result_graph.subjects(RDF_type, DASH_TestCase)
-    test_cases = set(test_cases)
-    if len(test_cases) < 1:  # pragma: no cover
-        raise ReportableRuntimeError("Cannot check the expected result, the given expected result graph does not have a GraphValidationTestCase.")
-    test_case = next(iter(test_cases))
-    expected_results = expected_result_graph.objects(test_case, DASH_expectedResult)
-    expected_results = set(expected_results)
-    if len(expected_results) < 1: # pragma: no cover
-        raise ReportableRuntimeError("Cannot check the expected result, the given GraphValidationTestCase does not have an expectedResult.")
-    expected_result = next(iter(expected_results))
-    return compare_validation_reports(report_graph, expected_result_graph, expected_result)
+    gv_test_cases = expected_result_graph.subjects(RDF_type, DASH_GraphValidationTestCase)
+    gv_test_cases = set(gv_test_cases)
+    inf_test_cases = expected_result_graph.subjects(RDF_type, DASH_InferencingTestCase)
+    inf_test_cases = set(inf_test_cases)
+
+    if len(gv_test_cases) > 0:
+        test_case = next(iter(gv_test_cases))
+        expected_results = expected_result_graph.objects(test_case, DASH_expectedResult)
+        expected_results = set(expected_results)
+        if len(expected_results) < 1:  # pragma: no cover
+            raise ReportableRuntimeError("Cannot check the expected result, the given GraphValidationTestCase does not have an expectedResult.")
+        expected_result = next(iter(expected_results))
+        gv_res = compare_validation_reports(report_graph, expected_result_graph, expected_result)
+    else:
+        gv_res = True
+    if len(inf_test_cases) > 0:
+        test_case = next(iter(inf_test_cases))
+        expected_results = expected_result_graph.objects(test_case, DASH_expectedResult)
+        expected_results = set(expected_results)
+        if len(expected_results) < 1:  # pragma: no cover
+            raise ReportableRuntimeError("Cannot check the expected result, the given InferencingTestCase does not have an expectedResult.")
+        expected_result = next(iter(expected_results))
+        inf_res = compare_inferencing_reports(data_graph, expected_result_graph, expected_result)
+    else:
+        inf_res = True
+    if gv_res is None and inf_res is None: # pragma: no cover
+        raise ReportableRuntimeError("Cannot check the expected result, the given expected result graph does not have a GraphValidationTestCase or InferencingTestCase.")
+    return gv_res and inf_res
 
 def check_sht_result(report_graph, sht_graph, sht_result_node):
     SHT = rdflib.namespace.Namespace('http://www.w3.org/ns/shacl-test#')

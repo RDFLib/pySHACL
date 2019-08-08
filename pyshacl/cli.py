@@ -4,8 +4,8 @@
 import sys
 import argparse
 
-from . import validate
-from .errors import ReportableRuntimeError, ValidationFailure
+from pyshacl import validate
+from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 
 parser = argparse.ArgumentParser(description='Run the pySHACL validator from the command line.')
 parser.add_argument('data', metavar='DataGraph', type=argparse.FileType('rb'),
@@ -22,7 +22,9 @@ parser.add_argument('-m', '--metashacl', dest='metashacl', action='store_true',
                     'Shapes Graph before before validating the Data Graph.')
 parser.add_argument('--imports', dest='imports', action='store_true',
                     default=False, help='Allow import of sub-graphs defined in statements with owl:import.')
-parser.add_argument('-a', '--abort', dest='abort', action='store_true',
+parser.add_argument('-a', '--advanced', dest='advanced', action='store_true',
+                    default=False, help='Enable features from the SHACL Advanced Features specification.')
+parser.add_argument('--abort', dest='abort', action='store_true',
                     default=False, help='Abort on first error.')
 parser.add_argument('-d', '--debug', dest='debug', action='store_true',
                     default=False, help='Output additional runtime messages.')
@@ -59,6 +61,8 @@ def main():
         validator_kwargs['do_owl_imports'] = True
     if args.metashacl:
         validator_kwargs['meta_shacl'] = True
+    if args.advanced:
+        validator_kwargs['advanced'] = True
     if args.abort:
         validator_kwargs['abort_on_error'] = True
     if args.shacl_file_format:

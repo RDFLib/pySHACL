@@ -8,7 +8,7 @@ from rdflib import RDF, XSD
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH, SH_message, SH_deactivated, SH_inversePath, SH_alternativePath, SH_zeroOrMorePath, \
-    SH_oneOrMorePath, SH_zeroOrOnePath, SH_prefixes, SH_prefix, SH_namespace
+    SH_oneOrMorePath, SH_zeroOrOnePath, SH_prefixes, SH_prefix, SH_namespace, RDF_type, OWL_Ontology
 from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError
 
 SH_sparql = SH.term('sparql')
@@ -44,9 +44,21 @@ class SPARQLQueryHelper(object):
         prefixes_vals = set(sg.objects(self.node, SH_prefixes))
         if len(prefixes_vals) < 1:
             return
+        named_graph = sg.identifier
+        if (named_graph):
+            ng_declares = set(sg.objects(named_graph, SH_declare))
+        else:
+            ng_declares = set()
+        onts = set(sg.subjects(RDF_type, OWL_Ontology))
+        ont_declares = set()
+        for o in onts:
+            ont_declares.update(set(sg.objects(o, SH_declare)))
+        global_declares = ng_declares.union(ont_declares)
+
         for prefixes_val in iter(prefixes_vals):
-            find_declares = set(sg.objects(prefixes_val, SH_declare))
-            for dec in iter(find_declares):
+            pfx_declares = set(sg.objects(prefixes_val, SH_declare))
+            all_declares = global_declares.union(pfx_declares)
+            for dec in iter(all_declares):
                 if isinstance(dec, rdflib.Literal):
                     raise ConstraintLoadError(
                         "sh:declare value must be either a URIRef or a BNode.",

@@ -35,12 +35,23 @@ if path.exists(check_bindir) and path.isdir(check_bindir):
 else:
     has_bin_dir = False
 
-if has_scripts_dir:
-    pyshacl_command = "{}/pyshacl".format(scr_dir)
-elif has_bin_dir:
-    pyshacl_command = "{}/pyshacl".format(bin_dir)
+cli_script = "pyshacl/cli.py"
+if in_test_dir:
+    cli_script = path.join('..', cli_script)
+check_cli_script = path.join(path.abspath(os.getcwd()), cli_script)
+if path.exists(check_cli_script) and path.isfile(check_cli_script):
+    has_cli_script = True
 else:
-    pyshacl_command = "pyshacl"
+    has_cli_script = False
+
+if has_scripts_dir:
+    pyshacl_command = ["{}/pyshacl".format(scr_dir)]
+elif has_bin_dir:
+    pyshacl_command = ["{}/pyshacl".format(bin_dir)]
+elif has_cli_script:
+    pyshacl_command = ["python3", cli_script]
+else:
+    pyshacl_command = ["pyshacl"]
 
 def test_cmdline():
     if not hasattr(subprocess, 'run'):
@@ -58,7 +69,7 @@ def test_cmdline():
     graph_file = path.join(cmdline_files_dir, 'd1.ttl')
     shacl_file = path.join(cmdline_files_dir, 's1.ttl')
     ont_file = path.join(cmdline_files_dir, 'o1.ttl')
-    cmd = [pyshacl_command]
+    cmd = pyshacl_command
     args = [
         graph_file,
         '-s', shacl_file,
@@ -88,7 +99,7 @@ def test_cmdline_fail():
     graph_file = path.join(cmdline_files_dir, 'd2.ttl')
     shacl_file = path.join(cmdline_files_dir, 's1.ttl')
     ont_file = path.join(cmdline_files_dir, 'o1.ttl')
-    cmd = [pyshacl_command]
+    cmd = pyshacl_command
     args = [
         graph_file,
         '-s', shacl_file,
@@ -124,7 +135,7 @@ def test_cmdline_web():
     graph_file = path.join(cmdline_files_dir, 'd1.ttl')
     shacl_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/s1.ttl"
     ont_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/o1.ttl"
-    cmd = [pyshacl_command]
+    cmd = pyshacl_command
     args = [
         graph_file,
         '-s', shacl_file,

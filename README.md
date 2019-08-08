@@ -29,7 +29,7 @@ $ deactivate
 For command line use:  
 _(these example commandline instructions are for a Linux/Unix based OS)_  
 ```bash
-pyshacl -s /path/to/shapesGraph.ttl -m -i rdfs -f human /path/to/dataGraph.ttl
+pyshacl -s /path/to/shapesGraph.ttl -m -i rdfs -a -f human /path/to/dataGraph.ttl
 ```
 Where
  - `-s` is an (optional) path to the shapes graph to use  
@@ -37,6 +37,7 @@ Where
  - `-i` is the pre-inferencing option  
  - `-f` is the ValidationReport output format (`human` = human-readable validation report)  
  - `-m` enable the meta-shacl feature  
+ - `-a` enable SHACL Advanced Features
 
 System exit codes are:  
 `0` = DataGraph is Conformant  
@@ -47,7 +48,7 @@ System exit codes are:
 Full CLI Usage options:
 ```bash
 usage: pyshacl [-h] [-s [SHACL]] [-e [ONT]] [-i {none,rdfs,owlrl,both}] [-m]
-               [--imports] [-a] [-d] [-f {human,turtle,xml,json-ld,nt,n3}]
+               [--imports] [--abort] [-a] [-d] [-f {human,turtle,xml,json-ld,nt,n3}]
                [-df {auto,turtle,xml,json-ld,nt,n3}]
                [-sf {auto,turtle,xml,json-ld,nt,n3}]
                [-ef {auto,turtle,xml,json-ld,nt,n3}] [-o [OUTPUT]]
@@ -73,7 +74,8 @@ optional arguments:
                         Graph.
   --imports             Allow import of sub-graphs defined in statements with
                         owl:import.
-  -a, --abort           Abort on first error.
+  -a, --advanced        Enable support for SHACL Advanced Features.
+  --abort               Abort on first error.
   -d, --debug           Output additional runtime messages.
   -f {human,turtle,xml,json-ld,nt,n3}, --format {human,turtle,xml,json-ld,nt,n3}
                         Choose an output format. Default is "human".
@@ -110,6 +112,7 @@ Options are 'rdfs', 'owlrl', 'both', or 'none'. The default is 'none'.
 * `debug` (optional) a Python `bool` value to indicate whether or not the program should emit debugging output text. Default is False.
 
 Some other optional keyword variables available available on the `validate` function:
+* `advanced`: Enable SHACL Advanced Features
 * `data_graph_format`: Override the format detection for the given data graph source file.
 * `shacl_graph_format`: Override the format detection for the given shacl graph source file.
 * `ont_graph_format`: Override the format detection for the given extra ontology graph source file.
@@ -175,7 +178,8 @@ Brisbane, Qld, Australia
 
 Lead Developer:  
 **Ashley Sommer**  
-*Software Engineer*  
+*Informatics Software Engineer*  
 CSIRO Land & Water, Environmental Informatics Group  
 Brisbane, Qld, Australia  
 <Ashley.Sommer@csiro.au>  
+<https://orcid.org/0000-0003-0590-0131>
