@@ -2,11 +2,12 @@
 from rdflib import Literal
 from rdflib.namespace import XSD
 
-from pyshacl.constraints.sparql.sparql_based_constraints import SPARQLQueryHelper
+
 from pyshacl.rdfutil import clone_graph
 from pyshacl.shape import Shape
 from pyshacl.errors import RuleLoadError, ReportableRuntimeError
-from pyshacl.consts import SH_construct, SH_prefixes
+from pyshacl.consts import SH_construct
+from pyshacl.sparql_query_helper import SPARQLQueryHelper
 from pyshacl.rules.shacl_rule import SHACLRule
 
 XSD_string = XSD.term('string')

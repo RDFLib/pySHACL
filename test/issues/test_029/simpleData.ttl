@@ -1,0 +1,16 @@
+@prefix metadata: <http://topbraid.org/metadata#> .
+@prefix ex:   <http://semantics.corning.com/ex#> .
+@prefix teamwork: <http://topbraid.org/teamwork#> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix test:	<http://semantics.corning.com/test#> .
+
+test:FuncNode	a	ex:Func;
+	ex:hasParameter test:FuncParam_b .
+	
+test:FuncParam_a	a	ex:FuncParam_Func_a .
+test:FuncParam_b	a	ex:FuncParam_Func_b .
+

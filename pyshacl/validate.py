@@ -4,12 +4,14 @@ import logging
 import rdflib
 import owlrl
 
+from pyshacl.rdfutil.clone import mix_datasets
+
 if owlrl.json_ld_available:
     import rdflib_jsonld
 from rdflib import Literal, URIRef, BNode
 from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 from pyshacl.inference import CustomRDFSSemantics, CustomRDFSOWLRLSemantics
-from pyshacl.shacl_graph import SHACLGraph
+from pyshacl.shapes_graph import ShapesGraph
 from pyshacl.consts import RDF_type, SH_conforms, \
     SH_result, SH_ValidationReport, RDFS_Resource, SH_resultMessage, \
     SH_sourceShape, SH_sourceConstraint, SH_resultPath, RDF_object, RDF_subject, RDF_predicate
@@ -65,6 +67,7 @@ class Validator(object):
                 raise e
             raise ReportableRuntimeError("Error during creation of OWL-RL Deductive Closure\n"
                                          "{}".format(str(e.args[0])))
+
         try:
             inferencer.expand(target_graph)
         except Exception as e:  # pragma: no cover
@@ -118,19 +121,31 @@ class Validator(object):
         self.data_graph = data_graph
         self._target_graph = None
         self.ont_graph = ont_graph
+        self.data_graph_is_multigraph = isinstance(self.data_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph))
+        if self.ont_graph is not None and \
+            isinstance(self.ont_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+            self.ont_graph.default_union = True
+
         if shacl_graph is None:
             shacl_graph = clone_graph(data_graph, identifier='shacl')
         assert isinstance(shacl_graph, rdflib.Graph),\
             "shacl_graph must be a rdflib Graph object"
-        self.shacl_graph = SHACLGraph(shacl_graph, self.logger)
+        self.shacl_graph = ShapesGraph(shacl_graph, self.logger)
 
     @property
     def target_graph(self):
         return self._target_graph
 
+    def mix_in_ontology(self):
+        if not self.data_graph_is_multigraph:
+            return mix_graphs(self.data_graph, self.ont_graph)
+        return mix_datasets(self.data_graph, self.ont_graph)
+
+
     def run(self):
         if self.ont_graph is not None:
-            the_target_graph = mix_graphs(self.data_graph, self.ont_graph)
+            # creates a copy of self.data_graph, doesn't modify it
+            the_target_graph = self.mix_in_ontology()
         else:
             the_target_graph = self.data_graph
         inference_option = self.options.get('inference', 'none')
@@ -144,14 +159,27 @@ class Validator(object):
         reports = []
         non_conformant = False
         shapes = self.shacl_graph.shapes  # This property getter triggers shapes harvest.
-        if self.options['advanced'] is True:
-            functions = gather_functions(self.shacl_graph)
-            rules = gather_rules(self.shacl_graph)
-            apply_rules(rules, the_target_graph)
-        for s in shapes:
-            _is_conform, _reports = s.validate(the_target_graph)
-            non_conformant = non_conformant or (not _is_conform)
-            reports.extend(_reports)
+        if self.options['advanced']:
+            advanced = {
+                'functions': gather_functions(self.shacl_graph),
+                'rules': gather_rules(self.shacl_graph)
+            }
+            for s in shapes:
+                s.set_advanced(True)
+        else:
+            advanced = {}
+        if isinstance(the_target_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+            named_graphs = [the_target_graph.get_context(i) if not isinstance(i, rdflib.Graph) else i for i in the_target_graph.store.contexts(None)]
+        else:
+            named_graphs = [the_target_graph]
+        for g in named_graphs:
+            if advanced:
+                #apply functions?
+                apply_rules(advanced['rules'], g)
+            for s in shapes:
+                _is_conform, _reports = s.validate(g)
+                non_conformant = non_conformant or (not _is_conform)
+                reports.extend(_reports)
         v_report, v_text = self.create_validation_report((not non_conformant), the_target_graph, self.shacl_graph, reports)
         return (not non_conformant), v_report, v_text
 
@@ -168,8 +196,8 @@ def meta_validate(shacl_graph, inference='rdfs', **kwargs):
             shacl_shacl_store = u.load()
         shacl_shacl_graph = rdflib.Graph(store=shacl_shacl_store, identifier="http://www.w3.org/ns/shacl-shacl")
         meta_validate.shacl_shacl_graph = shacl_shacl_graph
-    shacl_graph = load_from_source(shacl_graph,
-                                  rdf_format=kwargs.pop('shacl_graph_format', None))
+    shacl_graph = load_from_source(shacl_graph, rdf_format=kwargs.pop('shacl_graph_format', None),
+                                   multigraph=True)
     _ = kwargs.pop('meta_shacl', None)
     return validate(shacl_graph, shacl_graph=shacl_shacl_graph, inference=inference, **kwargs)
 meta_validate.shacl_shacl_graph = None
@@ -197,18 +225,6 @@ def validate(data_graph, *args, shacl_graph=None, ont_graph=None, advanced=False
         log_handler.setLevel(logging.DEBUG)
         log.setLevel(logging.DEBUG)
     apply_patches()
-    depr_target_graph = kwargs.pop('target_graph', None)
-    if depr_target_graph:
-        # TODO:coverage: will be fixed when we remove this deprecation
-        msg = "The target_graph parameter is deprecated. Use data_graph instead."
-        log.warning(msg)
-        if data_graph is None:
-            data_graph = depr_target_graph
-    depr_target_graph_format = kwargs.pop('target_graph_format', None)
-    if depr_target_graph_format:
-        # TODO:coverage: will be fixed when we remove this deprecation
-        msg = "The target_graph_format parameter is deprecated. Use data_graph_format instead."
-        log.warning(msg)
     do_check_dash_result = kwargs.pop('check_dash_result', False)
     do_check_sht_result = kwargs.pop('check_sht_result', False)
     if kwargs.get('meta_shacl', False):
@@ -221,21 +237,21 @@ def validate(data_graph, *args, shacl_graph=None, ont_graph=None, advanced=False
             raise ReportableRuntimeError(msg)
     do_owl_imports = kwargs.pop('do_owl_imports', False)
     data_graph_format = kwargs.pop('data_graph_format', None)
-    if data_graph_format is None:
-        # TODO:coverage: will be fixed when we remove this deprecation
-        data_graph_format = depr_target_graph_format
     data_graph = load_from_source(data_graph,
                                   rdf_format=data_graph_format,
+                                  multigraph=True,
                                   do_owl_imports=False)  # no imports on data_graph
     ont_graph_format = kwargs.pop('ont_graph_format', None)
     if ont_graph is not None:
         ont_graph = load_from_source(ont_graph,
                                      rdf_format=ont_graph_format,
+                                     multigraph=True,
                                      do_owl_imports=do_owl_imports)
     shacl_graph_format = kwargs.pop('shacl_graph_format', None)
     if shacl_graph is not None:
         shacl_graph = load_from_source(shacl_graph,
                                        rdf_format=shacl_graph_format,
+                                       multigraph=True,
                                        do_owl_imports=do_owl_imports)
     try:
         validator = Validator(

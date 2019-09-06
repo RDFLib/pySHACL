@@ -3,11 +3,12 @@
 from decimal import Decimal
 import rdflib
 import logging
+
 from pyshacl.consts import *
 from pyshacl.errors import ShapeLoadError, ReportableRuntimeError, ConstraintLoadWarning, ConstraintLoadError
 from pyshacl.constraints import ALL_CONSTRAINT_PARAMETERS, \
     CONSTRAINT_PARAMETERS_MAP
-
+from pyshacl.sparql_query_helper import SPARQLQueryHelper
 
 class Shape(object):
 
@@ -24,6 +25,7 @@ class Shape(object):
         self.node = node
         self._p = p
         self._path = path
+        self._advanced = False
 
         deactivated_vals = set(self.objects(SH_deactivated))
         if len(deactivated_vals) > 1:
@@ -60,6 +62,9 @@ class Shape(object):
             self._descriptions = iter(descriptions)
         else:
             self._descriptions = None
+
+    def set_advanced(self, val):
+        self._advanced = bool(val)
 
     def get_other_shape(self, shape_node):
         try:
@@ -168,6 +173,27 @@ class Shape(object):
         return (target_nodes, target_classes, implicit_targets,
                 target_objects_of, target_subjects_of)
 
+    def advanced_target(self):
+        custom_targets = set(self.sg.graph.objects(self.node, SH_target))
+        result_set = dict()
+        for c in custom_targets:
+            ct = dict()
+            is_types = set(self.sg.graph.objects(c, RDF_type))
+            is_target_type = False
+            parameters = set(self.sg.graph.objects(c, SH_parameter))
+            if SH_SPARQLTargetType in is_types or len(parameters) > 0:
+                is_target_type = True
+            ct['type'] = SH_SPARQLTargetType if is_target_type else SH_SPARQLTarget
+            selects = set(self.sg.graph.objects(c, SH_select))
+            if len(selects) < 1:
+                continue
+            ct['select'] = next(iter(selects))
+            qh = SPARQLQueryHelper(self, c, ct['select'], deactivated=self._deactivated)
+            ct['qh'] = qh
+            qh.collect_prefixes()
+            result_set[c] = ct
+        return result_set
+
     def focus_nodes(self, target_graph):
         """
         The set of focus nodes for a shape may be identified as follows:
@@ -179,6 +205,10 @@ class Shape(object):
         """
         (target_nodes, target_classes, implicit_classes,
          target_objects_of, target_subjects_of) = self.target()
+        if self._advanced:
+            advanced_targets = self.advanced_target()
+        else:
+            advanced_targets = False
         found_node_targets = set()
         for n in iter(target_nodes):
             # Note, a node_target _can_ be a literal.
@@ -214,6 +244,19 @@ class Shape(object):
             objs = {o for s, o in target_graph.subject_objects(o_of)}
             found_target_object_of.update(objs)
         found_node_targets.update(found_target_object_of)
+        if advanced_targets:
+            for at_node, at in advanced_targets.items():
+                if at['type'] == SH_SPARQLTargetType:
+                    # SPARQLTargetType not supported yet
+                    continue
+                qh = at['qh']
+                c = qh.apply_prefixes(at['select'])
+                results = target_graph.query(c, initBindings=None)
+                if not results or len(results.bindings) < 1:
+                    continue
+                for r in results:
+                    t = r['this']
+                    found_node_targets.add(t)
 
         return found_node_targets
 

@@ -43,7 +43,7 @@ def get_rdf_from_web(url):
     return resp, known_format
 
 
-def load_from_source(source, g=None, rdf_format=None, do_owl_imports=False, import_chain=None):
+def load_from_source(source, g=None, rdf_format=None, multigraph=False, do_owl_imports=False, import_chain=None):
     """
 
     :param source:
@@ -51,8 +51,10 @@ def load_from_source(source, g=None, rdf_format=None, do_owl_imports=False, impo
     :type g: rdflib.Graph
     :param rdf_format:
     :type rdf_format: str
+    :param multigraph:
+    :type multigraph: bool
     :param do_owl_imports:
-    :type do_owl_imports: bool
+    :type do_owl_imports: bool|int
     :param import_chain:
     :type import_chain: dict
     :return:
@@ -145,7 +147,7 @@ def load_from_source(source, g=None, rdf_format=None, do_owl_imports=False, impo
     else:
         raise ValueError("Cannot determine the format of the input graph")
     if g is None:
-        g = rdflib.Dataset()
+        g = rdflib.Dataset() if multigraph else rdflib.Graph()
     else:
         if not isinstance(g, (rdflib.Graph, rdflib.Dataset, rdflib.ConjunctiveGraph)):
             raise RuntimeError("Passing in g must be a Graph.")
@@ -267,37 +269,55 @@ def load_from_source(source, g=None, rdf_format=None, do_owl_imports=False, impo
             root_id = rdflib.URIRef(public_id) if public_id else None
         done_imports = 0
         if root_id is not None:
-            owl_imports = list(g.objects(root_id, rdflib.OWL.imports))
-            if len(owl_imports) > 0:
-                import_chain.append(root_id)
-            for o in owl_imports:
-                if o in import_chain:
-                    continue
-                load_from_source(o, g=g, do_owl_imports=do_owl_imports + 1, import_chain=import_chain)
-                done_imports += 1
-        if done_imports < 1 and public_id is not None and root_id != public_id:
-            public_id_uri = rdflib.URIRef(public_id)
-            owl_imports = list(g.objects(public_id_uri, rdflib.OWL.imports))
-            if len(owl_imports) > 0:
-                import_chain.append(public_id_uri)
-            for o in owl_imports:
-                if o in import_chain:
-                    continue
-                load_from_source(o, g=g, do_owl_imports=do_owl_imports + 1, import_chain=import_chain)
-                done_imports += 1
-        if done_imports < 1:
-            ontologies = g.subjects(rdflib.RDF.type, rdflib.OWL.Ontology)
-            for ont in ontologies:
-                if ont == root_id or ont == public_id:
-                    continue
-                if ont in import_chain:
-                    continue
-                owl_imports = list(g.objects(ont, rdflib.OWL.imports))
+            if isinstance(g, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
+                gs = list(g.contexts())
+            else:
+                gs = [g]
+            for ng in gs:
+                owl_imports = list(ng.objects(root_id, rdflib.OWL.imports))
                 if len(owl_imports) > 0:
-                    import_chain.append(ont)
+                    import_chain.append(root_id)
                 for o in owl_imports:
                     if o in import_chain:
                         continue
-                    load_from_source(o, g=g, do_owl_imports=do_owl_imports + 1, import_chain=import_chain)
+                    load_from_source(o, g=g, multigraph=multigraph,
+                                     do_owl_imports=do_owl_imports + 1, import_chain=import_chain)
                     done_imports += 1
+        if done_imports < 1 and public_id is not None and root_id != public_id:
+            public_id_uri = rdflib.URIRef(public_id)
+            if isinstance(g, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
+                gs = list(g.contexts())
+            else:
+                gs = [g]
+            for ng in gs:
+                owl_imports = list(ng.objects(public_id_uri, rdflib.OWL.imports))
+                if len(owl_imports) > 0:
+                    import_chain.append(public_id_uri)
+                for o in owl_imports:
+                    if o in import_chain:
+                        continue
+                    load_from_source(o, g=g, multigraph=multigraph,
+                                     do_owl_imports=do_owl_imports + 1, import_chain=import_chain)
+                    done_imports += 1
+        if done_imports < 1:
+            if isinstance(g, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
+                gs = list(g.contexts())
+            else:
+                gs = [g]
+            for ng in gs:
+                ontologies = ng.subjects(rdflib.RDF.type, rdflib.OWL.Ontology)
+                for ont in ontologies:
+                    if ont == root_id or ont == public_id:
+                        continue
+                    if ont in import_chain:
+                        continue
+                    owl_imports = list(ng.objects(ont, rdflib.OWL.imports))
+                    if len(owl_imports) > 0:
+                        import_chain.append(ont)
+                    for o in owl_imports:
+                        if o in import_chain:
+                            continue
+                        load_from_source(o, g=g, multigraph=multigraph,
+                                         do_owl_imports=do_owl_imports + 1, import_chain=import_chain)
+                        done_imports += 1
     return g

@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.11.0] - 2019-06-09
+
+### Added
+- Ability to load files with embedded named graphs (like in json-ld or trig)
+  - Shape constraints are validated against every named graph in the dataset.
+- Added a new SHACL Advanced Features feature, the Custom Target feature using sh:target
+  - Only works with `sh:SPARQLTarget` custom targets for now
+- New internal utilities in rdfutil module, for cloning a dataset and mixing datasets (as well as graphs)
+- New test for issue #029 
+
+### Changed
+- Big changes internally:
+  - All loaded files are loaded into a Dataset, rather than a graph
+  - All graph operations are now Dataset operations
+  - Shapes are applied on every named graph on the dataset
+
+
 ## [0.10.0] - 2019-08-08
 
 ### Added
@@ -93,7 +110,7 @@ can only be fully expanded with the help of an external ontology document contai
 ### Changed
 - Pre-inferencing can now only ever be run once per Validator instance, this is an attempt to prevent running 
 pre-inferencing multiple times unnecessarily.
-- Internal shapes lookup cache is now stored in the `ShapesGraph` instance, rather than in a global static class 
+- Internal shapes lookup cache is now stored in the `SHACLGraph` instance, rather than in a global static class 
 variable on the `Shape` class
 - Fixed some bugs in the examples code, thanks @johannesloetzsch!
 - Lots of code coverage specific changes, and comments where we can improve coverage.
@@ -407,7 +424,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.10.0...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.11.0...HEAD 
+[0.11.0]: https://github.com/RDFLib/pySHACL/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/RDFLib/pySHACL/compare/v0.9.11...v0.10.0
 [0.9.11]: https://github.com/RDFLib/pySHACL/compare/v0.9.10.post2...v0.9.11
 [0.9.10.post2]: https://github.com/RDFLib/pySHACL/compare/v0.9.10.post1...v0.9.10.post2

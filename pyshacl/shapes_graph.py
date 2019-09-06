@@ -12,15 +12,17 @@ from pyshacl.errors import ShapeLoadError, ConstraintLoadError
 from pyshacl.shape import Shape
 
 
-class SHACLGraph(object):
+class ShapesGraph(object):
     def __init__(self, graph, logger=None):
         """
 
         :param graph:
         :type graph: rdflib.Graph
         """
-        assert isinstance(graph, rdflib.Graph)
+        assert isinstance(graph, (rdflib.Dataset, rdflib.ConjunctiveGraph, rdflib.Graph))
         self.graph = graph
+        if isinstance(self.graph, rdflib.Dataset):
+            self.graph.default_union = True
         if logger is None:
             logger = logging.getLogger(__name__)
         self.logger = logger

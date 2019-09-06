@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from pyshacl.consts import RDF_type, SH_TripleRule, SH_SPARQLRule, SH_SPARQLFunction, SH_rule, SH_condition
 from pyshacl.errors import RuleLoadError
-from pyshacl.shacl_graph import SHACLGraph
+from pyshacl.shapes_graph import ShapesGraph
 from pyshacl.rules.shacl_rule import SHACLRule
 from pyshacl.rules.triple import TripleRule
 from pyshacl.rules.sparql import SPARQLRule
@@ -18,7 +18,7 @@ def gather_functions(shacl_graph):
     """
 
     :param shacl_graph:
-    :type shacl_graph: SHACLGraph
+    :type shacl_graph: ShapesGraph
     :return:
     :rtype: [SHACLRule]
     """
@@ -31,7 +31,7 @@ def gather_rules(shacl_graph):
     """
 
     :param shacl_graph:
-    :type shacl_graph: SHACLGraph
+    :type shacl_graph: ShapesGraph
     :return:
     :rtype: [SHACLRule]
     """

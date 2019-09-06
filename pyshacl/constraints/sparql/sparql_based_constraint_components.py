@@ -5,8 +5,8 @@ https://www.w3.org/TR/shacl/#sparql-constraint-components
 import re
 import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
-from pyshacl.constraints.sparql.sparql_based_constraints import SH_select, SPARQLQueryHelper
-from pyshacl.consts import SH, RDF_type, SH_message
+from pyshacl.constraints.sparql.sparql_based_constraints import SPARQLQueryHelper
+from pyshacl.consts import SH, RDF_type, SH_message, SH_select
 from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError
 
 SH_nodeValidator = SH.term('nodeValidator')

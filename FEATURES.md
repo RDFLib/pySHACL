@@ -116,7 +116,8 @@
 ### [Custom Targets](https://www.w3.org/TR/shacl-af/#targets)
 | Parameter             |  Link 	               |      Status      	|  Comments	|
 |:----------            |:------:	               |:-------------:	    |:------	|
-| `sh:SPARQLTarget`     | [▶][AFSPARQLTarget]      | ![status-missing]	|           |
+| `sh:target`           | [▶][AFSPARQLTarget]      | ![status-complete]	|           |
+| `sh:SPARQLTarget`     | [▶][AFSPARQLTarget]      | ![status-complete]	|           |
 | `sh:SPARQLTargetType` | [▶][AFSPARQLTargetType]  | ![status-missing]	|           |
 
 
