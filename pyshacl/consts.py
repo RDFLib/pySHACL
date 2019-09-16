@@ -7,9 +7,13 @@ from rdflib import RDFS, RDF, OWL
 SH = Namespace('http://www.w3.org/ns/shacl#')
 
 # Classes
+RDF_Property = RDF.term('Property')
+RDF_List = RDF.term('List')
 RDFS_Resource = RDFS.term('Resource')
 RDFS_Class = RDFS.term('Class')
 OWL_Ontology = OWL.term("Ontology")
+OWL_Class = OWL.term("Class")
+OWL_DatatypeProperty = OWL.term("DatatypeProperty")
 SH_NodeShape = SH.term('NodeShape')
 SH_PropertyShape = SH.term('PropertyShape')
 SH_ValidationResult = SH.term('ValidationResult')

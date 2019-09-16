@@ -7,17 +7,25 @@ from pyshacl.constraints.core.shape_based_constraints import SH_qualifiedValueSh
 from pyshacl.constraints.sparql.sparql_based_constraint_components import SH_ConstraintComponent, SH_parameter, \
     SH_optional, SPARQLConstraintComponent
 from pyshacl.consts import RDF_type, SH_path, SH_NodeShape, SH_PropertyShape, SH_targetClass, SH_targetNode, \
-    SH_targetObjectsOf, SH_targetSubjectsOf, SH_property, SH_node, RDFS_subClassOf
+    SH_targetObjectsOf, SH_targetSubjectsOf, SH_property, SH_node, RDFS_subClassOf, RDFS_Class, OWL_Class, \
+    OWL_DatatypeProperty, RDF_Property
 from pyshacl.errors import ShapeLoadError, ConstraintLoadError
 from pyshacl.shape import Shape
 
 
 class ShapesGraph(object):
+    system_triples = [
+        (OWL_Class, RDFS_subClassOf, RDFS_Class),
+        (OWL_DatatypeProperty, RDFS_subClassOf, RDF_Property)
+    ]
+
     def __init__(self, graph, logger=None):
         """
-
+        ShapesGraph
         :param graph:
         :type graph: rdflib.Graph
+        :param logger:
+        :type logger: logging.Logger|None
         """
         assert isinstance(graph, (rdflib.Dataset, rdflib.ConjunctiveGraph, rdflib.Graph))
         self.graph = graph
@@ -29,6 +37,15 @@ class ShapesGraph(object):
         self._node_shape_cache = {}
         self._shapes = None
         self._custom_constraints = None
+        self._add_system_triples()
+
+    def _add_system_triples(self):
+        if isinstance(self.graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+            g = next(iter(self.graph.contexts()))
+        else:
+            g = self.graph
+        for t in self.system_triples:
+            g.add(t)
 
     def subjects(self, p, o):
         return self.graph.subjects(p, o)

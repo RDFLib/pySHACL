@@ -11,10 +11,7 @@ def test_029():
     res = validate(data_graph, shacl_graph=shacl_graph, ont_graph=shacl_graph,
                    inference='none', debug=True)
     conforms, graph, string = res
-    #assert not conforms
-    # This will not find any shapes, thus it conforms.
-    # Because it uses owl:Class, not rdfs:Class for the shape.
-    assert conforms
+    assert not conforms
 
 if __name__ == "__main__":
     test_029()

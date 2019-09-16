@@ -14,11 +14,12 @@ class Shape(object):
 
     def __init__(self, sg, node, p=False, path=None, logger=None):
         """
-
-        :type sg: pyshacl.shacl_graph.SHACLGraph
+        Shape
+        :type sg: pyshacl.shapes_graph.ShapesGraph
         :type node: rdflib.term.Node
         :type p: bool
         :type path: rdflib.Node
+        :type logger: logging.Logger
         """
         self.logger = logger or logging.getLogger(__name__)
         self.sg = sg
@@ -138,9 +139,12 @@ class Shape(object):
         return self.sg.graph.objects(self.node, SH_targetClass)
 
     def implicit_class_targets(self):
-        types = self.sg.graph.objects(self.node, RDF_type)
-        if RDFS_Class in iter(types):
-            return [self.node]
+        types = list(self.sg.graph.objects(self.node, RDF_type))
+        subclasses = list(self.sg.graph.subjects(RDFS_subClassOf, RDFS_Class))
+        subclasses.append(RDFS_Class)
+        for t in types:
+            if t in subclasses:
+                return [self.node]
         return []
 
     def target_objects_of(self):

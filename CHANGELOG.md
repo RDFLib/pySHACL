@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.11.1] - 2019-16-09
+
+### Changed
+- Implemented change in behaviour to resolve issue #029
+  - A SHACL Shapes file will now get populated with some basic subClassOf relationships before 
+  the shapes are executed. This allows you to use owl:Class rather than rdfs:Class if you 
+  want to for implicit shapes.
+
+
 ## [0.11.0] - 2019-06-09
 
 ### Added
@@ -424,7 +433,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.11.0...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.11.1...HEAD 
+[0.11.1]: https://github.com/RDFLib/pySHACL/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/RDFLib/pySHACL/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/RDFLib/pySHACL/compare/v0.9.11...v0.10.0
 [0.9.11]: https://github.com/RDFLib/pySHACL/compare/v0.9.10.post2...v0.9.11
