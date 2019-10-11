@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.11.1.post1] - 2019-11-10
+
+### Fixed
+- Fixed an inferencing bug introduced in v0.11.0 (present in v0.11.0 and v0.11.1)
+  - OWL or RDFS or BOTH inferencing wasn't being applied correctly because RDF data is now loaded in as a Dataset 
+  rather than a Graph.
+### Changed
+- Fixed the "extras" tests to take advantage of RDFS inferencing to better expose this kind of bug in the future.
+
+
 ## [0.11.1] - 2019-16-09
 
 ### Changed
@@ -433,7 +443,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.11.1...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.11.1.post1...HEAD 
+[0.11.1.post1]: https://github.com/RDFLib/pySHACL/compare/v0.11.1...v0.11.1.post1
 [0.11.1]: https://github.com/RDFLib/pySHACL/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/RDFLib/pySHACL/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/RDFLib/pySHACL/compare/v0.9.11...v0.10.0

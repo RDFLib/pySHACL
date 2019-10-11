@@ -42,7 +42,7 @@ class Validator(object):
     def _run_pre_inference(cls, target_graph, inference_option, logger=None):
         """
         Note, this is the OWL/RDFS pre-inference,
-        it is not the SHACL-Rule inferencing step.
+        it is not the Advanced Spec SHACL-Rule inferencing step.
         :param target_graph:
         :param inference_option:
         :return:
@@ -67,9 +67,13 @@ class Validator(object):
                 raise e
             raise ReportableRuntimeError("Error during creation of OWL-RL Deductive Closure\n"
                                          "{}".format(str(e.args[0])))
-
+        if isinstance(target_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+            named_graphs = [target_graph.get_context(i) if not isinstance(i, rdflib.Graph) else i for i in target_graph.store.contexts(None)]
+        else:
+            named_graphs = [target_graph]
         try:
-            inferencer.expand(target_graph)
+            for g in named_graphs:
+                inferencer.expand(g)
         except Exception as e:  # pragma: no cover
             logger.error("Error while running OWL-RL Deductive Closure")
             raise ReportableRuntimeError("Error while running OWL-RL Deductive Closure\n"

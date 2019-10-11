@@ -36,10 +36,21 @@ exOnt:hasPet a rdf:Property ;
 
 exOnt:nlegs a rdf:Property ;
     rdfs:domain exOnt:Animal ;
-    rdfs:range exOnt:integer .
+    rdfs:range xsd:integer .
+
+exOnt:Teacher a rdfs:Class ;
+    rdfs:comment "A Human who is a teacher."@en ;
+    rdfs:subClassOf exOnt:Human .
+
+exOnt:PreschoolTeacher a rdfs:Class ;
+    rdfs:comment "A Teacher who teaches preschool."@en ;
+    rdfs:subClassOf exOnt:Teacher .
 
 exOnt:Lizard a rdfs:Class ;
     rdfs:subClassOf exOnt:Pet .
+    
+exOnt:Goanna a rdfs:Class ;
+    rdfs:subClassOf exOnt:Lizard .
 
 """
 
@@ -84,12 +95,12 @@ data_file_text = """
 @prefix exOnt: <http://example.com/exOnt#> .
 @prefix ex: <http://example.com/ex#> .
 
-ex:Human1 rdf:type exOnt:Human ;
+ex:Human1 rdf:type exOnt:PreschoolTeacher ;
     rdf:label "Amy" ;
     exOnt:nLegs "2"^^xsd:integer ;
     exOnt:hasPet ex:Pet1 .
 
-ex:Pet1 rdf:type exOnt:Lizard ;
+ex:Pet1 rdf:type exOnt:Goanna ;
     rdf:label "Sebastian" ;
     exOnt:nLegs "4"^^xsd:integer .
 """
@@ -100,16 +111,39 @@ data_file_text_bad = """
 @prefix exOnt: <http://example.com/exOnt#> .
 @prefix ex: <http://example.com/ex#> .
 
-ex:Human1 rdf:type exOnt:Human ;
+ex:Human1 rdf:type exOnt:PreschoolTeacher ;
     rdf:label "Amy" ;
     exOnt:nLegs "2"^^xsd:integer ;
     exOnt:hasPet "Sebastian"^^xsd:string .
 
-ex:Pet1 rdf:type exOnt:Lizard ;
+ex:Pet1 rdf:type exOnt:Goanna ;
     rdf:label "Sebastian" ;
     exOnt:nLegs "g"^^xsd:string .
 """
 
+def test_validate_with_ontology():
+    res = validate(data_file_text, shacl_graph=shacl_file_text,
+                   data_graph_format='turtle', shacl_graph_format='turtle',
+                   ont_graph=ontology_file_text,  ont_graph_format="turtle",
+                   inference='both', debug=True)
+    conforms, graph, string = res
+    assert conforms
+
+def test_validate_with_ontology_fail1():
+    res = validate(data_file_text_bad, shacl_graph=shacl_file_text,
+                   data_graph_format='turtle', shacl_graph_format='turtle',
+                   ont_graph=ontology_file_text,  ont_graph_format="turtle",
+                   inference='both', debug=True)
+    conforms, graph, string = res
+    assert not conforms
+
+def test_validate_with_ontology_fail2():
+    res = validate(data_file_text_bad, shacl_graph=shacl_file_text,
+                   data_graph_format='turtle', shacl_graph_format='turtle',
+                   ont_graph=ontology_file_text, ont_graph_format="turtle",
+                   inference=None, debug=True)
+    conforms, graph, string = res
+    assert conforms
 
 def test_metashacl_pass():
     res = validate(data_file_text, shacl_graph=shacl_file_text,
@@ -255,8 +289,12 @@ def test_owl_imports_fail():
 
 
 if __name__ == "__main__":
+    test_validate_with_ontology()
+    test_validate_with_ontology_fail1()
+    test_validate_with_ontology_fail2()
     test_metashacl_pass()
     test_metashacl_fail()
     test_web_retrieve()
     test_serialize_report_graph()
     test_owl_imports()
+    test_owl_imports_fail()
