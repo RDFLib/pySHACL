@@ -1,0 +1,42 @@
+sudo: false
+language: python
+dist: xenial
+cache:
+  directories:
+    - $HOME/.cache/pip
+matrix:
+  include:
+    - env: TOX_ENV=py36
+      python: 3.6
+      name: "Python 3.6"
+    - env: TOX_ENV=py37
+      python: 3.7
+      name: "Python 3.7"
+    - env: TOX_ENV=py38
+      python: 3.8
+      name: "Python 3.8"
+    - env: TOX_ENV=type-checking
+      python: 3.6
+      name: "Python 3.6 Type checks"
+    - env: TOX_ENV=type-checking
+      python: 3.7
+      name: "Python 3.7 Type checks"
+    - env: TOX_ENV=type-checking
+      python: 3.8
+      name: "Python 3.8 Type checks"
+    - env: TOX_ENV=lint
+      python: 3.6
+      name: "Python 3.6 Linter checks"
+
+
+install:
+  - pip install -U tox
+script: travis_retry tox -e $TOX_ENV
+deploy:
+  provider: pypi
+  user: ashleysommer
+  password:
+    secure: lq8L1Rc6jJW6URaZcmu5YOa9z8MqQkCiIxfivZlYBjbCkZLenU4/Hc7bK/ORVg+TPJZiyrfxobStFp1cX460zgQRw+3OW8f7whtRmj0qxLq9SF9szpORLrDcvSzHV/xU8GF6xAyJ83VS5UWC2TiA4yHIQyi7YkLYh9zdC370xkXMwKLQ+G2Bmqx5Y84h1wKYtpNU6RdrZiwcBTZEvZdWaoEjw5gZsd5wW8RmWDewS2SE2P6m7FXZwShB9XRGKkeC+UAXzDkp9DpZa94PQTktwXaM2yRo5Y2t1N2BBKzTT72ikFv/xr8vov157z0pdcOiEx7Xkd7Dov1fsy00KZ7If+opMgIWHaw/UnC5jwzILTAubBuFopV+SNJnLZ1EMMPsINpJF7eecj0/OoC+bEu/5Oxk8BeFO1UOoXZ4aOlzzDU6TpXP/0ULyoRtskc2UpXETRH2rapam41tbDX0JuXlfrrOFkPrB9O4jNMrm+6e9ldorGkpzKHKzZvOjp2WykMjiPzFk7GIordK96jmctwiEWG2N0HayLGsgdyT8YrhHatCZk51HZ+Jhk05zrmfPQqa+MhskIpcPfplei/sUcMD3TCN8Qw5mhyZPTbC6m/a6E3+wqw++Wos4ZMwcp71BiChdcIb/XhjG6oy/JHYV3Bth4ZuyRN1vnVzm4VDmdb5b2c=
+  on:
+    tags: true
+  distributions: "sdist bdist_wheel"

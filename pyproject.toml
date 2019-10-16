@@ -1,0 +1,108 @@
+[build-system]
+requires = ["poetry>=0.12.17"]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "pyshacl"
+version = "0.12.0"
+description = "Python SHACL Validator"
+license = "Apache-2.0"
+authors = [
+    "Ashley Sommer <Ashley.Sommer@csiro.au>"
+]
+readme = "README.md"
+repository = "https://github.com/RDFLib/pySHACL"
+homepage = "https://github.com/RDFLib/pySHACL"
+keywords = ["Linked Data", "Semantic Web", "RDF", "Python", "SHACL", "Shapes", "Schema", "Validate"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Topic :: Utilities",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Operating System :: OS Independent"
+]
+
+[tool.poetry.dependencies]
+python = "^3.6"  # Compatible python versions must be declared here
+rdflib = "^4.2.2"
+rdflib-jsonld = "^0.4"
+owlrl = "^5.2.1"
+
+[tool.poetry.dev-dependencies]
+coverage = "^4.5"
+pytest = "^5.0"
+pytest-cov = "^2.8.1"
+flake8 = "^3.7"
+black = { version=">=18.9b0", python=">=3.6"}
+mypy = { version="^0.730.0", python=">=3.6"}
+
+
+[tool.poetry.extras]
+dev-lint = ["black", "flake8"]
+dev-type-checking = ["mypy"]
+
+[tool.poetry.scripts]
+pyshacl = "pyshacl.cli:main"
+
+[tool.dephell.main]
+from = {format = "poetry", path = "pyproject.toml"}
+to = {format = "setuppy", path = "setup.py"}
+
+[tool.black]
+line-length = "119"
+target-version = ['py36']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | venv
+  )/
+)
+'''
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+skipsdist = True
+envlist = py36, py37, py38, lint, type-checking
+
+[testenv]
+deps =
+    poetry>=0.12.17
+whitelist_externals =
+    poetry
+skip_install = true
+commands_pre =
+    poetry install -vvv
+commands =
+    - poetry show
+    poetry run pytest --cov=pyshacl test/
+    - poetry run coverage combine --append
+    poetry run coverage report -m
+    poetry run coverage html -i
+
+[testenv:lint]
+commands =
+    - poetry show
+    poetry run flake8 pyshacl
+    poetry run black --check --verbose .
+
+[testenv:type-checking]
+commands =
+    - poetry show
+    poetry run mypy --ignore-missing-imports pyshacl
+"""
+

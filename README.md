@@ -124,13 +124,13 @@ Some other optional keyword variables available available on the `validate` func
 Return value:  
 * a three-component `tuple` containing:
   * `conforms` a `bool`, indicating whether or not the `data_graph` conforms to the `shacl_graph`
-  * `results_graph` an rdflib `Graph` object built according to the SHACL specification's [Validation Report](https://www.w3.org/TR/shacl/#validation-report) semantics
+  * `results_graph` an rdflib `Graph` object built according to the SHACL specification's [Validation Report](https://www.w3.org/TR/shacl/#validation-report) structure
   * `results_text` python string representing a verbose textual representation of the [Validation Report](https://www.w3.org/TR/shacl/#validation-report) 
 
 ## Errors  
 Under certain circumstances pySHACL can produce a `Validation Failure`. This is a formal error defined by the SHACL specification and is required to be produced as a result of specific conditions within the SHACL graph.
-If the validator produces a `Validation Failure`, the `result_graph` variable returned by the `validate()` function will be an instance of `ValidationFailure`.
-Use see the `.message` attribute on that instance to get more information about the validation failure.  
+If the validator produces a `Validation Failure`, the `results_graph` variable returned by the `validate()` function will be an instance of `ValidationFailure`.
+See the `message` attribute on that instance to get more information about the validation failure.  
 
 Other errors the validator can generate:  
 - `ShapeLoadError`: This error is thrown when a SHACL Shape in the SHACL graph is in an invalid state and cannot be loaded into the validation engine.
@@ -144,7 +144,10 @@ In the case of `ShapeLoadError` and `ConstraintLoadError`, see the `str()` strin
 
 
 ## Compatibility  
-PySHACL is a Python3 library. For best compatibility use Python v3.5 or greater. This library _**does not work**_ on Python 2.7.x or below.
+PySHACL is a Python3 library. For best compatibility use Python v3.6 or greater. This library _**does not work**_ on Python v2.7.x or below. 
+
+PySHACL v0.11.1.post1 is the last release targeting compatibility with Python v3.5. PySHACL v0.12.0 and above _**does not work**_ on Python v3.5.x or below.
+Use v0.11.1.post1 if you need to run PySHACL on Python v3.5.
 
 
 ## Features  
