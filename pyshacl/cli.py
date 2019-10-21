@@ -84,16 +84,17 @@ def main():
     except ValidationFailure as vf:
         args.output.write("Validator generated a Validation Failure result:\n")
         args.output.write(str(vf.message))
+        args.output.write("\n")
         sys.exit(1)
     except ReportableRuntimeError as rre:
         sys.stderr.write("Validator encountered a Runtime Error:\n")
         sys.stderr.write(str(rre.message))
-        sys.stderr.write("If you believe this is a bug in pyshacl, open an Issue on the pyshacl github page.\n")
+        sys.stderr.write("\nIf you believe this is a bug in pyshacl, open an Issue on the pyshacl github page.\n")
         sys.exit(2)
     except NotImplementedError as nie:
         sys.stderr.write("Validator feature is not implemented:\n")
         sys.stderr.write(str(nie.args[0]))
-        sys.stderr.write("If your use-case requires this feature, open an Issue on the pyshacl github page.\n")
+        sys.stderr.write("\nIf your use-case requires this feature, open an Issue on the pyshacl github page.\n")
         sys.exit(3)
     except RuntimeError as re:
         sys.stderr.write("Validator encountered a Runtime Error.")

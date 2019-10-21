@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
+from functools import wraps
 from sys import stderr
 import logging
+from typing import Union, Optional
+
 import rdflib
 import owlrl
 
 from pyshacl.rdfutil.clone import mix_datasets
+from pyshacl.pytypes import GraphLike
 
 if owlrl.json_ld_available:
     import rdflib_jsonld
@@ -194,36 +198,54 @@ class Validator(object):
         return (not non_conformant), v_report, v_text
 
 
-def meta_validate(shacl_graph, inference='rdfs', **kwargs):
-    shacl_shacl_graph = meta_validate.shacl_shacl_graph
-    if shacl_shacl_graph is None:
-        from os import path
-        import pickle
-        here_dir = path.dirname(__file__)
-        pickle_file = path.join(here_dir, "shacl-shacl.pickle")
-        with open(pickle_file, 'rb') as shacl_pickle:
-            u = pickle.Unpickler(shacl_pickle, fix_imports=False)
-            shacl_shacl_store = u.load()
-        shacl_shacl_graph = rdflib.Graph(store=shacl_shacl_store, identifier="http://www.w3.org/ns/shacl-shacl")
-        meta_validate.shacl_shacl_graph = shacl_shacl_graph
-    shacl_graph = load_from_source(shacl_graph, rdf_format=kwargs.pop('shacl_graph_format', None),
-                                   multigraph=True)
+def with_metashacl_shacl_graph_cache(f):
+    EMPTY = object()
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        graph_cache = getattr(wrapped, "graph_cache", None)
+        assert graph_cache is not None
+        if graph_cache is EMPTY:
+            from os import path
+            import pickle
+            here_dir = path.dirname(__file__)
+            pickle_file = path.join(here_dir, "shacl-shacl.pickle")
+            with open(pickle_file, 'rb') as shacl_pickle:
+                u = pickle.Unpickler(shacl_pickle, fix_imports=False)
+                shacl_shacl_store = u.load()
+            shacl_shacl_graph = rdflib.Graph(store=shacl_shacl_store,
+                                             identifier="http://www.w3.org/ns/shacl-shacl")
+            setattr(wrapped, "graph_cache", shacl_shacl_graph)
+        return f(*args, **kwargs)
+    setattr(wrapped, "graph_cache", EMPTY)
+    return wrapped
+
+
+@with_metashacl_shacl_graph_cache
+def meta_validate(shacl_graph: Union[GraphLike, str], inference: Optional[str] = 'rdfs', **kwargs):
+    shacl_shacl_graph = meta_validate.graph_cache
+    shacl_graph = load_from_source(shacl_graph, rdf_format=kwargs.pop('shacl_graph_format', None), multigraph=True)
     _ = kwargs.pop('meta_shacl', None)
     return validate(shacl_graph, shacl_graph=shacl_shacl_graph, inference=inference, **kwargs)
-meta_validate.shacl_shacl_graph = None
 
 
-def validate(data_graph, *args, shacl_graph=None, ont_graph=None, advanced=False, inference=None, abort_on_error=False, **kwargs):
+def validate(data_graph: Union[GraphLike, str], *args,
+             shacl_graph: Optional[Union[GraphLike, str]] = None,
+             ont_graph: Optional[Union[GraphLike, str]] = None,
+             advanced: Optional[bool] = False, inference: Optional[str] = None,
+             abort_on_error: Optional[bool] = False, **kwargs):
     """
     :param data_graph: rdflib.Graph or file path or web url of the data to validate
     :type data_graph: rdflib.Graph | str
     :param args:
     :type args: list
-    :param shacl_graph: rdflib.Graph or file path or web url of the SHACL Shapes graph to use to validate the data graph
+    :param shacl_graph: rdflib.Graph or file path or web url of the SHACL Shapes graph to use to
+    validate the data graph
     :type shacl_graph: rdflib.Graph | str
     :param ont_graph: rdflib.Graph or file path or web url of an extra ontology document to mix into the data graph
     :type ont_graph: rdflib.Graph | str
-    :param inference:
+    :param advanced: Enable advanced SHACL features, default=False
+    :type advanced: bool | None
+    :param inference: One of "rdfs", "owlrl", "both", "none", or None
     :type inference: str | None
     :param abort_on_error:
     :type abort_on_error: bool | None
@@ -235,8 +257,8 @@ def validate(data_graph, *args, shacl_graph=None, ont_graph=None, advanced=False
         log_handler.setLevel(logging.DEBUG)
         log.setLevel(logging.DEBUG)
     apply_patches()
-    do_check_dash_result = kwargs.pop('check_dash_result', False)
-    do_check_sht_result = kwargs.pop('check_sht_result', False)
+    do_check_dash_result = kwargs.pop('check_dash_result', False)  # type: bool
+    do_check_sht_result = kwargs.pop('check_sht_result', False)  # type: bool
     if kwargs.get('meta_shacl', False):
         to_meta_val = shacl_graph or data_graph
         conforms, v_r, v_t = meta_validate(to_meta_val, inference=inference, **kwargs)

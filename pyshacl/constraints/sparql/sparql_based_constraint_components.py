@@ -3,6 +3,8 @@
 https://www.w3.org/TR/shacl/#sparql-constraint-components
 """
 import re
+from typing import Dict, Tuple, Optional, Union
+
 import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.constraints.sparql.sparql_based_constraints import SPARQLQueryHelper
@@ -29,7 +31,7 @@ invalid_parameter_names = {
 
 
 class SPARQLConstraintComponentValidator(object):
-    validator_cache = {}
+    validator_cache: Dict[Tuple[int, str], Union['SelectConstraintValidator', 'AskConstraintValidator']] = {}
 
     def __new__(cls, shacl_graph, node, *args, **kwargs):
         cache_key = (id(shacl_graph.graph), str(node))

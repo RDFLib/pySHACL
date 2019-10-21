@@ -1,10 +1,31 @@
 # -*- coding: utf-8 -*-
 #
+from functools import wraps
+from typing import Optional, List
+
 import rdflib
+from rdflib.namespace import NamespaceManager
+
 from . import SH, RDF_first
 
 
-def stringify_blank_node(graph, bnode, ns_manager=None, recursion=0):
+def with_dict_cache(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        dict_cache = getattr(wrapped, "dict_cache", None)
+        assert dict_cache is not None
+        return f(*args, **kwargs)
+
+    dict_cache = getattr(wrapped, "dict_cache", None)
+    if dict_cache is None:
+        dict_cache = {}
+        setattr(wrapped, "dict_cache", dict_cache)
+    return wrapped
+
+
+@with_dict_cache
+def stringify_blank_node(graph: rdflib.Graph, bnode: rdflib.BNode, ns_manager: Optional[NamespaceManager] = None,
+                         recursion: int = 0):
     if isinstance(graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
         raise RuntimeError("Can only stringify a blank node when graph is an rdflib.Graph")
     assert isinstance(graph, rdflib.Graph)
@@ -12,21 +33,19 @@ def stringify_blank_node(graph, bnode, ns_manager=None, recursion=0):
     if recursion >= 9:
         return "<http://recursion.too.deep>"
     stringed_cache_key = id(graph), str(bnode)
-    if stringify_blank_node.stringed_cache is None:
-        stringify_blank_node.stringed_cache = {}
-    else:
-        try:
-            cached = stringify_blank_node.stringed_cache[stringed_cache_key]
-            return cached
-        except KeyError:
-            pass
+
+    try:
+        cached = stringify_blank_node.dict_cache[stringed_cache_key]
+        return cached
+    except LookupError:
+        pass
     if ns_manager is None:  # pragma: no cover
         ns_manager = graph.namespace_manager
         ns_manager.bind("sh", SH)
 
     def stringify_list(node):
         nonlocal graph, ns_manager, recursion
-        item_texts = []
+        item_texts = []  # type: List[str]
         for item in iter(graph.items(node)):
             item_text = stringify_node(graph, item, ns_manager=ns_manager,
                                        recursion=recursion+1)
@@ -63,14 +82,11 @@ def stringify_blank_node(graph, bnode, ns_manager=None, recursion=0):
         p, o = next(iter(p_string_map.items()))
         blank_string = "{} {}".format(p, o)
     blank_string = "[ {} ]".format(blank_string)
-    stringify_blank_node.stringed_cache[stringed_cache_key] = blank_string
+    stringify_blank_node.dict_cache[stringed_cache_key] = blank_string
     return blank_string
 
 
-stringify_blank_node.stringed_cache = None
-
-
-def stringify_literal(graph, node, ns_manager=None):
+def stringify_literal(graph: rdflib.Graph, node: rdflib.Literal, ns_manager: Optional[NamespaceManager] = None):
     lit_val_string = str(node.value)
     lex_val_string = str(node)
     if ns_manager is None:  # pragma: no cover
@@ -108,7 +124,8 @@ def find_node_named_graph(dataset, node):
             continue
     raise RuntimeError("Cannot find that node in any named graph.")
 
-def stringify_node(graph, node, ns_manager=None, recursion=0):
+def stringify_node(graph: rdflib.Graph, node: rdflib.term.Identifier, ns_manager: Optional[NamespaceManager] = None,
+                   recursion: int = 0):
     if ns_manager is None:
         ns_manager = graph.namespace_manager
     if isinstance(ns_manager, rdflib.Graph):
@@ -129,7 +146,7 @@ def stringify_node(graph, node, ns_manager=None, recursion=0):
     return node_string
 
 
-def stringify_graph(graph):
+def stringify_graph(graph: rdflib.Graph):
     string_builder = ""
     for t in iter(graph):
         node_string = stringify_node(graph, t, ns_manager=graph.namespace_manager)
@@ -138,7 +155,7 @@ def stringify_graph(graph):
     return string_builder
 
 
-def match_blank_nodes(graph1, bnode1, graph2, bnode2):
+def match_blank_nodes(graph1: rdflib.Graph, bnode1: rdflib.BNode, graph2: rdflib.Graph, bnode2: rdflib.BNode):
     string_1 = stringify_blank_node(graph1, bnode1)
     string_2 = stringify_blank_node(graph2, bnode2)
     return string_1 == string_2

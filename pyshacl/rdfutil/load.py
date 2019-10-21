@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 #
-from io import IOBase, BytesIO
+from io import IOBase, BytesIO, BufferedRandom, TextIOWrapper, BufferedReader, UnsupportedOperation
 from pathlib import Path
 import platform
+from typing import Union, Optional, Dict, List, IO, BinaryIO
 from urllib import request
 from urllib.error import HTTPError
 
 import rdflib
+
+from pyshacl.pytypes import GraphLike
+
 try:
     import rdflib_jsonld
     has_json_ld = True
@@ -16,7 +20,13 @@ except IndexError:
 is_windows = platform.system() == "Windows"
 
 
-def get_rdf_from_web(url):
+def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
+    """
+
+    :param url:
+    :type url: rdflib.URIRef | str
+    :return:
+    """
     headers = {'Accept':
                'text/turtle, application/rdf+xml, '
                'application/ld+json, application/n-triples,'
@@ -43,7 +53,10 @@ def get_rdf_from_web(url):
     return resp, known_format
 
 
-def load_from_source(source, g=None, rdf_format=None, multigraph=False, do_owl_imports=False, import_chain=None):
+def load_from_source(source: Union[GraphLike, BinaryIO, Union[str, bytes]],
+                     g: Optional[GraphLike] = None, rdf_format: Optional[str] = None,
+                     multigraph: bool = False, do_owl_imports: Union[bool, int] = False,
+                     import_chain: Optional[List[Union[rdflib.URIRef, str]]] = None):
     """
 
     :param source:
@@ -56,7 +69,7 @@ def load_from_source(source, g=None, rdf_format=None, multigraph=False, do_owl_i
     :param do_owl_imports:
     :type do_owl_imports: bool|int
     :param import_chain:
-    :type import_chain: dict
+    :type import_chain: list | None
     :return:
     """
     source_is_graph = False
@@ -75,7 +88,7 @@ def load_from_source(source, g=None, rdf_format=None, multigraph=False, do_owl_i
             g = source
         else:
             raise RuntimeError("Cannot pass in both target=rdflib.Graph/Dataset and g=graph.")
-    elif isinstance(source, IOBase) and hasattr(source, 'read'):
+    elif isinstance(source, IOBase):
         source_is_file = True
         if hasattr(source, 'closed'):
             source_is_open = not bool(source.closed)
@@ -84,8 +97,9 @@ def load_from_source(source, g=None, rdf_format=None, multigraph=False, do_owl_i
             # Assume it is open now and it was open when we started.
             source_is_open = True
             source_was_open = True
-        filename = source.name
-        public_id = Path(filename).resolve().as_uri() + "#"
+        if hasattr(source, 'name'):
+            filename = source.name  # type: ignore
+            public_id = Path(filename).resolve().as_uri() + "#"
     elif isinstance(source, str):
         if is_windows and source.startswith('file:///'):
             public_id = source
@@ -98,14 +112,16 @@ def load_from_source(source, g=None, rdf_format=None, multigraph=False, do_owl_i
         elif source.startswith('http:') or source.startswith('https:'):
             public_id = source
             try:
-                source, rdf_format = get_rdf_from_web(source)
+                resp, rdf_format = get_rdf_from_web(source)
             except HTTPError:
                 if is_imported_graph:
                     return g
                 else:
                     raise
+            filename = resp.geturl()
+            source = resp.fp
+            source_was_open = False
             source_is_open = True
-            filename = source.geturl()
         else:
             first_char = source[0]
             if is_windows and (first_char == '\\' or
@@ -133,10 +149,10 @@ def load_from_source(source, g=None, rdf_format=None, multigraph=False, do_owl_i
            (not is_windows and source.startswith(b'file://')) or \
            source.startswith(b'http:') or source.startswith(b'https:'):
             raise ValueError("file:// and http:// strings should be given as str, not bytes.")
-        first_char = source[0:1]
-        if first_char == b'#' or first_char == b'@' \
-            or first_char == b'<' or first_char == b'\n' \
-                or first_char == b'{' or first_char == b'[':
+        first_char_b = source[0:1]  # type: bytes
+        if first_char_b == b'#' or first_char_b == b'@' \
+            or first_char_b == b'<' or first_char_b == b'\n' \
+                or first_char_b == b'{' or first_char_b == b'[':
             # Contains some JSON or XML or Turtle stuff
             source_is_file = False
         elif len(source) < 140:
@@ -166,27 +182,26 @@ def load_from_source(source, g=None, rdf_format=None, multigraph=False, do_owl_i
             rdf_format = rdf_format or 'trig'
         elif filename.endswith('.xml') or filename.endswith('.rdf'):
             rdf_format = rdf_format or 'xml'
-    if source_is_file and filename and not source_is_open:
-        filename = Path(filename).resolve()
+    if source_is_file and filename is not None and not source_is_open:
+        filename = str(Path(filename).resolve())
         if not public_id:
             public_id = Path(filename).as_uri() + "#"
         source = open(filename, mode='rb')
         source_is_open = True
-    if source_is_open:
-        data = source.read()
-        # If the target was open to begin with, leave it open.
-        if not source_was_open:
-            source.close()
-        elif hasattr(source, 'seek'):
-            try:
-                source.seek(0)
-            except Exception:
-                pass
-        source = data
-        source_is_bytes = True
-
-    if source_is_bytes:
+    if not source_is_open and source_is_bytes:
         source = BytesIO(source)
+        source_is_open = True
+    if source_is_open:
+        #Check if we can seek
+        try:
+            source.seek(0)
+        except (AttributeError, UnsupportedOperation):
+            #Read it all into memory
+            new_bytes = BytesIO(source.read())
+            if not source_was_open:
+                source.close()
+            source = new_bytes
+            source_was_open = False
         if (rdf_format == "json-ld" or rdf_format == "json") and not has_json_ld:
             raise RuntimeError(
                 "Cannot load a JSON-LD file if rdflib_jsonld is not installed.")
@@ -234,8 +249,20 @@ def load_from_source(source, g=None, rdf_format=None, multigraph=False, do_owl_i
                     public_id = wordval
                 elif keyword == b"prefix":
                     uri_prefix = wordval
-            source.seek(0)
+            try:
+                source.seek(0)
+            except (AttributeError, UnsupportedOperation):
+                print("here")
+                raise
         g.parse(source=source, format=rdf_format, publicID=public_id)
+        # If the target was open to begin with, leave it open.
+        if not source_was_open:
+            source.close()
+        elif hasattr(source, 'seek'):
+            try:
+                source.seek(0)
+            except (AttributeError, UnsupportedOperation):
+                pass
         source_is_graph = True
 
     if not source_is_graph:
