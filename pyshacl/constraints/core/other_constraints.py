@@ -68,7 +68,7 @@ class InConstraintComponent(ConstraintComponent):
             for v in value_nodes:
                 if v not in in_vals:
                     non_conformant = True
-                    rept = self.make_v_result(f, value_node=v)
+                    rept = self.make_v_result(target_graph, f, value_node=v)
                     reports.append(rept)
         return (not non_conformant), reports
 
@@ -159,7 +159,7 @@ class ClosedConstraintComponent(ConstraintComponent):
                     elif p in working_paths:
                         continue
                     non_conformant = True
-                    rept = self.make_v_result(f, value_node=o, result_path=p)
+                    rept = self.make_v_result(target_graph, f, value_node=o, result_path=p)
                     reports.append(rept)
         return (not non_conformant), reports
 
@@ -205,12 +205,12 @@ class HasValueConstraintComponent(ConstraintComponent):
         non_conformant = False
 
         for hv in iter(self.has_value_set):
-            _nc, _r = self._evaluate_has_value(hv, focus_value_nodes)
+            _nc, _r = self._evaluate_has_value(target_graph, hv, focus_value_nodes)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
 
-    def _evaluate_has_value(self, hv, f_v_dict):
+    def _evaluate_has_value(self, target_graph, hv, f_v_dict):
         reports = []
         non_conformant = False
         for f, value_nodes in f_v_dict.items():
@@ -221,15 +221,15 @@ class HasValueConstraintComponent(ConstraintComponent):
                     break
             if not conformant:
                 non_conformant = True
-                # Note, including the value in the report generation here causes this constraint to not pass SHT validation
-                # though IMHO the value _should_ be included
+                # Note, including the value in the report generation here causes this constraint to not pass
+                # SHT validation, though IMHO the value _should_ be included
                 # if len(value_nodes) == 1:
                 #     a_value_node = next(iter(value_nodes))
                 #     rept = self.make_v_result(f, value_node=a_value_node)
                 # else:
                 if not self.shape.is_property_shape:
-                    rept = self.make_v_result(f, value_node=f)
+                    rept = self.make_v_result(target_graph, f, value_node=f)
                 else:
-                    rept = self.make_v_result(f, value_node=None)
+                    rept = self.make_v_result(target_graph, f, value_node=None)
                 reports.append(rept)
         return non_conformant, reports

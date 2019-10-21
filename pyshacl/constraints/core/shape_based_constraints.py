@@ -140,7 +140,7 @@ class NodeConstraintComponent(ConstraintComponent):
                 # ignore the fails from the node, create our own fail
                 if (not _is_conform) or len(_r) > 0:
                     non_conformant = True
-                    rept = self.make_v_result(f, value_node=v)
+                    rept = self.make_v_result(target_graph, f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
 
@@ -275,10 +275,10 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
                     raise v
             if self.max_count is not None and number_conforms > self.max_count:
                 non_conformant = True
-                _r = self.make_v_result(f, constraint_component=SH_QualifiedMaxCountConstraintComponent)
+                _r = self.make_v_result(target_graph, f, constraint_component=SH_QualifiedMaxCountConstraintComponent)
                 reports.append(_r)
             if self.min_count is not None and number_conforms < self.min_count:
                 non_conformant = True
-                _r = self.make_v_result(f, constraint_component=SH_QualifiedMinCountConstraintComponent)
+                _r = self.make_v_result(target_graph, f, constraint_component=SH_QualifiedMinCountConstraintComponent)
                 reports.append(_r)
         return non_conformant, reports

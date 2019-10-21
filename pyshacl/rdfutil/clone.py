@@ -11,7 +11,14 @@ def clone_dataset(source_ds, target_ds=None):
     default_union = source_ds.default_union
     if target_ds is None:
         target_ds = rdflib.Dataset(default_union=default_union)
-    cloned_graphs = [clone_graph(ng, rdflib.Graph(store=target_ds.store, identifier=ng.identifier)) for ng in source_ds.contexts()]
+    named_graphs = [
+        rdflib.Graph(source_ds.store, i, namespace_manager=source_ds.namespace_manager)
+        if not isinstance(i, rdflib.Graph) else i for i in source_ds.store.contexts(None)
+    ]
+    cloned_graphs = [
+        clone_graph(ng, rdflib.Graph(target_ds.store, ng.identifier, namespace_manager=target_ds.namespace_manager))
+        for ng in named_graphs
+    ]
     default_context_id = target_ds.default_context.identifier
     for g in cloned_graphs:
         if g.identifier == default_context_id:

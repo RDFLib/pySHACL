@@ -128,7 +128,7 @@ class MinLengthConstraintComponent(StringBasedConstraintBase):
                     flag = len(v_string) >= min_len
                 if not flag:
                     non_conformant = True
-                    rept = self.make_v_result(f, value_node=v)
+                    rept = self.make_v_result(target_graph, f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
 
@@ -186,7 +186,7 @@ class MaxLengthConstraintComponent(StringBasedConstraintBase):
                     flag = len(v_string) <= max_len
                 if not flag:
                     non_conformant = True
-                    rept = self.make_v_result(f, value_node=v)
+                    rept = self.make_v_result(target_graph, f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
 
@@ -255,7 +255,7 @@ class PatternConstraintComponent(StringBasedConstraintBase):
                         match = re_matcher.search(v_string)
                 if not match:
                     non_conformant = True
-                    rept = self.make_v_result(f, value_node=v)
+                    rept = self.make_v_result(target_graph, f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
 
@@ -332,7 +332,7 @@ class LanguageInConstraintComponent(StringBasedConstraintBase):
                                 flag = True
                 if not flag:
                     non_conformant = True
-                    rept = self.make_v_result(f, value_node=v)
+                    rept = self.make_v_result(target_graph, f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
 
@@ -391,7 +391,7 @@ class UniqueLangConstraintComponent(StringBasedConstraintBase):
         reports = []
         non_conformant = False
         for f, value_nodes in f_v_dict.items():
-            found_langs = set()
+            found_langs = dict()
             found_duplicates = set()
             for v in value_nodes:
                 if isinstance(v, rdflib.Literal):
@@ -400,7 +400,8 @@ class UniqueLangConstraintComponent(StringBasedConstraintBase):
                         low_lang = str(lang).lower()
                         if low_lang in found_langs:
                             found_duplicates.add(low_lang)
-                        found_langs.add(low_lang)
+                        else:
+                            found_langs[low_lang] = lang
                         # TODO: determine if there is duplicate matching on parts of multi-part langs.
                         # lang_parts = str(lang).split('-')
                         # first_part = lang_parts[0]
@@ -408,6 +409,9 @@ class UniqueLangConstraintComponent(StringBasedConstraintBase):
                         #     flag = True
             for d in iter(found_duplicates):
                 non_conformant = True
-                rept = self.make_v_result(f)
+                # Adding value_node here causes SHT validation to fail.
+                # IMHO it should be present
+                #rept = self.make_v_result(target_graph, f, value_node=found_langs[d])
+                rept = self.make_v_result(target_graph, f, value_node=None)
                 reports.append(rept)
         return non_conformant, reports

@@ -81,7 +81,7 @@ class MinCountConstraintComponent(ConstraintComponent):
             flag = len(value_nodes) >= min_count
             if not flag:
                 non_conformant = True
-                rept = self.make_v_result(f)
+                rept = self.make_v_result(target_graph, f)
                 reports.append(rept)
         return (not non_conformant), reports
 
@@ -146,7 +146,7 @@ class MaxCountConstraintComponent(ConstraintComponent):
             flag = len(value_nodes) <= max_count
             if not flag:
                 non_conformant = True
-                rept = self.make_v_result(f)
+                rept = self.make_v_result(target_graph, f)
                 reports.append(rept)
         return (not non_conformant), reports
 
