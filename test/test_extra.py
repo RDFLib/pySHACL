@@ -5,6 +5,8 @@
 # The need for these tests are discovered by doing coverage checks and these
 # are added as required.
 import os
+import re
+
 from pyshacl import validate
 from pyshacl.errors import ReportableRuntimeError
 
@@ -118,7 +120,7 @@ ex:Human1 rdf:type exOnt:PreschoolTeacher ;
 
 ex:Pet1 rdf:type exOnt:Goanna ;
     rdf:label "Sebastian" ;
-    exOnt:nLegs "g"^^xsd:string .
+    exOnt:nLegs "four"^^xsd:string .
 """
 
 def test_validate_with_ontology():
@@ -197,6 +199,54 @@ ex:AnimalShape a sh:NodeShape ;
         assert "Shacl Shapes Shacl file" in r.message
         did_error = True
     assert did_error
+
+data_file_text_bn = """
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix exOnt: <http://example.com/exOnt#> .
+@prefix ex: <http://example.com/ex#> .
+
+ex:Student1 exOnt:hasTeacher [
+    rdf:type exOnt:PreschoolTeacher ;
+    rdf:label "Amy" ;
+    exOnt:nLegs "2"^^xsd:integer ;
+    exOnt:hasPet ex:Pet1 ]
+.
+
+ex:Pet1 rdf:type exOnt:Goanna ;
+    rdf:label "Sebastian" ;
+    exOnt:nLegs "4"^^xsd:integer .
+"""
+
+data_file_text_bad_bn = """
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix exOnt: <http://example.com/exOnt#> .
+@prefix ex: <http://example.com/ex#> .
+
+ex:Student1 exOnt:hasTeacher [
+    rdf:type exOnt:PreschoolTeacher ;
+    rdf:label "Amy" ;
+    exOnt:nLegs "2"^^xsd:integer ;
+    exOnt:hasPet "Sebastian"^^xsd:string ]
+.
+
+ex:Pet1 rdf:type exOnt:Goanna ;
+    rdf:label "Sebastian" ;
+    exOnt:nLegs "four"^^xsd:string .
+"""
+
+def test_blank_node_string_generation():
+
+    res = validate(data_file_text_bad_bn, shacl_graph=shacl_file_text,
+                   data_graph_format='turtle', shacl_graph_format='turtle',
+                   ont_graph=ontology_file_text,  ont_graph_format="turtle",
+                   inference='rdfs', debug=True)
+    conforms, graph, string = res
+    assert not conforms
+    rx = r"^\s*Focus Node\:\s+\[.+rdf:type\s+.+exOnt\:PreschoolTeacher.*\]$"
+    matches = re.search(rx, string, flags=re.MULTILINE)
+    assert matches
 
 
 def test_serialize_report_graph():
@@ -294,6 +344,7 @@ if __name__ == "__main__":
     test_validate_with_ontology_fail2()
     test_metashacl_pass()
     test_metashacl_fail()
+    test_blank_node_string_generation()
     test_web_retrieve()
     test_serialize_report_graph()
     test_owl_imports()

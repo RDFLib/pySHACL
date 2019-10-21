@@ -102,4 +102,3 @@ def test_014_pass():
 if __name__ == "__main__":
     test_014_fail()
     test_014_pass()
-    test_014_web()

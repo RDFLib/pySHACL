@@ -146,8 +146,8 @@ In the case of `ShapeLoadError` and `ConstraintLoadError`, see the `str()` strin
 ## Compatibility  
 PySHACL is a Python3 library. For best compatibility use Python v3.6 or greater. This library _**does not work**_ on Python v2.7.x or below. 
 
-PySHACL v0.11.1.post1 is the last release targeting compatibility with Python v3.5. PySHACL v0.12.0 and above _**does not work**_ on Python v3.5.x or below.
-Use v0.11.1.post1 if you need to run PySHACL on Python v3.5.
+PySHACL v0.11.3 is the last release targeting compatibility with Python v3.5. PySHACL v0.12.0 and above _**does not work**_ on Python v3.5.x or below.
+Use v0.11.3 if you need to run PySHACL on Python v3.5.
 
 
 ## Features  

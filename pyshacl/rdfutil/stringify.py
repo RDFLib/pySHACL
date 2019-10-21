@@ -5,10 +5,12 @@ from . import SH, RDF_first
 
 
 def stringify_blank_node(graph, bnode, ns_manager=None, recursion=0):
+    if isinstance(graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
+        raise RuntimeError("Can only stringify a blank node when graph is an rdflib.Graph")
     assert isinstance(graph, rdflib.Graph)
     assert isinstance(bnode, rdflib.BNode)
-    if recursion >= 10:
-        return "Recursion too deep ..."
+    if recursion >= 9:
+        return "<http://recursion.too.deep>"
     stringed_cache_key = id(graph), str(bnode)
     if stringify_blank_node.stringed_cache is None:
         stringify_blank_node.stringed_cache = {}
@@ -95,18 +97,33 @@ def stringify_literal(graph, node, ns_manager=None):
     return node_string
 
 
+def find_node_named_graph(dataset, node):
+    if isinstance(node, rdflib.Literal):
+        raise RuntimeError("Cannot search for a Literal node in a dataset.")
+    for g in iter(dataset.contexts()):
+        try:
+             first = next(iter(g.predicate_objects(node)))
+             return g
+        except StopIteration:
+            continue
+    raise RuntimeError("Cannot find that node in any named graph.")
+
 def stringify_node(graph, node, ns_manager=None, recursion=0):
     if ns_manager is None:
         ns_manager = graph.namespace_manager
-        ns_manager.bind("sh", SH)
+    if isinstance(ns_manager, rdflib.Graph):
+        #json-ld loader can set namespace_manager to the conjunctive graph itself.
+        ns_manager = ns_manager.namespace_manager
+    ns_manager.bind("sh", SH, override=False, replace=False)
     if isinstance(node, rdflib.Literal):
-        node_string = stringify_literal(graph, node, ns_manager=ns_manager)
-    elif isinstance(node, rdflib.BNode):
-        node_string = stringify_blank_node(
-                      graph, node, ns_manager=ns_manager,
-                      recursion=recursion+1)
-    elif isinstance(node, rdflib.URIRef):
-        node_string = node.n3(namespace_manager=ns_manager)
+        return stringify_literal(graph, node, ns_manager=ns_manager)
+    if isinstance(node, rdflib.BNode):
+        if isinstance(graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
+            graph = find_node_named_graph(graph, node)
+        return stringify_blank_node(graph, node, ns_manager=ns_manager,
+                                    recursion=recursion+1)
+    if isinstance(node, rdflib.URIRef):
+        return node.n3(namespace_manager=ns_manager)
     else:
         node_string = str(node)
     return node_string

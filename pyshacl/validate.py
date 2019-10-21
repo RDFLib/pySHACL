@@ -68,7 +68,10 @@ class Validator(object):
             raise ReportableRuntimeError("Error during creation of OWL-RL Deductive Closure\n"
                                          "{}".format(str(e.args[0])))
         if isinstance(target_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
-            named_graphs = [target_graph.get_context(i) if not isinstance(i, rdflib.Graph) else i for i in target_graph.store.contexts(None)]
+            named_graphs = [
+                rdflib.Graph(target_graph.store, i, namespace_manager=target_graph.namespace_manager)
+                if not isinstance(i, rdflib.Graph) else i for i in target_graph.store.contexts(None)
+            ]
         else:
             named_graphs = [target_graph]
         try:
@@ -104,9 +107,9 @@ class Validator(object):
                 if isinstance(o, tuple):
                     source = o[0]
                     node = o[1]
-                    if source == "S":
+                    if source == 'S':
                         o = clone_node(sg, node, vg)
-                    elif source == "D":
+                    elif source == 'D':
                         o = clone_node(target_graph, node, vg)
                     else:  # pragma: no cover
                         raise RuntimeError("Adding node to validation report must have source of either 'D' or 'S'.")
@@ -145,7 +148,6 @@ class Validator(object):
             return mix_graphs(self.data_graph, self.ont_graph)
         return mix_datasets(self.data_graph, self.ont_graph)
 
-
     def run(self):
         if self.ont_graph is not None:
             # creates a copy of self.data_graph, doesn't modify it
@@ -173,7 +175,10 @@ class Validator(object):
         else:
             advanced = {}
         if isinstance(the_target_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
-            named_graphs = [the_target_graph.get_context(i) if not isinstance(i, rdflib.Graph) else i for i in the_target_graph.store.contexts(None)]
+            named_graphs = [
+                rdflib.Graph(the_target_graph.store, i, namespace_manager=the_target_graph.namespace_manager)
+                if not isinstance(i, rdflib.Graph) else i for i in the_target_graph.store.contexts(None)
+            ]
         else:
             named_graphs = [the_target_graph]
         for g in named_graphs:
@@ -184,7 +189,8 @@ class Validator(object):
                 _is_conform, _reports = s.validate(g)
                 non_conformant = non_conformant or (not _is_conform)
                 reports.extend(_reports)
-        v_report, v_text = self.create_validation_report((not non_conformant), the_target_graph, self.shacl_graph, reports)
+        v_report, v_text = self.create_validation_report(
+            not non_conformant, the_target_graph, self.shacl_graph, reports)
         return (not non_conformant), v_report, v_text
 
 

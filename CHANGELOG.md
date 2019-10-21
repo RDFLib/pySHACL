@@ -4,6 +4,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).  
 
+## [0.11.3] - 2019-21-10
+
+### Fixed
+- Fixed Issue [#032](https://github.com/RDFLib/pySHACL/issues/32) 
+- Stringification of Focus Node, and Value Node in the results text string now works correctly
+  - This is an old bug, that has been around since the first versions of pySHACL
+  - Manifests when the DataGraph is a different graph than the ShapesGraph
+  - Recent change from using Graphs by default to using Datasets by default helped to expose this bug
+  - Thanks to @jameshowison for reporting the bug
+
+### Changed
+- Stringification of a blank node now operates on a rdflib.Graph only, rather than a Dataset.
+  - Added mechanism to extract the correct named graph from a dataset when stringifying a blank node.
+- Added a workaround for a json-ld loader bug where the namespace_manager for named graphs within a conjunctive graph
+  is set to the parent conjunctive graph.
+  - This necessary workaround was exposed only after changing the blank node stringification above.
+  (Fixing one bug exposed another bug!)
+
+### Announcement 
+- **This is the final version with Python v3.5 support**
+  - Versions 0.12.0 and above will have newer package management and dependency management, and will
+  require Python v3.6+. 
+
+
+## [0.11.2] - 2019-17-10
+
+### Changed
+- Bumped min OWL-RL version to 5.2.1 to bring in some new bugfixes
+- Corrected some tiny typos in readme
+
+
 ## [0.11.1.post1] - 2019-11-10
 
 ### Fixed
@@ -443,7 +474,9 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality  
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.11.1.post1...HEAD 
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.11.3...HEAD 
+[0.11.3]: https://github.com/RDFLib/pySHACL/compare/v0.11.2...v0.11.3
+[0.11.2]: https://github.com/RDFLib/pySHACL/compare/v0.11.1.post1...v0.11.2
 [0.11.1.post1]: https://github.com/RDFLib/pySHACL/compare/v0.11.1...v0.11.1.post1
 [0.11.1]: https://github.com/RDFLib/pySHACL/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/RDFLib/pySHACL/compare/v0.10.0...v0.11.0

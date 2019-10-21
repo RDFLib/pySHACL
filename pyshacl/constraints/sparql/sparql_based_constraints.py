@@ -133,18 +133,17 @@ class SPARQLBasedConstraint(ConstraintComponent):
                 non_conformant = True
                 if isinstance(v, bool) and v is True:
                     rept = self.make_v_result(
-                        f, value_node=result_val, **rept_kwargs)
+                        target_graph, f, value_node=result_val, **rept_kwargs)
                 elif isinstance(v, tuple):
                     t, p, v = v
                     if v is None:
                         v = result_val
                     rept = self.make_v_result(
-                        t or f, value_node=v, result_path=p,
+                        target_graph, t or f, value_node=v, result_path=p,
                         **rept_kwargs)
                 else:
                     rept = self.make_v_result(
-                        f, value_node=v,
-                        **rept_kwargs)
+                        target_graph, f, value_node=v, **rept_kwargs)
                 reports.append(rept)
         return non_conformant, reports
 
