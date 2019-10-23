@@ -76,7 +76,8 @@ optional arguments:
                         owl:import.
   -a, --advanced        Enable support for SHACL Advanced Features.
   --abort               Abort on first error.
-  -d, --debug           Output additional runtime messages.
+  -d, --debug           Output additional runtime messages, including violations that didn't 
+                        lead to non-conformance.
   -f {human,turtle,xml,json-ld,nt,n3}, --format {human,turtle,xml,json-ld,nt,n3}
                         Choose an output format. Default is "human".
   -df {auto,turtle,xml,json-ld,nt,n3}, --data-file-format {auto,turtle,xml,json-ld,nt,n3}
@@ -109,7 +110,7 @@ Where:
 Options are 'rdfs', 'owlrl', 'both', or 'none'. The default is 'none'.
 * `abort_on_error` (optional) a Python `bool` value to indicate whether or not the program should abort after encountering a validation error or to continue. Default is to continue.
 * `meta_shacl` (optional) a Python `bool` value to indicate whether or not the program should enable the Meta-SHACL feature. Default is False.
-* `debug` (optional) a Python `bool` value to indicate whether or not the program should emit debugging output text. Default is False.
+* `debug` (optional) a Python `bool` value to indicate whether or not the program should emit debugging output text, including violations that didn't lead to non-conformance overall. So when debug is True don't judge conformance by absense of violation messages. Default is False.
 
 Some other optional keyword variables available available on the `validate` function:
 * `advanced`: Enable SHACL Advanced Features
