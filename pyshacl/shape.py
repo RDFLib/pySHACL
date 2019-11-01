@@ -198,7 +198,7 @@ class Shape(object):
             result_set[c] = ct
         return result_set
 
-    def focus_nodes(self, target_graph):
+    def focus_nodes(self, data_graph):
         """
         The set of focus nodes for a shape may be identified as follows:
 
@@ -214,38 +214,30 @@ class Shape(object):
         else:
             advanced_targets = False
         found_node_targets = set()
-        for n in iter(target_nodes):
-            # Note, a node_target _can_ be a literal.
-            if n in iter(target_graph.subjects()):
-                found_node_targets.add(n)
-                continue
-            elif n in iter(target_graph.predicates()):
-                found_node_targets.add(n)
-                continue
-            elif n in iter(target_graph.objects()):
-                found_node_targets.add(n)
-                continue
+        # Just add _all_ target_nodes to the set,
+        # they don't need to actually exist in the graph
+        found_node_targets.update(iter(target_nodes))
         target_classes = set(target_classes)
         target_classes.update(set(implicit_classes))
         found_target_instances = set()
         for tc in target_classes:
-            s = target_graph.subjects(RDF_type, tc)
+            s = data_graph.subjects(RDF_type, tc)
             found_target_instances.update(s)
-            subc = target_graph.subjects(RDFS_subClassOf, tc)
+            subc = data_graph.subjects(RDFS_subClassOf, tc)
             for subclass in iter(subc):
                 if subclass == tc:
                     continue
-                s1 = target_graph.subjects(RDF_type, subclass)
+                s1 = data_graph.subjects(RDF_type, subclass)
                 found_target_instances.update(s1)
         found_node_targets.update(found_target_instances)
         found_target_subject_of = set()
         for s_of in target_subjects_of:
-            subs = {s for s, o in target_graph.subject_objects(s_of)}
+            subs = {s for s, o in data_graph.subject_objects(s_of)}
             found_target_subject_of.update(subs)
         found_node_targets.update(found_target_subject_of)
         found_target_object_of = set()
         for o_of in target_objects_of:
-            objs = {o for s, o in target_graph.subject_objects(o_of)}
+            objs = {o for s, o in data_graph.subject_objects(o_of)}
             found_target_object_of.update(objs)
         found_node_targets.update(found_target_object_of)
         if advanced_targets:
@@ -255,7 +247,7 @@ class Shape(object):
                     continue
                 qh = at['qh']
                 c = qh.apply_prefixes(at['select'])
-                results = target_graph.query(c, initBindings=None)
+                results = data_graph.query(c, initBindings=None)
                 if not results or len(results.bindings) < 1:
                     continue
                 for r in results:
