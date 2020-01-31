@@ -46,7 +46,7 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MinExclusiveConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
@@ -125,7 +125,7 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MinInclusiveConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
@@ -205,7 +205,7 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MaxExclusiveConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
@@ -285,7 +285,7 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MaxInclusiveConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict

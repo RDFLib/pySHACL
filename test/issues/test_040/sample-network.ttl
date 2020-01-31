@@ -1,0 +1,21 @@
+@prefix : <http://sample.org/> .
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix bacnet: <http://data.ashrae.org/bacnet/2019#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:a rdf:type bacnet:Network ;
+    bacnet:hasNode :b, :c .
+
+:b rdf:type bacnet:Node ;
+    bacnet:hasAddress 1 ;
+    bacnet:layeredAbove :c .
+
+:c rdf:type bacnet:Node ;
+    bacnet:hasAddress 2 ;
+    bacnet:layeredBelow :b .
+
+:d rdf:type bacnet:EthernetNode ;
+    bacnet:hasAddress "01:02:03:04:05:06" .
+
+

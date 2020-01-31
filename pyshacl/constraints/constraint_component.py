@@ -38,8 +38,35 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         return NotImplementedError()  # pragma: no cover
 
     @abc.abstractmethod
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         return NotImplementedError()  # pragma: no cover
+
+    def __str__(self):
+        c_name = str(self.__class__.__name__)
+        shape_id = str(self.shape)
+        return "<{} on {}>".format(c_name, shape_id)
+
+    def recursion_triggers(self, _evaluation_path):
+        shape = self.shape
+        eval_length = len(_evaluation_path)
+        maybe_recursive = []
+        if eval_length >= 6:
+            _shape, _self = _evaluation_path[eval_length - 2:]
+            if _shape is not shape or _self is not self:
+                raise RuntimeError("Bad evaluation path construction")
+            seen_before = [i for i, x in enumerate(_evaluation_path[:eval_length-2]) if x is shape] #_evaluation_path.index(shape, 0, eval_length - 2)
+            for s in seen_before:
+                for i, p in enumerate(_evaluation_path[s + 1:-2]):
+                    if isinstance(p, ConstraintComponent):
+                        if p.shape is shape and p.__class__ == self.__class__:
+                            try:
+                                next_shape = _evaluation_path[s + 1 + i + 1]
+                                maybe_recursive.append(next_shape)
+                            except IndexError:
+                                pass
+                        break
+        return maybe_recursive
+
 
     def make_v_result_description(self, datagraph, focus_node, severity, value_node=None, result_path=None,
                                   constraint_component=None, source_constraint=None, extra_messages=None):

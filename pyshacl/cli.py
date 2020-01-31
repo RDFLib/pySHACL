@@ -43,6 +43,7 @@ parser.add_argument('-ef', '--ont-file-format', dest='ont_file_format', action='
 parser.add_argument('-o', '--output', dest='output', nargs='?', type=argparse.FileType('w'),
                     help='Send output to a file (defaults to stdout).',
                     default=sys.stdout)
+#parser.add_argument('-h', '--help', action="help", help='Show this help text.')
 
 
 def main():

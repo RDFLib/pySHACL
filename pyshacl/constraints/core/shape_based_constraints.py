@@ -2,10 +2,12 @@
 """
 https://www.w3.org/TR/shacl/#core-components-shape
 """
+from warnings import warn
 import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH, SH_property, SH_node
-from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError, ConstraintLoadWarning
+from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError, ConstraintLoadWarning, \
+    ShapeRecursionWarning
 
 SH_PropertyConstraintComponent = SH.term('PropertyConstraintComponent')
 SH_NodeConstraintComponent = SH.term('NodeConstraintComponent')
@@ -50,35 +52,44 @@ class PropertyConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_PropertyConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
+        shape = self.shape
+        potentially_recursive = self.recursion_triggers(_evaluation_path)
+
+        def _evaluate_property_shape(prop_shape):
+            nonlocal shape, target_graph, focus_value_nodes, _evaluation_path
+            _reports = []
+            _non_conformant = False
+            prop_shape = shape.get_other_shape(prop_shape)
+            if prop_shape in potentially_recursive:
+                warn(ShapeRecursionWarning(_evaluation_path))
+                return _non_conformant, _reports
+            if not prop_shape or not prop_shape.is_property_shape:
+                raise ReportableRuntimeError(
+                    "Shape pointed to by sh:property does not exist "
+                    "or is not a well-formed SHACL PropertyShape.")
+
+            for f, value_nodes in focus_value_nodes.items():
+                for v in value_nodes:
+                    _is_conform, _r = prop_shape.validate(target_graph, focus=v,
+                                                          _evaluation_path=_evaluation_path[:])
+                    _non_conformant = _non_conformant or (not _is_conform)
+                    _reports.extend(_r)
+            return _non_conformant, _reports
 
         for p_shape in self.property_shapes:
-            _nc, _r = self._evaluate_property_shape(p_shape, target_graph, focus_value_nodes)
+            _nc, _r = _evaluate_property_shape(p_shape)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
-
-    def _evaluate_property_shape(self, prop_shape, target_graph, f_v_dict):
-        reports = []
-        non_conformant = False
-        prop_shape = self.shape.get_other_shape(prop_shape)
-        if not prop_shape or not prop_shape.is_property_shape:
-            raise ReportableRuntimeError(
-                "Shape pointed to by sh:property does not exist "
-                "or is not a well-formed SHACL PropertyShape.")
-        for f, value_nodes in f_v_dict.items():
-            for v in value_nodes:
-                _is_conform, _r = prop_shape.validate(target_graph, focus=v)
-                non_conformant = non_conformant or (not _is_conform)
-                reports.extend(_r)
-        return non_conformant, reports
 
 
 class NodeConstraintComponent(ConstraintComponent):
@@ -111,38 +122,46 @@ class NodeConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_NodeConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
+        shape = self.shape
+        potentially_recursive = self.recursion_triggers(_evaluation_path)
+
+        def _evaluate_node_shape(node_shape):
+            nonlocal self, target_graph, shape, focus_value_nodes, _evaluation_path
+            _reports = []
+            _non_conformant = False
+            node_shape = shape.get_other_shape(node_shape)
+            if node_shape in potentially_recursive:
+                warn(ShapeRecursionWarning(_evaluation_path))
+                return _non_conformant, _reports
+            if not node_shape or node_shape.is_property_shape:
+                raise ReportableRuntimeError(
+                    "Shape pointed to by sh:node does not exist or "
+                    "is not a well-formed SHACL NodeShape.")
+            for f, value_nodes in focus_value_nodes.items():
+                for v in value_nodes:
+                    _is_conform, _r = node_shape.validate(target_graph, focus=v,
+                                                          _evaluation_path=_evaluation_path[:])
+                    # ignore the fails from the node, create our own fail
+                    if (not _is_conform) or len(_r) > 0:
+                        _non_conformant = True
+                        rept = self.make_v_result(target_graph, f, value_node=v)
+                        _reports.append(rept)
+            return _non_conformant, _reports
 
         for n_shape in self.node_shapes:
-            _nc, _r = self._evaluate_node_shape(n_shape, target_graph, focus_value_nodes)
+            _nc, _r = _evaluate_node_shape(n_shape)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
-
-    def _evaluate_node_shape(self, node_shape, target_graph, f_v_dict):
-        reports = []
-        non_conformant = False
-        node_shape = self.shape.get_other_shape(node_shape)
-        if not node_shape or node_shape.is_property_shape:
-            raise ReportableRuntimeError(
-                "Shape pointed to by sh:node does not exist or "
-                "is not a well-formed SHACL NodeShape.")
-        for f, value_nodes in f_v_dict.items():
-            for v in value_nodes:
-                _is_conform, _r = node_shape.validate(target_graph, focus=v)
-                # ignore the fails from the node, create our own fail
-                if (not _is_conform) or len(_r) > 0:
-                    non_conformant = True
-                    rept = self.make_v_result(target_graph, f, value_node=v)
-                    reports.append(rept)
-        return non_conformant, reports
 
 
 class QualifiedValueShapeConstraintComponent(ConstraintComponent):
@@ -221,64 +240,76 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
                                   "QualifiedMinCountConstraintComponent or "
                                   "QualifiedMaxCountConstraintComponent")
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type _evaluation_path list
         """
         reports = []
         non_conformant = False
+        shape = self.shape
+        potentially_recursive = self.recursion_triggers(_evaluation_path)
+
+        def _evaluate_value_shape(_v_shape):
+            nonlocal self, shape, target_graph, focus_value_nodes, _evaluation_path
+            _reports = []
+            _non_conformant = False
+            other_shape = shape.get_other_shape(_v_shape)
+            if other_shape in potentially_recursive:
+                warn(ShapeRecursionWarning(_evaluation_path))
+                return _non_conformant, _reports
+            if not other_shape:
+                raise ReportableRuntimeError(
+                    "Shape pointed to by sh:property does not "
+                    "exist or is not a well-formed SHACL Shape.")
+            if self.is_disjoint:
+                # Textual Definition of Sibling Shapes:
+                # Let Q be a shape in shapes graph G that declares a qualified cardinality constraint (by having values for sh:qualifiedValueShape and at least one of sh:qualifiedMinCount or sh:qualifiedMaxCount). Let ps be the set of shapes in G that have Q as a value of sh:property. If Q has true as a value for sh:qualifiedValueShapesDisjoint then the set of sibling shapes for Q is defined as the set of all values of the SPARQL property path sh:property/sh:qualifiedValueShape for any shape in ps minus the value of sh:qualifiedValueShape of Q itself. The set of sibling shapes is empty otherwise.
+                sibling_shapes = set()
+                parent_shapes = set(self.shape.sg.subjects(SH_property, self.shape.node))
+                for p in iter(parent_shapes):
+                    found_siblings = set(self.shape.sg.objects(p, SH_property))
+                    for s in iter(found_siblings):
+                        if s == self.shape.node:
+                            continue
+                        sibling_shapes.update(self.shape.sg.objects(s, SH_qualifiedValueShape))
+
+                sibling_shapes = set(self.shape.get_other_shape(s) for s in sibling_shapes)
+            else:
+                sibling_shapes = set()
+            for f, value_nodes in focus_value_nodes.items():
+                number_conforms = 0
+                for v in value_nodes:
+                    try:
+                        _is_conform, _r = other_shape.validate(target_graph, focus=v,
+                                                               _evaluation_path=_evaluation_path[:])
+                        if _is_conform:
+                            _conforms_to_sibling = False
+                            for sibling_shape in sibling_shapes:
+                                _c2, _r = sibling_shape.validate(target_graph, focus=v,
+                                                                 _evaluation_path=_evaluation_path[:])
+                                _conforms_to_sibling = _conforms_to_sibling or _c2
+                            if not _conforms_to_sibling:
+                                number_conforms += 1
+                    except ValidationFailure as v:
+                        raise v
+                if self.max_count is not None and number_conforms > self.max_count:
+                    _non_conformant = True
+                    _r = self.make_v_result(target_graph, f,
+                                            constraint_component=SH_QualifiedMaxCountConstraintComponent)
+                    _reports.append(_r)
+                if self.min_count is not None and number_conforms < self.min_count:
+                    _non_conformant = True
+                    _r = self.make_v_result(target_graph, f,
+                                            constraint_component=SH_QualifiedMinCountConstraintComponent)
+                    _reports.append(_r)
+            return _non_conformant, _reports
 
         for v_shape in self.value_shapes:
-            _nc, _r = self._evaluate_value_shape(v_shape, target_graph, focus_value_nodes)
+            _nc, _r = _evaluate_value_shape(v_shape)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
 
-    def _evaluate_value_shape(self, v_shape, target_graph, f_v_dict):
-        reports = []
-        non_conformant = False
-        other_shape = self.shape.get_other_shape(v_shape)
-        if not other_shape:
-            raise ReportableRuntimeError(
-                "Shape pointed to by sh:property does not "
-                "exist or is not a well-formed SHACL Shape.")
-        if self.is_disjoint:
-            # Textual Definition of Sibling Shapes:
-            # Let Q be a shape in shapes graph G that declares a qualified cardinality constraint (by having values for sh:qualifiedValueShape and at least one of sh:qualifiedMinCount or sh:qualifiedMaxCount). Let ps be the set of shapes in G that have Q as a value of sh:property. If Q has true as a value for sh:qualifiedValueShapesDisjoint then the set of sibling shapes for Q is defined as the set of all values of the SPARQL property path sh:property/sh:qualifiedValueShape for any shape in ps minus the value of sh:qualifiedValueShape of Q itself. The set of sibling shapes is empty otherwise.
-            sibling_shapes = set()
-            parent_shapes = set(self.shape.sg.subjects(SH_property, self.shape.node))
-            for p in iter(parent_shapes):
-                found_siblings = set(self.shape.sg.objects(p, SH_property))
-                for s in iter(found_siblings):
-                    if s == self.shape.node:
-                        continue
-                    sibling_shapes.update(self.shape.sg.objects(s, SH_qualifiedValueShape))
-
-            sibling_shapes = set(self.shape.get_other_shape(s) for s in sibling_shapes)
-        else:
-            sibling_shapes = set()
-        for f, value_nodes in f_v_dict.items():
-            number_conforms = 0
-            for v in value_nodes:
-                try:
-                    _is_conform, _r = other_shape.validate(target_graph, focus=v)
-                    if _is_conform:
-                        _conforms_to_sibling = False
-                        for sibling_shape in sibling_shapes:
-                            _c2, _r = sibling_shape.validate(target_graph, focus=v)
-                            _conforms_to_sibling = _conforms_to_sibling or _c2
-                        if not _conforms_to_sibling:
-                            number_conforms += 1
-                except ValidationFailure as v:
-                    raise v
-            if self.max_count is not None and number_conforms > self.max_count:
-                non_conformant = True
-                _r = self.make_v_result(target_graph, f, constraint_component=SH_QualifiedMaxCountConstraintComponent)
-                reports.append(_r)
-            if self.min_count is not None and number_conforms < self.min_count:
-                non_conformant = True
-                _r = self.make_v_result(target_graph, f, constraint_component=SH_QualifiedMinCountConstraintComponent)
-                reports.append(_r)
-        return non_conformant, reports

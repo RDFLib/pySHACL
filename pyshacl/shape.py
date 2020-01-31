@@ -99,11 +99,17 @@ class Shape(object):
 
     @property
     def name(self):
-        # TODO:coverage: this is never used?
         if self._names is None:
             return
         for n in self._names:
             yield n
+
+    def __str__(self):
+        try:
+            name = next(iter(self.name))
+        except Exception as e:
+            name = str(self.node)
+        return "<Shape {}>".format(name)
 
     @property
     def description(self):
@@ -408,7 +414,7 @@ class Shape(object):
         return applicable_custom_constraints
 
 
-    def validate(self, target_graph, focus=None, bail_on_error=False):
+    def validate(self, target_graph, focus=None, bail_on_error=False, _evaluation_path=None):
         #assert isinstance(target_graph, rdflib.Graph)
         if self.deactivated:
             return True, []
@@ -421,12 +427,18 @@ class Shape(object):
             # Its possible for shapes to have _no_ focus nodes
             # (they are called in other ways)
             return True, []
+        if _evaluation_path is None:
+            _evaluation_path = []
+        elif len(_evaluation_path) >= 28:  # 27 is the depth required to successfully do the meta-shacl test
+            path_str = "->".join((str(e) for e in _evaluation_path))
+            raise ReportableRuntimeError("Evaluation path too deep!\n{}".format(path_str))
         parameters = self.parameters()
         reports = []
         focus_value_nodes = self.value_nodes(target_graph, focus)
         non_conformant = False
         done_constraints = set()
         run_count = 0
+        _evaluation_path.append(self)
         constraint_components = [CONSTRAINT_PARAMETERS_MAP[p] for p in iter(parameters)]
         for constraint_component in constraint_components:
             if constraint_component in done_constraints:
@@ -439,7 +451,9 @@ class Shape(object):
             except ConstraintLoadError as e:
                 self.logger.error(repr(e))
                 raise e
-            _is_conform, _r = c.evaluate(target_graph, focus_value_nodes)
+            _e_p = _evaluation_path[:]
+            _e_p.append(c)
+            _is_conform, _r = c.evaluate(target_graph, focus_value_nodes, _e_p)
             non_conformant = non_conformant or (not _is_conform)
             reports.extend(_r)
             run_count += 1
@@ -450,8 +464,10 @@ class Shape(object):
         for a in applicable_custom_constraints:
             if non_conformant and bail_on_error:
                 break
+            _e_p = _evaluation_path[:]
             validator = a.make_validator_for_shape(self)
-            _is_conform, _r = validator.evaluate(target_graph, focus_value_nodes)
+            _e_p.append(validator)
+            _is_conform, _r = validator.evaluate(target_graph, focus_value_nodes, _e_p)
             non_conformant = non_conformant or (not _is_conform)
             reports.extend(_r)
             run_count += 1

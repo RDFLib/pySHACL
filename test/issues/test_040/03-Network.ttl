@@ -1,0 +1,323 @@
+@prefix : <http://data.ashrae.org/bacnet/2019#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:Network
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:comment            "The class of networks." ;
+    sh:property [ sh:node :Node ;
+            sh:path :hasNode ] .
+
+:Node
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:comment            "A node is a member of a network with an address." ;
+    sh:targetClass          :Node ;
+    sh:property [ 
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:path :hasAddress ] ;
+    sh:property [ sh:node :Network ;
+            sh:path :isNodeOf ] ;
+    sh:property [ sh:node :Port ;
+            sh:path :portReference ] ;
+    sh:property [ sh:node :Node ;
+            sh:path :layeredAbove ] ;
+    sh:property [ sh:node :Node ;
+            sh:path :layeredBelow ] .
+
+:layeredAbove
+    rdf:type            rdf:Property, owl:TransitiveProperty ;
+    rdfs:domain         :Node ;
+    rdfs:range          :Node ;
+    rdf:comment         "A network node may be 'stacked' on one or more nodes." ;
+    owl:inverseOf       :layeredBelow .
+
+:layeredBelow
+    rdf:type            rdf:Property, owl:TransitiveProperty ;
+    rdfs:domain         :Node ;
+    rdfs:range          :Node ;
+    rdf:comment         "A network node may have one or more nodes 'stacked' on top." ;
+    owl:inverseOf       :layeredAbove .
+
+:Port
+    rdf:type            owl:Class, sh:NodeShape ;
+    rdfs:comment        "A port is a connection point used to connect one of more devices together." ;
+    sh:targetClass      :Port .
+
+:Jack
+    rdf:type            owl:Class, sh:NodeShape ;
+    rdfs:comment        "A jack is a demarcation point between a network service provider and a network customer." ;
+    sh:targetClass      :Jack .
+
+:Device
+    rdf:type            owl:Class, sh:NodeShape ;
+    rdfs:comment        "The class of networks." ;
+    sh:property [ sh:node :Node ;
+            sh:path :hasNode ] ;
+    sh:property [ sh:node :Port ;
+            sh:path :hasPort ] .
+
+:Bridge
+    rdf:type            owl:Class ;
+    rdfs:subClassOf     :Device ;
+    rdfs:comment        "A device that connects two or more segments at the physical and data link layers." .
+
+:Repeater
+    rdf:type            owl:Class ;
+    rdfs:subClassOf     :Device ;
+    rdfs:comment        "A device that connects two or more physical segments at the physical layer." .
+
+:Router
+    rdf:type            owl:Class ;
+    rdfs:subClassOf     :Device ;
+    rdfs:comment        "A device that connects two or more similar networks to form an intranetwork" .
+
+:Gateway
+    rdf:type            owl:Class ;
+    rdfs:subClassOf     :Device ;
+    rdfs:comment        "A device that connects two or more dissimilar networks, permitting information exchange between them." .
+
+:hasNode
+    rdf:type            rdf:Property ;
+    rdfs:range          :Node ;
+    rdf:comment         "A network node may be 'stacked' on one or more nodes." ;
+    owl:inverseOf       :layeredBelow .
+
+:hasPort
+    rdf:type            rdf:Property ;
+    rdfs:range          :Port ;
+    rdf:comment         "A network node may be 'stacked' on one or more nodes." ;
+    owl:inverseOf       :layeredBelow .
+
+:EthernetNetwork
+    rdf:type                    owl:Class, sh:NodeShape ;
+    sh:targetClass              :EthernetNetwork ;
+    rdfs:subClassOf             :Network ;
+    sh:property [ sh:node :EthernetNode ;
+            sh:path :hasNode ] .
+
+:EthernetNode
+    rdf:type                    owl:Class, sh:NodeShape ;
+    rdfs:subClassOf             :Node ;
+    sh:targetClass              :EthernetNode ;
+    sh:property [ 
+            sh:pattern      "^[0-9a-f][0-9a-f](:[0-9a-f][0-9a-f]){5}$" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:path :hasAddress ] .
+
+:EthernetHub
+    rdf:type                    owl:Class ;
+    rdfs:subClassOf             :Bridge ;
+    rdfs:comment                "A device that connects two or more Ethernet segments at the physical and data link layers (deprecated by IEEE 802.3)." .
+
+:EthernetSwitch
+    rdf:type                    owl:Class ;
+    rdfs:subClassOf             :Bridge ;
+    rdfs:comment                "A device that connects two or more Ethernet segments at the physical and data link layers that uses packet switching." .
+
+:EthernetVLANNetwork
+    rdf:type                    owl:Class, sh:NodeShape ;
+    sh:targetClass              :EthernetVLANNetwork ;
+    rdfs:subClassOf             :EthernetNetwork ;
+    sh:property [
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:path :hasVID ] .
+
+:hasVID
+    rdf:type                    rdf:Property ;
+    rdfs:comment                "The VLAN identifier (VID) is the 12-bit unsigned specifying the VLAN." .
+
+:EthernetPort
+    rdf:type                    owl:Class, sh:NodeShape ;
+    rdfs:subClassOf             :Port ;
+    sh:targetClass              :EthernetPort .
+
+:ARCNETNetwork
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Network ;
+    sh:targetClass          :ARCNETNetwork ;
+    sh:property [ sh:node :ARCNETNode ;
+            sh:path :hasNode ] .
+
+:ARCNETRepeater
+    rdf:type                owl:Class ;
+    rdfs:subClassOf         :Repeater ;
+    rdfs:comment            "A device that connects two or more ARCNET physical segments at the physical layer." .
+
+:ARCNETNode
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Node ;
+    sh:targetClass          :ARCNETNode ;
+    sh:property [
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:path :hasAddress ] .
+
+:MSTPNetwork
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Network ;
+    sh:targetClass          :MSTPNetwork ;
+    sh:property [ sh:node :MSTPNode ;
+            sh:path :hasNode ] .
+
+:MSTPNode
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Node ;
+    sh:targetClass          :MSTPNode ;
+    sh:property [
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:path :hasAddress ] .
+
+:PTPNetwork
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Network ;
+    sh:targetClass          :PTPNetwork ;
+    sh:property [ sh:node :PTPNode ;
+            sh:path :hasNode ] .
+
+:PTPNode
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Node ;
+    sh:targetClass          :PTPNode ;
+    sh:property [
+            sh:maxCount 0 ;
+            sh:minCount 0 ;
+            sh:path :hasAddress ] .
+
+:LonTalkNetwork
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Network ;
+    sh:targetClass          :LonTalkNetwork ;
+    sh:property [ sh:node :LonTalkNode ;
+            sh:path :hasNode ] .
+
+:LonTalkNode
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Node ;
+    sh:targetClass          :LonTalkNode ;
+    sh:property [
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:path :hasAddress ] .
+
+:IPv4Network
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Network ;
+    sh:targetClass          :IPv4Network ;
+    sh:property [ sh:node :IPv4Node ;
+            sh:path :hasNode ] .
+
+:IPv4Node
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Node ;
+    sh:targetClass          :IPv4Node ;
+    sh:property [
+            sh:pattern      "^[0-9]+([.][0-9]+){3}$" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:path :hasAddress ] .
+
+:ZigBeeNetwork
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Network ;
+    sh:targetClass          :ZigBeeNetwork ;
+    sh:property [ sh:node :ZigBeeNode ;
+            sh:path :hasNode ] .
+
+:ZigBeeNode
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Node ;
+    sh:targetClass          :ZigBeeNode ;
+    sh:property [
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:path :hasAddress ] .
+
+:VirtualNetwork
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Network ;
+    sh:targetClass          :VirtualNetwork ;
+    sh:property [ sh:node :VirtualNode ;
+            sh:path :hasNode ] .
+
+:VirtualNode
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Node ;
+    sh:targetClass          :VirtualNode ;
+    sh:property [ sh:datatype xsd:hexBinary ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:path :hasAddress ] .
+
+:IPv6Network
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Network ;
+    sh:targetClass          :IPv6Network ;
+    sh:property [ sh:node :IPv6Node ;
+            sh:path :hasNode ] .
+
+:IPv6Node
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Node ;
+    sh:targetClass          :IPv6Node ;
+    sh:property [
+            sh:pattern      "^[0-9]+([.][0-9]+){3}$" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:path :hasAddress ] .
+
+:SecureConnectNetwork
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Network ;
+    sh:targetClass          :SecureConnectNetwork ;
+    sh:property [ sh:node :SecureConnectNode ;
+            sh:path :hasNode ] .
+
+:SecureConnectNode
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Node ;
+    sh:targetClass          :SecureConnectNode ;
+    sh:property [
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:path :hasAddress ] .
+
+:SerialNetwork
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Network ;
+    sh:targetClass          :SerialNetwork ;
+    sh:property [ sh:node :SerialNode ;
+            sh:path :hasNode ] .
+
+:SerialNode
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Node ;
+    sh:targetClass          :SerialNode ;
+    sh:property [
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:path :hasAddress ] .
+
+:ProprietaryNetwork
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Network ;
+    sh:targetClass          :ProprietaryNetwork ;
+    sh:property [ sh:node :ProprietaryNode ;
+            sh:path :hasNode ] .
+
+:ProprietaryNode
+    rdf:type                owl:Class, sh:NodeShape ;
+    rdfs:subClassOf         :Node ;
+    sh:targetClass          :ProprietaryNode ;
+    sh:property [
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:path :hasAddress ] .
+
+

@@ -2,10 +2,11 @@
 """
 https://www.w3.org/TR/shacl/#core-components-logical
 """
+from warnings import warn
 import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
-from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError
+from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError, ShapeRecursionWarning
 
 SH_not = SH.term('not')
 SH_and = SH.term('and')
@@ -52,41 +53,49 @@ class NotConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_NotConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type _evaluation_path list
         """
         reports = []
         non_conformant = False
+        shape = self.shape
+        potentially_recursive = self.recursion_triggers(_evaluation_path)
+
+        def _evaluate_not_constraint(not_c):
+            nonlocal self, shape, target_graph, focus_value_nodes, _evaluation_path
+            _reports = []
+            _non_conformant = False
+            not_shape = shape.get_other_shape(not_c)
+            if not not_shape:
+                raise ReportableRuntimeError(
+                    "Shape pointed to by sh:not does not exist or is not "
+                    "a well-formed SHACL Shape.")
+            if not_shape in potentially_recursive:
+                warn(ShapeRecursionWarning(_evaluation_path))
+                return _non_conformant, _reports
+            for f, value_nodes in focus_value_nodes.items():
+                for v in value_nodes:
+                    try:
+                        _is_conform, _r = not_shape.validate(target_graph, focus=v,
+                                                             _evaluation_path=_evaluation_path[:])
+                    except ValidationFailure as e:
+                        raise e
+                    if _is_conform:
+                        # in this case, we _dont_ want to conform!
+                        _non_conformant = True
+                        rept = self.make_v_result(target_graph, f, value_node=v)
+                        _reports.append(rept)
+            return _non_conformant, _reports
 
         for not_c in self.not_list:
-            _nc, _r = self._evaluate_not_constraint(not_c, target_graph, focus_value_nodes)
+            _nc, _r = _evaluate_not_constraint(not_c)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
-
-    def _evaluate_not_constraint(self, not_c, target_graph, f_v_dict):
-        reports = []
-        non_conformant = False
-        not_shape = self.shape.get_other_shape(not_c)
-        if not not_shape:
-            raise ReportableRuntimeError(
-                "Shape pointed to by sh:not does not exist or is not "
-                "a well-formed SHACL Shape.")
-        for f, value_nodes in f_v_dict.items():
-            for v in value_nodes:
-                try:
-                    _is_conform, _r = not_shape.validate(target_graph, focus=v)
-                except ValidationFailure as e:
-                    raise e
-                if _is_conform:
-                    # in this case, we _dont_ want to conform!
-                    non_conformant = True
-                    rept = self.make_v_result(target_graph, f, value_node=v)
-                    reports.append(rept)
-        return non_conformant, reports
 
 
 class AndConstraintComponent(ConstraintComponent):
@@ -119,52 +128,58 @@ class AndConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_AndConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
+        shape = self.shape
+
+        def _evaluate_and_constraint(and_c):
+            nonlocal self, shape, target_graph, focus_value_nodes, _evaluation_path
+            _reports = []
+            _non_conformant = False
+            sg = shape.sg.graph
+            and_list = set(sg.items(and_c))
+            if len(and_list) < 1:
+                raise ReportableRuntimeError(
+                    "The list associated with sh:and is not a "
+                    "valid RDF list.")
+            and_shapes = set()
+            for a in and_list:
+                and_shape = shape.get_other_shape(a)
+                if not and_shape:
+                    raise ReportableRuntimeError(
+                        "Shape pointed to by sh:and does not exist or "
+                        "is not a well-formed SHACL Shape.")
+                and_shapes.add(and_shape)
+            for f, value_nodes in focus_value_nodes.items():
+                for v in value_nodes:
+                    passed_all = True
+                    for and_shape in and_shapes:
+                        try:
+                            _is_conform, _r = and_shape.validate(target_graph, focus=v,
+                                                                 _evaluation_path=_evaluation_path[:])
+                        except ValidationFailure as e:
+                            raise e
+                        passed_all = passed_all and _is_conform
+                    if not passed_all:
+                        _non_conformant = True
+                        rept = self.make_v_result(target_graph, f, value_node=v)
+                        _reports.append(rept)
+            return _non_conformant, _reports
 
         for and_c in self.and_list:
-            _nc, _r = self._evaluate_and_constraint(and_c, target_graph, focus_value_nodes)
+            _nc, _r = _evaluate_and_constraint(and_c)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
 
-    def _evaluate_and_constraint(self, and_c, target_graph, f_v_dict):
-        reports = []
-        non_conformant = False
-        sg = self.shape.sg.graph
-        and_list = set(sg.items(and_c))
-        if len(and_list) < 1:
-            raise ReportableRuntimeError(
-                "The list associated with sh:and is not a "
-                "valid RDF list.")
-        and_shapes = set()
-        for a in and_list:
-            and_shape = self.shape.get_other_shape(a)
-            if not and_shape:
-                raise ReportableRuntimeError(
-                    "Shape pointed to by sh:and does not exist or "
-                    "is not a well-formed SHACL Shape.")
-            and_shapes.add(and_shape)
-        for f, value_nodes in f_v_dict.items():
-            for v in value_nodes:
-                passed_all = True
-                for and_shape in and_shapes:
-                    try:
-                        _is_conform, _r = and_shape.validate(target_graph, focus=v)
-                    except ValidationFailure as e:
-                        raise e
-                    passed_all = passed_all and _is_conform
-                if not passed_all:
-                    non_conformant = True
-                    rept = self.make_v_result(target_graph, f, value_node=v)
-                    reports.append(rept)
-        return non_conformant, reports
+
 
 
 class OrConstraintComponent(ConstraintComponent):
@@ -197,7 +212,7 @@ class OrConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_OrConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
@@ -205,44 +220,47 @@ class OrConstraintComponent(ConstraintComponent):
         """
         reports = []
         non_conformant = False
+        shape = self.shape
+
+        def _evaluate_or_constraint(or_c):
+            nonlocal self, shape, target_graph, focus_value_nodes, _evaluation_path
+            _reports = []
+            _non_conformant = False
+            sg = shape.sg.graph
+            or_list = set(sg.items(or_c))
+            if len(or_list) < 1:
+                raise ReportableRuntimeError(
+                    "The list associated with sh:or "
+                    "is not a valid RDF list.")
+            or_shapes = set()
+            for o in or_list:
+                or_shape = shape.get_other_shape(o)
+                if not or_shape:
+                    raise ReportableRuntimeError(
+                        "Shape pointed to by sh:or does not exist or "
+                        "is not a well-formed SHACL Shape.")
+                or_shapes.add(or_shape)
+            for f, value_nodes in focus_value_nodes.items():
+                for v in value_nodes:
+                    passed_any = False
+                    for or_shape in or_shapes:
+                        try:
+                            _is_conform, _r = or_shape.validate(target_graph, focus=v,
+                                                                _evaluation_path=_evaluation_path[:])
+                        except ValidationFailure as e:
+                            raise e
+                        passed_any = passed_any or _is_conform
+                    if not passed_any:
+                        _non_conformant = True
+                        rept = self.make_v_result(target_graph, f, value_node=v)
+                        _reports.append(rept)
+            return _non_conformant, _reports
 
         for or_c in self.or_list:
-            _nc, _r = self._evaluate_or_constraint(or_c, target_graph, focus_value_nodes)
+            _nc, _r = _evaluate_or_constraint(or_c)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
-
-    def _evaluate_or_constraint(self, or_c, target_graph, f_v_dict):
-        reports = []
-        non_conformant = False
-        sg = self.shape.sg.graph
-        or_list = set(sg.items(or_c))
-        if len(or_list) < 1:
-            raise ReportableRuntimeError(
-                "The list associated with sh:or "
-                "is not a valid RDF list.")
-        or_shapes = set()
-        for o in or_list:
-            or_shape = self.shape.get_other_shape(o)
-            if not or_shape:
-                raise ReportableRuntimeError(
-                    "Shape pointed to by sh:or does not exist or "
-                    "is not a well-formed SHACL Shape.")
-            or_shapes.add(or_shape)
-        for f, value_nodes in f_v_dict.items():
-            for v in value_nodes:
-                passed_any = False
-                for or_shape in or_shapes:
-                    try:
-                        _is_conform, _r = or_shape.validate(target_graph, focus=v)
-                    except ValidationFailure as e:
-                        raise e
-                    passed_any = passed_any or _is_conform
-                if not passed_any:
-                    non_conformant = True
-                    rept = self.make_v_result(target_graph, f, value_node=v)
-                    reports.append(rept)
-        return non_conformant, reports
 
 
 class XoneConstraintComponent(ConstraintComponent):
@@ -275,51 +293,56 @@ class XoneConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_XoneConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type _evaluation_path list
         """
         reports = []
         non_conformant = False
+        shape = self.shape
+
+        def _evaluate_xone_constraint(xone_c):
+            nonlocal self, shape, target_graph, focus_value_nodes, _evaluation_path
+            _reports = []
+            _non_conformant = False
+            sg = shape.sg.graph
+            xone_list = list(sg.items(xone_c))
+            if len(xone_list) < 1:
+                raise ReportableRuntimeError(
+                    "The list associated with sh:xone is not "
+                    "a valid RDF list.")
+            xone_shapes = list()
+            for x in xone_list:
+                xone_shape = shape.get_other_shape(x)
+                if not xone_shape:
+                    raise ReportableRuntimeError(
+                        "Shape pointed to by sh:xone does not exist "
+                        "or is not a well-formed SHACL Shape.")
+                xone_shapes.append(xone_shape)
+            for f, value_nodes in focus_value_nodes.items():
+                for v in value_nodes:
+                    passed_count = 0
+                    for xone_shape in xone_shapes:
+                        try:
+                            _is_conform, _r = xone_shape.validate(target_graph, focus=v,
+                                                                  _evaluation_path=_evaluation_path[:])
+                        except ValidationFailure as e:
+                            raise e
+                        if _is_conform:
+                            passed_count += 1
+                    if not (passed_count == 1):
+                        _non_conformant = True
+                        rept = self.make_v_result(target_graph, f, value_node=v)
+                        _reports.append(rept)
+            return _non_conformant, _reports
 
         for xone_c in self.xone_nodes:
-            _nc, _r = self._evaluate_xone_constraint(xone_c, target_graph, focus_value_nodes)
+            _nc, _r = _evaluate_xone_constraint(xone_c)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
 
-    def _evaluate_xone_constraint(self, xone_c, target_graph, f_v_dict):
-        reports = []
-        non_conformant = False
-        sg = self.shape.sg.graph
-        xone_list = list(sg.items(xone_c))
-        if len(xone_list) < 1:
-            raise ReportableRuntimeError(
-                "The list associated with sh:xone is not "
-                "a valid RDF list.")
-        xone_shapes = list()
-        for x in xone_list:
-            xone_shape = self.shape.get_other_shape(x)
-            if not xone_shape:
-                raise ReportableRuntimeError(
-                    "Shape pointed to by sh:xone does not exist "
-                    "or is not a well-formed SHACL Shape.")
-            xone_shapes.append(xone_shape)
-        for f, value_nodes in f_v_dict.items():
-            for v in value_nodes:
-                passed_count = 0
-                for xone_shape in xone_shapes:
-                    try:
-                        _is_conform, _r = xone_shape.validate(target_graph, focus=v)
-                    except ValidationFailure as e:
-                        raise e
-                    if _is_conform:
-                        passed_count += 1
-                if not (passed_count == 1):
-                    non_conformant = True
-                    rept = self.make_v_result(target_graph, f, value_node=v)
-                    reports.append(rept)
-        return non_conformant, reports
 
