@@ -11,7 +11,7 @@ data_graph = load_from_source("./test/issues/test_040/sample-network.ttl")
 shacl_graph = load_from_source("./test/issues/test_040/03-Network.ttl")
 
 def test_040():
-    conforms, g, s = validate(data_graph=data_graph, shacl_graph=shacl_graph, inference='owlrl')
+    conforms, g, s = validate(data_graph=data_graph, shacl_graph=shacl_graph, ont_graph=shacl_graph, inference='rdfs')
     assert conforms
 
 
