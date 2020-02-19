@@ -199,8 +199,14 @@ def meta_validate(shacl_graph, inference='rdfs', **kwargs):
     if shacl_shacl_graph is None:
         from os import path
         import pickle
-        here_dir = path.dirname(__file__)
-        pickle_file = path.join(here_dir, "shacl-shacl.pickle")
+        import sys
+        if getattr( sys, 'frozen', False ) :
+                # runs in a pyinstaller bundle
+                here_dir = sys._MEIPASS
+                pickle_file = path.join(here_dir, "shacl-shacl.pickle")                            
+        else :
+                here_dir = path.dirname(__file__)
+                pickle_file = path.join(here_dir, "shacl-shacl.pickle")            
         with open(pickle_file, 'rb') as shacl_pickle:
             u = pickle.Unpickler(shacl_pickle, fix_imports=False)
             shacl_shacl_store = u.load()

@@ -93,6 +93,29 @@ optional arguments:
                         Send output to a file (defaults to stdout).
 ```
 
+## Windows CLI
+
+[Pyinstaller](https://www.pyinstaller.org/) can be 
+[used](https://pyinstaller.readthedocs.io/en/stable/usage.html) to create an 
+executable for Windows that has the same characteristics as the Linux/Mac 
+CLI program. 
+The necessary ``.spec`` file is already included in ``pyshacl/pyshacl-cli.spec``.
+The ``pyshacl-cli.spec`` PyInstaller spec file creates a ``.exe`` for the 
+pySHACL Command Line utility. See above for the pySHACL command line util usage instructions.
+
+See [the PyInstaller installation guide](https://pyinstaller.readthedocs.io/en/stable/installation.html#installing-in-windows) for info on how to install PyInstaller for Windows.
+
+Once you have pyinstaller, use pyinstaller to generate the ``pyshacl.exe`` CLI file like so:
+```
+    $ cd src/pyshacl
+    $ pyinstaller pyshacl-cli.spec
+```
+This will output ``pyshacl.exe`` in the ``dist`` directory in ``src/pyshacl``.
+
+You can now run the pySHACL Command Line utility via ``pyshacl.exe``. 
+See above for the pySHACL command line util usage instructions.
+
+
 ## Python Module Use
 For basic use of this module, you can just call the `validate` function of the `pyshacl` module like this:
 
