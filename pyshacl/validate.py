@@ -17,7 +17,7 @@ from pyshacl.consts import RDF_type, SH_conforms, \
     SH_sourceShape, SH_sourceConstraint, SH_resultPath, RDF_object, RDF_subject, RDF_predicate
 from pyshacl.rules import gather_rules, apply_rules, gather_functions
 from pyshacl.rdfutil import load_from_source, clone_graph, \
-    clone_node, compare_blank_node, mix_graphs, compare_literal
+    clone_node, compare_blank_node, mix_graphs, order_graph_literal
 from pyshacl.monkey import apply_patches
 
 log_handler = logging.StreamHandler(stderr)
@@ -203,10 +203,10 @@ def meta_validate(shacl_graph, inference='rdfs', **kwargs):
         if getattr( sys, 'frozen', False ) :
                 # runs in a pyinstaller bundle
                 here_dir = sys._MEIPASS
-                pickle_file = path.join(here_dir, "shacl-shacl.pickle")                            
+                pickle_file = path.join(here_dir, "shacl-shacl.pickle")
         else :
                 here_dir = path.dirname(__file__)
-                pickle_file = path.join(here_dir, "shacl-shacl.pickle")            
+                pickle_file = path.join(here_dir, "shacl-shacl.pickle")
         with open(pickle_file, 'rb') as shacl_pickle:
             u = pickle.Unpickler(shacl_pickle, fix_imports=False)
             shacl_shacl_store = u.load()
@@ -391,7 +391,7 @@ def compare_inferencing_reports(data_graph, expected_graph, expected_result):
         found = False
         for o in found_objs:
             if isinstance(o, Literal):
-                found = 0 == compare_literal(expected_graph, expected_object, data_graph, o)
+                found = 0 == order_graph_literal(expected_graph, expected_object, data_graph, o)
         return found
 
     elif isinstance(expected_object, BNode):

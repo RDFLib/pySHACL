@@ -1,8 +1,16 @@
 # -*- coding: utf-8 -*-
 #
+import datetime
 import rdflib
 
 from . import RDF_first, RDFS_Resource, stringify_node
+
+# RDFLib 5.0+ has TOTAL_ORDER_CASTERS to force order on normally unorderable types,
+# like datetimes and times. We specifically _dont_ want that here when comparing literals.
+_FORCE_COMPARE_LITERAL_VALUE = [
+    datetime.datetime,
+    datetime.time,
+]
 
 def compare_blank_node(graph1, bnode1, graph2, bnode2, recursion=0):
     assert isinstance(graph1, rdflib.Graph)
@@ -167,48 +175,59 @@ def compare_blank_node(graph1, bnode1, graph2, bnode2, recursion=0):
     return return_eq(bnode1_eq)
 
 
-def compare_literal(graph1, node1, graph2, node2):
+def compare_literal(l1, l2):
+    if l1.eq(l2):
+        return 0
+    # If we are not equal, but didn't get TypeError not NotImplementedError
+    # then we know these are compatible/comparable datatypes already
+    if l1.value.__class__ in _FORCE_COMPARE_LITERAL_VALUE:
+        if l1.value == l2.value:
+            return 0
+        elif l1.value > l2.value:
+            return 1
+    elif l1 > l2:
+        return 1
+    return -1
+
+
+def order_graph_literal(graph1, node1, graph2, node2):
     try:
-        cmp = node1.eq(node2)
-    except TypeError:
-        # Type error means we cannot compare these literals
-        cmp = False
-    if cmp:
-        return 0  # 0 = equal
-    else:
-        return 1  # 1 = not-equal
+        order = compare_literal(node1, node2)
+    except (TypeError, NotImplementedError):
+        order = 1  # 1 = not-equal
+    return order
 
 
 def compare_node(graph1, node1, graph2, node2, recursion=0):
     if isinstance(node1, rdflib.Literal) and isinstance(node2, rdflib.Literal):
-        eq = compare_literal(graph1, node1, graph2, node2)
+        order = order_graph_literal(graph1, node1, graph2, node2)
     elif isinstance(node1, rdflib.Literal):
-        eq = 1 # node1 being a literal is greater
+        order = 1  # node1 being a literal is greater
     elif isinstance(node2, rdflib.Literal):
-        eq = -1 # node2 being a literal is greater
+        order = -1  # node2 being a literal is greater
     elif isinstance(node1, rdflib.BNode) and isinstance(node2, rdflib.BNode):
-        eq = compare_blank_node(graph1, node1, graph2, node2,
-                                recursion=recursion+1)
+        order = compare_blank_node(graph1, node1, graph2, node2,
+                                   recursion=recursion+1)
     elif isinstance(node1, rdflib.BNode):
-        eq = 1 # node1 being a BNode is greater
+        order = 1  # node1 being a BNode is greater
     elif isinstance(node2, rdflib.BNode):
-        eq = -1  # node2 being a BNode is greater
+        order = -1  # node2 being a BNode is greater
     elif isinstance(node1, rdflib.URIRef) and isinstance(node2, rdflib.URIRef):
         s1 = str(node1)
         s2 = str(node2)
         if s1 > s2:
-            eq = 1
+            order = 1
         elif s2 > s1:
-            eq = -1
+            order = -1
         else:
-            eq = 0
+            order = 0
     else:
         s1 = str(node1)
         s2 = str(node2)
         if s1 > s2:
-            eq = 1
+            order = 1
         elif s2 > s1:
-            eq = -1
+            order = -1
         else:
-            eq = 0
-    return eq
+            order = 0
+    return order

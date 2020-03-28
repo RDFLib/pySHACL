@@ -6,6 +6,7 @@ import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
+from pyshacl.rdfutil.compare import compare_literal
 
 SH_MinExclusiveConstraintComponent = SH.term('MinExclusiveConstraintComponent')
 SH_MinInclusiveConstraintComponent = SH.term('MinInclusiveConstraintComponent')
@@ -83,8 +84,9 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
                         pass
                     else:
                         try:
-                            r = m_val < v
-                            flag = r
+                            # pass if v > m_val
+                            cmp = compare_literal(v, m_val)
+                            flag = cmp > 0
                         except (TypeError, NotImplementedError):
                             flag = False
                 else:
@@ -162,8 +164,9 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
                         pass
                     else:
                         try:
-                            r = m_val <= v
-                            flag = r
+                            # pass if v >= m_val
+                            cmp = compare_literal(v, m_val)
+                            flag = cmp >= 0
                         except (TypeError, NotImplementedError):
                             flag = False
                 else:
@@ -242,8 +245,9 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
                         pass
                     else:
                         try:
-                            r = m_val > v
-                            flag = r
+                            # pass if v < m_val
+                            cmp = compare_literal(v, m_val)
+                            flag = cmp < 0
                         except (TypeError, NotImplementedError):
                             flag = False
                 else:
@@ -322,8 +326,9 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
                         pass
                     else:
                         try:
-                            r = m_val >= v
-                            flag = r
+                            # pass if v <= m_val
+                            cmp = compare_literal(v, m_val)
+                            flag = cmp <= 0
                         except (TypeError, NotImplementedError):
                             flag = False
                 else:
