@@ -21,7 +21,7 @@ parser.add_argument('-m', '--metashacl', dest='metashacl', action='store_true',
                     default=False, help='Validate the SHACL Shapes graph against the shacl-shacl '
                     'Shapes Graph before before validating the Data Graph.')
 parser.add_argument('--imports', dest='imports', action='store_true',
-                    default=False, help='Allow import of sub-graphs defined in statements with owl:import.')
+                    default=False, help='Allow import of sub-graphs defined in statements with owl:imports.')
 parser.add_argument('-a', '--advanced', dest='advanced', action='store_true',
                     default=False, help='Enable features from the SHACL Advanced Features specification.')
 parser.add_argument('--abort', dest='abort', action='store_true',

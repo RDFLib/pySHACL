@@ -121,7 +121,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
   - This should not affect end user usability of the pyshacl script.
 - Updated README.md to reflect changes including Advanced Features, and cli `--advanced` arg.
 - Updated feature matrix to add section for SHACL Advanced Features.
-- Fix owl:import typo [#27](https://github.com/RDFLib/pySHACL/pull/27)
+- Fix owl:imports typo [#27](https://github.com/RDFLib/pySHACL/pull/27)
 
 
 ## [0.9.11] - 2019-05-01
