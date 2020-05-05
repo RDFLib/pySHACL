@@ -1,3 +1,5 @@
+<img src="pySHACL.png" style="width:250px;" alt=""pySHACL logo" />
+
 # pySHACL
 A Python validator for SHACL.
 
