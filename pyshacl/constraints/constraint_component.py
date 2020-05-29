@@ -131,9 +131,9 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
                 desc += "\tMessage: {}\n".format(str(m))
         return desc
 
-    def make_v_result(self, datagraph, focus_node, value_node=None, result_path=None,
+    def make_v_result(self, datagraph, focus_node, value_node=None, result_path=None, , bound_vars=None
                       constraint_component=None, source_constraint=None,
-                      extra_messages=None, bound_vars=None):
+                      extra_messages=None):
         """
         :param datagraph:
         :type datagraph: rdflib.Graph | rdflib.Dataset
@@ -142,10 +142,10 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         :param value_node:
         :type value_node: rdflib.term.Identifier | None
         :param result_path:
+        :param bound_vars:
         :param constraint_component:
         :param source_constraint:
         :param extra_messages:
-        :param bound_vars:
         :return:
         """
         constraint_component = constraint_component or self.shacl_constraint_class()
