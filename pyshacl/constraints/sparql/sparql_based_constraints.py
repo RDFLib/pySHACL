@@ -140,7 +140,7 @@ class SPARQLBasedConstraint(ConstraintComponent):
                         v = result_val
                     rept = self.make_v_result(
                         target_graph, t or f, value_node=v, result_path=p,
-                        **rept_kwargs)
+                        (t, p, v), **rept_kwargs)
                 else:
                     rept = self.make_v_result(
                         target_graph, f, value_node=v, **rept_kwargs)

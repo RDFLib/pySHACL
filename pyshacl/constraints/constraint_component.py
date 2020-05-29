@@ -3,6 +3,7 @@
 https://www.w3.org/TR/shacl/#core-components-value-type
 """
 import abc
+import re
 from rdflib import BNode
 from pyshacl.consts import *
 from pyshacl.rdfutil import stringify_node
@@ -68,7 +69,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         return maybe_recursive
 
 
-    def make_v_result_description(self, datagraph, focus_node, severity, value_node=None, result_path=None,
+    def make_v_result_description(self, datagraph, focus_node, severity, value_node=None, result_path=None, bound_vars=None,
                                   constraint_component=None, source_constraint=None, extra_messages=None):
         """
         :param datagraph:
@@ -78,6 +79,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         :param value_node:
         :type value_node: rdflib.term.Identifier | None
         :param result_path:
+        :param bound_vars:
         :param constraint_component:
         :param source_constraint:
         :param extra_messages:
@@ -113,11 +115,17 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
                 if m in self.shape.message:
                     continue
                 if isinstance(m, rdflib.Literal):
-                    desc += "\tMessage: {}\n".format(str(m.value))
+                    msg = str(m.value)
+                    if bound_vars is not None:
+                        msg = self._format_sparql_based_result_message(msg, bound_vars)
+                    desc += "\tMessage: {}\n".format(msg)
                 else:  # pragma: no cover
                     desc += "\tMessage: {}\n".format(str(m))
         for m in self.shape.message:
             if isinstance(m, rdflib.Literal):
+                msg = str(m.value)
+                if bound_vars is not None:
+                    msg = self._format_sparql_based_result_message(msg, bound_vars)
                 desc += "\tMessage: {}\n".format(str(m.value))
             else:  # pragma: no cover
                 desc += "\tMessage: {}\n".format(str(m))
@@ -125,7 +133,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
 
     def make_v_result(self, datagraph, focus_node, value_node=None, result_path=None,
                       constraint_component=None, source_constraint=None,
-                      extra_messages=None):
+                      extra_messages=None, bound_vars=None):
         """
         :param datagraph:
         :type datagraph: rdflib.Graph | rdflib.Dataset
@@ -137,6 +145,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         :param constraint_component:
         :param source_constraint:
         :param extra_messages:
+        :param bound_vars:
         :return:
         """
         constraint_component = constraint_component or self.shacl_constraint_class()
@@ -151,7 +160,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         desc = self.make_v_result_description(
             datagraph, focus_node, severity, value_node,
             result_path=result_path, constraint_component=constraint_component,
-            source_constraint=source_constraint, extra_messages=extra_messages)
+            source_constraint=source_constraint, extra_messages=extra_messages, bound_vars=bound_vars)
         if value_node:
             r_triples.append((r_node, SH_value, ('D', value_node)))
         if result_path is None and self.shape.is_property_shape:
@@ -169,3 +178,11 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
                 r_triples.append((r_node, SH_resultMessage, m))
         self.shape.logger.debug(desc)
         return desc, r_node, r_triples
+
+    def _format_sparql_based_result_message(self, msg, bound_vars):
+        if bound_vars is None:
+            return msg
+        msg = re.sub('{[?$]this}', str(bound_vars[0]), msg)
+        msg = re.sub('{[?$]path}', str(bound_vars[1]), msg)
+        msg = re.sub('{[?$]value}', str(bound_vars[2]), msg)
+        return msg
