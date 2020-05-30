@@ -131,7 +131,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
                 desc += "\tMessage: {}\n".format(str(m))
         return desc
 
-    def make_v_result(self, datagraph, focus_node, value_node=None, result_path=None, , bound_vars=None
+    def make_v_result(self, datagraph, focus_node, value_node=None, result_path=None, bound_vars=None,
                       constraint_component=None, source_constraint=None,
                       extra_messages=None):
         """
