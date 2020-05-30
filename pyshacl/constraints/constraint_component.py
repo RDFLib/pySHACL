@@ -182,7 +182,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
     def _format_sparql_based_result_message(self, msg, bound_vars):
         if bound_vars is None:
             return msg
-        msg = re.sub(f'{{[?,$]{{1}}this}}', str(bound_vars[0]), msg)
-        msg = re.sub(f'{{[?,$]{{1}}path}}', str(bound_vars[1]), msg)
-        msg = re.sub(f'{{[?,$]{{1}}value}}', str(bound_vars[2]), msg)
+        msg = re.sub('{[?$]this}', str(bound_vars[0]), msg)
+        msg = re.sub('{[?$]path}', str(bound_vars[1]), msg)
+        msg = re.sub('{[?$]value}', str(bound_vars[2]), msg)
         return msg
