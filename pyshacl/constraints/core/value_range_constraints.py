@@ -6,6 +6,7 @@ import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
+from pyshacl.rdfutil.compare import compare_literal
 
 SH_MinExclusiveConstraintComponent = SH.term('MinExclusiveConstraintComponent')
 SH_MinInclusiveConstraintComponent = SH.term('MinInclusiveConstraintComponent')
@@ -46,7 +47,7 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MinExclusiveConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
@@ -83,8 +84,9 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
                         pass
                     else:
                         try:
-                            r = m_val < v
-                            flag = r
+                            # pass if v > m_val
+                            cmp = compare_literal(v, m_val)
+                            flag = cmp > 0
                         except (TypeError, NotImplementedError):
                             flag = False
                 else:
@@ -125,7 +127,7 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MinInclusiveConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
@@ -162,8 +164,9 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
                         pass
                     else:
                         try:
-                            r = m_val <= v
-                            flag = r
+                            # pass if v >= m_val
+                            cmp = compare_literal(v, m_val)
+                            flag = cmp >= 0
                         except (TypeError, NotImplementedError):
                             flag = False
                 else:
@@ -205,7 +208,7 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MaxExclusiveConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
@@ -242,8 +245,9 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
                         pass
                     else:
                         try:
-                            r = m_val > v
-                            flag = r
+                            # pass if v < m_val
+                            cmp = compare_literal(v, m_val)
+                            flag = cmp < 0
                         except (TypeError, NotImplementedError):
                             flag = False
                 else:
@@ -285,7 +289,7 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MaxInclusiveConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
@@ -322,8 +326,9 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
                         pass
                     else:
                         try:
-                            r = m_val >= v
-                            flag = r
+                            # pass if v <= m_val
+                            cmp = compare_literal(v, m_val)
+                            flag = cmp <= 0
                         except (TypeError, NotImplementedError):
                             flag = False
                 else:

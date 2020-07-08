@@ -325,7 +325,7 @@ class BoundShapeValidatorComponent(ConstraintComponent):
         # TODO:coverage: this is never used for this constraint?
         return SH_ConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
         :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph

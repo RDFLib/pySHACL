@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from distutils.version import LooseVersion
 import rdflib
 
+RDFLIB_VERSION = LooseVersion(rdflib.__version__)
+RDFLIB_421 = LooseVersion("4.2.1")
+RDFLIB_500 = LooseVersion("5.0.0")
 
 def rdflib_bool_patch():
     from rdflib.term import _toPythonMapping, _XSD_PFX, URIRef
@@ -30,7 +34,14 @@ def rdflib_term_ge_le_patch():
 
 
 def apply_patches():
-    rdflib_bool_patch()
-    rdflib_term_ge_le_patch()
+    #applied = apply_patches.applied
+    #if applied:
+    #    return True
+    if RDFLIB_500 > RDFLIB_VERSION:
+        rdflib_bool_patch()
+    if RDFLIB_421 >= RDFLIB_VERSION:
+        rdflib_term_ge_le_patch()
+    #apply_patches.applied = True
     return True
+apply_patches.applied = False
 

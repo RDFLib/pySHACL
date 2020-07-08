@@ -58,7 +58,7 @@ class ClassConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_ClassConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
@@ -137,7 +137,7 @@ class DatatypeConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_DatatypeConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
@@ -223,7 +223,7 @@ class NodeKindConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_NodeKindConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict

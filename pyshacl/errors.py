@@ -52,6 +52,33 @@ class ValidationFailure(RuntimeError):
         return "ValidationFailure: {}".format(self.__str__())
 
 
+class ValidationWarning(RuntimeWarning):
+    def __init__(self, message, link):
+        super(ValidationWarning, self).__init__()
+        self.message = message
+        self.link = link
+
+    @property
+    def args(self):
+        return [self.message, self.link]
+
+    def __str__(self):
+        return "{}\n{}".format(str(self.message), str(self.link))
+
+    def __repr__(self):
+        return "{}: {}".format(str(self.__class__), self.__str__())
+
+
+class ShapeRecursionWarning(ValidationWarning):
+    def __init__(self, evaluation_path):
+        l = len(evaluation_path)
+        r_string = "->".join(str(e) for e in evaluation_path)
+        message = "Warning, A Recursive Shape was detected executing a recursive validation sequence " \
+                  "{} levels deep. Backing out.\n{}".format(l, r_string)
+        link = "https://www.w3.org/TR/shacl/#shapes-recursion"
+        super(ShapeRecursionWarning, self).__init__(message, link)
+
+
 class ConstraintLoadError(RuntimeError):
     def __init__(self, message, link):
         self.message = message
@@ -69,6 +96,7 @@ class ConstraintLoadError(RuntimeError):
 
 class ConstraintLoadWarning(RuntimeWarning):
     def __init__(self, message, link):
+        super(ConstraintLoadWarning, self).__init__()
         self.message = message
         self.link = link
 

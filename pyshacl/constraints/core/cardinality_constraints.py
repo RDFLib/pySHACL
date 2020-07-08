@@ -64,7 +64,7 @@ class MinCountConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MinCountConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
@@ -132,7 +132,7 @@ class MaxCountConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MaxCountConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict

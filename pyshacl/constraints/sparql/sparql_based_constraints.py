@@ -86,7 +86,7 @@ class SPARQLBasedConstraint(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_SPARQLConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes):
+    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
         """
 
         :type focus_value_nodes: dict
