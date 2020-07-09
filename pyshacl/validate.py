@@ -265,10 +265,11 @@ def validate(data_graph, *args, shacl_graph=None, ont_graph=None, advanced=False
                                      do_owl_imports=do_owl_imports)
     shacl_graph_format = kwargs.pop('shacl_graph_format', None)
     if shacl_graph is not None:
-        shacl_graph = load_from_source(shacl_graph,
-                                       rdf_format=shacl_graph_format,
-                                       multigraph=True,
+        # SHACL spec requires rdf BOOL literals to operate in a very specific way
+        rdflib_bool_patch()
+        shacl_graph = load_from_source(shacl_graph, rdf_format=shacl_graph_format, multigraph=True,
                                        do_owl_imports=do_owl_imports)
+        rdflib_bool_unpatch()
     try:
         validator = Validator(
             data_graph, shacl_graph=shacl_graph, ont_graph=ont_graph,
