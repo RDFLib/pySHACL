@@ -13,7 +13,8 @@ parser.add_argument('data', metavar='DataGraph', type=argparse.FileType('rb'),
 parser.add_argument('-s', '--shacl', dest='shacl', action='store', nargs='?',
                     help='A file containing the SHACL Shapes Graph.')
 parser.add_argument('-e', '--ont-graph', dest='ont', action='store', nargs='?',
-                    help='A file path or URL to a docucument containing extra ontological information to mix into the data graph.')
+                    help='A file path or URL to a docucument containing extra ontological information to mix into '
+                         'the data graph.')
 parser.add_argument('-i', '--inference', dest='inference', action='store',
                     default='none', choices=('none', 'rdfs', 'owlrl', 'both'),
                     help='Choose a type of inferencing to run against the Data Graph before validating.')
