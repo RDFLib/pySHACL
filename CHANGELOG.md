@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [0.11.6.post1] - 2020-07-09
+
+### Added
+- New feature to CLI tool
+  - `-V` shows the PySHACL version
+- Run module directly
+  - You can get access to the same CLI tool if you install the module and run it using `python3 -m pyshacl`
+  - See `python3 -m pyshacl --help` for more details
+
+### Announcement
+- **This is the final version with Python v3.5 support**
+  - Versions 0.12.0 and above will have newer package management and dependency management, and will
+  require Python v3.6+.
+
+
 ## [0.11.6] - 2020-07-09
 
 ### Fixed
@@ -12,11 +27,6 @@ used and that also has multiple named graphs, then only the first graph in the m
   - Now all named graphs from the mixin source are mixed into all named graphs of the datagraph, as originally intended.
   - Fixed one unit test which had been intermittently failing
 - Cleaned up the behaviour around performing patch to Boolean Literal parsing on rdflib 5.0.0
-
-### Announcement
-- **This is the final version with Python v3.5 support**
-  - Versions 0.12.0 and above will have newer package management and dependency management, and will
-  require Python v3.6+.
 
 
 ## [0.11.5] - 2020-03-28
@@ -519,7 +529,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.11.6...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.11.6.post1...HEAD
+[0.11.6.post1]: https://github.com/RDFLib/pySHACL/compare/v0.11.6...v0.11.6.post1
 [0.11.6]: https://github.com/RDFLib/pySHACL/compare/v0.11.5...v0.11.6
 [0.11.5]: https://github.com/RDFLib/pySHACL/compare/v0.11.4...v0.11.5
 [0.11.4]: https://github.com/RDFLib/pySHACL/compare/v0.11.3.post1...v0.11.4
