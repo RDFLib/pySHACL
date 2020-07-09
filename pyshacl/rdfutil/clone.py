@@ -57,20 +57,20 @@ def clone_graph(source_graph, target_graph=None, identifier=None):
 
 def mix_datasets(base_ds, extra_ds, target_ds=None):
     default_union = base_ds.default_union
-    base_named_graphs = base_ds.contexts()
+    base_named_graphs = list(base_ds.contexts())
     if target_ds is None:
         target_ds = rdflib.Dataset(default_union=default_union)
     if isinstance(extra_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
         mixin_graphs = list(extra_ds.contexts())
     else:
         mixin_graphs = [extra_ds]
-    mixed_graphs = []
+    mixed_graphs = {}
     for mg in mixin_graphs:
-        mod_named_graphs = [mix_graphs(g, mg, target_graph=rdflib.Graph(store=target_ds.store, identifier=g.identifier)) for g in base_named_graphs]
-        mixed_graphs.extend(mod_named_graphs)
+        mod_named_graphs = {g.identifier: mix_graphs(g, mg, target_graph=rdflib.Graph(store=target_ds.store, identifier=g.identifier)) for g in base_named_graphs}
+        mixed_graphs.update(mod_named_graphs)
     default_context_id = target_ds.default_context.identifier
-    for m in mixed_graphs:
-        if m.identifier == default_context_id:
+    for i, m in mixed_graphs.items():
+        if i == default_context_id:
             target_ds.store.remove_graph(target_ds.default_context)
             target_ds.default_context = m
         target_ds.add_graph(m)
