@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+#
 from functools import wraps
 from sys import stderr
 import logging
-from typing import Union, Optional
+from typing import Union, Optional, List, Tuple
 
 import rdflib
 import owlrl
@@ -22,7 +23,7 @@ from pyshacl.consts import RDF_type, SH_conforms, \
 from pyshacl.rules import gather_rules, apply_rules, gather_functions
 from pyshacl.rdfutil import load_from_source, clone_graph, \
     clone_node, compare_blank_node, mix_graphs, order_graph_literal
-from pyshacl.monkey import apply_patches
+from pyshacl.monkey import apply_patches, rdflib_bool_patch, rdflib_bool_unpatch
 
 log_handler = logging.StreamHandler(stderr)
 log = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ log_handler.setLevel(logging.INFO)
 
 class Validator(object):
     @classmethod
-    def _load_default_options(cls, options_dict):
+    def _load_default_options(cls, options_dict: dict):
         options_dict.setdefault('advanced', False)
         options_dict.setdefault('inference', 'none')
         options_dict.setdefault('abort_on_error', False)
@@ -43,7 +44,8 @@ class Validator(object):
             options_dict['logger'] = logging.getLogger(__name__)
 
     @classmethod
-    def _run_pre_inference(cls, target_graph, inference_option, logger=None):
+    def _run_pre_inference(cls, target_graph: GraphLike, inference_option: str,
+                           logger: Optional[logging.Logger] = None):
         """
         Note, this is the OWL/RDFS pre-inference,
         it is not the Advanced Spec SHACL-Rule inferencing step.
@@ -87,7 +89,8 @@ class Validator(object):
                                          "{}".format(str(e.args[0])))
 
     @classmethod
-    def create_validation_report(cls, conforms, target_graph, shacl_graph, results):
+    def create_validation_report(cls, conforms: bool, target_graph: GraphLike, shapes_graph: ShapesGraph,
+                                 results: List[Tuple]):
         v_text = "Validation Report\nConforms: {}\n".format(str(conforms))
         result_len = len(results)
         if not conforms:
@@ -96,7 +99,7 @@ class Validator(object):
         if result_len > 0:
             v_text += "Results ({}):\n".format(str(result_len))
         vg = rdflib.Graph()
-        sg = shacl_graph.graph
+        sg = shapes_graph.graph
         for p, n in sg.namespace_manager.namespaces():
             vg.namespace_manager.bind(p, n)
         vr = BNode()
@@ -120,15 +123,15 @@ class Validator(object):
                 vg.add((s, p, o))
         return vg, v_text
 
-    def __init__(self, data_graph, *args, shacl_graph=None,
-                 ont_graph=None, options=None, **kwargs):
+    def __init__(self, data_graph: GraphLike, *args, shacl_graph: Optional[GraphLike] = None,
+                 ont_graph: Optional[GraphLike] = None, options: Optional[dict] = None, **kwargs):
         options = options or {}
         self._load_default_options(options)
-        self.options = options
-        self.logger = options['logger']
+        self.options = options  # type: dict
+        self.logger = options['logger']  # type: logging.Logger
         self.pre_inferenced = kwargs.pop('pre_inferenced', False)
-        assert isinstance(data_graph, rdflib.Graph),\
-            "data_graph must be a rdflib Graph object"
+        if not isinstance(data_graph, rdflib.Graph):
+            raise RuntimeError("data_graph must be a rdflib Graph object")
         self.data_graph = data_graph
         self._target_graph = None
         self.ont_graph = ont_graph
@@ -234,21 +237,21 @@ def meta_validate(shacl_graph: Union[GraphLike, str], inference: Optional[str] =
     return validate(shacl_graph, shacl_graph=shacl_shacl_graph, inference=inference, **kwargs)
 
 
-def validate(data_graph: Union[GraphLike, str], *args,
-             shacl_graph: Optional[Union[GraphLike, str]] = None,
-             ont_graph: Optional[Union[GraphLike, str]] = None,
+def validate(data_graph: Union[GraphLike, str, bytes], *args,
+             shacl_graph: Optional[Union[GraphLike, str, bytes]] = None,
+             ont_graph: Optional[Union[GraphLike, str, bytes]] = None,
              advanced: Optional[bool] = False, inference: Optional[str] = None,
              abort_on_error: Optional[bool] = False, **kwargs):
     """
     :param data_graph: rdflib.Graph or file path or web url of the data to validate
-    :type data_graph: rdflib.Graph | str
+    :type data_graph: rdflib.Graph | str | bytes
     :param args:
     :type args: list
     :param shacl_graph: rdflib.Graph or file path or web url of the SHACL Shapes graph to use to
     validate the data graph
-    :type shacl_graph: rdflib.Graph | str
+    :type shacl_graph: rdflib.Graph | str | bytes
     :param ont_graph: rdflib.Graph or file path or web url of an extra ontology document to mix into the data graph
-    :type ont_graph: rdflib.Graph | str
+    :type ont_graph: rdflib.Graph | str | bytes
     :param advanced: Enable advanced SHACL features, default=False
     :type advanced: bool | None
     :param inference: One of "rdfs", "owlrl", "both", "none", or None
@@ -269,21 +272,16 @@ def validate(data_graph: Union[GraphLike, str], *args,
         to_meta_val = shacl_graph or data_graph
         conforms, v_r, v_t = meta_validate(to_meta_val, inference=inference, **kwargs)
         if not conforms:
-            msg = "Shacl File does not validate against the Shacl Shapes Shacl file.\n{}"\
-                  .format(v_t)
+            msg = "Shacl File does not validate against the Shacl Shapes Shacl file.\n{}".format(v_t)
             log.error(msg)
             raise ReportableRuntimeError(msg)
     do_owl_imports = kwargs.pop('do_owl_imports', False)
     data_graph_format = kwargs.pop('data_graph_format', None)
-    data_graph = load_from_source(data_graph,
-                                  rdf_format=data_graph_format,
-                                  multigraph=True,
-                                  do_owl_imports=False)  # no imports on data_graph
+    # force no owl imports on data_graph
+    data_graph = load_from_source(data_graph, rdf_format=data_graph_format, multigraph=True, do_owl_imports=False)
     ont_graph_format = kwargs.pop('ont_graph_format', None)
     if ont_graph is not None:
-        ont_graph = load_from_source(ont_graph,
-                                     rdf_format=ont_graph_format,
-                                     multigraph=True,
+        ont_graph = load_from_source(ont_graph, rdf_format=ont_graph_format, multigraph=True,
                                      do_owl_imports=do_owl_imports)
     shacl_graph_format = kwargs.pop('shacl_graph_format', None)
     if shacl_graph is not None:
@@ -307,6 +305,8 @@ def validate(data_graph: Union[GraphLike, str], *args,
         return passes, report_graph, report_text
     if do_check_sht_result:
         (sht_graph, sht_result_node) = kwargs.pop('sht_validate', (False, None))
+        if not sht_result_node:
+            raise RuntimeError("Cannot check SHT result if SHT graph and result node are not given.")
         passes = check_sht_result(report_graph, sht_graph or shacl_graph or data_graph, sht_result_node)
         return passes, report_graph, report_text
     do_serialize_report_graph = kwargs.pop('serialize_report_graph', False)
@@ -391,7 +391,8 @@ def compare_validation_reports(report_graph, expected_graph, expected_result):
         return False
     return True
 
-def compare_inferencing_reports(data_graph, expected_graph, expected_result):
+
+def compare_inferencing_reports(data_graph: GraphLike, expected_graph: GraphLike, expected_result: GraphLike):
     expected_object = set(expected_graph.objects(expected_result, RDF_object))
     if len(expected_object) < 1:
         raise ReportableRuntimeError(
@@ -433,8 +434,7 @@ def compare_inferencing_reports(data_graph, expected_graph, expected_result):
     return True
 
 
-
-def check_dash_result(data_graph, report_graph, expected_result_graph):
+def check_dash_result(data_graph: GraphLike, report_graph: GraphLike, expected_result_graph: GraphLike):
     DASH = rdflib.namespace.Namespace('http://datashapes.org/dash#')
     DASH_GraphValidationTestCase = DASH.term('GraphValidationTestCase')
     DASH_InferencingTestCase = DASH.term('InferencingTestCase')
@@ -469,7 +469,8 @@ def check_dash_result(data_graph, report_graph, expected_result_graph):
         raise ReportableRuntimeError("Cannot check the expected result, the given expected result graph does not have a GraphValidationTestCase or InferencingTestCase.")
     return gv_res and inf_res
 
-def check_sht_result(report_graph, sht_graph, sht_result_node):
+
+def check_sht_result(report_graph: GraphLike, sht_graph: GraphLike, sht_result_node: Union[URIRef, BNode]):
     SHT = rdflib.namespace.Namespace('http://www.w3.org/ns/shacl-test#')
     types = set(sht_graph.objects(sht_result_node, RDF_type))
     expected_failure = (sht_result_node == SHT.Failure)

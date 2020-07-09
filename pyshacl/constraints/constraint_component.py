@@ -1,45 +1,57 @@
-
+# -*- coding: utf-8 -*-
+#
 """
 https://www.w3.org/TR/shacl/#core-components-value-type
 """
 import abc
+from typing import Optional, Iterable, TYPE_CHECKING
+
 from rdflib import BNode
 from pyshacl.consts import *
+from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
 
+if TYPE_CHECKING:
+    from pyshacl.shape import Shape
 
 class ConstraintComponent(object, metaclass=abc.ABCMeta):
+    __slots__ = ('shape',)
+
     """
     Abstract Constraint Component Class
     All Constraint Components must inherit from this class.
     """
 
-    def __init__(self, shape):
+    def __init__(self, shape: 'Shape'):
         """
 
         :param shape:
-        :type shape: pyshacl.shape.Shape
+        :type shape: Shape
         """
         self.shape = shape
 
     @classmethod
     @abc.abstractmethod
     def constraint_parameters(cls):
-        return NotImplementedError()  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     @classmethod
     @abc.abstractmethod
     def constraint_name(cls):
-        return NotImplementedError()  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     @classmethod
     @abc.abstractmethod
     def shacl_constraint_class(cls):
-        return NotImplementedError()  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     @abc.abstractmethod
     def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
-        return NotImplementedError()  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
+
+    def make_generic_message(self):
+        print(self)
+        return None  # pragma: no cover
 
     def __str__(self):
         c_name = str(self.__class__.__name__)
@@ -67,20 +79,25 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
                         break
         return maybe_recursive
 
+    def make_v_result_description(self, datagraph: GraphLike, focus_node: rdflib.term.Identifier,
+                                  severity: rdflib.URIRef, value_node: Optional[rdflib.term.Identifier],
+                                  result_path=None, constraint_component=None, source_constraint=None,
+                                  extra_messages: Optional[Iterable] = None):
 
-    def make_v_result_description(self, datagraph, focus_node, severity, value_node=None, result_path=None,
-                                  constraint_component=None, source_constraint=None, extra_messages=None):
         """
         :param datagraph:
-        :type datagraph: rdflib.Graph | rdflib.Dataset
+        :type datagraph: rdflib.Graph | rdflib.ConjunctiveGraph | rdflib.Dataset
         :param focus_node:
         :type focus_node: rdflib.term.Identifier
+        :param severity:
+        :type value_node: rdflib.URIRef
         :param value_node:
         :type value_node: rdflib.term.Identifier | None
         :param result_path:
         :param constraint_component:
         :param source_constraint:
         :param extra_messages:
+        :type extra_messages: collections.abc.Iterable | None
         :return:
         """
         sg = self.shape.sg.graph
@@ -123,12 +140,13 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
                 desc += "\tMessage: {}\n".format(str(m))
         return desc
 
-    def make_v_result(self, datagraph, focus_node, value_node=None, result_path=None,
+    def make_v_result(self, datagraph: GraphLike, focus_node: rdflib.term.Identifier,
+                      value_node: Optional[rdflib.term.Identifier] = None, result_path=None,
                       constraint_component=None, source_constraint=None,
-                      extra_messages=None):
+                      extra_messages: Optional[Iterable] = None):
         """
         :param datagraph:
-        :type datagraph: rdflib.Graph | rdflib.Dataset
+        :type datagraph: rdflib.Graph | rdflib.ConjunctiveGraph | rdflib.Dataset
         :param focus_node:
         :type focus_node: rdflib.term.Identifier
         :param value_node:
@@ -137,6 +155,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         :param constraint_component:
         :param source_constraint:
         :param extra_messages:
+        :type extra_messages: collections.abc.Iterable | None
         :return:
         """
         constraint_component = constraint_component or self.shacl_constraint_class()

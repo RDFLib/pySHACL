@@ -1,24 +1,29 @@
 # -*- coding: utf-8 -*-
 #
 from decimal import Decimal
-import rdflib
 import logging
-
+from typing import TYPE_CHECKING, Union, Optional, Set
+from rdflib import Literal, BNode, URIRef
 from pyshacl.consts import *
 from pyshacl.errors import ShapeLoadError, ReportableRuntimeError, ConstraintLoadWarning, ConstraintLoadError
-from pyshacl.constraints import ALL_CONSTRAINT_PARAMETERS, \
-    CONSTRAINT_PARAMETERS_MAP
+from pyshacl.constraints import ALL_CONSTRAINT_PARAMETERS, CONSTRAINT_PARAMETERS_MAP
 from pyshacl.sparql_query_helper import SPARQLQueryHelper
+
+if TYPE_CHECKING:
+    from pyshacl.shapes_graph import ShapesGraph
 
 class Shape(object):
 
-    def __init__(self, sg, node, p=False, path=None, logger=None):
+    __slots__ = ('logger', 'sg', 'node', '_p', '_path', '_advanced', '_deactivated', '_severity', '_messages',
+                 '_names', '_descriptions')
+
+    def __init__(self, sg: 'ShapesGraph', node: Union[URIRef, BNode], p=False, path: Optional[Union[URIRef, BNode]] = None, logger=None):
         """
         Shape
-        :type sg: pyshacl.shapes_graph.ShapesGraph
-        :type node: rdflib.term.Node
+        :type sg: ShapesGraph
+        :type node: URIRef | BNode
         :type p: bool
-        :type path: rdflib.Node
+        :type path: URIRef | BNode | None
         :type logger: logging.Logger
         """
         self.logger = logger or logging.getLogger(__name__)
@@ -34,10 +39,10 @@ class Shape(object):
             raise ShapeLoadError("A SHACL Shape cannot have more than one sh:deactivated predicate.",
                                  "https://www.w3.org/TR/shacl/#deactivated")
         elif len(deactivated_vals) < 1:
-            self._deactivated = False
+            self._deactivated = False  # type: bool
         else:
             d = next(iter(deactivated_vals))
-            if not isinstance(d, rdflib.Literal):
+            if not isinstance(d, Literal):
                 # TODO:coverage: we don't have any tests for invalid shapes
                 raise ShapeLoadError(
                     "The value of sh:deactivated predicate on a SHACL Shape must be a Literal.",
@@ -45,24 +50,24 @@ class Shape(object):
             self._deactivated = bool(d.value)
         severity = set(self.objects(SH_severity))
         if len(severity):
-            self._severity = next(iter(severity))
+            self._severity = next(iter(severity))  # type: Union[URIRef, BNode, Literal]
         else:
             self._severity = SH_Violation
         messages = set(self.objects(SH_message))
         if len(messages):
-            self._messages = messages
+            self._messages = messages  # type: Set
         else:
-            self._messages = None
+            self._messages = set()
         names = set(self.objects(SH_name))
         if len(names):
-            self._names = iter(names)
+            self._names = names  # type: Set
         else:
-            self._names = None
+            self._names = set()
         descriptions = set(self.objects(SH_description))
         if len(descriptions):
-            self._descriptions = iter(descriptions)
+            self._descriptions = descriptions  # type: Set
         else:
-            self._descriptions = None
+            self._descriptions = set()
 
     def set_advanced(self, val):
         self._advanced = bool(val)

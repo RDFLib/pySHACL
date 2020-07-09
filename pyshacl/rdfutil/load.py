@@ -124,30 +124,27 @@ def load_from_source(source: Union[GraphLike, BinaryIO, Union[str, bytes]],
             source_is_open = True
         else:
             first_char = source[0]
-            if is_windows and (first_char == '\\' or
-               (len(source) > 3 and source[1:3] == ":\\")):
+            if is_windows and (first_char == '\\' or (len(source) > 3 and source[1:3] == ":\\")):
                 source_is_file = True
                 filename = source
             elif first_char == '/' or source[0:3] == "./":
                 source_is_file = True
                 filename = source
-            elif first_char == '#' or first_char == '@' \
-                or first_char == '<' or first_char == '\n' \
+            elif first_char == '#' or first_char == '@' or first_char == '<' or first_char == '\n' \
                     or first_char == '{' or first_char == '[':
                 # Contains some JSON or XML or Turtle stuff
                 source_is_file = False
             elif len(source) < 140:
                 source_is_file = True
                 filename = source
-        if public_id and not public_id.endswith('#'):
-            public_id = "{}#".format(public_id)
-        if not source_is_file and not source_is_open:
+        #if public_id and not public_id.endswith('#'):
+        #    public_id = "{}#".format(public_id)
+        if not source_is_file and not source_is_open and isinstance(source, str):
+            # source is raw RDF data.
             source = source.encode('utf-8')
             source_is_bytes = True
     elif isinstance(source, bytes):
-        if (is_windows and source.startswith(b'file:///')) or \
-           (not is_windows and source.startswith(b'file://')) or \
-           source.startswith(b'http:') or source.startswith(b'https:'):
+        if source.startswith(b'file:') or source.startswith(b'http:') or source.startswith(b'https:'):
             raise ValueError("file:// and http:// strings should be given as str, not bytes.")
         first_char_b = source[0:1]  # type: bytes
         if first_char_b == b'#' or first_char_b == b'@' \
@@ -156,9 +153,9 @@ def load_from_source(source: Union[GraphLike, BinaryIO, Union[str, bytes]],
             # Contains some JSON or XML or Turtle stuff
             source_is_file = False
         elif len(source) < 140:
-            source_is_file = True
             filename = source.decode('utf-8')
-        if not source_is_file:
+            source_is_file = True
+        if not source_is_file and not source_is_open:
             source_is_bytes = True
     else:
         raise ValueError("Cannot determine the format of the input graph")
@@ -208,6 +205,7 @@ def load_from_source(source: Union[GraphLike, BinaryIO, Union[str, bytes]],
         if rdf_format == 'turtle' or rdf_format == 'n3':
             # SHACL Shapes files and Data files can have extra RDF Metadata in the
             # Top header block, including #BaseURI and #Prefix.
+            # The @base line is not read here, but it is parsed in the n3 parser
             while True:
                 try:
                     l = source.readline()
