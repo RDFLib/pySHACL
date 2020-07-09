@@ -18,7 +18,7 @@ from pyshacl.consts import RDF_type, SH_conforms, \
 from pyshacl.rules import gather_rules, apply_rules, gather_functions
 from pyshacl.rdfutil import load_from_source, clone_graph, \
     clone_node, compare_blank_node, mix_graphs, order_graph_literal
-from pyshacl.monkey import apply_patches
+from pyshacl.monkey import apply_patches, rdflib_bool_patch, rdflib_bool_unpatch
 
 log_handler = logging.StreamHandler(stderr)
 log = logging.getLogger(__name__)
