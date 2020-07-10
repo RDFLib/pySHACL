@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [0.12.0] - 2020-07-10
+
+### Removed
+- Python 3.5 support is removed. PySHACL now requires Python 3.6 or above.
+  - Routine tests are run using Python 3.6.11, 3.7.8, and 3.8.2.
+  - Python 3.9 might work but is not yet supported.
+
+### Added
+- Python 3.6-compatible type hinting is added throughout the codebase
+- MyPy library is used to run type checking during testing process
+- Flake8 linting is added to enforce PEP8
+- isort is added to enforce imports linting
+- Black is added to keep formatting consistent across releases
+
+### Changed
+- PySHACL is no longer a setuptools-based project with a `setup.py` and `requirements.txt` file.
+- PySHACL is now a PEP518 & PEP517 project, it uses `pyproject.toml` and `poetry` to manage
+dependencies, build and install.
+- For best compatibility when installing from PyPI with `pip`, upgrade to pip v18.1.0 or above.
+  - If you're on Ubuntu 16.04 or 18.04, you will need to run `sudo pip3 install --upgrade pip`
+- Editor Line Length for PySHACL code is now set to 119 as opposed to 79 chars.
+
+
+
 ## [0.11.6.post1] - 2020-07-09
 
 ### Added
@@ -13,7 +37,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
   - You can get access to the same CLI tool if you install the module and run it using `python3 -m pyshacl`
   - See `python3 -m pyshacl --help` for more details
 
-### Announcement
+### Deprecated
+#### Announcement
 - **This is the final version with Python v3.5 support**
   - Versions 0.12.0 and above will have newer package management and dependency management, and will
   require Python v3.6+.
@@ -529,7 +554,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.11.6.post1...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/RDFLib/pySHACL/compare/v0.11.6.post1...v0.12.0
 [0.11.6.post1]: https://github.com/RDFLib/pySHACL/compare/v0.11.6...v0.11.6.post1
 [0.11.6]: https://github.com/RDFLib/pySHACL/compare/v0.11.5...v0.11.6
 [0.11.5]: https://github.com/RDFLib/pySHACL/compare/v0.11.4...v0.11.5

@@ -1,5 +1,9 @@
 include *.txt *.md
+include pyproject.toml
+include poetry.lock
+include MANIFEST.in
 include pyshacl/*.pickle
+include pyshacl/*.spec
 include test/*.py
 include test/issues/*.py
 recursive-include test/resources *.ttl

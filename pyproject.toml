@@ -37,7 +37,7 @@ pytest = "^5.0"
 pytest-cov = "^2.8.1"
 flake8 = "^3.7"
 isort = {version="^5.0.0", python=">=3.6"}
-black = {version=">=18.9b0", python=">=3.6"}
+black = {version=">=18.9b0,<=19.10b0", python=">=3.6"}
 mypy = {version="^0.770.0", python=">=3.6"}
 
 
@@ -63,9 +63,14 @@ exclude = '''
     | \.git          # root of the project
     | \.hg
     | \.mypy_cache
+    | \.pytest_cache
     | \.tox
     | \.venv
     | _build
+    | htmlcov
+    | benchmarks
+    | examples
+    | pyshacl.egg-info
     | buck-out
     | build
     | dist
@@ -91,17 +96,15 @@ multi_line_output = 3
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-skipsdist = True
+isolated_build = true
+skipsdist = true
 envlist = py36, py37, py38, lint, type-checking
 
 [testenv]
-deps =
-    poetry>=1.0.9
-whitelist_externals =
-    poetry
+deps = poetry>=1.0.9
+whitelist_externals = poetry
 skip_install = true
-commands_pre =
-    poetry install -vvv
+commands_pre = poetry install -vvv
 commands =
     - poetry show
     poetry run pytest --cov=pyshacl test/

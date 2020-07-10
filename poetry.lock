@@ -128,7 +128,7 @@ marker = "python_version >= \"3.6\""
 name = "isort"
 optional = false
 python-versions = ">=3.6,<4.0"
-version = "5.0.4"
+version = "5.0.6"
 
 [package.extras]
 pipfile_deprecated_finder = ["pipreqs", "requirementslib", "tomlkit (>=0.5.3)"]
@@ -398,7 +398,7 @@ dev-lint = []
 dev-type-checking = []
 
 [metadata]
-content-hash = "bd1837ef38475d8bac9c82d1c70fae4bed9ab0a2a500cdd2784beac66caa8944"
+content-hash = "174f7f8dbaff0aeaa98e1abd9c87a48142f1d94256e219e16fbd4b34e8c3fb61"
 python-versions = "^3.6"  # Compatible python versions must be declared here
 
 [metadata.files]
@@ -473,8 +473,8 @@ isodate = [
     {file = "isodate-0.6.0.tar.gz", hash = "sha256:2e364a3d5759479cdb2d37cce6b9376ea504db2ff90252a2e5b7cc89cc9ff2d8"},
 ]
 isort = [
-    {file = "isort-5.0.4-py3-none-any.whl", hash = "sha256:78661ad751751cb3c181d37302e175a0c644b3714877c073df058c596281d7fd"},
-    {file = "isort-5.0.4.tar.gz", hash = "sha256:6ae9cf5414e416954e3421f861cbbfc099b3ace63cb270cc76c6670efd960a0a"},
+    {file = "isort-5.0.6-py3-none-any.whl", hash = "sha256:76a97d9acdb3a376c48fafddbe9177192d4ac35b0b2c21a0c965b9604a412af1"},
+    {file = "isort-5.0.6.tar.gz", hash = "sha256:af3ac4524d1256e3f32d155da8fb43b2a94201644fa6b45813c8783fc51c3841"},
 ]
 mccabe = [
     {file = "mccabe-0.6.1-py2.py3-none-any.whl", hash = "sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42"},
