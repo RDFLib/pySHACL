@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 #
 import datetime
+
+from typing import List
+
 import rdflib
 
-from . import RDF_first, RDFS_Resource, stringify_node
+from .consts import RDF_first, RDFS_Resource
+from .stringify import stringify_node
+
 
 # RDFLib 5.0+ has TOTAL_ORDER_CASTERS to force order on normally unorderable types,
 # like datetimes and times. We specifically _dont_ want that here when comparing literals.
@@ -12,11 +17,12 @@ _FORCE_COMPARE_LITERAL_VALUE = [
     datetime.time,
 ]
 
-def compare_blank_node(graph1, bnode1, graph2, bnode2, recursion=0):
-    assert isinstance(graph1, rdflib.Graph)
-    assert isinstance(graph2, rdflib.Graph)
-    assert isinstance(bnode1, rdflib.BNode)
-    assert isinstance(bnode2, rdflib.BNode)
+
+def compare_blank_node(graph1: rdflib.Graph, bnode1, graph2: rdflib.Graph, bnode2, recursion=0):
+    if not isinstance(graph1, rdflib.Graph) or not isinstance(graph2, rdflib.Graph):
+        raise RuntimeError("Comparing blank nodes, graph1 and graph2 must must be RDFLib Graphs")
+    if not isinstance(bnode1, rdflib.BNode) or not isinstance(bnode2, rdflib.BNode):
+        raise RuntimeError("Comparing blank nodes, bnode1 and bnode2 must must be RDFLib BNodes")
     if recursion >= 10:
         return 1  # Cannot compare this deep
 
@@ -32,7 +38,7 @@ def compare_blank_node(graph1, bnode1, graph2, bnode2, recursion=0):
         for i1 in list_1_items:
             found = None
             for i2 in list_2_items:
-                eq = compare_node(graph1, i1, graph2, i2, recursion=recursion+1)
+                eq = compare_node(graph1, i1, graph2, i2, recursion=recursion + 1)
                 if eq == 0:
                     found = i2
                     break
@@ -43,16 +49,16 @@ def compare_blank_node(graph1, bnode1, graph2, bnode2, recursion=0):
                 break
         return eq
 
-
     predicates1 = set(graph1.predicates(bnode1))
     predicates2 = set(graph2.predicates(bnode2))
-    in_ps1_but_not_in_ps2 = list()
-    in_ps2_but_not_in_ps1 = list()
-    pred_objs_in_bnode1_but_not_bnode2 = list()
-    pred_objs_in_bnode2_but_not_bnode1 = list()
+    in_ps1_but_not_in_ps2: List = list()
+    in_ps2_but_not_in_ps1: List = list()
+    pred_objs_in_bnode1_but_not_bnode2: List = list()
+    pred_objs_in_bnode2_but_not_bnode1: List = list()
+
     def return_eq(direction):
-        nonlocal in_ps2_but_not_in_ps1
-        nonlocal in_ps1_but_not_in_ps2
+        nonlocal in_ps2_but_not_in_ps1, in_ps1_but_not_in_ps2
+        nonlocal pred_objs_in_bnode1_but_not_bnode2, pred_objs_in_bnode2_but_not_bnode1
         if direction == 0:
             return direction
         if recursion <= 1:
@@ -96,8 +102,6 @@ def compare_blank_node(graph1, bnode1, graph2, bnode2, recursion=0):
     elif RDF_first in predicates2:
         return return_eq(-1)
 
-    p1s_compared = set()
-    p2s_compared = set()
     bnode1_eq = 0
     for p1 in predicates1:
         if isinstance(p1, rdflib.URIRef):
@@ -110,7 +114,7 @@ def compare_blank_node(graph1, bnode1, graph2, bnode2, recursion=0):
                         continue
                     found = None
                     for o2 in o2_list:
-                        eq = compare_node(graph1, o1, graph2, o2, recursion=recursion+1)
+                        eq = compare_node(graph1, o1, graph2, o2, recursion=recursion + 1)
                         if eq == 0:
                             found = o2
                             break
@@ -125,8 +129,8 @@ def compare_blank_node(graph1, bnode1, graph2, bnode2, recursion=0):
                 in_ps1_but_not_in_ps2.append(p1)
                 bnode1_eq = 1
         else:
-            raise NotImplementedError(
-                "Don't know to compare non-uri predicates on a blank node.")
+            raise NotImplementedError("Don't know to compare non-uri predicates on a blank node.")
+
     bnode2_eq = 0
     for p2 in predicates2:
         if isinstance(p2, rdflib.URIRef):
@@ -139,8 +143,7 @@ def compare_blank_node(graph1, bnode1, graph2, bnode2, recursion=0):
                         continue
                     found = None
                     for o1 in o1_list:
-                        eq = compare_node(graph2, o2, graph1, o1,
-                                          recursion=recursion + 1)
+                        eq = compare_node(graph2, o2, graph1, o1, recursion=recursion + 1)
                         if eq == 0:
                             found = o1
                             break
@@ -155,8 +158,7 @@ def compare_blank_node(graph1, bnode1, graph2, bnode2, recursion=0):
                 in_ps2_but_not_in_ps1.append(p2)
                 bnode2_eq = 1
         else:
-            raise NotImplementedError(
-                "Don't know to compare non-uri predicates on a blank node.")
+            raise NotImplementedError("Don't know to compare non-uri predicates on a blank node.")
 
     if bnode1_eq == 0 and bnode2_eq == 0:
         return return_eq(0)
@@ -190,15 +192,23 @@ def compare_literal(l1, l2):
     return -1
 
 
-def order_graph_literal(graph1, node1, graph2, node2):
+def order_graph_literal(graph1: rdflib.Graph, lit1: rdflib.Literal, graph2: rdflib.Graph, lit2: rdflib.Literal):
+    if not isinstance(graph1, rdflib.Graph) or not isinstance(graph2, rdflib.Graph):
+        raise RuntimeError("Comparing ordered literals, graph1 and graph2 must must be RDFLib Graphs")
+    if not isinstance(lit1, rdflib.Literal) or not isinstance(lit2, rdflib.Literal):
+        raise RuntimeError("Comparing ordered literals, lit1 and lit2 must must be RDFLib Literals")
     try:
-        order = compare_literal(node1, node2)
+        order = compare_literal(lit1, lit2)
     except (TypeError, NotImplementedError):
         order = 1  # 1 = not-equal
     return order
 
 
-def compare_node(graph1, node1, graph2, node2, recursion=0):
+def compare_node(graph1: rdflib.Graph, node1, graph2: rdflib.Graph, node2, recursion=0):
+    if not isinstance(graph1, rdflib.Graph) or not isinstance(graph2, rdflib.Graph):
+        raise RuntimeError("Comparing nodes, graph1 and graph2 must must be RDFLib Graphs")
+    if not isinstance(node1, rdflib.term.Identifier) or not isinstance(node2, rdflib.term.Identifier):
+        raise RuntimeError("Comparing nodes, node1 and node2 must must be RDFLib Identifiers")
     if isinstance(node1, rdflib.Literal) and isinstance(node2, rdflib.Literal):
         order = order_graph_literal(graph1, node1, graph2, node2)
     elif isinstance(node1, rdflib.Literal):
@@ -206,8 +216,7 @@ def compare_node(graph1, node1, graph2, node2, recursion=0):
     elif isinstance(node2, rdflib.Literal):
         order = -1  # node2 being a literal is greater
     elif isinstance(node1, rdflib.BNode) and isinstance(node2, rdflib.BNode):
-        order = compare_blank_node(graph1, node1, graph2, node2,
-                                   recursion=recursion+1)
+        order = compare_blank_node(graph1, node1, graph2, node2, recursion=recursion + 1)
     elif isinstance(node1, rdflib.BNode):
         order = 1  # node1 being a BNode is greater
     elif isinstance(node2, rdflib.BNode):

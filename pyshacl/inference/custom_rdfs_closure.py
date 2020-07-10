@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from owlrl.RDFSClosure import RDFS_Semantics as OrigRDFSSemantics
+from owlrl.OWL import DataRange, OWLClass, Thing, equivalentClass
 from owlrl.OWLRL import OWLRL_Semantics
+from owlrl.RDFS import Class, Datatype, Resource
+from owlrl.RDFSClosure import RDFS_Semantics as OrigRDFSSemantics
 
-from owlrl.RDFS import Resource, Class, Datatype
-from owlrl.OWL import OWLClass, Thing, equivalentClass, DataRange
 
 class CustomRDFSSemantics(OrigRDFSSemantics):
     def one_time_rules(self):
@@ -21,10 +21,11 @@ class CustomRDFSOWLRLSemantics(CustomRDFSSemantics, OWLRL_Semantics):
     Copied directly from RDFSClosure.CombinedClosure
     with a few tiny modifications
     """
+
     full_binding_triples = [
         (Thing, equivalentClass, Resource),
         (Class, equivalentClass, OWLClass),
-        (DataRange, equivalentClass, Datatype)
+        (DataRange, equivalentClass, Datatype),
     ]
 
     def __init__(self, graph, axioms, daxioms, rdfs=True):
@@ -34,9 +35,9 @@ class CustomRDFSOWLRLSemantics(CustomRDFSSemantics, OWLRL_Semantics):
 
     # noinspection PyMethodMayBeStatic
     @staticmethod
-    def add_new_datatype(uri, conversion_function, datatype_list,
-                         subsumption_dict=None, subsumption_key=None,
-                         subsumption_list=None):
+    def add_new_datatype(
+        uri, conversion_function, datatype_list, subsumption_dict=None, subsumption_key=None, subsumption_list=None
+    ):
         """If an extension wants to add new datatypes, this method should be invoked at initialization time.
 
         @param uri: URI for the new datatypes, like owl_ns["Rational"]
@@ -48,8 +49,7 @@ class CustomRDFSOWLRLSemantics(CustomRDFSSemantics, OWLRL_Semantics):
         @param subsumption_list: list of subsumptions associated to a subsumption key (ie, all datatypes that are
         superclasses of the new datatype)
         """
-        from owlrl.DatatypeHandling import AltXSDToPYTHON, \
-            use_Alt_lexical_conversions
+        from owlrl.DatatypeHandling import AltXSDToPYTHON, use_Alt_lexical_conversions
 
         if datatype_list:
             datatype_list.append(uri)

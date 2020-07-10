@@ -1,23 +1,28 @@
 # -*- coding: utf-8 -*-
 import itertools
 
+from typing import TYPE_CHECKING
+
 import rdflib
 
-from pyshacl.consts import SH_subject, SH_predicate, SH_object, SH_this, SH_path
-from pyshacl.shape import Shape
+from pyshacl.consts import SH_object, SH_path, SH_predicate, SH_subject, SH_this
 from pyshacl.rules.shacl_rule import SHACLRule
+
+
+if TYPE_CHECKING:
+    from pyshacl.shape import Shape
 
 
 class TripleRule(SHACLRule):
     __slots__ = ("s", "p", "o")
 
-    def __init__(self, shape, rule_node):
+    def __init__(self, shape: 'Shape', rule_node: 'rdflib.term.Identifier'):
         """
 
         :param shape:
         :type shape: Shape
         :param rule_node:
-        :type rule_node: rdflib.Identifier
+        :type rule_node: rdflib.term.Identifier
         """
         super(TripleRule, self).__init__(shape, rule_node)
         my_subject_nodes = set(self.shape.sg.objects(self.node, SH_subject))

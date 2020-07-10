@@ -50,7 +50,7 @@ exOnt:PreschoolTeacher a rdfs:Class ;
 
 exOnt:Lizard a rdfs:Class ;
     rdfs:subClassOf exOnt:Pet .
-    
+
 exOnt:Goanna a rdfs:Class ;
     rdfs:subClassOf exOnt:Lizard .
 
@@ -185,7 +185,7 @@ ex:AnimalShape a sh:NodeShape ;
         sh:maxInclusive 4 ;
         sh:minInclusive 1 ;
     ] ;
-    sh:targetClass ex:Animal .  
+    sh:targetClass ex:Animal .
 """
     did_error = False
     try:
@@ -350,7 +350,6 @@ def test_web_retrieve():
                    ont_graph_format="turtle", inference='both', debug=True)
     conforms, graph, string = res
     assert conforms
-
 
 def test_web_retrieve_fail():
     DEB_BUILD_ARCH = os.environ.get('DEB_BUILD_ARCH', None)

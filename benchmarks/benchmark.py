@@ -10,7 +10,7 @@ import pyshacl
 from os import path
 
 target_ttl_file = \
-    '../tests/resources/tests/core/complex/personexample.test.ttl'
+    '../test/resources/dash_tests/core/complex/personexample.test.ttl'
 target_ttl_file = path.abspath(target_ttl_file)
 target_graph = rdflib.Graph()
 with open(target_ttl_file, 'rb') as file:
@@ -33,14 +33,13 @@ run_script_pre_both = '''
 r = pyshacl.validate(target_graph, inference='both')
 '''
 
-t1 = timeit.timeit(run_script_pre_none, set_up_script, number=12) / 12.0
+t1 = timeit.timeit(run_script_pre_none, set_up_script, number=100) / 100.0
 
+t2 = timeit.timeit(run_script_pre_rdfs, set_up_script, number=100) / 100.0
 
-t2 = timeit.timeit(run_script_pre_rdfs, set_up_script, number=12) / 12.0
+t3 = timeit.timeit(run_script_pre_owlrl, set_up_script, number=100) / 100.0
 
-t3 = timeit.timeit(run_script_pre_owlrl, set_up_script, number=12) / 12.0
-
-t4 = timeit.timeit(run_script_pre_both, set_up_script, number=12) / 12.0
+t4 = timeit.timeit(run_script_pre_both, set_up_script, number=100) / 100.0
 
 
 print("Benchmark completed. Validation took:\n"

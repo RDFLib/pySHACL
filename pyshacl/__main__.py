@@ -2,4 +2,5 @@
 #
 from pyshacl.cli import main
 
+
 main()

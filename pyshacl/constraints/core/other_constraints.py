@@ -2,11 +2,17 @@
 """
 https://www.w3.org/TR/shacl/#core-components-others
 """
+from typing import Dict, List
+
 import rdflib
-from rdflib.namespace import RDF, RDFS
+
+from rdflib.namespace import RDFS
+
 from pyshacl.constraints.constraint_component import ConstraintComponent
-from pyshacl.consts import RDF_type, SH, SH_property, SH_path
+from pyshacl.consts import SH, RDF_type, SH_property
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
+from pyshacl.pytypes import GraphLike
+
 
 SH_InConstraintComponent = SH.term('InConstraintComponent')
 SH_ClosedConstraintComponent = SH.term('ClosedConstraintComponent')
@@ -32,11 +38,13 @@ class InConstraintComponent(ConstraintComponent):
         if len(in_vals) < 1:
             raise ConstraintLoadError(
                 "InConstraintComponent must have at least one sh:in predicate.",
-                "https://www.w3.org/TR/shacl/#InConstraintComponent")
+                "https://www.w3.org/TR/shacl/#InConstraintComponent",
+            )
         elif len(in_vals) > 1:
             raise ConstraintLoadError(
                 "InConstraintComponent must have at most one sh:in predicate.",
-                "https://www.w3.org/TR/shacl/#InConstraintComponent")
+                "https://www.w3.org/TR/shacl/#InConstraintComponent",
+            )
         self.in_list = in_vals[0]
         sg = self.shape.sg.graph
 
@@ -55,11 +63,11 @@ class InConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_InConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
@@ -81,8 +89,8 @@ class ClosedConstraintComponent(ConstraintComponent):
     Textual Definition:
     If $closed is true then there is a validation result for each triple that has a value node as its subject and a predicate that is not explicitly enumerated as a value of sh:path in any of the property shapes declared via sh:property at the current shape. If $ignoredProperties has a value then the properties enumerated as members of this SHACL list are also permitted for the value node. The validation result MUST have the predicate of the triple as its sh:resultPath, and the object of the triple as its sh:value.
     """
-    ALWAYS_IGNORE = {(RDF_type, RDFS.term('Resource'))}
 
+    ALWAYS_IGNORE = {(RDF_type, RDFS.term('Resource'))}
 
     def __init__(self, shape):
         super(ClosedConstraintComponent, self).__init__(shape)
@@ -91,11 +99,13 @@ class ClosedConstraintComponent(ConstraintComponent):
         if len(closed_vals) < 1:
             raise ConstraintLoadError(
                 "ClosedConstraintComponent must have at least one sh:closed predicate.",
-                "https://www.w3.org/TR/shacl/#ClosedConstraintComponent")
+                "https://www.w3.org/TR/shacl/#ClosedConstraintComponent",
+            )
         elif len(closed_vals) > 1:
             raise ConstraintLoadError(
                 "ClosedConstraintComponent must have at most one sh:closed predicate.",
-                "https://www.w3.org/TR/shacl/#ClosedConstraintComponent")
+                "https://www.w3.org/TR/shacl/#ClosedConstraintComponent",
+            )
         assert isinstance(closed_vals[0], rdflib.Literal), "sh:closed must take a xsd:boolean literal."
         self.is_closed = bool(closed_vals[0].value)
         ignored_vals = list(self.shape.objects(SH_ignoredProperties))
@@ -109,8 +119,6 @@ class ClosedConstraintComponent(ConstraintComponent):
                 continue
         self.property_shapes = list(self.shape.objects(SH_property))
 
-
-
     @classmethod
     def constraint_parameters(cls):
         return [SH_closed, SH_ignoredProperties]
@@ -123,11 +131,11 @@ class ClosedConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_ClosedConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
@@ -140,7 +148,8 @@ class ClosedConstraintComponent(ConstraintComponent):
             if not property_shape or not property_shape.is_property_shape:
                 raise ReportableRuntimeError(
                     "The shape pointed to by sh:property does "
-                    "not exist, or is not a well defined SHACL PropertyShape.")
+                    "not exist, or is not a well defined SHACL PropertyShape."
+                )
             working_shapes.add(property_shape)
         working_paths = set()
         for w in working_shapes:
@@ -179,9 +188,9 @@ class HasValueConstraintComponent(ConstraintComponent):
         if len(has_value_set) < 1:
             raise ConstraintLoadError(
                 "HasValueConstraintComponent must have at least one sh:hasValue predicate.",
-                "https://www.w3.org/TR/shacl/#HasValueConstraintComponent")
+                "https://www.w3.org/TR/shacl/#HasValueConstraintComponent",
+            )
         self.has_value_set = has_value_set
-
 
     @classmethod
     def constraint_parameters(cls):
@@ -195,11 +204,11 @@ class HasValueConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_HasValueConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False

@@ -3,9 +3,11 @@
 # pySHACL
 A Python validator for SHACL.
 
-[![PyPI version](https://badge.fury.io/py/pyshacl.svg)](https://badge.fury.io/py/pyshacl)  ![](https://img.shields.io/badge/coverage-86%25-yellowgreen.svg)
+[![Build Status](https://travis-ci.org/RDFLib/pySHACL.svg?branch=master)](https://travis-ci.org/RDFLib/pySHACL) [![Coverage Status](https://coveralls.io/repos/github/RDFLib/pySHACL/badge.svg?branch=master)](https://coveralls.io/github/RDFLib/pySHACL?branch=master) [![PyPI version](https://badge.fury.io/py/pyshacl.svg)](https://badge.fury.io/py/pyshacl) [![Code Style Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-This is a pure Python module which allows for the validation of [RDF](https://www.w3.org/2001/sw/wiki/RDF) graphs against Shapes Constraint Language ([SHACL](https://www.w3.org/TR/shacl/)) graphs. This module uses the [rdflib](https://github.com/RDFLib/rdflib) Python library for working with RDF and is dependent on the [OWL-RL](https://github.com/RDFLib/OWL-RL) Python module for [OWL2 RL Profile](https://www.w3.org/TR/owl2-overview/#ref-owl-2-profiles)\-based expansion of data graphs.
+[![Downloads](https://pepy.tech/badge/pyshacl)](https://pepy.tech/project/pyshacl) [![Downloads](https://pepy.tech/badge/pyshacl/month)](https://pepy.tech/project/pyshacl/month) [![Downloads](https://pepy.tech/badge/pyshacl/week)](https://pepy.tech/project/pyshacl/week)
+
+This is a pure Python module which allows for the validation of [RDF](https://www.w3.org/2001/sw/wiki/RDF) graphs against Shapes Constraint Language ([SHACL](https://www.w3.org/TR/shacl/)) graphs. This module uses the [rdflib](https://github.com/RDFLib/rdflib) Python library for working with RDF and is dependent on the [OWL-RL](https://github.com/RDFLib/OWL-RL) Python module for [OWL2 RL Profile](https://www.w3.org/TR/owl2-overview/#ref-owl-2-profiles) based expansion of data graphs.
 
 This module is developed to adhere to the SHACL Recommendation:
 > Holger Knublauch; Dimitris Kontokostas. *Shapes Constraint Language (SHACL)*. 20 July 2017. W3C Recommendation. URL: <https://www.w3.org/TR/shacl/> ED: <https://w3c.github.io/data-shapes/shacl/>
@@ -18,10 +20,11 @@ $ pip3 install pyshacl
 
 Or in a python virtualenv _(these example commandline instructions are for a Linux/Unix based OS)_
 ```bash
-$ python3 -m virtualenv --python=python3 --no-site-packages shaclvenv
-$ source ./shaclvenv/bin/activate
+$ python3 -m virtualenv --python=python3 --no-site-packages .venv
+$ source ./.venv/bin/activate
 $ pip3 install pyshacl
 ```
+
 To exit the virtual enviornment:
 ```bash
 $ deactivate
@@ -53,7 +56,7 @@ usage: pyshacl [-h] [-s [SHACL]] [-e [ONT]] [-i {none,rdfs,owlrl,both}] [-m]
                [--imports] [--abort] [-a] [-d] [-f {human,turtle,xml,json-ld,nt,n3}]
                [-df {auto,turtle,xml,json-ld,nt,n3}]
                [-sf {auto,turtle,xml,json-ld,nt,n3}]
-               [-ef {auto,turtle,xml,json-ld,nt,n3}] [-o [OUTPUT]]
+               [-ef {auto,turtle,xml,json-ld,nt,n3}] [-V] [-o [OUTPUT]]
                DataGraph
 
 Run the pySHACL validator from the command line.
@@ -91,6 +94,7 @@ optional arguments:
   -ef {auto,turtle,xml,json-ld,nt,n3}, --ont-file-format {auto,turtle,xml,json-ld,nt,n3}
                         Explicitly state the RDF File format of the extra
                         ontology file. Default="auto".
+  -V, --version         Print the PySHACL version and exit.
   -o [OUTPUT], --output [OUTPUT]
                         Send output to a file (defaults to stdout).
 ```
@@ -123,7 +127,7 @@ For basic use of this module, you can just call the `validate` function of the `
 
 ```
 from pyshacl import validate
-r = validate(data_graph, shacl_graph=sg, ont_graph=og, inference='rdfs', abort_on_error=False, meta_shacl=False, debug=False)
+r = validate(data_graph, shacl_graph=sg, ont_graph=og, inference='rdfs', abort_on_error=False, meta_shacl=False, advanced=False, debug=False)
 conforms, results_graph, results_text = r
 ```
 
@@ -135,10 +139,10 @@ Where:
 Options are 'rdfs', 'owlrl', 'both', or 'none'. The default is 'none'.
 * `abort_on_error` (optional) a Python `bool` value to indicate whether or not the program should abort after encountering a validation error or to continue. Default is to continue.
 * `meta_shacl` (optional) a Python `bool` value to indicate whether or not the program should enable the Meta-SHACL feature. Default is False.
+* `advanced`: (optional) a Python `bool` value to enable SHACL Advanced Features
 * `debug` (optional) a Python `bool` value to indicate whether or not the program should emit debugging output text, including violations that didn't lead to non-conformance overall. So when debug is True don't judge conformance by absense of violation messages. Default is False.
 
 Some other optional keyword variables available available on the `validate` function:
-* `advanced`: Enable SHACL Advanced Features
 * `data_graph_format`: Override the format detection for the given data graph source file.
 * `shacl_graph_format`: Override the format detection for the given shacl graph source file.
 * `ont_graph_format`: Override the format detection for the given extra ontology graph source file.
@@ -152,6 +156,14 @@ Return value:
   * `conforms` a `bool`, indicating whether or not the `data_graph` conforms to the `shacl_graph`
   * `results_graph` an rdflib `Graph` object built according to the SHACL specification's [Validation Report](https://www.w3.org/TR/shacl/#validation-report) structure
   * `results_text` python string representing a verbose textual representation of the [Validation Report](https://www.w3.org/TR/shacl/#validation-report)
+
+
+## Python Module Call
+
+You can get an equivalent of the Command Line Tool using the Python3 executable by doing:
+
+`python3 -m pyshacl`
+
 
 ## Errors
 Under certain circumstances pySHACL can produce a `Validation Failure`. This is a formal error defined by the SHACL specification and is required to be produced as a result of specific conditions within the SHACL graph.
@@ -170,7 +182,12 @@ In the case of `ShapeLoadError` and `ConstraintLoadError`, see the `str()` strin
 
 
 ## Compatibility
-PySHACL is a Python3 library. For best compatibility use Python v3.5 or greater. This library _**does not work**_ on Python v2.7.x or below.
+PySHACL is a Python3 library. For best compatibility use Python v3.6 or greater. Python3 v3.5 or below is _**not supported**_ and this library _**does not work**_ on Python v2.7.x or below.
+
+PySHACL is now a PEP518 & PEP517 project, it uses `pyproject.toml` and `poetry` to manage dependencies, build and install.
+
+For best compatibility when installing from PyPI with `pip`, upgrade to pip v18.1.0 or above.
+  - If you're on Ubuntu 16.04 or 18.04, you will need to run `sudo pip3 install --upgrade pip` to get the newer version.
 
 
 ## Features

@@ -1,24 +1,79 @@
 # -*- coding: utf-8 -*-
 #
-from decimal import Decimal
-import rdflib
 import logging
 
-from pyshacl.consts import *
-from pyshacl.errors import ShapeLoadError, ReportableRuntimeError, ConstraintLoadWarning, ConstraintLoadError
-from pyshacl.constraints import ALL_CONSTRAINT_PARAMETERS, \
-    CONSTRAINT_PARAMETERS_MAP
+from decimal import Decimal
+from typing import TYPE_CHECKING, List, Optional, Set, Tuple, Union
+
+from rdflib import RDF, BNode, Literal, URIRef
+
+from pyshacl.constraints import ALL_CONSTRAINT_PARAMETERS, CONSTRAINT_PARAMETERS_MAP
+from pyshacl.consts import (
+    RDF_type,
+    RDFS_Class,
+    RDFS_subClassOf,
+    SH_alternativePath,
+    SH_deactivated,
+    SH_description,
+    SH_inversePath,
+    SH_message,
+    SH_name,
+    SH_oneOrMorePath,
+    SH_order,
+    SH_parameter,
+    SH_property,
+    SH_select,
+    SH_severity,
+    SH_SPARQLTarget,
+    SH_SPARQLTargetType,
+    SH_target,
+    SH_targetClass,
+    SH_targetNode,
+    SH_targetObjectsOf,
+    SH_targetSubjectsOf,
+    SH_Violation,
+    SH_zeroOrMorePath,
+    SH_zeroOrOnePath,
+)
+from pyshacl.errors import ConstraintLoadError, ConstraintLoadWarning, ReportableRuntimeError, ShapeLoadError
+from pyshacl.pytypes import GraphLike
 from pyshacl.sparql_query_helper import SPARQLQueryHelper
+
+
+if TYPE_CHECKING:
+    from pyshacl.shapes_graph import ShapesGraph
+
 
 class Shape(object):
 
-    def __init__(self, sg, node, p=False, path=None, logger=None):
+    __slots__ = (
+        'logger',
+        'sg',
+        'node',
+        '_p',
+        '_path',
+        '_advanced',
+        '_deactivated',
+        '_severity',
+        '_messages',
+        '_names',
+        '_descriptions',
+    )
+
+    def __init__(
+        self,
+        sg: 'ShapesGraph',
+        node: Union[URIRef, BNode],
+        p=False,
+        path: Optional[Union[URIRef, BNode]] = None,
+        logger=None,
+    ):
         """
         Shape
-        :type sg: pyshacl.shapes_graph.ShapesGraph
-        :type node: rdflib.term.Node
+        :type sg: ShapesGraph
+        :type node: URIRef | BNode
         :type p: bool
-        :type path: rdflib.Node
+        :type path: URIRef | BNode | None
         :type logger: logging.Logger
         """
         self.logger = logger or logging.getLogger(__name__)
@@ -31,38 +86,41 @@ class Shape(object):
         deactivated_vals = set(self.objects(SH_deactivated))
         if len(deactivated_vals) > 1:
             # TODO:coverage: we don't have any tests for invalid shapes
-            raise ShapeLoadError("A SHACL Shape cannot have more than one sh:deactivated predicate.",
-                                 "https://www.w3.org/TR/shacl/#deactivated")
+            raise ShapeLoadError(
+                "A SHACL Shape cannot have more than one sh:deactivated predicate.",
+                "https://www.w3.org/TR/shacl/#deactivated",
+            )
         elif len(deactivated_vals) < 1:
-            self._deactivated = False
+            self._deactivated = False  # type: bool
         else:
             d = next(iter(deactivated_vals))
-            if not isinstance(d, rdflib.Literal):
+            if not isinstance(d, Literal):
                 # TODO:coverage: we don't have any tests for invalid shapes
                 raise ShapeLoadError(
                     "The value of sh:deactivated predicate on a SHACL Shape must be a Literal.",
-                    "https://www.w3.org/TR/shacl/#deactivated")
+                    "https://www.w3.org/TR/shacl/#deactivated",
+                )
             self._deactivated = bool(d.value)
         severity = set(self.objects(SH_severity))
         if len(severity):
-            self._severity = next(iter(severity))
+            self._severity = next(iter(severity))  # type: Union[URIRef, BNode, Literal]
         else:
             self._severity = SH_Violation
         messages = set(self.objects(SH_message))
         if len(messages):
-            self._messages = messages
+            self._messages = messages  # type: Set
         else:
-            self._messages = None
+            self._messages = set()
         names = set(self.objects(SH_name))
         if len(names):
-            self._names = iter(names)
+            self._names = names  # type: Set
         else:
-            self._names = None
+            self._names = set()
         descriptions = set(self.objects(SH_description))
         if len(descriptions):
-            self._descriptions = iter(descriptions)
+            self._descriptions = descriptions  # type: Set
         else:
-            self._descriptions = None
+            self._descriptions = set()
 
     def set_advanced(self, val):
         self._advanced = bool(val)
@@ -107,7 +165,7 @@ class Shape(object):
     def __str__(self):
         try:
             name = next(iter(self.name))
-        except Exception as e:
+        except Exception:
             name = str(self.node)
         return "<Shape {}>".format(name)
 
@@ -129,13 +187,13 @@ class Shape(object):
             return Decimal("0.0")
         if len(order_nodes) > 1:
             raise ShapeLoadError(
-                "A SHACL Shape can have only one sh:order property.",
-                "https://www.w3.org/TR/shacl-af/#rules-order")
+                "A SHACL Shape can have only one sh:order property.", "https://www.w3.org/TR/shacl-af/#rules-order"
+            )
         order_node = next(iter(order_nodes))
-        if not isinstance(order_node, rdflib.Literal):
+        if not isinstance(order_node, Literal):
             raise ShapeLoadError(
-                "A SHACL Shape must be a numeric literal.",
-                "https://www.w3.org/TR/shacl-af/#rules-order")
+                "A SHACL Shape must be a numeric literal.", "https://www.w3.org/TR/shacl-af/#rules-order"
+            )
         return Decimal(order_node.value)
 
     def target_nodes(self):
@@ -167,21 +225,15 @@ class Shape(object):
         raise RuntimeError("property shape has no _path!")  # pragma: no cover
 
     def parameters(self):
-        return (p for p, v in self.sg.predicate_objects(self.node)
-                if p in ALL_CONSTRAINT_PARAMETERS)
+        return (p for p, v in self.sg.predicate_objects(self.node) if p in ALL_CONSTRAINT_PARAMETERS)
 
     def target(self):
-        """
-
-        :type target_graph: rdflib.Graph
-        """
         target_nodes = self.target_nodes()
         target_classes = self.target_classes()
         implicit_targets = self.implicit_class_targets()
         target_objects_of = self.target_objects_of()
         target_subjects_of = self.target_subjects_of()
-        return (target_nodes, target_classes, implicit_targets,
-                target_objects_of, target_subjects_of)
+        return (target_nodes, target_classes, implicit_targets, target_objects_of, target_subjects_of)
 
     def advanced_target(self):
         custom_targets = set(self.sg.graph.objects(self.node, SH_target))
@@ -213,8 +265,7 @@ class Shape(object):
         specified as explicit input to the SHACL processor for validating a specific RDF term against a shape
         :return:
         """
-        (target_nodes, target_classes, implicit_classes,
-         target_objects_of, target_subjects_of) = self.target()
+        (target_nodes, target_classes, implicit_classes, target_objects_of, target_subjects_of) = self.target()
         if self._advanced:
             advanced_targets = self.advanced_target()
         else:
@@ -265,11 +316,10 @@ class Shape(object):
     @classmethod
     def value_nodes_from_path(cls, sg, focus, path_val, target_graph, recursion=0):
         # Link: https://www.w3.org/TR/shacl/#property-paths
-        if isinstance(path_val, rdflib.URIRef):
+        if isinstance(path_val, URIRef):
             return set(target_graph.objects(focus, path_val))
-        elif isinstance(path_val, rdflib.Literal):
-            raise ReportableRuntimeError(
-                    "Values of a property path cannot be a Literal.")
+        elif isinstance(path_val, Literal):
+            raise ReportableRuntimeError("Values of a property path cannot be a Literal.")
         # At this point, path_val _must_ be a BNode
         # TODO, the path_val BNode must be value of exactly one sh:path subject in the SG.
         if recursion >= 10:
@@ -281,27 +331,21 @@ class Shape(object):
             go_deeper = True
             if len(rest_nodes) < 1:
                 if recursion == 0:
-                    raise ReportableRuntimeError(
-                        "A list of SHACL Paths must contain at least "
-                        "two path items.")
+                    raise ReportableRuntimeError("A list of SHACL Paths must contain at least two path items.")
                 else:
                     go_deeper = False
             rest_node = next(iter(rest_nodes))
             if rest_node == RDF.nil:
                 if recursion == 0:
-                    raise ReportableRuntimeError(
-                        "A list of SHACL Paths must contain at least "
-                        "two path items.")
+                    raise ReportableRuntimeError("A list of SHACL Paths must contain at least two path items.")
                 else:
                     go_deeper = False
-            this_level_nodes = cls.value_nodes_from_path(sg,
-                focus, first_node, target_graph, recursion=recursion+1)
+            this_level_nodes = cls.value_nodes_from_path(sg, focus, first_node, target_graph, recursion=recursion + 1)
             if not go_deeper:
                 return this_level_nodes
             found_value_nodes = set()
             for tln in iter(this_level_nodes):
-                value_nodes = cls.value_nodes_from_path(sg,
-                    tln, rest_node, target_graph, recursion=recursion+1)
+                value_nodes = cls.value_nodes_from_path(sg, tln, rest_node, target_graph, recursion=recursion + 1)
                 found_value_nodes.update(value_nodes)
             return found_value_nodes
 
@@ -316,33 +360,29 @@ class Shape(object):
             all_collected = set()
             visited_alternatives = 0
             for a in sg.graph.items(alternatives_list):
-                found_nodes = cls.value_nodes_from_path(sg,
-                    focus, a, target_graph, recursion=recursion+1)
+                found_nodes = cls.value_nodes_from_path(sg, focus, a, target_graph, recursion=recursion + 1)
                 visited_alternatives += 1
                 all_collected.update(found_nodes)
             if visited_alternatives < 2:
-                raise ReportableRuntimeError(
-                    "List of SHACL alternate paths "
-                    "must have alt least two path items.")
+                raise ReportableRuntimeError("List of SHACL alternate paths must have at least two path items.")
             return all_collected
 
         find_zero_or_more = set(sg.graph.objects(path_val, SH_zeroOrMorePath))
         if len(find_zero_or_more) > 0:
-            zero_or_more_path = next(iter(find_zero_or_more))
+            zm_path = next(iter(find_zero_or_more))
             collection_set = set()
             # Note, the zero-or-more path always includes the current subject too!
             collection_set.add(focus)
-            found_nodes = cls.value_nodes_from_path(sg,
-                focus, zero_or_more_path, target_graph, recursion=recursion+1)
+            found_nodes = cls.value_nodes_from_path(sg, focus, zm_path, target_graph, recursion=recursion + 1)
             search_deeper_nodes = set(iter(found_nodes))
             while len(search_deeper_nodes) > 0:
                 current_node = search_deeper_nodes.pop()
                 if current_node in collection_set:
                     continue
                 collection_set.add(current_node)
-                found_more_nodes = cls.value_nodes_from_path(sg,
-                    current_node, zero_or_more_path, target_graph,
-                    recursion=recursion+1)
+                found_more_nodes = cls.value_nodes_from_path(
+                    sg, current_node, zm_path, target_graph, recursion=recursion + 1
+                )
                 search_deeper_nodes.update(found_more_nodes)
             return collection_set
 
@@ -350,8 +390,7 @@ class Shape(object):
         if len(find_one_or_more) > 0:
             one_or_more_path = next(iter(find_one_or_more))
             collection_set = set()
-            found_nodes = cls.value_nodes_from_path(sg,
-                focus, one_or_more_path, target_graph, recursion=recursion + 1)
+            found_nodes = cls.value_nodes_from_path(sg, focus, one_or_more_path, target_graph, recursion=recursion + 1)
             # Note, the one-or-more path should _not_ include the current focus
             search_deeper_nodes = set(iter(found_nodes))
             while len(search_deeper_nodes) > 0:
@@ -359,9 +398,9 @@ class Shape(object):
                 if current_node in collection_set:
                     continue
                 collection_set.add(current_node)
-                found_more_nodes = cls.value_nodes_from_path(sg,
-                    current_node, one_or_more_path, target_graph,
-                    recursion=recursion + 1)
+                found_more_nodes = cls.value_nodes_from_path(
+                    sg, current_node, one_or_more_path, target_graph, recursion=recursion + 1
+                )
                 search_deeper_nodes.update(found_more_nodes)
             return collection_set
 
@@ -371,13 +410,11 @@ class Shape(object):
             collection_set = set()
             # Note, the zero-or-one path always includes the current subject too!
             collection_set.add(focus)
-            found_nodes = cls.value_nodes_from_path(sg,
-                focus, zero_or_one_path, target_graph, recursion=recursion+1)
+            found_nodes = cls.value_nodes_from_path(sg, focus, zero_or_one_path, target_graph, recursion=recursion + 1)
             collection_set.update(found_nodes)
             return collection_set
 
-        raise NotImplementedError(
-            "That path method to get value nodes of property shapes is not yet implemented.")
+        raise NotImplementedError("That path method to get value nodes of property shapes is not yet implemented.")
 
     def value_nodes(self, target_graph, focus):
         """
@@ -405,17 +442,28 @@ class Shape(object):
             found_all_mandatory = True
             for mandatory_param in mandatory:
                 path = mandatory_param.path()
-                assert isinstance(path, rdflib.URIRef)
+                assert isinstance(path, URIRef)
                 found_vals = set(self.sg.objects(self.node, path))
-                #found_vals = self._value_nodes_from_path(self.node, mandatory_param.path(), self.sg.graph)
+                # found_vals = self._value_nodes_from_path(self.node, mandatory_param.path(), self.sg.graph)
                 found_all_mandatory = found_all_mandatory and bool(len(found_vals) > 0)
             if found_all_mandatory:
                 applicable_custom_constraints.add(c)
         return applicable_custom_constraints
 
-
-    def validate(self, target_graph, focus=None, bail_on_error=False, _evaluation_path=None):
-        #assert isinstance(target_graph, rdflib.Graph)
+    def validate(
+        self,
+        target_graph: GraphLike,
+        focus: Optional[
+            Union[
+                Tuple[Union[URIRef, BNode]],
+                List[Union[URIRef, BNode]],
+                Set[Union[URIRef, BNode]],
+                Union[URIRef, BNode],
+            ]
+        ] = None,
+        bail_on_error: Optional[bool] = False,
+        _evaluation_path: Optional[List] = None,
+    ):
         if self.deactivated:
             return True, []
         if focus is not None:
@@ -471,8 +519,7 @@ class Shape(object):
             non_conformant = non_conformant or (not _is_conform)
             reports.extend(_r)
             run_count += 1
-        #if run_count < 1:
-            #raise RuntimeError("A SHACL Shape should have at least one parameter or attached property shape.")
+        # TODO: Can these two lines be completely removed?
+        #  if run_count < 1:
+        #      raise RuntimeError("A SHACL Shape should have at least one parameter or attached property shape.")
         return (not non_conformant), reports
-
-

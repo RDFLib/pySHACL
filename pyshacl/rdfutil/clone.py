@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 #
+from typing import Optional
+
 import rdflib
+
 from rdflib.collection import Collection
-from . import RDF_first
+
+from .consts import RDF_first
+from .pytypes import ConjunctiveLike, GraphLike
 
 
 def clone_dataset(source_ds, target_ds=None):
@@ -13,7 +18,9 @@ def clone_dataset(source_ds, target_ds=None):
         target_ds = rdflib.Dataset(default_union=default_union)
     named_graphs = [
         rdflib.Graph(source_ds.store, i, namespace_manager=source_ds.namespace_manager)
-        if not isinstance(i, rdflib.Graph) else i for i in source_ds.store.contexts(None)
+        if not isinstance(i, rdflib.Graph)
+        else i
+        for i in source_ds.store.contexts(None)
     ]
     cloned_graphs = [
         clone_graph(ng, rdflib.Graph(target_ds.store, ng.identifier, namespace_manager=target_ds.namespace_manager))
@@ -55,18 +62,23 @@ def clone_graph(source_graph, target_graph=None, identifier=None):
     return g
 
 
-def mix_datasets(base_ds, extra_ds, target_ds=None):
+def mix_datasets(base_ds: ConjunctiveLike, extra_ds: GraphLike, target_ds: Optional[ConjunctiveLike] = None):
     default_union = base_ds.default_union
     base_named_graphs = list(base_ds.contexts())
     if target_ds is None:
         target_ds = rdflib.Dataset(default_union=default_union)
+    elif not isinstance(target_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+        raise RuntimeError("Cannot mix datasets if target_ds passed in is not a Dataset itself.")
     if isinstance(extra_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
         mixin_graphs = list(extra_ds.contexts())
     else:
         mixin_graphs = [extra_ds]
     mixed_graphs = {}
     for mg in mixin_graphs:
-        mod_named_graphs = {g.identifier: mix_graphs(g, mg, target_graph=rdflib.Graph(store=target_ds.store, identifier=g.identifier)) for g in base_named_graphs}
+        mod_named_graphs = {
+            g.identifier: mix_graphs(g, mg, target_graph=rdflib.Graph(store=target_ds.store, identifier=g.identifier))
+            for g in base_named_graphs
+        }
         mixed_graphs.update(mod_named_graphs)
     default_context_id = target_ds.default_context.identifier
     for i, m in mixed_graphs.items():
@@ -77,7 +89,7 @@ def mix_datasets(base_ds, extra_ds, target_ds=None):
     return target_ds
 
 
-def mix_graphs(base_graph, extra_graph, target_graph=None):
+def mix_graphs(base_graph: GraphLike, extra_graph: GraphLike, target_graph: Optional[ConjunctiveLike] = None):
     """
     Make a clone of base_graph and add in the triples from extra_graph
     :param base_graph:
@@ -110,7 +122,7 @@ def clone_blank_node(graph, bnode, target_graph, recursion=0):
         cloned_node = rdflib.BNode()
         new_list = Collection(target_graph, cloned_node)
         for item in iter(graph.items(l_node)):
-            cloned_item = clone_node(graph, item, target_graph, recursion=recursion+1)
+            cloned_item = clone_node(graph, item, target_graph, recursion=recursion + 1)
             new_list.append(cloned_item)
         return cloned_node
 
@@ -120,13 +132,12 @@ def clone_blank_node(graph, bnode, target_graph, recursion=0):
     if RDF_first in predicates:
         return clone_list(bnode)
     for p in predicates:
-        cloned_p = clone_node(graph, p, target_graph, recursion=recursion+1)
+        cloned_p = clone_node(graph, p, target_graph, recursion=recursion + 1)
         objs = list(graph.objects(bnode, p))
         if len(objs) < 1:
             continue
         for o in objs:
-            cloned_o = clone_node(graph, o, target_graph,
-                                      recursion=recursion+1)
+            cloned_o = clone_node(graph, o, target_graph, recursion=recursion + 1)
             target_graph.add((cloned_bnode, cloned_p, cloned_o))
     return cloned_bnode
 
@@ -135,8 +146,7 @@ def clone_literal(graph, node, target_graph):
     lex_val_string = str(node)
     lang = node.language
     datatype = node.datatype
-    new_literal = rdflib.Literal(lex_val_string,
-                                 lang, datatype)
+    new_literal = rdflib.Literal(lex_val_string, lang, datatype)
     return new_literal
 
 
@@ -144,9 +154,7 @@ def clone_node(graph, node, target_graph, recursion=0):
     if isinstance(node, rdflib.Literal):
         new_node = clone_literal(graph, node, target_graph)
     elif isinstance(node, rdflib.BNode):
-        new_node = clone_blank_node(
-                   graph, node, target_graph,
-                   recursion=recursion+1)
+        new_node = clone_blank_node(graph, node, target_graph, recursion=recursion + 1)
     elif isinstance(node, rdflib.URIRef):
         new_node = rdflib.URIRef(str(node))
     else:

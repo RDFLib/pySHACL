@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
-from rdflib import Literal, RDF
+from decimal import Decimal
+
+from rdflib import RDF, Literal
+
 from pyshacl.consts import SH_condition, SH_deactivated, SH_order
 from pyshacl.errors import RuleLoadError
-from decimal import Decimal
+
 
 RDF_first = RDF.term('first')
 
+
 class SHACLRuleCondition(object):
     __slots__ = ("rule", "cond_shape")
+
     def __init__(self, rule, cond_shape):
         self.rule = rule
         self.cond_shape = cond_shape
@@ -47,21 +52,21 @@ class SHACLRule(object):
             return Decimal("0.0")
         if len(order_nodes) > 1:
             raise RuleLoadError(
-                "A SHACL Rule can have only one sh:order property.",
-                "https://www.w3.org/TR/shacl-af/#rules-order")
+                "A SHACL Rule can have only one sh:order property.", "https://www.w3.org/TR/shacl-af/#rules-order"
+            )
         order_node = next(iter(order_nodes))
         if not isinstance(order_node, Literal):
             raise RuleLoadError(
-                "A SHACL Rule must be a numeric literal.",
-                "https://www.w3.org/TR/shacl-af/#rules-order")
+                "A SHACL Rule must be a numeric literal.", "https://www.w3.org/TR/shacl-af/#rules-order"
+            )
         return Decimal(order_node.value)
 
     def get_conditions(self):
         cond_nodes = list(self.shape.sg.graph.objects(self.node, SH_condition))
         conditions = []
         for c in cond_nodes:
+            # test_me = list(self.shape.sg.graph.predicate_objects(c))
             # check if this is a rdf:list
-            test_me = list(self.shape.sg.graph.predicate_objects(c))
             first_nodes = list(self.shape.sg.graph.objects(c, RDF_first))
             if len(first_nodes) > 0:
                 for c_item in self.shape.sg.graph.items(c):
@@ -70,7 +75,8 @@ class SHACLRule(object):
                     except (AttributeError, KeyError):
                         raise RuleLoadError(
                             "A SHACL Rule Condition must be an existing well-formed SHACL Shape.",
-                            "https://www.w3.org/TR/shacl-af/#condition")
+                            "https://www.w3.org/TR/shacl-af/#condition",
+                        )
                     condition = SHACLRuleCondition(self, cond_shape)
                     conditions.append(condition)
             else:
@@ -79,7 +85,8 @@ class SHACLRule(object):
                 except (AttributeError, KeyError):
                     raise RuleLoadError(
                         "A SHACL Rule Condition must be an existing well-formed SHACL Shape.",
-                        "https://www.w3.org/TR/shacl-af/#condition")
+                        "https://www.w3.org/TR/shacl-af/#condition",
+                    )
                 condition = SHACLRuleCondition(self, cond_shape)
                 conditions.append(condition)
         return conditions
@@ -98,4 +105,3 @@ class SHACLRule(object):
 
     def apply(self, data_graph):
         raise NotImplementedError()
-

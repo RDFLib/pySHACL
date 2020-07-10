@@ -2,11 +2,14 @@
 """
 https://www.w3.org/TR/shacl/#core-components-logical
 """
+from typing import Dict, List
 from warnings import warn
-import rdflib
+
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
-from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError, ShapeRecursionWarning
+from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError, ShapeRecursionWarning, ValidationFailure
+from pyshacl.pytypes import GraphLike
+
 
 SH_not = SH.term('not')
 SH_and = SH.term('and')
@@ -34,11 +37,13 @@ class NotConstraintComponent(ConstraintComponent):
         if len(not_list) < 1:
             raise ConstraintLoadError(
                 "NotConstraintComponent must have at least one sh:not predicate.",
-                "https://www.w3.org/TR/shacl/#NotConstraintComponent")
+                "https://www.w3.org/TR/shacl/#NotConstraintComponent",
+            )
         if len(not_list) > 1:
             raise ConstraintLoadError(
                 "NotConstraintComponent must have at most one sh:not predicate.",
-                "https://www.w3.org/TR/shacl/#NotConstraintComponent")
+                "https://www.w3.org/TR/shacl/#NotConstraintComponent",
+            )
         self.not_list = not_list
 
     @classmethod
@@ -53,7 +58,7 @@ class NotConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_NotConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
 
         :type focus_value_nodes: dict
@@ -72,16 +77,17 @@ class NotConstraintComponent(ConstraintComponent):
             not_shape = shape.get_other_shape(not_c)
             if not not_shape:
                 raise ReportableRuntimeError(
-                    "Shape pointed to by sh:not does not exist or is not "
-                    "a well-formed SHACL Shape.")
+                    "Shape pointed to by sh:not does not exist or is not " "a well-formed SHACL Shape."
+                )
             if not_shape in potentially_recursive:
                 warn(ShapeRecursionWarning(_evaluation_path))
                 return _non_conformant, _reports
             for f, value_nodes in focus_value_nodes.items():
                 for v in value_nodes:
                     try:
-                        _is_conform, _r = not_shape.validate(target_graph, focus=v,
-                                                             _evaluation_path=_evaluation_path[:])
+                        _is_conform, _r = not_shape.validate(
+                            target_graph, focus=v, _evaluation_path=_evaluation_path[:]
+                        )
                     except ValidationFailure as e:
                         raise e
                     if _is_conform:
@@ -113,7 +119,8 @@ class AndConstraintComponent(ConstraintComponent):
         if len(and_list) < 1:
             raise ConstraintLoadError(
                 "AndConstraintComponent must have at least one sh:and predicate.",
-                "https://www.w3.org/TR/shacl/#AndConstraintComponent")
+                "https://www.w3.org/TR/shacl/#AndConstraintComponent",
+            )
         self.and_list = and_list
 
     @classmethod
@@ -128,7 +135,7 @@ class AndConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_AndConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
 
         :type focus_value_nodes: dict
@@ -146,24 +153,23 @@ class AndConstraintComponent(ConstraintComponent):
             sg = shape.sg.graph
             and_list = set(sg.items(and_c))
             if len(and_list) < 1:
-                raise ReportableRuntimeError(
-                    "The list associated with sh:and is not a "
-                    "valid RDF list.")
+                raise ReportableRuntimeError("The list associated with sh:and is not a " "valid RDF list.")
             and_shapes = set()
             for a in and_list:
                 and_shape = shape.get_other_shape(a)
                 if not and_shape:
                     raise ReportableRuntimeError(
-                        "Shape pointed to by sh:and does not exist or "
-                        "is not a well-formed SHACL Shape.")
+                        "Shape pointed to by sh:and does not exist or " "is not a well-formed SHACL Shape."
+                    )
                 and_shapes.add(and_shape)
             for f, value_nodes in focus_value_nodes.items():
                 for v in value_nodes:
                     passed_all = True
                     for and_shape in and_shapes:
                         try:
-                            _is_conform, _r = and_shape.validate(target_graph, focus=v,
-                                                                 _evaluation_path=_evaluation_path[:])
+                            _is_conform, _r = and_shape.validate(
+                                target_graph, focus=v, _evaluation_path=_evaluation_path[:]
+                            )
                         except ValidationFailure as e:
                             raise e
                         passed_all = passed_all and _is_conform
@@ -178,8 +184,6 @@ class AndConstraintComponent(ConstraintComponent):
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
-
-
 
 
 class OrConstraintComponent(ConstraintComponent):
@@ -197,7 +201,8 @@ class OrConstraintComponent(ConstraintComponent):
         if len(or_list) < 1:
             raise ConstraintLoadError(
                 "OrConstraintComponent must have at least one sh:or predicate.",
-                "https://www.w3.org/TR/shacl/#OrConstraintComponent")
+                "https://www.w3.org/TR/shacl/#OrConstraintComponent",
+            )
         self.or_list = or_list
 
     @classmethod
@@ -212,11 +217,11 @@ class OrConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_OrConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
@@ -229,24 +234,23 @@ class OrConstraintComponent(ConstraintComponent):
             sg = shape.sg.graph
             or_list = set(sg.items(or_c))
             if len(or_list) < 1:
-                raise ReportableRuntimeError(
-                    "The list associated with sh:or "
-                    "is not a valid RDF list.")
+                raise ReportableRuntimeError("The list associated with sh:or " "is not a valid RDF list.")
             or_shapes = set()
             for o in or_list:
                 or_shape = shape.get_other_shape(o)
                 if not or_shape:
                     raise ReportableRuntimeError(
-                        "Shape pointed to by sh:or does not exist or "
-                        "is not a well-formed SHACL Shape.")
+                        "Shape pointed to by sh:or does not exist or " "is not a well-formed SHACL Shape."
+                    )
                 or_shapes.add(or_shape)
             for f, value_nodes in focus_value_nodes.items():
                 for v in value_nodes:
                     passed_any = False
                     for or_shape in or_shapes:
                         try:
-                            _is_conform, _r = or_shape.validate(target_graph, focus=v,
-                                                                _evaluation_path=_evaluation_path[:])
+                            _is_conform, _r = or_shape.validate(
+                                target_graph, focus=v, _evaluation_path=_evaluation_path[:]
+                            )
                         except ValidationFailure as e:
                             raise e
                         passed_any = passed_any or _is_conform
@@ -278,7 +282,8 @@ class XoneConstraintComponent(ConstraintComponent):
         if len(xone_nodes) < 1:
             raise ConstraintLoadError(
                 "XoneConstraintComponent must have at least one sh:xone predicate.",
-                "https://www.w3.org/TR/shacl/#XoneConstraintComponent")
+                "https://www.w3.org/TR/shacl/#XoneConstraintComponent",
+            )
         self.xone_nodes = xone_nodes
 
     @classmethod
@@ -293,7 +298,7 @@ class XoneConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_XoneConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
 
         :type focus_value_nodes: dict
@@ -311,24 +316,23 @@ class XoneConstraintComponent(ConstraintComponent):
             sg = shape.sg.graph
             xone_list = list(sg.items(xone_c))
             if len(xone_list) < 1:
-                raise ReportableRuntimeError(
-                    "The list associated with sh:xone is not "
-                    "a valid RDF list.")
+                raise ReportableRuntimeError("The list associated with sh:xone is not " "a valid RDF list.")
             xone_shapes = list()
             for x in xone_list:
                 xone_shape = shape.get_other_shape(x)
                 if not xone_shape:
                     raise ReportableRuntimeError(
-                        "Shape pointed to by sh:xone does not exist "
-                        "or is not a well-formed SHACL Shape.")
+                        "Shape pointed to by sh:xone does not exist " "or is not a well-formed SHACL Shape."
+                    )
                 xone_shapes.append(xone_shape)
             for f, value_nodes in focus_value_nodes.items():
                 for v in value_nodes:
                     passed_count = 0
                     for xone_shape in xone_shapes:
                         try:
-                            _is_conform, _r = xone_shape.validate(target_graph, focus=v,
-                                                                  _evaluation_path=_evaluation_path[:])
+                            _is_conform, _r = xone_shape.validate(
+                                target_graph, focus=v, _evaluation_path=_evaluation_path[:]
+                            )
                         except ValidationFailure as e:
                             raise e
                         if _is_conform:
@@ -344,5 +348,3 @@ class XoneConstraintComponent(ConstraintComponent):
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
-
-

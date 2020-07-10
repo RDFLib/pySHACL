@@ -1,45 +1,75 @@
-
+# -*- coding: utf-8 -*-
+#
 """
 https://www.w3.org/TR/shacl/#core-components-value-type
 """
 import abc
-from rdflib import BNode
-from pyshacl.consts import *
+
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional
+
+import rdflib
+
+from rdflib import BNode, Literal, URIRef
+
+from pyshacl.consts import (
+    RDF_type,
+    SH_focusNode,
+    SH_resultMessage,
+    SH_resultPath,
+    SH_resultSeverity,
+    SH_sourceConstraint,
+    SH_sourceConstraintComponent,
+    SH_sourceShape,
+    SH_ValidationResult,
+    SH_value,
+    SH_Violation,
+)
+from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
 
 
+if TYPE_CHECKING:
+    from pyshacl.shape import Shape
+
+
 class ConstraintComponent(object, metaclass=abc.ABCMeta):
+    __slots__ = ('shape',)
+
     """
     Abstract Constraint Component Class
     All Constraint Components must inherit from this class.
     """
 
-    def __init__(self, shape):
+    def __init__(self, shape: 'Shape'):
         """
 
         :param shape:
-        :type shape: pyshacl.shape.Shape
+        :type shape: Shape
         """
-        self.shape = shape
+        self.shape = shape  # type: Shape
 
     @classmethod
     @abc.abstractmethod
     def constraint_parameters(cls):
-        return NotImplementedError()  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     @classmethod
     @abc.abstractmethod
     def constraint_name(cls):
-        return NotImplementedError()  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     @classmethod
     @abc.abstractmethod
     def shacl_constraint_class(cls):
-        return NotImplementedError()  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     @abc.abstractmethod
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
-        return NotImplementedError()  # pragma: no cover
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+        raise NotImplementedError()  # pragma: no cover
+
+    def make_generic_message(self):
+        print(self)
+        return None  # pragma: no cover
 
     def __str__(self):
         c_name = str(self.__class__.__name__)
@@ -51,12 +81,12 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         eval_length = len(_evaluation_path)
         maybe_recursive = []
         if eval_length >= 6:
-            _shape, _self = _evaluation_path[eval_length - 2:]
+            _shape, _self = _evaluation_path[eval_length - 2 :]
             if _shape is not shape or _self is not self:
                 raise RuntimeError("Bad evaluation path construction")
-            seen_before = [i for i, x in enumerate(_evaluation_path[:eval_length-2]) if x is shape] #_evaluation_path.index(shape, 0, eval_length - 2)
+            seen_before = [i for i, x in enumerate(_evaluation_path[: eval_length - 2]) if x is shape]
             for s in seen_before:
-                for i, p in enumerate(_evaluation_path[s + 1:-2]):
+                for i, p in enumerate(_evaluation_path[s + 1 : -2]):
                     if isinstance(p, ConstraintComponent):
                         if p.shape is shape and p.__class__ == self.__class__:
                             try:
@@ -67,20 +97,32 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
                         break
         return maybe_recursive
 
+    def make_v_result_description(
+        self,
+        datagraph: GraphLike,
+        focus_node: 'rdflib.term.Identifier',
+        severity: URIRef,
+        value_node: Optional['rdflib.term.Identifier'],
+        result_path=None,
+        constraint_component=None,
+        source_constraint=None,
+        extra_messages: Optional[Iterable] = None,
+    ):
 
-    def make_v_result_description(self, datagraph, focus_node, severity, value_node=None, result_path=None,
-                                  constraint_component=None, source_constraint=None, extra_messages=None):
         """
         :param datagraph:
-        :type datagraph: rdflib.Graph | rdflib.Dataset
+        :type datagraph: rdflib.Graph | rdflib.ConjunctiveGraph | rdflib.Dataset
         :param focus_node:
         :type focus_node: rdflib.term.Identifier
+        :param severity:
+        :type value_node: rdflib.URIRef
         :param value_node:
         :type value_node: rdflib.term.Identifier | None
         :param result_path:
         :param constraint_component:
         :param source_constraint:
         :param extra_messages:
+        :type extra_messages: collections.abc.Iterable | None
         :return:
         """
         sg = self.shape.sg.graph
@@ -93,10 +135,14 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         source_shape_text = stringify_node(sg, self.shape.node)
         severity_node_text = stringify_node(sg, severity)
         focus_node_text = stringify_node(datagraph or sg, focus_node)
-        desc = "{} in {} ({}):\n\tSeverity: {}\n\tSource Shape: {}\n\tFocus Node: {}\n"\
-            .format(severity_desc, constraint_name,
-                    str(constraint_component),
-                    severity_node_text, source_shape_text, focus_node_text)
+        desc = "{} in {} ({}):\n\tSeverity: {}\n\tSource Shape: {}\n\tFocus Node: {}\n".format(
+            severity_desc,
+            constraint_name,
+            str(constraint_component),
+            severity_node_text,
+            source_shape_text,
+            focus_node_text,
+        )
         if value_node is not None:
             val_node_string = stringify_node(datagraph or sg, value_node)
             desc += "\tValue Node: {}\n".format(val_node_string)
@@ -112,23 +158,30 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
             for m in iter(extra_messages):
                 if m in self.shape.message:
                     continue
-                if isinstance(m, rdflib.Literal):
+                if isinstance(m, Literal):
                     desc += "\tMessage: {}\n".format(str(m.value))
                 else:  # pragma: no cover
                     desc += "\tMessage: {}\n".format(str(m))
         for m in self.shape.message:
-            if isinstance(m, rdflib.Literal):
+            if isinstance(m, Literal):
                 desc += "\tMessage: {}\n".format(str(m.value))
             else:  # pragma: no cover
                 desc += "\tMessage: {}\n".format(str(m))
         return desc
 
-    def make_v_result(self, datagraph, focus_node, value_node=None, result_path=None,
-                      constraint_component=None, source_constraint=None,
-                      extra_messages=None):
+    def make_v_result(
+        self,
+        datagraph: GraphLike,
+        focus_node: 'rdflib.term.Identifier',
+        value_node: Optional['rdflib.term.Identifier'] = None,
+        result_path=None,
+        constraint_component=None,
+        source_constraint=None,
+        extra_messages: Optional[Iterable] = None,
+    ):
         """
         :param datagraph:
-        :type datagraph: rdflib.Graph | rdflib.Dataset
+        :type datagraph: rdflib.Graph | rdflib.ConjunctiveGraph | rdflib.Dataset
         :param focus_node:
         :type focus_node: rdflib.term.Identifier
         :param value_node:
@@ -137,6 +190,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         :param constraint_component:
         :param source_constraint:
         :param extra_messages:
+        :type extra_messages: collections.abc.Iterable | None
         :return:
         """
         constraint_component = constraint_component or self.shacl_constraint_class()
@@ -149,9 +203,15 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         r_triples.append((r_node, SH_resultSeverity, severity))
         r_triples.append((r_node, SH_focusNode, ('D', focus_node)))
         desc = self.make_v_result_description(
-            datagraph, focus_node, severity, value_node,
-            result_path=result_path, constraint_component=constraint_component,
-            source_constraint=source_constraint, extra_messages=extra_messages)
+            datagraph,
+            focus_node,
+            severity,
+            value_node,
+            result_path=result_path,
+            constraint_component=constraint_component,
+            source_constraint=source_constraint,
+            extra_messages=extra_messages,
+        )
         if value_node:
             r_triples.append((r_node, SH_value, ('D', value_node)))
         if result_path is None and self.shape.is_property_shape:
