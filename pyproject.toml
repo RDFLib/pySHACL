@@ -102,8 +102,10 @@ skipsdist = true
 envlist = py36, py37, py38, lint, type-checking
 
 [testenv]
-deps = poetry>=1.0.9
-whitelist_externals = poetry
+deps =
+    poetry>=1.0.9
+    py36: coveralls
+passenv = TRAVIS TRAVIS_JOB_ID TRAVIS_BRANCH
 skip_install = true
 commands_pre = poetry install -vvv
 commands =
@@ -112,6 +114,7 @@ commands =
     - poetry run coverage combine --append
     poetry run coverage report -m
     poetry run coverage html -i
+    py36: - coveralls
 
 [testenv:lint]
 commands =
@@ -124,5 +127,6 @@ commands =
 commands =
     - poetry show
     poetry run mypy --ignore-missing-imports pyshacl
+
 """
 
