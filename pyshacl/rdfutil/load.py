@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 #
-from io import IOBase, BytesIO, UnsupportedOperation
-from pathlib import Path
 import platform
-from typing import Union, Optional, List, BinaryIO
+
+from io import BytesIO, IOBase, UnsupportedOperation
+from pathlib import Path
+from typing import BinaryIO, List, Optional, Union
 from urllib import request
 from urllib.error import HTTPError
 
 import rdflib
 
 from pyshacl.pytypes import GraphLike
+
 
 try:
     import rdflib_jsonld  # noqa: F401

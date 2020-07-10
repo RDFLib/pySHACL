@@ -3,12 +3,15 @@
 https://www.w3.org/TR/shacl/#core-components-count
 """
 from typing import Dict, List
-from rdflib.term import Literal
+
 from rdflib.namespace import XSD
+from rdflib.term import Literal
+
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError
 from pyshacl.pytypes import GraphLike
+
 
 XSD_integer = XSD.term('integer')
 SH_minCount = SH.term('minCount')

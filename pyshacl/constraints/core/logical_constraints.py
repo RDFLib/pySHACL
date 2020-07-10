@@ -4,10 +4,12 @@ https://www.w3.org/TR/shacl/#core-components-logical
 """
 from typing import Dict, List
 from warnings import warn
+
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
-from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError, ShapeRecursionWarning
+from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError, ShapeRecursionWarning, ValidationFailure
 from pyshacl.pytypes import GraphLike
+
 
 SH_not = SH.term('not')
 SH_and = SH.term('and')

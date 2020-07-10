@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 from typing import TYPE_CHECKING
+
 import rdflib
+
 from rdflib import Literal
 from rdflib.namespace import XSD
-from pyshacl.rdfutil import clone_graph
-from pyshacl.errors import RuleLoadError, ReportableRuntimeError
+
 from pyshacl.consts import SH_construct
-from pyshacl.sparql_query_helper import SPARQLQueryHelper
+from pyshacl.errors import ReportableRuntimeError, RuleLoadError
+from pyshacl.rdfutil import clone_graph
 from pyshacl.rules.shacl_rule import SHACLRule
+from pyshacl.sparql_query_helper import SPARQLQueryHelper
+
 
 if TYPE_CHECKING:
     from pyshacl.shape import Shape

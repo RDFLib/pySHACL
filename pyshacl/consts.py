@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+from rdflib import OWL, RDF, RDFS
 from rdflib.namespace import Namespace
-from rdflib import RDFS, RDF, OWL
+
 
 SH = Namespace('http://www.w3.org/ns/shacl#')
 

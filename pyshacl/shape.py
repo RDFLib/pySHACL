@@ -1,17 +1,44 @@
 # -*- coding: utf-8 -*-
 #
-from decimal import Decimal
 import logging
-from typing import TYPE_CHECKING, Union, Optional, Set, Tuple, List
-from rdflib import Literal, BNode, URIRef, RDF
-from pyshacl.consts import SH_deactivated, SH_severity, SH_message, SH_Violation, SH_name, SH_description, SH_property, \
-    SH_order, SH_targetNode, SH_targetClass, RDF_type, RDFS_subClassOf, RDFS_Class, SH_targetObjectsOf, \
-    SH_targetSubjectsOf, SH_target, SH_parameter, SH_SPARQLTargetType, SH_SPARQLTarget, SH_select, SH_inversePath, \
-    SH_alternativePath, SH_zeroOrMorePath, SH_oneOrMorePath, SH_zeroOrOnePath
-from pyshacl.errors import ShapeLoadError, ReportableRuntimeError, ConstraintLoadWarning, ConstraintLoadError
+
+from decimal import Decimal
+from typing import TYPE_CHECKING, List, Optional, Set, Tuple, Union
+
+from rdflib import RDF, BNode, Literal, URIRef
+
 from pyshacl.constraints import ALL_CONSTRAINT_PARAMETERS, CONSTRAINT_PARAMETERS_MAP
-from pyshacl.sparql_query_helper import SPARQLQueryHelper
+from pyshacl.consts import (
+    RDF_type,
+    RDFS_Class,
+    RDFS_subClassOf,
+    SH_alternativePath,
+    SH_deactivated,
+    SH_description,
+    SH_inversePath,
+    SH_message,
+    SH_name,
+    SH_oneOrMorePath,
+    SH_order,
+    SH_parameter,
+    SH_property,
+    SH_select,
+    SH_severity,
+    SH_SPARQLTarget,
+    SH_SPARQLTargetType,
+    SH_target,
+    SH_targetClass,
+    SH_targetNode,
+    SH_targetObjectsOf,
+    SH_targetSubjectsOf,
+    SH_Violation,
+    SH_zeroOrMorePath,
+    SH_zeroOrOnePath,
+)
+from pyshacl.errors import ConstraintLoadError, ConstraintLoadWarning, ReportableRuntimeError, ShapeLoadError
 from pyshacl.pytypes import GraphLike
+from pyshacl.sparql_query_helper import SPARQLQueryHelper
+
 
 if TYPE_CHECKING:
     from pyshacl.shapes_graph import ShapesGraph

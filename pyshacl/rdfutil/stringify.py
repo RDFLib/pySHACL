@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 #
 from functools import wraps
-from typing import Optional, List
+from typing import List, Optional
 
 import rdflib
+
 from rdflib.namespace import NamespaceManager
 
 from .consts import SH, RDF_first

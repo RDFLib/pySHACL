@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import argparse
 import os
 import sys
-import argparse
-from pyshacl import validate, __version__
+
+from pyshacl import __version__, validate
 from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 
 

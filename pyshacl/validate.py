@@ -1,29 +1,48 @@
 # -*- coding: utf-8 -*-
 #
+import logging
+
 from functools import wraps
 from sys import stderr
-import logging
-from typing import Union, Optional, List, Tuple
+from typing import List, Optional, Tuple, Union
 
-import rdflib
 import owlrl
+import rdflib
 
-from pyshacl.rdfutil.clone import mix_datasets
 from pyshacl.pytypes import GraphLike
+from pyshacl.rdfutil.clone import mix_datasets
+
 
 if owlrl.json_ld_available:
     import rdflib_jsonld  # noqa: F401
-from rdflib import Literal, URIRef, BNode
+
+from rdflib import BNode, Literal, URIRef
+
+from pyshacl.consts import (
+    RDF_object,
+    RDF_predicate,
+    RDF_subject,
+    RDF_type,
+    RDFS_Resource,
+    SH_conforms,
+    SH_result,
+    SH_resultMessage,
+    SH_ValidationReport,
+)
 from pyshacl.errors import ReportableRuntimeError, ValidationFailure
-from pyshacl.inference import CustomRDFSSemantics, CustomRDFSOWLRLSemantics
-from pyshacl.shapes_graph import ShapesGraph
-from pyshacl.consts import RDF_type, SH_conforms, \
-    SH_result, SH_ValidationReport, RDFS_Resource, SH_resultMessage, \
-    RDF_object, RDF_subject, RDF_predicate
-from pyshacl.rules import gather_rules, apply_rules, gather_functions
-from pyshacl.rdfutil import load_from_source, clone_graph, \
-    clone_node, compare_blank_node, mix_graphs, order_graph_literal
+from pyshacl.inference import CustomRDFSOWLRLSemantics, CustomRDFSSemantics
 from pyshacl.monkey import apply_patches, rdflib_bool_patch, rdflib_bool_unpatch
+from pyshacl.rdfutil import (
+    clone_graph,
+    clone_node,
+    compare_blank_node,
+    load_from_source,
+    mix_graphs,
+    order_graph_literal,
+)
+from pyshacl.rules import apply_rules, gather_functions, gather_rules
+from pyshacl.shapes_graph import ShapesGraph
+
 
 log_handler = logging.StreamHandler(stderr)
 log = logging.getLogger(__name__)
@@ -209,9 +228,10 @@ def with_metashacl_shacl_graph_cache(f):
         graph_cache = getattr(wrapped, "graph_cache", None)
         assert graph_cache is not None
         if graph_cache is EMPTY:
-            from os import path
             import pickle
             import sys
+
+            from os import path
             if getattr(sys, 'frozen', False) :
                 # runs in a pyinstaller bundle
                 here_dir = sys._MEIPASS

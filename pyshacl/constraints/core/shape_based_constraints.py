@@ -4,12 +4,20 @@ https://www.w3.org/TR/shacl/#core-components-shape
 """
 from typing import Dict, List
 from warnings import warn
+
 import rdflib
+
 from pyshacl.constraints.constraint_component import ConstraintComponent
-from pyshacl.consts import SH, SH_property, SH_node
-from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError, ConstraintLoadWarning, \
-    ShapeRecursionWarning
+from pyshacl.consts import SH, SH_node, SH_property
+from pyshacl.errors import (
+    ConstraintLoadError,
+    ConstraintLoadWarning,
+    ReportableRuntimeError,
+    ShapeRecursionWarning,
+    ValidationFailure,
+)
 from pyshacl.pytypes import GraphLike
+
 
 SH_PropertyConstraintComponent = SH.term('PropertyConstraintComponent')
 SH_NodeConstraintComponent = SH.term('NodeConstraintComponent')

@@ -5,11 +5,14 @@ https://www.w3.org/TR/shacl/#core-components-others
 from typing import Dict, List
 
 import rdflib
+
 from rdflib.namespace import RDFS
+
 from pyshacl.constraints.constraint_component import ConstraintComponent
-from pyshacl.consts import RDF_type, SH, SH_property
+from pyshacl.consts import SH, RDF_type, SH_property
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
 from pyshacl.pytypes import GraphLike
+
 
 SH_InConstraintComponent = SH.term('InConstraintComponent')
 SH_ClosedConstraintComponent = SH.term('ClosedConstraintComponent')

@@ -2,17 +2,29 @@
 """
 https://www.w3.org/TR/shacl/#core-components-value-type
 """
+from datetime import date, datetime, time
 from typing import Dict, List
+
 import rdflib
-from datetime import date, time, datetime
-from rdflib.term import Literal
+
 from rdflib.namespace import RDF, XSD
+from rdflib.term import Literal
+
 from pyshacl.constraints.constraint_component import ConstraintComponent
-from pyshacl.consts import SH, RDFS_subClassOf, RDF_type,\
-    SH_IRI, SH_BlankNode, SH_Literal, SH_IRIOrLiteral, SH_BlankNodeOrIRI,\
-    SH_BlankNodeORLiteral
+from pyshacl.consts import (
+    SH,
+    SH_IRI,
+    RDF_type,
+    RDFS_subClassOf,
+    SH_BlankNode,
+    SH_BlankNodeOrIRI,
+    SH_BlankNodeORLiteral,
+    SH_IRIOrLiteral,
+    SH_Literal,
+)
 from pyshacl.errors import ConstraintLoadError
 from pyshacl.pytypes import GraphLike
+
 
 RDF_langString = RDF.term('langString')
 XSD_string = XSD.term('string')

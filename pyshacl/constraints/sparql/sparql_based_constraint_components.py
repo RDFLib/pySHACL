@@ -3,14 +3,17 @@
 https://www.w3.org/TR/shacl/#sparql-constraint-components
 """
 import re
-from typing import Dict, Tuple, Union, List
+
+from typing import Dict, List, Tuple, Union
 
 import rdflib
+
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.constraints.sparql.sparql_based_constraints import SPARQLQueryHelper
 from pyshacl.consts import SH, RDF_type, SH_message, SH_select
-from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError
+from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
 from pyshacl.pytypes import GraphLike
+
 
 SH_nodeValidator = SH.term('nodeValidator')
 SH_propertyValidator = SH.term('propertyValidator')

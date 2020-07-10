@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
-from typing import TYPE_CHECKING, Dict, List, Tuple, Any
-from pyshacl.consts import RDF_type, SH_TripleRule, SH_SPARQLRule, SH_SPARQLFunction, SH_rule
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple
+
+from pyshacl.consts import RDF_type, SH_rule, SH_SPARQLFunction, SH_SPARQLRule, SH_TripleRule
 from pyshacl.errors import RuleLoadError
 from pyshacl.pytypes import GraphLike
-from pyshacl.rules.triple import TripleRule
 from pyshacl.rules.sparql import SPARQLRule
+from pyshacl.rules.triple import TripleRule
+
 
 if TYPE_CHECKING:
-    from pyshacl.shapes_graph import ShapesGraph
     from pyshacl.shape import Shape
+    from pyshacl.shapes_graph import ShapesGraph
+
     from .shacl_rule import SHACLRule
 
 ALL_SPARQL_RULES = [

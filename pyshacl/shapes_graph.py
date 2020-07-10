@@ -1,15 +1,34 @@
 # -*- coding: utf-8 -*-
-import rdflib
 import logging
 
-from pyshacl.constraints.core.logical_constraints import SH_not, SH_and, SH_or, SH_xone
+import rdflib
+
+from pyshacl.constraints.core.logical_constraints import SH_and, SH_not, SH_or, SH_xone
 from pyshacl.constraints.core.shape_based_constraints import SH_qualifiedValueShape
-from pyshacl.constraints.sparql.sparql_based_constraint_components import SH_ConstraintComponent, SH_parameter, \
-    SH_optional, SPARQLConstraintComponent
-from pyshacl.consts import RDF_type, SH_path, SH_NodeShape, SH_PropertyShape, SH_targetClass, SH_targetNode, \
-    SH_targetObjectsOf, SH_targetSubjectsOf, SH_property, SH_node, RDFS_subClassOf, RDFS_Class, OWL_Class, \
-    OWL_DatatypeProperty, RDF_Property
-from pyshacl.errors import ShapeLoadError, ConstraintLoadError
+from pyshacl.constraints.sparql.sparql_based_constraint_components import (
+    SH_ConstraintComponent,
+    SH_optional,
+    SH_parameter,
+    SPARQLConstraintComponent,
+)
+from pyshacl.consts import (
+    OWL_Class,
+    OWL_DatatypeProperty,
+    RDF_Property,
+    RDF_type,
+    RDFS_Class,
+    RDFS_subClassOf,
+    SH_node,
+    SH_NodeShape,
+    SH_path,
+    SH_property,
+    SH_PropertyShape,
+    SH_targetClass,
+    SH_targetNode,
+    SH_targetObjectsOf,
+    SH_targetSubjectsOf,
+)
+from pyshacl.errors import ConstraintLoadError, ShapeLoadError
 from pyshacl.shape import Shape
 
 

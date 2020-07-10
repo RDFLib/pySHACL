@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
-from rdflib import Literal, RDF
+from decimal import Decimal
+
+from rdflib import RDF, Literal
+
 from pyshacl.consts import SH_condition, SH_deactivated, SH_order
 from pyshacl.errors import RuleLoadError
-from decimal import Decimal
+
 
 RDF_first = RDF.term('first')
 

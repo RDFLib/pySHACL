@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from distutils.version import LooseVersion
+
 import rdflib
+
 
 RDFLIB_VERSION = LooseVersion(rdflib.__version__)
 RDFLIB_421 = LooseVersion("4.2.1")
@@ -9,14 +11,14 @@ RDFLIB_500 = LooseVersion("5.0.0")
 
 
 def rdflib_bool_patch():
-    from rdflib.term import _toPythonMapping, _XSD_PFX, URIRef
+    from rdflib.term import _XSD_PFX, URIRef, _toPythonMapping
     rdflib.NORMALIZE_LITERALS = False
     # we want to consider only 'true' to be a valid XSD:boolean truth (ie, ignore '1')
     _toPythonMapping[URIRef(_XSD_PFX + 'boolean')] = lambda i: i.lower() == 'true'
 
 
 def rdflib_bool_unpatch():
-    from rdflib.term import _toPythonMapping, _XSD_PFX, URIRef
+    from rdflib.term import _XSD_PFX, URIRef, _toPythonMapping
     rdflib.NORMALIZE_LITERALS = True
     if RDFLIB_500 > RDFLIB_VERSION:
         # versions before rdflib 5.0.0

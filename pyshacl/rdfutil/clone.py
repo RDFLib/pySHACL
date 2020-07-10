@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 #
 import rdflib
+
 from rdflib.collection import Collection
+
 from .consts import RDF_first
 
 

@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 import itertools
+
 from typing import TYPE_CHECKING
+
 import rdflib
-from pyshacl.consts import SH_subject, SH_predicate, SH_object, SH_this, SH_path
+
+from pyshacl.consts import SH_object, SH_path, SH_predicate, SH_subject, SH_this
 from pyshacl.rules.shacl_rule import SHACLRule
+
 
 if TYPE_CHECKING:
     from pyshacl.shape import Shape

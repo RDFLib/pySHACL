@@ -1,17 +1,51 @@
 # -*- coding: utf-8 -*-
-from typing import List, Type, Dict, Any
+from typing import Any, Dict, List, Type
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
-from pyshacl.constraints.core.value_constraints import ClassConstraintComponent, DatatypeConstraintComponent, NodeKindConstraintComponent
-from pyshacl.constraints.core.cardinality_constraints import MinCountConstraintComponent, MaxCountConstraintComponent
-from pyshacl.constraints.core.value_range_constraints import MinExclusiveConstraintComponent, MinInclusiveConstraintComponent, MaxExclusiveConstraintComponent, MaxInclusiveConstraintComponent
-from pyshacl.constraints.core.string_based_constraints import MinLengthConstraintComponent, MaxLengthConstraintComponent, PatternConstraintComponent, LanguageInConstraintComponent, UniqueLangConstraintComponent
-from pyshacl.constraints.core.property_pair_constraints import EqualsConstraintComponent, DisjointConstraintComponent, LessThanConstraintComponent, LessThanOrEqualsConstraintComponent
-from pyshacl.constraints.core.logical_constraints import NotConstraintComponent, AndConstraintComponent, OrConstraintComponent, XoneConstraintComponent
-from pyshacl.constraints.core.shape_based_constraints import NodeConstraintComponent, PropertyConstraintComponent, QualifiedValueShapeConstraintComponent
-from pyshacl.constraints.core.other_constraints import ClosedConstraintComponent, InConstraintComponent, HasValueConstraintComponent
-from pyshacl.constraints.sparql.sparql_based_constraints import SPARQLBasedConstraint
+from pyshacl.constraints.core.cardinality_constraints import MaxCountConstraintComponent, MinCountConstraintComponent
+from pyshacl.constraints.core.logical_constraints import (
+    AndConstraintComponent,
+    NotConstraintComponent,
+    OrConstraintComponent,
+    XoneConstraintComponent,
+)
+from pyshacl.constraints.core.other_constraints import (
+    ClosedConstraintComponent,
+    HasValueConstraintComponent,
+    InConstraintComponent,
+)
+from pyshacl.constraints.core.property_pair_constraints import (
+    DisjointConstraintComponent,
+    EqualsConstraintComponent,
+    LessThanConstraintComponent,
+    LessThanOrEqualsConstraintComponent,
+)
+from pyshacl.constraints.core.shape_based_constraints import (
+    NodeConstraintComponent,
+    PropertyConstraintComponent,
+    QualifiedValueShapeConstraintComponent,
+)
+from pyshacl.constraints.core.string_based_constraints import (
+    LanguageInConstraintComponent,
+    MaxLengthConstraintComponent,
+    MinLengthConstraintComponent,
+    PatternConstraintComponent,
+    UniqueLangConstraintComponent,
+)
+from pyshacl.constraints.core.value_constraints import (
+    ClassConstraintComponent,
+    DatatypeConstraintComponent,
+    NodeKindConstraintComponent,
+)
+from pyshacl.constraints.core.value_range_constraints import (
+    MaxExclusiveConstraintComponent,
+    MaxInclusiveConstraintComponent,
+    MinExclusiveConstraintComponent,
+    MinInclusiveConstraintComponent,
+)
 from pyshacl.constraints.sparql.sparql_based_constraint_components import SPARQLConstraintComponent  # noqa: F401
+from pyshacl.constraints.sparql.sparql_based_constraints import SPARQLBasedConstraint
+
 
 ALL_CONSTRAINT_COMPONENTS: List[Type[ConstraintComponent]] = [
     ClassConstraintComponent,

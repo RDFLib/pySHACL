@@ -3,12 +3,15 @@
 https://www.w3.org/TR/shacl/#sparql-constraints
 """
 from typing import Dict, List
+
 import rdflib
+
 from pyshacl.constraints.constraint_component import ConstraintComponent
-from pyshacl.consts import SH, SH_select, SH_message, SH_deactivated
+from pyshacl.consts import SH, SH_deactivated, SH_message, SH_select
 from pyshacl.errors import ConstraintLoadError, ValidationFailure
 from pyshacl.pytypes import GraphLike
 from pyshacl.sparql_query_helper import SPARQLQueryHelper
+
 
 SH_sparql = SH.term('sparql')
 SH_SPARQLConstraintComponent = SH.term('SPARQLConstraintComponent')

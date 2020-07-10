@@ -4,15 +4,29 @@
 https://www.w3.org/TR/shacl/#core-components-value-type
 """
 import abc
-from typing import Optional, Iterable, Dict, List, TYPE_CHECKING
+
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional
 
 import rdflib
-from rdflib import BNode, URIRef, Literal
 
-from pyshacl.consts import SH_Violation, RDF_type, SH_ValidationResult, SH_sourceConstraintComponent, SH_sourceShape, \
-    SH_resultSeverity, SH_focusNode, SH_value, SH_resultPath, SH_sourceConstraint, SH_resultMessage
+from rdflib import BNode, Literal, URIRef
+
+from pyshacl.consts import (
+    RDF_type,
+    SH_focusNode,
+    SH_resultMessage,
+    SH_resultPath,
+    SH_resultSeverity,
+    SH_sourceConstraint,
+    SH_sourceConstraintComponent,
+    SH_sourceShape,
+    SH_ValidationResult,
+    SH_value,
+    SH_Violation,
+)
 from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
+
 
 if TYPE_CHECKING:
     from pyshacl.shape import Shape

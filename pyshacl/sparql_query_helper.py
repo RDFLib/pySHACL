@@ -3,12 +3,26 @@
 https://www.w3.org/TR/shacl/#sparql-constraints
 """
 import re
+
 import rdflib
+
 from rdflib import RDF, XSD
 
-from pyshacl.consts import SH, SH_inversePath, SH_alternativePath,\
-    SH_zeroOrMorePath, SH_oneOrMorePath, SH_zeroOrOnePath, SH_prefixes, SH_prefix, SH_namespace, RDF_type, OWL_Ontology
-from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError
+from pyshacl.consts import (
+    SH,
+    OWL_Ontology,
+    RDF_type,
+    SH_alternativePath,
+    SH_inversePath,
+    SH_namespace,
+    SH_oneOrMorePath,
+    SH_prefix,
+    SH_prefixes,
+    SH_zeroOrMorePath,
+    SH_zeroOrOnePath,
+)
+from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
+
 
 SH_declare = SH.term('declare')
 

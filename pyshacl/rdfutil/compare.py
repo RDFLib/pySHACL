@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 #
 import datetime
+
 from typing import List
 
 import rdflib
 
 from .consts import RDF_first, RDFS_Resource
-from . import stringify_node
+from .stringify import stringify_node
 
 
 # RDFLib 5.0+ has TOTAL_ORDER_CASTERS to force order on normally unorderable types,

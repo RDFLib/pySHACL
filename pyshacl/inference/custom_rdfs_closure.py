@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from owlrl.RDFSClosure import RDFS_Semantics as OrigRDFSSemantics
+from owlrl.OWL import DataRange, OWLClass, Thing, equivalentClass
 from owlrl.OWLRL import OWLRL_Semantics
-from owlrl.RDFS import Resource, Class, Datatype
-from owlrl.OWL import OWLClass, Thing, equivalentClass, DataRange
+from owlrl.RDFS import Class, Datatype, Resource
+from owlrl.RDFSClosure import RDFS_Semantics as OrigRDFSSemantics
 
 
 class CustomRDFSSemantics(OrigRDFSSemantics):
@@ -48,8 +48,7 @@ class CustomRDFSOWLRLSemantics(CustomRDFSSemantics, OWLRL_Semantics):
         @param subsumption_list: list of subsumptions associated to a subsumption key (ie, all datatypes that are
         superclasses of the new datatype)
         """
-        from owlrl.DatatypeHandling import AltXSDToPYTHON, \
-            use_Alt_lexical_conversions
+        from owlrl.DatatypeHandling import AltXSDToPYTHON, use_Alt_lexical_conversions
 
         if datatype_list:
             datatype_list.append(uri)

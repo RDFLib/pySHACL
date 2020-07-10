@@ -2,13 +2,17 @@
 """
 https://www.w3.org/TR/shacl/#core-components-string
 """
-from typing import Dict, List
-import rdflib
 import re
+
+from typing import Dict, List
+
+import rdflib
+
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
 from pyshacl.pytypes import GraphLike
+
 
 SH_PatternConstraintComponent = SH.term('PatternConstraintComponent')
 SH_MinLengthConstraintComponent = SH.term('MinLengthConstraintComponent')
