@@ -50,10 +50,10 @@ def compare_blank_node(graph1: rdflib.Graph, bnode1, graph2: rdflib.Graph, bnode
 
     predicates1 = set(graph1.predicates(bnode1))
     predicates2 = set(graph2.predicates(bnode2))
-    in_ps1_but_not_in_ps2 = list()  # type: List
-    in_ps2_but_not_in_ps1 = list()  # type: List
-    pred_objs_in_bnode1_but_not_bnode2 = list()  # type: List
-    pred_objs_in_bnode2_but_not_bnode1 = list()  # type: List
+    in_ps1_but_not_in_ps2: List = list()
+    in_ps2_but_not_in_ps1: List = list()
+    pred_objs_in_bnode1_but_not_bnode2: List = list()
+    pred_objs_in_bnode2_but_not_bnode1: List = list()
 
     def return_eq(direction):
         nonlocal in_ps2_but_not_in_ps1, in_ps1_but_not_in_ps2

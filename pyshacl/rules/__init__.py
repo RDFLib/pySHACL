@@ -39,7 +39,7 @@ def gather_rules(shacl_graph: 'ShapesGraph') -> Dict['Shape', List['SHACLRule']]
     :param shacl_graph:
     :type shacl_graph: ShapesGraph
     :return:
-    :rtype: Dict['Shape', List['SHACLRule']]
+    :rtype: Dict[Shape, List[SHACLRule]]
     """
     triple_rule_nodes = set(shacl_graph.subjects(RDF_type, SH_TripleRule))
     sparql_rule_nodes = set(shacl_graph.subjects(RDF_type, SH_SPARQLRule))
@@ -52,7 +52,7 @@ def gather_rules(shacl_graph: 'ShapesGraph') -> Dict['Shape', List['SHACLRule']]
     ret_rules = defaultdict(list)
     for sub, obj in used_rules:
         try:
-            shape = shacl_graph.lookup_shape_from_node(sub)  # type: Shape
+            shape: Shape = shacl_graph.lookup_shape_from_node(sub)
         except (AttributeError, KeyError):
             raise RuleLoadError(
                 "The shape that rule is attached to is not a valid SHACL Shape.",

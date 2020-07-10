@@ -45,7 +45,7 @@ def stringify_blank_node(graph: rdflib.Graph, bnode: rdflib.BNode, ns_manager: O
 
     def stringify_list(node):
         nonlocal graph, ns_manager, recursion
-        item_texts = []  # type: List[str]
+        item_texts: List[str] = []
         for item in iter(graph.items(node)):
             item_text = stringify_node(graph, item, ns_manager=ns_manager, recursion=recursion + 1)
             item_texts.append(item_text)

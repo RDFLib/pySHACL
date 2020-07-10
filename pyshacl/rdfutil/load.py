@@ -146,7 +146,7 @@ def load_from_source(source: Union[GraphLike, BinaryIO, Union[str, bytes]],
     elif isinstance(source, bytes):
         if source.startswith(b'file:') or source.startswith(b'http:') or source.startswith(b'https:'):
             raise ValueError("file:// and http:// strings should be given as str, not bytes.")
-        first_char_b = source[0:1]  # type: bytes
+        first_char_b: bytes = source[0:1]
         if first_char_b == b'#' or first_char_b == b'@' \
             or first_char_b == b'<' or first_char_b == b'\n' \
                 or first_char_b == b'{' or first_char_b == b'[':
