@@ -1,3 +1,5 @@
+![](pySHACL-250.png)
+
 # pySHACL
 A Python validator for SHACL.
 

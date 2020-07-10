@@ -1,13 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 import sys
 import argparse
-
-from pyshacl import validate
+from pyshacl import validate, __version__
 from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 
-parser = argparse.ArgumentParser(description='Run the pySHACL validator from the command line.')
+
+class ShowVersion(argparse.Action):
+    def __init__(self, option_strings, dest=argparse.SUPPRESS, default=argparse.SUPPRESS, help=None):
+        super(ShowVersion, self).__init__(option_strings=option_strings, dest=dest, default=default,
+                                          nargs=0, help=help)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        sys.stderr.write("PySHACL Version: " + str(__version__) + "\n")
+        parser.exit()
+
+
+parser = argparse.ArgumentParser(description='PySHACL {} command line tool.'.format(str(__version__)))
 parser.add_argument('data', metavar='DataGraph', type=argparse.FileType('rb'),
                     help='The file containing the Target Data Graph.')
 parser.add_argument('-s', '--shacl', dest='shacl', action='store', nargs='?',
@@ -41,6 +52,7 @@ parser.add_argument('-sf', '--shacl-file-format', dest='shacl_file_format', acti
 parser.add_argument('-ef', '--ont-file-format', dest='ont_file_format', action='store',
                     help='Explicitly state the RDF File format of the extra ontology file. Default=\"auto\".',
                     default='auto', choices=('auto', 'turtle', 'xml', 'json-ld', 'nt', 'n3'))
+parser.add_argument('-V', '--version', action=ShowVersion, help='Show PySHACL version and exit.')
 parser.add_argument('-o', '--output', dest='output', nargs='?', type=argparse.FileType('w'),
                     help='Send output to a file (defaults to stdout).',
                     default=sys.stdout)
@@ -48,8 +60,10 @@ parser.add_argument('-o', '--output', dest='output', nargs='?', type=argparse.Fi
 
 
 def main():
+    basename = os.path.basename(sys.argv[0])
+    if basename == "__main__.py":
+        parser.prog = "python3 -m pyshacl"
     args = parser.parse_args()
-
     validator_kwargs = {'debug': args.debug}
     if args.shacl is not None:
         validator_kwargs['shacl_graph'] = args.shacl
