@@ -24,6 +24,22 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Operating System :: OS Independent"
 ]
+packages = [
+    { include = "pyshacl" },
+    { include = "examples", format = "sdist" },
+    { include = "benchmarks", format = "sdist" },
+    { include = "test", format = "sdist" }
+]
+# Note, when Poetry 1.1.0 is released, we can include some of these only in the sdist
+include = [
+	"*.md",
+	"*.txt",
+	"pyproject.toml",
+    "MANIFEST.in",
+    "pyshacl/*.pickle",
+    "pyshacl/*.spec"
+]
+
 
 [tool.poetry.dependencies]
 python = "^3.6"  # Compatible python versions must be declared here

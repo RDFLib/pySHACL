@@ -30,14 +30,19 @@ matrix:
 
 
 install:
-  - pip3 install --upgrade pip
-  - pip3 install --upgrade tox
+  - pip3 install --upgrade pip "poetry>=1.0.9" tox
 script: travis_retry tox -e $TOX_ENV
+before_deploy:
+    - poetry build
 deploy:
   provider: pypi
   user: ashleysommer
+  skip_cleanup: true #Need skip cleanup because we build the artifacts in before_deploy
   password:
     secure: lq8L1Rc6jJW6URaZcmu5YOa9z8MqQkCiIxfivZlYBjbCkZLenU4/Hc7bK/ORVg+TPJZiyrfxobStFp1cX460zgQRw+3OW8f7whtRmj0qxLq9SF9szpORLrDcvSzHV/xU8GF6xAyJ83VS5UWC2TiA4yHIQyi7YkLYh9zdC370xkXMwKLQ+G2Bmqx5Y84h1wKYtpNU6RdrZiwcBTZEvZdWaoEjw5gZsd5wW8RmWDewS2SE2P6m7FXZwShB9XRGKkeC+UAXzDkp9DpZa94PQTktwXaM2yRo5Y2t1N2BBKzTT72ikFv/xr8vov157z0pdcOiEx7Xkd7Dov1fsy00KZ7If+opMgIWHaw/UnC5jwzILTAubBuFopV+SNJnLZ1EMMPsINpJF7eecj0/OoC+bEu/5Oxk8BeFO1UOoXZ4aOlzzDU6TpXP/0ULyoRtskc2UpXETRH2rapam41tbDX0JuXlfrrOFkPrB9O4jNMrm+6e9ldorGkpzKHKzZvOjp2WykMjiPzFk7GIordK96jmctwiEWG2N0HayLGsgdyT8YrhHatCZk51HZ+Jhk05zrmfPQqa+MhskIpcPfplei/sUcMD3TCN8Qw5mhyZPTbC6m/a6E3+wqw++Wos4ZMwcp71BiChdcIb/XhjG6oy/JHYV3Bth4ZuyRN1vnVzm4VDmdb5b2c=
   on:
     tags: true
+    python: 3.6
   distributions: "sdist bdist_wheel"
+  skip_existing: true
+
