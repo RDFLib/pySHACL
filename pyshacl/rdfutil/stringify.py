@@ -6,7 +6,7 @@ from typing import Optional, List
 import rdflib
 from rdflib.namespace import NamespaceManager
 
-from . import SH, RDF_first
+from .consts import SH, RDF_first
 
 
 def with_dict_cache(f):

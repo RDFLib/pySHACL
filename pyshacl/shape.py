@@ -404,7 +404,7 @@ class Shape(object):
         return applicable_custom_constraints
 
     def validate(self, target_graph: GraphLike,
-                 focus: Optional[Union[Tuple[URIRef, BNode], List[URIRef, BNode], Set[URIRef, BNode], URIRef, BNode]] = None,
+                 focus: Optional[Union[Tuple[Union[URIRef, BNode]], List[Union[URIRef, BNode]], Set[Union[URIRef, BNode]], Union[URIRef, BNode]]] = None,
                  bail_on_error: Optional[bool] = False, _evaluation_path: Optional[List] = None):
         if self.deactivated:
             return True, []

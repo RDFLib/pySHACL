@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 #
 import datetime
+from typing import List
+
 import rdflib
 
-from . import RDF_first, RDFS_Resource, stringify_node
+from .consts import RDF_first, RDFS_Resource
+from . import stringify_node
+
 
 # RDFLib 5.0+ has TOTAL_ORDER_CASTERS to force order on normally unorderable types,
 # like datetimes and times. We specifically _dont_ want that here when comparing literals.
@@ -46,14 +50,14 @@ def compare_blank_node(graph1: rdflib.Graph, bnode1, graph2: rdflib.Graph, bnode
 
     predicates1 = set(graph1.predicates(bnode1))
     predicates2 = set(graph2.predicates(bnode2))
-    in_ps1_but_not_in_ps2 = list()
-    in_ps2_but_not_in_ps1 = list()
-    pred_objs_in_bnode1_but_not_bnode2 = list()
-    pred_objs_in_bnode2_but_not_bnode1 = list()
+    in_ps1_but_not_in_ps2 = list()  # type: List
+    in_ps2_but_not_in_ps1 = list()  # type: List
+    pred_objs_in_bnode1_but_not_bnode2 = list()  # type: List
+    pred_objs_in_bnode2_but_not_bnode1 = list()  # type: List
 
     def return_eq(direction):
-        nonlocal in_ps2_but_not_in_ps1
-        nonlocal in_ps1_but_not_in_ps2
+        nonlocal in_ps2_but_not_in_ps1, in_ps1_but_not_in_ps2
+        nonlocal pred_objs_in_bnode1_but_not_bnode2, pred_objs_in_bnode2_but_not_bnode1
         if direction == 0:
             return direction
         if recursion <= 1:

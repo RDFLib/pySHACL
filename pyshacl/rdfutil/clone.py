@@ -2,7 +2,7 @@
 #
 import rdflib
 from rdflib.collection import Collection
-from . import RDF_first
+from .consts import RDF_first
 
 
 def clone_dataset(source_ds, target_ds=None):

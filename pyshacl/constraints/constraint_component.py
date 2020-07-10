@@ -32,7 +32,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         :param shape:
         :type shape: Shape
         """
-        self.shape = shape
+        self.shape = shape  # type: Shape
 
     @classmethod
     @abc.abstractmethod
