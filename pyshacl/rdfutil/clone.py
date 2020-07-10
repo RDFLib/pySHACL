@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 #
+from typing import Optional
+
 import rdflib
 
 from rdflib.collection import Collection
 
 from .consts import RDF_first
+from .pytypes import ConjunctiveLike, GraphLike
 
 
 def clone_dataset(source_ds, target_ds=None):
@@ -59,11 +62,13 @@ def clone_graph(source_graph, target_graph=None, identifier=None):
     return g
 
 
-def mix_datasets(base_ds, extra_ds, target_ds=None):
+def mix_datasets(base_ds: ConjunctiveLike, extra_ds: GraphLike, target_ds: Optional[ConjunctiveLike] = None):
     default_union = base_ds.default_union
     base_named_graphs = list(base_ds.contexts())
     if target_ds is None:
         target_ds = rdflib.Dataset(default_union=default_union)
+    elif not isinstance(target_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+        raise RuntimeError("Cannot mix datasets if target_ds passed in is not a Dataset itself.")
     if isinstance(extra_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
         mixin_graphs = list(extra_ds.contexts())
     else:
@@ -84,7 +89,7 @@ def mix_datasets(base_ds, extra_ds, target_ds=None):
     return target_ds
 
 
-def mix_graphs(base_graph, extra_graph, target_graph=None):
+def mix_graphs(base_graph: GraphLike, extra_graph: GraphLike, target_graph: Optional[ConjunctiveLike] = None):
     """
     Make a clone of base_graph and add in the triples from extra_graph
     :param base_graph:
