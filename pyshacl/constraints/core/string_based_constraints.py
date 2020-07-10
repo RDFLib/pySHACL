@@ -96,11 +96,13 @@ class MinLengthConstraintComponent(StringBasedConstraintBase):
         if len(patterns_found) < 1:
             raise ConstraintLoadError(
                 "MinLengthConstraintComponent must have at least one sh:minLength predicate.",
-                "https://www.w3.org/TR/shacl/#MinLengthConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MinLengthConstraintComponent",
+            )
         elif len(patterns_found) > 1:
             raise ConstraintLoadError(
                 "MinLengthConstraintComponent must have at most one sh:minLength predicate.",
-                "https://www.w3.org/TR/shacl/#MinLengthConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MinLengthConstraintComponent",
+            )
         self.string_rules = patterns_found
 
     @classmethod
@@ -156,11 +158,13 @@ class MaxLengthConstraintComponent(StringBasedConstraintBase):
         if len(patterns_found) < 1:
             raise ConstraintLoadError(
                 "MaxLengthConstraintComponent must have at least one sh:maxLength predicate.",
-                "https://www.w3.org/TR/shacl/#MaxLengthConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MaxLengthConstraintComponent",
+            )
         elif len(patterns_found) > 1:
             raise ConstraintLoadError(
                 "MaxLengthConstraintComponent must have at most one sh:maxLength predicate.",
-                "https://www.w3.org/TR/shacl/#MaxLengthConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MaxLengthConstraintComponent",
+            )
         self.string_rules = patterns_found
 
     @classmethod
@@ -213,7 +217,8 @@ class PatternConstraintComponent(StringBasedConstraintBase):
         if len(patterns_found) < 1:
             raise ConstraintLoadError(
                 "PatternConstraintComponent must have at least one sh:pattern predicate.",
-                "https://www.w3.org/TR/shacl/#PatternConstraintComponent")
+                "https://www.w3.org/TR/shacl/#PatternConstraintComponent",
+            )
         self.string_rules = patterns_found
         flags_found = set(self.shape.objects(SH_flags))
         if len(flags_found) > 0:
@@ -283,11 +288,13 @@ class LanguageInConstraintComponent(StringBasedConstraintBase):
         if len(language_ins_found) < 1:
             raise ConstraintLoadError(
                 "LanguageInConstraintComponent must have at least one sh:languageIn predicate.",
-                "https://www.w3.org/TR/shacl/#LanguageInConstraintComponent")
+                "https://www.w3.org/TR/shacl/#LanguageInConstraintComponent",
+            )
         elif len(language_ins_found) > 1:
             raise ConstraintLoadError(
                 "LanguageInConstraintComponent must have at most one sh:languageIn predicate.",
-                "https://www.w3.org/TR/shacl/#LanguageInConstraintComponent")
+                "https://www.w3.org/TR/shacl/#LanguageInConstraintComponent",
+            )
         self.string_rules = language_ins_found
 
     @classmethod
@@ -312,10 +319,12 @@ class LanguageInConstraintComponent(StringBasedConstraintBase):
                 try:
                     if not isinstance(lang_in, rdflib.Literal) or not isinstance(lang_in.value, str):
                         raise ReportableRuntimeError(
-                            "All languages in sh:LanugageIn must be a Literal with type xsd:string")
+                            "All languages in sh:LanugageIn must be a Literal with type xsd:string"
+                        )
                 except (AssertionError, AttributeError):
                     raise ReportableRuntimeError(
-                        "All languages in sh:LanugageIn must be a Literal with type xsd:string")
+                        "All languages in sh:LanugageIn must be a Literal with type xsd:string"
+                    )
                 languages_need.add(str(lang_in.value).lower())
         except (KeyError, AttributeError, ValueError):
             raise ReportableRuntimeError("Value of sh:LanguageIn must be a RDF List")
@@ -360,15 +369,18 @@ class UniqueLangConstraintComponent(StringBasedConstraintBase):
         if len(is_unique_lang) < 1:
             raise ConstraintLoadError(
                 "UniqueLangConstraintComponent must have at least one sh:uniqueLang predicate.",
-                "https://www.w3.org/TR/shacl/#UniqueLangConstraintComponent")
+                "https://www.w3.org/TR/shacl/#UniqueLangConstraintComponent",
+            )
         elif len(is_unique_lang) > 1:
             raise ConstraintLoadError(
                 "UniqueLangConstraintComponent must have at most one sh:uniqueLang predicate.",
-                "https://www.w3.org/TR/shacl/#UniqueLangConstraintComponent")
+                "https://www.w3.org/TR/shacl/#UniqueLangConstraintComponent",
+            )
         if not shape.is_property_shape:
             raise ConstraintLoadError(
                 "UniqueLangConstraintComponent can only be present on a PropertyShape, not a NodeShape.",
-                "https://www.w3.org/TR/shacl/#UniqueLangConstraintComponent")
+                "https://www.w3.org/TR/shacl/#UniqueLangConstraintComponent",
+            )
         is_unique_lang = next(iter(is_unique_lang))
         try:
             assert isinstance(is_unique_lang, rdflib.Literal)
@@ -376,7 +388,8 @@ class UniqueLangConstraintComponent(StringBasedConstraintBase):
         except (AssertionError, AttributeError):
             raise ConstraintLoadError(
                 "UniqueLangConstraintComponent must have an RDF Literal of type boolean as its sh:uniqueLang.",
-                "https://www.w3.org/TR/shacl/#UniqueLangConstraintComponent")
+                "https://www.w3.org/TR/shacl/#UniqueLangConstraintComponent",
+            )
         self.string_rules = {is_unique_lang.value}
 
     @classmethod

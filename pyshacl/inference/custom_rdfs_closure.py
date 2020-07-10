@@ -21,10 +21,11 @@ class CustomRDFSOWLRLSemantics(CustomRDFSSemantics, OWLRL_Semantics):
     Copied directly from RDFSClosure.CombinedClosure
     with a few tiny modifications
     """
+
     full_binding_triples = [
         (Thing, equivalentClass, Resource),
         (Class, equivalentClass, OWLClass),
-        (DataRange, equivalentClass, Datatype)
+        (DataRange, equivalentClass, Datatype),
     ]
 
     def __init__(self, graph, axioms, daxioms, rdfs=True):
@@ -34,9 +35,9 @@ class CustomRDFSOWLRLSemantics(CustomRDFSSemantics, OWLRL_Semantics):
 
     # noinspection PyMethodMayBeStatic
     @staticmethod
-    def add_new_datatype(uri, conversion_function, datatype_list,
-                         subsumption_dict=None, subsumption_key=None,
-                         subsumption_list=None):
+    def add_new_datatype(
+        uri, conversion_function, datatype_list, subsumption_dict=None, subsumption_key=None, subsumption_list=None
+    ):
         """If an extension wants to add new datatypes, this method should be invoked at initialization time.
 
         @param uri: URI for the new datatypes, like owl_ns["Rational"]

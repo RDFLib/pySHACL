@@ -38,7 +38,8 @@ class EqualsConstraintComponent(ConstraintComponent):
         if len(property_compare_set) < 1:
             raise ConstraintLoadError(
                 "EqualsConstraintComponent must have at least one sh:equals predicate.",
-                "https://www.w3.org/TR/shacl/#EqualsConstraintComponent")
+                "https://www.w3.org/TR/shacl/#EqualsConstraintComponent",
+            )
         self.property_compare_set = property_compare_set
 
     @classmethod
@@ -104,7 +105,8 @@ class DisjointConstraintComponent(ConstraintComponent):
         if len(property_compare_set) < 1:
             raise ConstraintLoadError(
                 "DisjointConstraintComponent must have at least one sh:disjoint predicate.",
-                "https://www.w3.org/TR/shacl/#DisjointConstraintComponent")
+                "https://www.w3.org/TR/shacl/#DisjointConstraintComponent",
+            )
         self.property_compare_set = property_compare_set
 
     @classmethod
@@ -167,11 +169,13 @@ class LessThanConstraintComponent(ConstraintComponent):
         if len(property_compare_set) < 1:
             raise ConstraintLoadError(
                 "LessThanConstraintComponent must have at least one sh:lessThan predicate.",
-                "https://www.w3.org/TR/shacl/#LessThanConstraintComponent")
+                "https://www.w3.org/TR/shacl/#LessThanConstraintComponent",
+            )
         if not shape.is_property_shape:
             raise ConstraintLoadError(
                 "LessThanConstraintComponent can only be present on a PropertyShape, not a NodeShape.",
-                "https://www.w3.org/TR/shacl/#LessThanConstraintComponent")
+                "https://www.w3.org/TR/shacl/#LessThanConstraintComponent",
+            )
         self.property_compare_set = property_compare_set
 
     @classmethod
@@ -197,8 +201,7 @@ class LessThanConstraintComponent(ConstraintComponent):
 
         for lt in iter(self.property_compare_set):
             if isinstance(lt, rdflib.Literal) or isinstance(lt, rdflib.BNode):
-                raise ReportableRuntimeError(
-                    "Value of sh:lessThan MUST be a URI Identifier.")
+                raise ReportableRuntimeError("Value of sh:lessThan MUST be a URI Identifier.")
             _nc, _r = self._evaluate_less_than(lt, target_graph, focus_value_nodes)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
@@ -213,8 +216,7 @@ class LessThanConstraintComponent(ConstraintComponent):
 
             for value_node in iter(value_node_set):
                 if isinstance(value_node, rdflib.BNode):
-                    raise ReportableRuntimeError(
-                        "Cannot use sh:lessThan to compare a BlankNode.")
+                    raise ReportableRuntimeError("Cannot use sh:lessThan to compare a BlankNode.")
                 value_is_string = False
                 orig_value_node = value_node
                 if isinstance(value_node, rdflib.URIRef):
@@ -226,8 +228,7 @@ class LessThanConstraintComponent(ConstraintComponent):
 
                 for compare_value in compare_values:
                     if isinstance(compare_value, rdflib.BNode):
-                        raise ReportableRuntimeError(
-                            "Cannot use sh:lessThan to compare a BlankNode.")
+                        raise ReportableRuntimeError("Cannot use sh:lessThan to compare a BlankNode.")
                     compare_is_string = False
                     if isinstance(compare_value, rdflib.URIRef):
                         compare_value = str(compare_value)
@@ -261,11 +262,13 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
         if len(property_compare_set) < 1:
             raise ConstraintLoadError(
                 "LessThanOrEqualsConstraintComponent must have at least one sh:lessThanOrEquals predicate.",
-                "https://www.w3.org/TR/shacl/#LessThanOrEqualsConstraintComponent")
+                "https://www.w3.org/TR/shacl/#LessThanOrEqualsConstraintComponent",
+            )
         if not shape.is_property_shape:
             raise ConstraintLoadError(
                 "LessThanOrEqualsConstraintComponent can only be present on a PropertyShape, not a NodeShape.",
-                "https://www.w3.org/TR/shacl/#LessThanOrEqualsConstraintComponent")
+                "https://www.w3.org/TR/shacl/#LessThanOrEqualsConstraintComponent",
+            )
         self.property_compare_set = property_compare_set
 
     @classmethod
@@ -291,8 +294,7 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
 
         for lt in iter(self.property_compare_set):
             if isinstance(lt, rdflib.Literal) or isinstance(lt, rdflib.BNode):
-                raise ReportableRuntimeError(
-                    "Value of sh:lessThanOrEquals MUST be a URI Identifier.")
+                raise ReportableRuntimeError("Value of sh:lessThanOrEquals MUST be a URI Identifier.")
             _nc, _r = self._evaluate_ltoe(lt, target_graph, focus_value_nodes)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
@@ -307,8 +309,7 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
 
             for value_node in iter(value_node_set):
                 if isinstance(value_node, rdflib.BNode):
-                    raise ReportableRuntimeError(
-                        "Cannot use sh:lessThanOrEquals to compare a BlankNode.")
+                    raise ReportableRuntimeError("Cannot use sh:lessThanOrEquals to compare a BlankNode.")
                 value_is_string = False
                 orig_value_node = value_node
                 if isinstance(value_node, rdflib.URIRef):
@@ -320,8 +321,7 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
 
                 for compare_value in compare_values:
                     if isinstance(compare_value, rdflib.BNode):
-                        raise ReportableRuntimeError(
-                            "Cannot use sh:lessThanOrEquals to compare a BlankNode.")
+                        raise ReportableRuntimeError("Cannot use sh:lessThanOrEquals to compare a BlankNode.")
                     compare_is_string = False
                     if isinstance(compare_value, rdflib.URIRef):
                         compare_value = str(compare_value)

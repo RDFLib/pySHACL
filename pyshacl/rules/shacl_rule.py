@@ -52,13 +52,13 @@ class SHACLRule(object):
             return Decimal("0.0")
         if len(order_nodes) > 1:
             raise RuleLoadError(
-                "A SHACL Rule can have only one sh:order property.",
-                "https://www.w3.org/TR/shacl-af/#rules-order")
+                "A SHACL Rule can have only one sh:order property.", "https://www.w3.org/TR/shacl-af/#rules-order"
+            )
         order_node = next(iter(order_nodes))
         if not isinstance(order_node, Literal):
             raise RuleLoadError(
-                "A SHACL Rule must be a numeric literal.",
-                "https://www.w3.org/TR/shacl-af/#rules-order")
+                "A SHACL Rule must be a numeric literal.", "https://www.w3.org/TR/shacl-af/#rules-order"
+            )
         return Decimal(order_node.value)
 
     def get_conditions(self):
@@ -75,7 +75,8 @@ class SHACLRule(object):
                     except (AttributeError, KeyError):
                         raise RuleLoadError(
                             "A SHACL Rule Condition must be an existing well-formed SHACL Shape.",
-                            "https://www.w3.org/TR/shacl-af/#condition")
+                            "https://www.w3.org/TR/shacl-af/#condition",
+                        )
                     condition = SHACLRuleCondition(self, cond_shape)
                     conditions.append(condition)
             else:
@@ -84,7 +85,8 @@ class SHACLRule(object):
                 except (AttributeError, KeyError):
                     raise RuleLoadError(
                         "A SHACL Rule Condition must be an existing well-formed SHACL Shape.",
-                        "https://www.w3.org/TR/shacl-af/#condition")
+                        "https://www.w3.org/TR/shacl-af/#condition",
+                    )
                 condition = SHACLRuleCondition(self, cond_shape)
                 conditions.append(condition)
         return conditions

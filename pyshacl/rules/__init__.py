@@ -15,10 +15,7 @@ if TYPE_CHECKING:
 
     from .shacl_rule import SHACLRule
 
-ALL_SPARQL_RULES = [
-    TripleRule,
-    SPARQLRule
-]
+ALL_SPARQL_RULES = [TripleRule, SPARQLRule]
 
 
 def gather_functions(shacl_graph: 'ShapesGraph') -> List['SHACLRule']:
@@ -50,7 +47,8 @@ def gather_rules(shacl_graph: 'ShapesGraph') -> Dict['Shape', List['SHACLRule']]
     if len(overlaps) > 0:
         raise RuleLoadError(
             "A SHACL Rule cannot be both a TripleRule and a SPARQLRule.",
-            "https://www.w3.org/TR/shacl-af/#rules-syntax")
+            "https://www.w3.org/TR/shacl-af/#rules-syntax",
+        )
     used_rules = shacl_graph.subject_objects(SH_rule)
     ret_rules = defaultdict(list)
     for sub, obj in used_rules:
@@ -59,7 +57,8 @@ def gather_rules(shacl_graph: 'ShapesGraph') -> Dict['Shape', List['SHACLRule']]
         except (AttributeError, KeyError):
             raise RuleLoadError(
                 "The shape that rule is attached to is not a valid SHACL Shape.",
-                "https://www.w3.org/TR/shacl-af/#rules-syntax")
+                "https://www.w3.org/TR/shacl-af/#rules-syntax",
+            )
         if obj in triple_rule_nodes:
             rule: SHACLRule = TripleRule(shape, obj)
         elif obj in sparql_rule_nodes:
@@ -67,7 +66,8 @@ def gather_rules(shacl_graph: 'ShapesGraph') -> Dict['Shape', List['SHACLRule']]
         else:
             raise RuleLoadError(
                 "when using sh:rule, the Rule must be defined as either a TripleRule or SPARQLRule.",
-                "https://www.w3.org/TR/shacl-af/#rules-syntax")
+                "https://www.w3.org/TR/shacl-af/#rules-syntax",
+            )
         ret_rules[shape].append(rule)
     return ret_rules
 

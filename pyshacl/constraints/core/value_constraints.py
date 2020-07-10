@@ -58,7 +58,8 @@ class ClassConstraintComponent(ConstraintComponent):
         if len(class_rules) < 1:
             raise ConstraintLoadError(
                 "ClassConstraintComponent must have at least one sh:class predicate.",
-                "https://www.w3.org/TR/shacl/#ClassConstraintComponent")
+                "https://www.w3.org/TR/shacl/#ClassConstraintComponent",
+            )
         self.class_rules = class_rules
 
     @classmethod
@@ -82,8 +83,7 @@ class ClassConstraintComponent(ConstraintComponent):
         reports = []
         non_conformant = False
         for c in self.class_rules:
-            _n, _r = self._evaluate_class_rules(
-                target_graph, focus_value_nodes, c)
+            _n, _r = self._evaluate_class_rules(target_graph, focus_value_nodes, c)
             non_conformant = non_conformant or _n
             reports.extend(_r)
         return (not non_conformant), reports
@@ -95,9 +95,10 @@ class ClassConstraintComponent(ConstraintComponent):
             for v in value_nodes:
                 found = False
                 if isinstance(v, Literal):
-                    self.shape.logger.debug("Class Constraint won't work with Literals. "
-                                            "Attempting to match Literal node {} to class of {} will fail."
-                                            .format(v, class_rule))
+                    self.shape.logger.debug(
+                        "Class Constraint won't work with Literals. "
+                        "Attempting to match Literal node {} to class of {} will fail.".format(v, class_rule)
+                    )
                 else:
                     objs = target_graph.objects(v, RDF_type)
                     for ctype in iter(objs):
@@ -133,11 +134,13 @@ class DatatypeConstraintComponent(ConstraintComponent):
         if len(datatype_rules) < 1:
             raise ConstraintLoadError(
                 "DatatypeConstraintComponent must have at least one sh:datatype predicate.",
-                "https://www.w3.org/TR/shacl/#DatatypeConstraintComponent")
+                "https://www.w3.org/TR/shacl/#DatatypeConstraintComponent",
+            )
         elif len(datatype_rules) > 1:
             raise ConstraintLoadError(
                 "DatatypeConstraintComponent must have at most one sh:datatype predicate.",
-                "https://www.w3.org/TR/shacl/#DatatypeConstraintComponent")
+                "https://www.w3.org/TR/shacl/#DatatypeConstraintComponent",
+            )
         self.datatype_rule = datatype_rules[0]
 
     @classmethod
@@ -169,15 +172,15 @@ class DatatypeConstraintComponent(ConstraintComponent):
                     lang = v.language
                     if datatype == dtype_rule:
                         matches = self._assert_actual_datatype(v, dtype_rule)
-                    elif datatype is None and lang is None and \
-                            dtype_rule == XSD_string:
+                    elif datatype is None and lang is None and dtype_rule == XSD_string:
                         matches = self._assert_actual_datatype(v, dtype_rule)
                     elif dtype_rule == RDF_langString and lang:
                         matches = self._assert_actual_datatype(v, dtype_rule)
                 else:
-                    self.shape.logger.debug("Datatype Constraint only works on Literal datatypes. "
-                                            "Attempting to match non-Literal node {} to datatype of {} will fail."
-                                            .format(v, dtype_rule))
+                    self.shape.logger.debug(
+                        "Datatype Constraint only works on Literal datatypes. "
+                        "Attempting to match non-Literal node {} to datatype of {} will fail.".format(v, dtype_rule)
+                    )
                 if not matches:
                     non_conformant = True
                     rept = self.make_v_result(target_graph, f, value_node=v)
@@ -220,11 +223,13 @@ class NodeKindConstraintComponent(ConstraintComponent):
         if len(nodekind_rules) < 1:
             raise ConstraintLoadError(
                 "NodeKindConstraintComponent must have at least one sh:nodeKind predicate.",
-                "https://www.w3.org/TR/shacl/#NodeKindConstraintComponent")
+                "https://www.w3.org/TR/shacl/#NodeKindConstraintComponent",
+            )
         elif len(nodekind_rules) > 1:
             raise ConstraintLoadError(
                 "NodeKindConstraintComponent must have at most one sh:nodeKind predicate.",
-                "https://www.w3.org/TR/shacl/#NodeKindConstraintComponent")
+                "https://www.w3.org/TR/shacl/#NodeKindConstraintComponent",
+            )
         self.nodekind_rule = nodekind_rules[0]
 
     @classmethod

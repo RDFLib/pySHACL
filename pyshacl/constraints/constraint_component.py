@@ -81,12 +81,12 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         eval_length = len(_evaluation_path)
         maybe_recursive = []
         if eval_length >= 6:
-            _shape, _self = _evaluation_path[eval_length - 2:]
+            _shape, _self = _evaluation_path[eval_length - 2 :]
             if _shape is not shape or _self is not self:
                 raise RuntimeError("Bad evaluation path construction")
-            seen_before = [i for i, x in enumerate(_evaluation_path[:eval_length - 2]) if x is shape]
+            seen_before = [i for i, x in enumerate(_evaluation_path[: eval_length - 2]) if x is shape]
             for s in seen_before:
-                for i, p in enumerate(_evaluation_path[s + 1:-2]):
+                for i, p in enumerate(_evaluation_path[s + 1 : -2]):
                     if isinstance(p, ConstraintComponent):
                         if p.shape is shape and p.__class__ == self.__class__:
                             try:
@@ -97,10 +97,17 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
                         break
         return maybe_recursive
 
-    def make_v_result_description(self, datagraph: GraphLike, focus_node: 'rdflib.term.Identifier',
-                                  severity: URIRef, value_node: Optional['rdflib.term.Identifier'],
-                                  result_path=None, constraint_component=None, source_constraint=None,
-                                  extra_messages: Optional[Iterable] = None):
+    def make_v_result_description(
+        self,
+        datagraph: GraphLike,
+        focus_node: 'rdflib.term.Identifier',
+        severity: URIRef,
+        value_node: Optional['rdflib.term.Identifier'],
+        result_path=None,
+        constraint_component=None,
+        source_constraint=None,
+        extra_messages: Optional[Iterable] = None,
+    ):
 
         """
         :param datagraph:
@@ -128,10 +135,14 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         source_shape_text = stringify_node(sg, self.shape.node)
         severity_node_text = stringify_node(sg, severity)
         focus_node_text = stringify_node(datagraph or sg, focus_node)
-        desc = "{} in {} ({}):\n\tSeverity: {}\n\tSource Shape: {}\n\tFocus Node: {}\n"\
-            .format(severity_desc, constraint_name,
-                    str(constraint_component),
-                    severity_node_text, source_shape_text, focus_node_text)
+        desc = "{} in {} ({}):\n\tSeverity: {}\n\tSource Shape: {}\n\tFocus Node: {}\n".format(
+            severity_desc,
+            constraint_name,
+            str(constraint_component),
+            severity_node_text,
+            source_shape_text,
+            focus_node_text,
+        )
         if value_node is not None:
             val_node_string = stringify_node(datagraph or sg, value_node)
             desc += "\tValue Node: {}\n".format(val_node_string)
@@ -158,10 +169,16 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
                 desc += "\tMessage: {}\n".format(str(m))
         return desc
 
-    def make_v_result(self, datagraph: GraphLike, focus_node: 'rdflib.term.Identifier',
-                      value_node: Optional['rdflib.term.Identifier'] = None, result_path=None,
-                      constraint_component=None, source_constraint=None,
-                      extra_messages: Optional[Iterable] = None):
+    def make_v_result(
+        self,
+        datagraph: GraphLike,
+        focus_node: 'rdflib.term.Identifier',
+        value_node: Optional['rdflib.term.Identifier'] = None,
+        result_path=None,
+        constraint_component=None,
+        source_constraint=None,
+        extra_messages: Optional[Iterable] = None,
+    ):
         """
         :param datagraph:
         :type datagraph: rdflib.Graph | rdflib.ConjunctiveGraph | rdflib.Dataset
@@ -186,9 +203,15 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         r_triples.append((r_node, SH_resultSeverity, severity))
         r_triples.append((r_node, SH_focusNode, ('D', focus_node)))
         desc = self.make_v_result_description(
-            datagraph, focus_node, severity, value_node,
-            result_path=result_path, constraint_component=constraint_component,
-            source_constraint=source_constraint, extra_messages=extra_messages)
+            datagraph,
+            focus_node,
+            severity,
+            value_node,
+            result_path=result_path,
+            constraint_component=constraint_component,
+            source_constraint=source_constraint,
+            extra_messages=extra_messages,
+        )
         if value_node:
             r_triples.append((r_node, SH_value, ('D', value_node)))
         if result_path is None and self.shape.is_property_shape:

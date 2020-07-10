@@ -46,10 +46,28 @@ if TYPE_CHECKING:
 
 class Shape(object):
 
-    __slots__ = ('logger', 'sg', 'node', '_p', '_path', '_advanced', '_deactivated', '_severity', '_messages',
-                 '_names', '_descriptions')
+    __slots__ = (
+        'logger',
+        'sg',
+        'node',
+        '_p',
+        '_path',
+        '_advanced',
+        '_deactivated',
+        '_severity',
+        '_messages',
+        '_names',
+        '_descriptions',
+    )
 
-    def __init__(self, sg: 'ShapesGraph', node: Union[URIRef, BNode], p=False, path: Optional[Union[URIRef, BNode]] = None, logger=None):
+    def __init__(
+        self,
+        sg: 'ShapesGraph',
+        node: Union[URIRef, BNode],
+        p=False,
+        path: Optional[Union[URIRef, BNode]] = None,
+        logger=None,
+    ):
         """
         Shape
         :type sg: ShapesGraph
@@ -68,8 +86,10 @@ class Shape(object):
         deactivated_vals = set(self.objects(SH_deactivated))
         if len(deactivated_vals) > 1:
             # TODO:coverage: we don't have any tests for invalid shapes
-            raise ShapeLoadError("A SHACL Shape cannot have more than one sh:deactivated predicate.",
-                                 "https://www.w3.org/TR/shacl/#deactivated")
+            raise ShapeLoadError(
+                "A SHACL Shape cannot have more than one sh:deactivated predicate.",
+                "https://www.w3.org/TR/shacl/#deactivated",
+            )
         elif len(deactivated_vals) < 1:
             self._deactivated = False  # type: bool
         else:
@@ -78,7 +98,8 @@ class Shape(object):
                 # TODO:coverage: we don't have any tests for invalid shapes
                 raise ShapeLoadError(
                     "The value of sh:deactivated predicate on a SHACL Shape must be a Literal.",
-                    "https://www.w3.org/TR/shacl/#deactivated")
+                    "https://www.w3.org/TR/shacl/#deactivated",
+                )
             self._deactivated = bool(d.value)
         severity = set(self.objects(SH_severity))
         if len(severity):
@@ -166,13 +187,13 @@ class Shape(object):
             return Decimal("0.0")
         if len(order_nodes) > 1:
             raise ShapeLoadError(
-                "A SHACL Shape can have only one sh:order property.",
-                "https://www.w3.org/TR/shacl-af/#rules-order")
+                "A SHACL Shape can have only one sh:order property.", "https://www.w3.org/TR/shacl-af/#rules-order"
+            )
         order_node = next(iter(order_nodes))
         if not isinstance(order_node, Literal):
             raise ShapeLoadError(
-                "A SHACL Shape must be a numeric literal.",
-                "https://www.w3.org/TR/shacl-af/#rules-order")
+                "A SHACL Shape must be a numeric literal.", "https://www.w3.org/TR/shacl-af/#rules-order"
+            )
         return Decimal(order_node.value)
 
     def target_nodes(self):
@@ -204,8 +225,7 @@ class Shape(object):
         raise RuntimeError("property shape has no _path!")  # pragma: no cover
 
     def parameters(self):
-        return (p for p, v in self.sg.predicate_objects(self.node)
-                if p in ALL_CONSTRAINT_PARAMETERS)
+        return (p for p, v in self.sg.predicate_objects(self.node) if p in ALL_CONSTRAINT_PARAMETERS)
 
     def target(self):
         target_nodes = self.target_nodes()
@@ -213,8 +233,7 @@ class Shape(object):
         implicit_targets = self.implicit_class_targets()
         target_objects_of = self.target_objects_of()
         target_subjects_of = self.target_subjects_of()
-        return (target_nodes, target_classes, implicit_targets,
-                target_objects_of, target_subjects_of)
+        return (target_nodes, target_classes, implicit_targets, target_objects_of, target_subjects_of)
 
     def advanced_target(self):
         custom_targets = set(self.sg.graph.objects(self.node, SH_target))
@@ -246,8 +265,7 @@ class Shape(object):
         specified as explicit input to the SHACL processor for validating a specific RDF term against a shape
         :return:
         """
-        (target_nodes, target_classes, implicit_classes,
-         target_objects_of, target_subjects_of) = self.target()
+        (target_nodes, target_classes, implicit_classes, target_objects_of, target_subjects_of) = self.target()
         if self._advanced:
             advanced_targets = self.advanced_target()
         else:
@@ -362,8 +380,9 @@ class Shape(object):
                 if current_node in collection_set:
                     continue
                 collection_set.add(current_node)
-                found_more_nodes = cls.value_nodes_from_path(sg, current_node, zm_path, target_graph,
-                                                             recursion=recursion + 1)
+                found_more_nodes = cls.value_nodes_from_path(
+                    sg, current_node, zm_path, target_graph, recursion=recursion + 1
+                )
                 search_deeper_nodes.update(found_more_nodes)
             return collection_set
 
@@ -379,8 +398,9 @@ class Shape(object):
                 if current_node in collection_set:
                     continue
                 collection_set.add(current_node)
-                found_more_nodes = cls.value_nodes_from_path(sg, current_node, one_or_more_path, target_graph,
-                                                             recursion=recursion + 1)
+                found_more_nodes = cls.value_nodes_from_path(
+                    sg, current_node, one_or_more_path, target_graph, recursion=recursion + 1
+                )
                 search_deeper_nodes.update(found_more_nodes)
             return collection_set
 
@@ -430,9 +450,20 @@ class Shape(object):
                 applicable_custom_constraints.add(c)
         return applicable_custom_constraints
 
-    def validate(self, target_graph: GraphLike,
-                 focus: Optional[Union[Tuple[Union[URIRef, BNode]], List[Union[URIRef, BNode]], Set[Union[URIRef, BNode]], Union[URIRef, BNode]]] = None,
-                 bail_on_error: Optional[bool] = False, _evaluation_path: Optional[List] = None):
+    def validate(
+        self,
+        target_graph: GraphLike,
+        focus: Optional[
+            Union[
+                Tuple[Union[URIRef, BNode]],
+                List[Union[URIRef, BNode]],
+                Set[Union[URIRef, BNode]],
+                Union[URIRef, BNode],
+            ]
+        ] = None,
+        bail_on_error: Optional[bool] = False,
+        _evaluation_path: Optional[List] = None,
+    ):
         if self.deactivated:
             return True, []
         if focus is not None:

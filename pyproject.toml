@@ -54,6 +54,7 @@ to = {format = "setuppy", path = "setup.py"}
 
 [tool.black]
 line-length = "119"
+skip-string-normalization = true
 target-version = ['py36']
 include = '\.pyi?$'
 exclude = '''
@@ -117,7 +118,7 @@ commands =
     - poetry show
     poetry run flake8 pyshacl
     poetry run isort --check-only pyshacl
-    poetry run black --check --verbose pyshacl
+    poetry run black --check --verbose --config ./pyproject.toml pyshacl
 
 [testenv:type-checking]
 commands =

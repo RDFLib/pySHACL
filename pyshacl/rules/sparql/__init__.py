@@ -36,8 +36,12 @@ class SPARQLRule(SHACLRule):
             raise RuleLoadError("No sh:construct on SPARQLRule", "https://www.w3.org/TR/shacl-af/#SPARQLRule")
         self._constructs = []
         for c in construct_nodes:
-            if not isinstance(c, Literal) or not (c.datatype == XSD_string or c.language is not None or isinstance(c.value, str)):
-                raise RuleLoadError("SPARQLRule sh:construct must be an xsd:string", "https://www.w3.org/TR/shacl-af/#SPARQLRule")
+            if not isinstance(c, Literal) or not (
+                c.datatype == XSD_string or c.language is not None or isinstance(c.value, str)
+            ):
+                raise RuleLoadError(
+                    "SPARQLRule sh:construct must be an xsd:string", "https://www.w3.org/TR/shacl-af/#SPARQLRule"
+                )
             self._constructs.append(str(c.value))
         query_helper = SPARQLQueryHelper(self.shape, self.node, None, deactivated=self._deactivated)
         query_helper.collect_prefixes()

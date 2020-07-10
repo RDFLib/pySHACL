@@ -82,7 +82,8 @@ ALL_CONSTRAINT_COMPONENTS: List[Type[ConstraintComponent]] = [
     # Because it gets matched to shapes manually
 ]
 
-CONSTRAINT_PARAMETERS_MAP: Dict[Any, Type[ConstraintComponent]] = {p: c for c in ALL_CONSTRAINT_COMPONENTS
-                                                                   for p in c.constraint_parameters()}
+CONSTRAINT_PARAMETERS_MAP: Dict[Any, Type[ConstraintComponent]] = {
+    p: c for c in ALL_CONSTRAINT_COMPONENTS for p in c.constraint_parameters()
+}
 
 ALL_CONSTRAINT_PARAMETERS: List[Any] = list(CONSTRAINT_PARAMETERS_MAP.keys())

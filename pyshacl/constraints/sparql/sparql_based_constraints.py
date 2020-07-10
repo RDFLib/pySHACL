@@ -31,35 +31,36 @@ class SPARQLBasedConstraint(ConstraintComponent):
         if len(sparql_node_list) < 1:
             raise ConstraintLoadError(
                 "SPARQLConstraintComponent must have at least one sh:sparql predicate.",
-                "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent")
+                "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent",
+            )
         sparql_constraints = set()
         for s in iter(sparql_node_list):
             select_node_list = set(sg.objects(s, SH_select))
             if len(select_node_list) < 1:
                 raise ConstraintLoadError(
-                    "SPARQLConstraintComponent value for sh:select must have "
-                    "at least one sh:select predicate.",
-                    "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent")
+                    "SPARQLConstraintComponent value for sh:select must have " "at least one sh:select predicate.",
+                    "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent",
+                )
             elif len(select_node_list) > 1:
                 raise ConstraintLoadError(
-                    "SPARQLConstraintComponent value for sh:select must have "
-                    "at most one sh:select predicate.",
-                    "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent")
+                    "SPARQLConstraintComponent value for sh:select must have " "at most one sh:select predicate.",
+                    "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent",
+                )
             select_node = next(iter(select_node_list))
             if not (isinstance(select_node, rdflib.Literal) and isinstance(select_node.value, str)):
                 raise ConstraintLoadError(
-                    "SPARQLConstraintComponent value for sh:select must be "
-                    "a Literal with type xsd:string.",
-                    "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent")
+                    "SPARQLConstraintComponent value for sh:select must be " "a Literal with type xsd:string.",
+                    "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent",
+                )
             query_helper = SPARQLQueryHelper(self.shape, s, select_node.value)
             message_node_list = set(sg.objects(s, SH_message))
             if len(message_node_list) > 0:
                 message = next(iter(message_node_list))
                 if not (isinstance(message, rdflib.Literal) and isinstance(message.value, str)):
                     raise ConstraintLoadError(
-                        "SPARQLConstraintComponent value for sh:message must be "
-                        "a Literal with type xsd:string.",
-                        "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent")
+                        "SPARQLConstraintComponent value for sh:message must be " "a Literal with type xsd:string.",
+                        "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent",
+                    )
                 query_helper.messages = message_node_list
             deactivated_node_list = set(sg.objects(s, SH_deactivated))
             if len(deactivated_node_list) > 0:
@@ -68,7 +69,8 @@ class SPARQLBasedConstraint(ConstraintComponent):
                     raise ConstraintLoadError(
                         "SPARQLConstraintComponent value for sh:deactivated must be "
                         "a Literal with type xsd:boolean.",
-                        "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent")
+                        "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent",
+                    )
                 query_helper.deactivated = deactivated.value
             query_helper.collect_prefixes()
             sparql_constraints.add(query_helper)
@@ -98,21 +100,16 @@ class SPARQLBasedConstraint(ConstraintComponent):
         for query_helper in self.sparql_constraints:
             if query_helper.deactivated:
                 continue
-            _nc, _r = self._evaluate_sparql_constraint(
-                query_helper, target_graph, focus_value_nodes)
+            _nc, _r = self._evaluate_sparql_constraint(query_helper, target_graph, focus_value_nodes)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
 
-    def _evaluate_sparql_constraint(self, sparql_constraint,
-                                    target_graph, f_v_dict):
+    def _evaluate_sparql_constraint(self, sparql_constraint, target_graph, f_v_dict):
         reports = []
         non_conformant = False
         extra_messages = sparql_constraint.messages or None
-        rept_kwargs = {
-            'source_constraint': sparql_constraint.node,
-            'extra_messages': extra_messages
-        }
+        rept_kwargs = {'source_constraint': sparql_constraint.node, 'extra_messages': extra_messages}
         for f, value_nodes in f_v_dict.items():
             # we don't use value_nodes in the sparql constraint
             # All queries are done on the corresponding focus node.
@@ -120,8 +117,7 @@ class SPARQLBasedConstraint(ConstraintComponent):
             sparql_text = sparql_constraint.apply_prefixes(sparql_text)
 
             try:
-                violating_vals = self._validate_sparql_query(
-                    sparql_text, init_binds, target_graph)
+                violating_vals = self._validate_sparql_query(sparql_text, init_binds, target_graph)
 
             except ValidationFailure as e:
                 raise e
@@ -132,18 +128,14 @@ class SPARQLBasedConstraint(ConstraintComponent):
             for v in violating_vals:
                 non_conformant = True
                 if isinstance(v, bool) and v is True:
-                    rept = self.make_v_result(
-                        target_graph, f, value_node=result_val, **rept_kwargs)
+                    rept = self.make_v_result(target_graph, f, value_node=result_val, **rept_kwargs)
                 elif isinstance(v, tuple):
                     t, p, v = v
                     if v is None:
                         v = result_val
-                    rept = self.make_v_result(
-                        target_graph, t or f, value_node=v, result_path=p,
-                        **rept_kwargs)
+                    rept = self.make_v_result(target_graph, t or f, value_node=v, result_path=p, **rept_kwargs)
                 else:
-                    rept = self.make_v_result(
-                        target_graph, f, value_node=v, **rept_kwargs)
+                    rept = self.make_v_result(target_graph, f, value_node=v, **rept_kwargs)
                 reports.append(rept)
         return non_conformant, reports
 

@@ -38,11 +38,13 @@ class InConstraintComponent(ConstraintComponent):
         if len(in_vals) < 1:
             raise ConstraintLoadError(
                 "InConstraintComponent must have at least one sh:in predicate.",
-                "https://www.w3.org/TR/shacl/#InConstraintComponent")
+                "https://www.w3.org/TR/shacl/#InConstraintComponent",
+            )
         elif len(in_vals) > 1:
             raise ConstraintLoadError(
                 "InConstraintComponent must have at most one sh:in predicate.",
-                "https://www.w3.org/TR/shacl/#InConstraintComponent")
+                "https://www.w3.org/TR/shacl/#InConstraintComponent",
+            )
         self.in_list = in_vals[0]
         sg = self.shape.sg.graph
 
@@ -87,6 +89,7 @@ class ClosedConstraintComponent(ConstraintComponent):
     Textual Definition:
     If $closed is true then there is a validation result for each triple that has a value node as its subject and a predicate that is not explicitly enumerated as a value of sh:path in any of the property shapes declared via sh:property at the current shape. If $ignoredProperties has a value then the properties enumerated as members of this SHACL list are also permitted for the value node. The validation result MUST have the predicate of the triple as its sh:resultPath, and the object of the triple as its sh:value.
     """
+
     ALWAYS_IGNORE = {(RDF_type, RDFS.term('Resource'))}
 
     def __init__(self, shape):
@@ -96,11 +99,13 @@ class ClosedConstraintComponent(ConstraintComponent):
         if len(closed_vals) < 1:
             raise ConstraintLoadError(
                 "ClosedConstraintComponent must have at least one sh:closed predicate.",
-                "https://www.w3.org/TR/shacl/#ClosedConstraintComponent")
+                "https://www.w3.org/TR/shacl/#ClosedConstraintComponent",
+            )
         elif len(closed_vals) > 1:
             raise ConstraintLoadError(
                 "ClosedConstraintComponent must have at most one sh:closed predicate.",
-                "https://www.w3.org/TR/shacl/#ClosedConstraintComponent")
+                "https://www.w3.org/TR/shacl/#ClosedConstraintComponent",
+            )
         assert isinstance(closed_vals[0], rdflib.Literal), "sh:closed must take a xsd:boolean literal."
         self.is_closed = bool(closed_vals[0].value)
         ignored_vals = list(self.shape.objects(SH_ignoredProperties))
@@ -143,7 +148,8 @@ class ClosedConstraintComponent(ConstraintComponent):
             if not property_shape or not property_shape.is_property_shape:
                 raise ReportableRuntimeError(
                     "The shape pointed to by sh:property does "
-                    "not exist, or is not a well defined SHACL PropertyShape.")
+                    "not exist, or is not a well defined SHACL PropertyShape."
+                )
             working_shapes.add(property_shape)
         working_paths = set()
         for w in working_shapes:
@@ -182,7 +188,8 @@ class HasValueConstraintComponent(ConstraintComponent):
         if len(has_value_set) < 1:
             raise ConstraintLoadError(
                 "HasValueConstraintComponent must have at least one sh:hasValue predicate.",
-                "https://www.w3.org/TR/shacl/#HasValueConstraintComponent")
+                "https://www.w3.org/TR/shacl/#HasValueConstraintComponent",
+            )
         self.has_value_set = has_value_set
 
     @classmethod

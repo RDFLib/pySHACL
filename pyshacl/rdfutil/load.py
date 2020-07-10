@@ -15,6 +15,7 @@ from pyshacl.pytypes import GraphLike
 
 try:
     import rdflib_jsonld  # noqa: F401
+
     has_json_ld = True
 except IndexError:
     has_json_ld = False
@@ -29,16 +30,14 @@ def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
     :type url: rdflib.URIRef | str
     :return:
     """
-    headers = {'Accept':
-               'text/turtle, application/rdf+xml, '
-               'application/ld+json, application/n-triples,'
-               'text/plain'}
+    headers = {
+        'Accept': 'text/turtle, application/rdf+xml, ' 'application/ld+json, application/n-triples,' 'text/plain'
+    }
     r = request.Request(url, headers=headers)
     resp = request.urlopen(r)
     code = resp.getcode()
     if not (200 <= code <= 210):
-        raise RuntimeError("Cannot pull RDF URL from the web: {}, code: {}"
-                           .format(url, str(code)))
+        raise RuntimeError("Cannot pull RDF URL from the web: {}, code: {}".format(url, str(code)))
     known_format = None
     content_type = resp.headers.get('Content-Type', None)
     if content_type:
@@ -55,10 +54,14 @@ def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
     return resp, known_format
 
 
-def load_from_source(source: Union[GraphLike, BinaryIO, Union[str, bytes]],
-                     g: Optional[GraphLike] = None, rdf_format: Optional[str] = None,
-                     multigraph: bool = False, do_owl_imports: Union[bool, int] = False,
-                     import_chain: Optional[List[Union[rdflib.URIRef, str]]] = None):
+def load_from_source(
+    source: Union[GraphLike, BinaryIO, Union[str, bytes]],
+    g: Optional[GraphLike] = None,
+    rdf_format: Optional[str] = None,
+    multigraph: bool = False,
+    do_owl_imports: Union[bool, int] = False,
+    import_chain: Optional[List[Union[rdflib.URIRef, str]]] = None,
+):
     """
 
     :param source:
@@ -131,8 +134,14 @@ def load_from_source(source: Union[GraphLike, BinaryIO, Union[str, bytes]],
             elif first_char == '/' or source[0:3] == "./":
                 source_is_file = True
                 filename = source
-            elif first_char == '#' or first_char == '@' or first_char == '<' or first_char == '\n' \
-                    or first_char == '{' or first_char == '[':
+            elif (
+                first_char == '#'
+                or first_char == '@'
+                or first_char == '<'
+                or first_char == '\n'
+                or first_char == '{'
+                or first_char == '['
+            ):
                 # Contains some JSON or XML or Turtle stuff
                 source_is_file = False
             elif len(source) < 140:
@@ -149,9 +158,14 @@ def load_from_source(source: Union[GraphLike, BinaryIO, Union[str, bytes]],
         if source.startswith(b'file:') or source.startswith(b'http:') or source.startswith(b'https:'):
             raise ValueError("file:// and http:// strings should be given as str, not bytes.")
         first_char_b: bytes = source[0:1]
-        if first_char_b == b'#' or first_char_b == b'@' \
-            or first_char_b == b'<' or first_char_b == b'\n' \
-                or first_char_b == b'{' or first_char_b == b'[':
+        if (
+            first_char_b == b'#'
+            or first_char_b == b'@'
+            or first_char_b == b'<'
+            or first_char_b == b'\n'
+            or first_char_b == b'{'
+            or first_char_b == b'['
+        ):
             # Contains some JSON or XML or Turtle stuff
             source_is_file = False
         elif len(source) < 140:
@@ -202,8 +216,7 @@ def load_from_source(source: Union[GraphLike, BinaryIO, Union[str, bytes]],
             source = new_bytes
             source_was_open = False
         if (rdf_format == "json-ld" or rdf_format == "json") and not has_json_ld:
-            raise RuntimeError(
-                "Cannot load a JSON-LD file if rdflib_jsonld is not installed.")
+            raise RuntimeError("Cannot load a JSON-LD file if rdflib_jsonld is not installed.")
         if rdf_format == 'turtle' or rdf_format == 'n3':
             # SHACL Shapes files and Data files can have extra RDF Metadata in the
             # Top header block, including #BaseURI and #Prefix.
@@ -307,8 +320,9 @@ def load_from_source(source: Union[GraphLike, BinaryIO, Union[str, bytes]],
                 for o in owl_imports:
                     if o in import_chain:
                         continue
-                    load_from_source(o, g=g, multigraph=multigraph,
-                                     do_owl_imports=do_owl_imports + 1, import_chain=import_chain)
+                    load_from_source(
+                        o, g=g, multigraph=multigraph, do_owl_imports=do_owl_imports + 1, import_chain=import_chain
+                    )
                     done_imports += 1
         if done_imports < 1 and public_id is not None and root_id != public_id:
             public_id_uri = rdflib.URIRef(public_id)
@@ -323,8 +337,9 @@ def load_from_source(source: Union[GraphLike, BinaryIO, Union[str, bytes]],
                 for o in owl_imports:
                     if o in import_chain:
                         continue
-                    load_from_source(o, g=g, multigraph=multigraph,
-                                     do_owl_imports=do_owl_imports + 1, import_chain=import_chain)
+                    load_from_source(
+                        o, g=g, multigraph=multigraph, do_owl_imports=do_owl_imports + 1, import_chain=import_chain
+                    )
                     done_imports += 1
         if done_imports < 1:
             if isinstance(g, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
@@ -344,7 +359,8 @@ def load_from_source(source: Union[GraphLike, BinaryIO, Union[str, bytes]],
                     for o in owl_imports:
                         if o in import_chain:
                             continue
-                        load_from_source(o, g=g, multigraph=multigraph,
-                                         do_owl_imports=do_owl_imports + 1, import_chain=import_chain)
+                        load_from_source(
+                            o, g=g, multigraph=multigraph, do_owl_imports=do_owl_imports + 1, import_chain=import_chain
+                        )
                         done_imports += 1
     return g

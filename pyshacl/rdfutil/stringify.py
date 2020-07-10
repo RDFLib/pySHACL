@@ -25,8 +25,9 @@ def with_dict_cache(f):
 
 
 @with_dict_cache
-def stringify_blank_node(graph: rdflib.Graph, bnode: rdflib.BNode, ns_manager: Optional[NamespaceManager] = None,
-                         recursion: int = 0):
+def stringify_blank_node(
+    graph: rdflib.Graph, bnode: rdflib.BNode, ns_manager: Optional[NamespaceManager] = None, recursion: int = 0
+):
     if isinstance(graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
         raise RuntimeError("Can only stringify a blank node when graph is a rdflib.Graph")
     assert isinstance(graph, rdflib.Graph)
@@ -52,6 +53,7 @@ def stringify_blank_node(graph: rdflib.Graph, bnode: rdflib.BNode, ns_manager: O
             item_texts.append(item_text)
         # item_texts.sort()  ## Don't sort, to preserve list order
         return "( {} )".format(" ".join(item_texts))
+
     predicates = list(graph.predicates(bnode))
     if len(predicates) < 1:
         return "[ ]"
@@ -74,8 +76,7 @@ def stringify_blank_node(graph: rdflib.Graph, bnode: rdflib.BNode, ns_manager: O
             o_text = o_texts[0]
         p_string_map[p_string] = o_text
     if len(p_string_map) > 1:
-        g = ["{} {}".format(p, o)
-             for p, o in sorted(p_string_map.items())]
+        g = ["{} {}".format(p, o) for p, o in sorted(p_string_map.items())]
         blank_string = " ; ".join(g)
     else:
         p, o = next(iter(p_string_map.items()))
@@ -100,15 +101,11 @@ def stringify_literal(graph: rdflib.Graph, node: rdflib.Literal, ns_manager: Opt
     else:
         lang_string = ""
     if node.datatype:
-        datatype_uri = stringify_node(graph, node.datatype,
-                                      ns_manager=ns_manager)
+        datatype_uri = stringify_node(graph, node.datatype, ns_manager=ns_manager)
         datatype_string = ", datatype={}".format(datatype_uri)
     else:
         datatype_string = ""
-    node_string = "Literal({}{}{})" \
-        .format(val_string,
-                lang_string,
-                datatype_string)
+    node_string = "Literal({}{}{})".format(val_string, lang_string, datatype_string)
     return node_string
 
 
@@ -131,8 +128,12 @@ def find_node_named_graph(dataset, node):
     raise RuntimeError("Cannot find that node in any named graph.")
 
 
-def stringify_node(graph: rdflib.Graph, node: rdflib.term.Identifier, ns_manager: Optional[NamespaceManager] = None,
-                   recursion: int = 0):
+def stringify_node(
+    graph: rdflib.Graph,
+    node: rdflib.term.Identifier,
+    ns_manager: Optional[NamespaceManager] = None,
+    recursion: int = 0,
+):
     if ns_manager is None:
         ns_manager = graph.namespace_manager
     if isinstance(ns_manager, rdflib.Graph):

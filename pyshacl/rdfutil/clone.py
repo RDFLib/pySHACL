@@ -15,7 +15,9 @@ def clone_dataset(source_ds, target_ds=None):
         target_ds = rdflib.Dataset(default_union=default_union)
     named_graphs = [
         rdflib.Graph(source_ds.store, i, namespace_manager=source_ds.namespace_manager)
-        if not isinstance(i, rdflib.Graph) else i for i in source_ds.store.contexts(None)
+        if not isinstance(i, rdflib.Graph)
+        else i
+        for i in source_ds.store.contexts(None)
     ]
     cloned_graphs = [
         clone_graph(ng, rdflib.Graph(target_ds.store, ng.identifier, namespace_manager=target_ds.namespace_manager))
@@ -68,7 +70,10 @@ def mix_datasets(base_ds, extra_ds, target_ds=None):
         mixin_graphs = [extra_ds]
     mixed_graphs = {}
     for mg in mixin_graphs:
-        mod_named_graphs = {g.identifier: mix_graphs(g, mg, target_graph=rdflib.Graph(store=target_ds.store, identifier=g.identifier)) for g in base_named_graphs}
+        mod_named_graphs = {
+            g.identifier: mix_graphs(g, mg, target_graph=rdflib.Graph(store=target_ds.store, identifier=g.identifier))
+            for g in base_named_graphs
+        }
         mixed_graphs.update(mod_named_graphs)
     default_context_id = target_ds.default_context.identifier
     for i, m in mixed_graphs.items():
@@ -136,8 +141,7 @@ def clone_literal(graph, node, target_graph):
     lex_val_string = str(node)
     lang = node.language
     datatype = node.datatype
-    new_literal = rdflib.Literal(lex_val_string,
-                                 lang, datatype)
+    new_literal = rdflib.Literal(lex_val_string, lang, datatype)
     return new_literal
 
 

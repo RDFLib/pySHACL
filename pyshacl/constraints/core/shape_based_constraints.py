@@ -47,7 +47,8 @@ class PropertyConstraintComponent(ConstraintComponent):
         if len(property_shapes) < 1:
             raise ConstraintLoadError(
                 "PropertyConstraintComponent must have at least one sh:property predicate.",
-                "https://www.w3.org/TR/shacl/#PropertyConstraintComponent")
+                "https://www.w3.org/TR/shacl/#PropertyConstraintComponent",
+            )
         self.property_shapes = property_shapes
 
     @classmethod
@@ -84,13 +85,12 @@ class PropertyConstraintComponent(ConstraintComponent):
                 return _non_conformant, _reports
             if not prop_shape or not prop_shape.is_property_shape:
                 raise ReportableRuntimeError(
-                    "Shape pointed to by sh:property does not exist "
-                    "or is not a well-formed SHACL PropertyShape.")
+                    "Shape pointed to by sh:property does not exist " "or is not a well-formed SHACL PropertyShape."
+                )
 
             for f, value_nodes in focus_value_nodes.items():
                 for v in value_nodes:
-                    _is_conform, _r = prop_shape.validate(target_graph, focus=v,
-                                                          _evaluation_path=_evaluation_path[:])
+                    _is_conform, _r = prop_shape.validate(target_graph, focus=v, _evaluation_path=_evaluation_path[:])
                     _non_conformant = _non_conformant or (not _is_conform)
                     _reports.extend(_r)
             return _non_conformant, _reports
@@ -117,7 +117,8 @@ class NodeConstraintComponent(ConstraintComponent):
         if len(node_shapes) < 1:
             raise ConstraintLoadError(
                 "NodeConstraintComponent must have at least one sh:node predicate.",
-                "https://www.w3.org/TR/shacl/#NodeConstraintComponent")
+                "https://www.w3.org/TR/shacl/#NodeConstraintComponent",
+            )
         self.node_shapes = node_shapes
 
     @classmethod
@@ -154,12 +155,11 @@ class NodeConstraintComponent(ConstraintComponent):
                 return _non_conformant, _reports
             if not node_shape or node_shape.is_property_shape:
                 raise ReportableRuntimeError(
-                    "Shape pointed to by sh:node does not exist or "
-                    "is not a well-formed SHACL NodeShape.")
+                    "Shape pointed to by sh:node does not exist or " "is not a well-formed SHACL NodeShape."
+                )
             for f, value_nodes in focus_value_nodes.items():
                 for v in value_nodes:
-                    _is_conform, _r = node_shape.validate(target_graph, focus=v,
-                                                          _evaluation_path=_evaluation_path[:])
+                    _is_conform, _r = node_shape.validate(target_graph, focus=v, _evaluation_path=_evaluation_path[:])
                     # ignore the fails from the node, create our own fail
                     if (not _is_conform) or len(_r) > 0:
                         _non_conformant = True
@@ -191,12 +191,14 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
             # Note, this no longer throws an error, this constraint is simply ignored on NodeShapes.
             raise ConstraintLoadWarning(
                 "QualifiedValueShapeConstraintComponent can only be present on a PropertyShape, not a NodeShape.",
-                "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent")
+                "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent",
+            )
         value_shapes = set(self.shape.objects(SH_qualifiedValueShape))
         if len(value_shapes) < 1:
             raise ConstraintLoadError(
                 "QualifiedValueShapeConstraintComponent must have at least one sh:qualifiedValueShape predicate.",
-                "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent")
+                "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent",
+            )
         self.value_shapes = value_shapes
         min_count = set(self.shape.objects(SH_qualifiedMinCount))
         if len(min_count) < 1:
@@ -204,7 +206,8 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
         elif len(min_count) > 1:
             raise ConstraintLoadError(
                 "QualifiedMinCountConstraintComponent must have at most one sh:qualifiedMinCount predicate.",
-                "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent")
+                "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent",
+            )
         else:
             min_count = next(iter(min_count))
             assert isinstance(min_count, rdflib.Literal) and isinstance(min_count.value, int)
@@ -216,7 +219,8 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
         elif len(max_count) > 1:
             raise ConstraintLoadError(
                 "QualifiedMaxCountConstraintComponent must have at most one sh:qualifiedMaxCount predicate.",
-                "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent")
+                "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent",
+            )
         else:
             max_count = next(iter(max_count))
             assert isinstance(max_count, rdflib.Literal) and isinstance(max_count.value, int)
@@ -224,7 +228,9 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
         if min_count is None and max_count is None:
             raise ConstraintLoadError(
                 "QualifiedValueShapeConstraintComponent must have at lease one sh:qualifiedMinCount or "
-                "sh:qualifiedMaxCount", "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent")
+                "sh:qualifiedMaxCount",
+                "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent",
+            )
         is_disjoint = False
         disjoint_nodes = set(self.shape.objects(SH_qualifiedValueShapesDisjoint))
         for d in disjoint_nodes:
@@ -237,8 +243,7 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
 
     @classmethod
     def constraint_parameters(cls):
-        return [SH_qualifiedValueShape, SH_qualifiedMinCount,
-                SH_qualifiedValueShapesDisjoint, SH_qualifiedMaxCount]
+        return [SH_qualifiedValueShape, SH_qualifiedMinCount, SH_qualifiedValueShapesDisjoint, SH_qualifiedMaxCount]
 
     @classmethod
     def constraint_name(cls):
@@ -246,9 +251,11 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
 
     @classmethod
     def shacl_constraint_class(cls):
-        raise NotImplementedError("QualifiedValueShapeConstraintComponent must be either "
-                                  "QualifiedMinCountConstraintComponent or "
-                                  "QualifiedMaxCountConstraintComponent")
+        raise NotImplementedError(
+            "QualifiedValueShapeConstraintComponent must be either "
+            "QualifiedMinCountConstraintComponent or "
+            "QualifiedMaxCountConstraintComponent"
+        )
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
@@ -272,8 +279,8 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
                 return _non_conformant, _reports
             if not other_shape:
                 raise ReportableRuntimeError(
-                    "Shape pointed to by sh:property does not "
-                    "exist or is not a well-formed SHACL Shape.")
+                    "Shape pointed to by sh:property does not " "exist or is not a well-formed SHACL Shape."
+                )
             if self.is_disjoint:
                 # Textual Definition of Sibling Shapes:
                 # Let Q be a shape in shapes graph G that declares a qualified cardinality constraint (by having values for sh:qualifiedValueShape and at least one of sh:qualifiedMinCount or sh:qualifiedMaxCount). Let ps be the set of shapes in G that have Q as a value of sh:property. If Q has true as a value for sh:qualifiedValueShapesDisjoint then the set of sibling shapes for Q is defined as the set of all values of the SPARQL property path sh:property/sh:qualifiedValueShape for any shape in ps minus the value of sh:qualifiedValueShape of Q itself. The set of sibling shapes is empty otherwise.
@@ -293,13 +300,15 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
                 number_conforms = 0
                 for v in value_nodes:
                     try:
-                        _is_conform, _r = other_shape.validate(target_graph, focus=v,
-                                                               _evaluation_path=_evaluation_path[:])
+                        _is_conform, _r = other_shape.validate(
+                            target_graph, focus=v, _evaluation_path=_evaluation_path[:]
+                        )
                         if _is_conform:
                             _conforms_to_sibling = False
                             for sibling_shape in sibling_shapes:
-                                _c2, _r = sibling_shape.validate(target_graph, focus=v,
-                                                                 _evaluation_path=_evaluation_path[:])
+                                _c2, _r = sibling_shape.validate(
+                                    target_graph, focus=v, _evaluation_path=_evaluation_path[:]
+                                )
                                 _conforms_to_sibling = _conforms_to_sibling or _c2
                             if not _conforms_to_sibling:
                                 number_conforms += 1
@@ -307,13 +316,15 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
                         raise v
                 if self.max_count is not None and number_conforms > self.max_count:
                     _non_conformant = True
-                    _r = self.make_v_result(target_graph, f,
-                                            constraint_component=SH_QualifiedMaxCountConstraintComponent)
+                    _r = self.make_v_result(
+                        target_graph, f, constraint_component=SH_QualifiedMaxCountConstraintComponent
+                    )
                     _reports.append(_r)
                 if self.min_count is not None and number_conforms < self.min_count:
                     _non_conformant = True
-                    _r = self.make_v_result(target_graph, f,
-                                            constraint_component=SH_QualifiedMinCountConstraintComponent)
+                    _r = self.make_v_result(
+                        target_graph, f, constraint_component=SH_QualifiedMinCountConstraintComponent
+                    )
                     _reports.append(_r)
             return _non_conformant, _reports
 

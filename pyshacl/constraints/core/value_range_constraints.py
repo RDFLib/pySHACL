@@ -38,7 +38,8 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
         if len(min_vals) < 1:
             raise ConstraintLoadError(
                 "MinExclusiveConstraintComponent must have at least one sh:minExclusive predicate.",
-                "https://www.w3.org/TR/shacl/#MinExclusiveConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MinExclusiveConstraintComponent",
+            )
         self.min_vals = min_vals
 
     @classmethod
@@ -96,8 +97,7 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
                         except (TypeError, NotImplementedError):
                             flag = False
                 else:
-                    raise ReportableRuntimeError(
-                        "Not sure how to compare anything else.")
+                    raise ReportableRuntimeError("Not sure how to compare anything else.")
                 if not flag:
                     non_conformant = True
                     rept = self.make_v_result(target_graph, f, value_node=v)
@@ -119,7 +119,8 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
         if len(min_vals) < 1:
             raise ConstraintLoadError(
                 "MinInclusiveConstraintComponent must have at least one sh:minInclusive predicate.",
-                "https://www.w3.org/TR/shacl/#MinInclusiveConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MinInclusiveConstraintComponent",
+            )
         self.min_vals = min_vals
 
     @classmethod
@@ -177,8 +178,7 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
                         except (TypeError, NotImplementedError):
                             flag = False
                 else:
-                    raise ReportableRuntimeError(
-                        "Not sure how to compare anything else.")
+                    raise ReportableRuntimeError("Not sure how to compare anything else.")
                 if not flag:
                     non_conformant = True
                     rept = self.make_v_result(target_graph, f, value_node=v)
@@ -200,7 +200,8 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
         if len(max_vals) < 1:
             raise ConstraintLoadError(
                 "MaxExclusiveConstraintComponent must have at least one sh:minExclusive predicate.",
-                "https://www.w3.org/TR/shacl/#MaxExclusiveConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MaxExclusiveConstraintComponent",
+            )
         self.max_vals = max_vals
 
     @classmethod
@@ -258,8 +259,7 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
                         except (TypeError, NotImplementedError):
                             flag = False
                 else:
-                    raise ReportableRuntimeError(
-                        "Not sure how to compare anything else.")
+                    raise ReportableRuntimeError("Not sure how to compare anything else.")
                 if not flag:
                     non_conformant = True
                     rept = self.make_v_result(target_graph, f, value_node=v)
@@ -281,7 +281,8 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
         if len(max_vals) < 1:
             raise ConstraintLoadError(
                 "MaxInclusiveConstraintComponent must have at least one sh:minInclusive predicate.",
-                "https://www.w3.org/TR/shacl/#MaxInclusiveConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MaxInclusiveConstraintComponent",
+            )
         self.max_vals = max_vals
 
     @classmethod
@@ -339,8 +340,7 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
                         except (TypeError, NotImplementedError):
                             flag = False
                 else:
-                    raise ReportableRuntimeError(
-                        "Not sure how to compare anything else.")
+                    raise ReportableRuntimeError("Not sure how to compare anything else.")
                 if not flag:
                     non_conformant = True
                     rept = self.make_v_result(target_graph, f, value_node=v)

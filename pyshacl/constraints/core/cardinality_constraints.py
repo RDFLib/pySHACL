@@ -36,24 +36,29 @@ class MinCountConstraintComponent(ConstraintComponent):
         if len(min_count) < 1:
             raise ConstraintLoadError(
                 "MinCountConstraintComponent must have at least one sh:minCount predicate.",
-                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent",
+            )
         if len(min_count) > 1:
             raise ConstraintLoadError(
                 "MinCountConstraintComponent must have at most one sh:minCount predicate.",
-                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent",
+            )
         if not shape.is_property_shape:
             raise ConstraintLoadError(
                 "MinCountConstraintComponent can only be present on a PropertyShape, not a NodeShape.",
-                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent",
+            )
         self.min_count = min_count[0]
         if not (isinstance(self.min_count, Literal) and self.min_count.datatype == XSD_integer):
             raise ConstraintLoadError(
                 "MinCountConstraintComponent sh:minCount must be a literal with datatype xsd:integer.",
-                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent",
+            )
         if int(self.min_count.value) < 0:
             raise ConstraintLoadError(
                 "MinCountConstraintComponent sh:minCount must be an integer >= 0.",
-                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent",
+            )
 
     @classmethod
     def constraint_parameters(cls):
@@ -103,24 +108,29 @@ class MaxCountConstraintComponent(ConstraintComponent):
         if len(max_count) < 1:
             raise ConstraintLoadError(
                 "MaxCountConstraintComponent must have at least one sh:maxCount predicate.",
-                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent",
+            )
         if len(max_count) > 1:
             raise ConstraintLoadError(
                 "MaxCountConstraintComponent must have at most one sh:maxCount predicate.",
-                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent",
+            )
         if not shape.is_property_shape:
             raise ConstraintLoadError(
                 "MaxCountConstraintComponent can only be present on a PropertyShape, not a NodeShape.",
-                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent",
+            )
         self.max_count = max_count[0]
         if not (isinstance(self.max_count, Literal) and self.max_count.datatype == XSD_integer):
             raise ConstraintLoadError(
                 "MaxCountConstraintComponent sh:maxCount must be a literal with datatype xsd:integer.",
-                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent",
+            )
         if int(self.max_count.value) < 0:
             raise ConstraintLoadError(
                 "MaxCountConstraintComponent sh:maxCount must be an integer >= 0.",
-                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent",
+            )
 
     @classmethod
     def constraint_parameters(cls):
