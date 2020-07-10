@@ -135,7 +135,7 @@ class ShapesGraph(object):
             self._build_node_shape_cache()
         return self._node_shape_cache.values()
 
-    def lookup_shape_from_node(self, node):
+    def lookup_shape_from_node(self, node) -> Shape:
         # This will throw a KeyError if it is not found. This is intentionally not caught here.
         return self._node_shape_cache[node]
 
@@ -217,8 +217,8 @@ class ShapesGraph(object):
             set(value_of_or).union(
                 set(value_of_xone)))
 
-        for l in value_of_s_list_expecting:
-            list_contents = set(g.items(l))
+        for lst in value_of_s_list_expecting:
+            list_contents = set(g.items(lst))
             if len(list_contents) < 1:
                 # TODO:coverage: we don't have any tests for invalid shape lists
                 raise ShapeLoadError(
@@ -274,5 +274,3 @@ class ShapesGraph(object):
             prop_shape_path = found_prop_shapes_paths[prop_shape]
             s = Shape(self, prop_shape, p=True, path=prop_shape_path, logger=self.logger)
             self._node_shape_cache[prop_shape] = s
-
-

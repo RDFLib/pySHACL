@@ -3,13 +3,14 @@
 https://www.w3.org/TR/shacl/#sparql-constraint-components
 """
 import re
-from typing import Dict, Tuple, Optional, Union
+from typing import Dict, Tuple, Union, List
 
 import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.constraints.sparql.sparql_based_constraints import SPARQLQueryHelper
 from pyshacl.consts import SH, RDF_type, SH_message, SH_select
 from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError
+from pyshacl.pytypes import GraphLike
 
 SH_nodeValidator = SH.term('nodeValidator')
 SH_propertyValidator = SH.term('propertyValidator')
@@ -23,11 +24,7 @@ SH_ConstraintComponent = SH.term('ConstraintComponent')
 SH_SPARQLSelectValidator = SH.term('SPARQLSelectValidator')
 SH_SPARQLAskValidator = SH.term('SPARQLAskValidator')
 
-
-invalid_parameter_names = {
-                           'this', 'shapesGraph', 'currentShape', 'path',
-                           'PATH', 'value'
-                          }
+invalid_parameter_names = {'this', 'shapesGraph', 'currentShape', 'path', 'PATH', 'value'}
 
 
 class SPARQLConstraintComponentValidator(object):
@@ -95,9 +92,8 @@ class SPARQLConstraintComponentValidator(object):
             shape_params = set(shape.objects(m.path()))
             if len(shape_params) < 1:
                 # TODO:coverage: No test for this case
-                raise ReportableRuntimeError(
-                        "Shape does not have mandatory parameter {}."
-                        .format(str(m.path())))
+                raise ReportableRuntimeError("Shape does not have mandatory parameter {}."
+                                             .format(str(m.path())))
             # TODO: Can shapes have more than one value for the predicate?
             # Just use one for now.
             bind_map[name] = next(iter(shape_params))
@@ -122,8 +118,7 @@ class SPARQLConstraintComponentValidator(object):
         sg = shacl_graph.graph
         message_nodes = set(sg.objects(node, SH_message))
         for m in message_nodes:
-            if not (isinstance(m, rdflib.Literal) and
-                    isinstance(m.value, str)):
+            if not (isinstance(m, rdflib.Literal) and isinstance(m.value, str)):
                 # TODO:coverage: No test for when SPARQL-based constraint is RDF Literal is is not of type string
                 raise ConstraintLoadError(
                     "Validator sh:message must be an RDF Literal of type xsd:string.",
@@ -146,8 +141,7 @@ class AskConstraintValidator(SPARQLConstraintComponentValidator):
                 "AskValidator must have exactly one value for sh:ask.",
                 "https://www.w3.org/TR/shacl/#ConstraintComponent")
         ask_val = next(iter(ask_vals))
-        if not (isinstance(ask_val, rdflib.Literal) and
-                isinstance(ask_val.value, str)):
+        if not (isinstance(ask_val, rdflib.Literal) and isinstance(ask_val.value, str)):
             # TODO:coverage: No test for this case
             raise ConstraintLoadError(
                 "AskValidator sh:ask must be an RDF Literal of type xsd:string.",
@@ -201,8 +195,7 @@ class SelectConstraintValidator(SPARQLConstraintComponentValidator):
                 "SelectValidator must have exactly one value for sh:select.",
                 "https://www.w3.org/TR/shacl/#ConstraintComponent")
         select_val = next(iter(select_vals))
-        if not (isinstance(select_val, rdflib.Literal) and
-                isinstance(select_val.value, str)):
+        if not (isinstance(select_val, rdflib.Literal) and isinstance(select_val.value, str)):
             # TODO:coverage: No test for the case when sh:select is not a literal of type string
             raise ConstraintLoadError(
                 "SelectValidator sh:select must be an RDF Literal of type xsd:string.",
@@ -243,7 +236,6 @@ class SelectConstraintValidator(SPARQLConstraintComponentValidator):
                     v = r['value']
                 except KeyError:
                     v = None
-                    pass
                 try:
                     t = r['this']
                 except KeyError:
@@ -256,7 +248,7 @@ class SelectConstraintValidator(SPARQLConstraintComponentValidator):
                     #  'path' and 'value' and 'this' are not returned.
                     #  here 'failure' must exist
                     try:
-                        f = r['failure']
+                        _ = r['failure']
                         violations.add(True)
                     except KeyError:
                         pass
@@ -301,14 +293,10 @@ class BoundShapeValidatorComponent(ConstraintComponent):
                 try:
                     replacer = var_replacers[variable]
                 except KeyError:
-                    replacer = re.compile(r"([\s()\"\'])\{[\$\?]"+f[1]+"\}", flags=re.M)
+                    replacer = re.compile(r"([\s()\"\'])\{[\$\?]" + f[1] + r"\}", flags=re.M)
                     var_replacers[variable] = replacer
-                m_val = replacer.sub(
-                    "\g<1>{}".format(param_bind_map[variable].value),
-                    m_val, 1)
+                m_val = replacer.sub(r"\g<1>{}".format(param_bind_map[variable].value), m_val, 1)
             self.messages.add(rdflib.Literal(m_val, lang=m.language, datatype=m.datatype))
-
-
 
     @classmethod
     def constraint_parameters(cls):
@@ -325,7 +313,7 @@ class BoundShapeValidatorComponent(ConstraintComponent):
         # TODO:coverage: this is never used for this constraint?
         return SH_ConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
         :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
@@ -335,7 +323,7 @@ class BoundShapeValidatorComponent(ConstraintComponent):
         extra_messages = self.messages or None
         rept_kwargs = {
             # TODO, determine if we need sourceConstraint here
-            #'source_constraint': self.validator.node,
+            #  'source_constraint': self.validator.node,
             'constraint_component': self.constraint.node,
             'extra_messages': extra_messages
         }
@@ -356,18 +344,14 @@ class BoundShapeValidatorComponent(ConstraintComponent):
                 non_conformant = True
                 if isinstance(v, bool) and v is True:
                     # TODO:coverage: No test for when violation is `True`
-                    rept = self.make_v_result(
-                        target_graph, f, value_node=result_val, **rept_kwargs)
+                    rept = self.make_v_result(target_graph, f, value_node=result_val, **rept_kwargs)
                 elif isinstance(v, tuple):
                     t, p, v = v
                     if v is None:
                         v = result_val
-                    rept = self.make_v_result(
-                        target_graph, t or f, value_node=v, result_path=p,
-                        **rept_kwargs)
+                    rept = self.make_v_result(target_graph, t or f, value_node=v, result_path=p, **rept_kwargs)
                 else:
-                    rept = self.make_v_result(
-                        target_graph, f, value_node=v, **rept_kwargs)
+                    rept = self.make_v_result(target_graph, f, value_node=v, **rept_kwargs)
                 reports.append(rept)
         return (not non_conformant), reports
 
@@ -405,12 +389,12 @@ class SPARQLConstraintComponent(object):
         path = str(parameter.path())
         hash_index = path.find('#')
         if hash_index > 0:
-            ending = path[hash_index+1:]
+            ending = path[hash_index + 1:]
             return ending
         right_slash_index = path.rfind('/')
         if right_slash_index > 0:
             # TODO:coverage: No test for this case where path has a right slash
-            ending = path[right_slash_index+1:]
+            ending = path[right_slash_index + 1:]
             return ending
         raise ReportableRuntimeError("Cannot get a local name for {}".format(path))
 
@@ -444,4 +428,3 @@ class SPARQLConstraintComponent(object):
             self, shape, must_be_ask_val=must_be_ask_val,
             must_be_select_val=must_be_select_val)
         return applied_validator
-

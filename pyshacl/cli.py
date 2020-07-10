@@ -56,7 +56,7 @@ parser.add_argument('-V', '--version', action=ShowVersion, help='Show PySHACL ve
 parser.add_argument('-o', '--output', dest='output', nargs='?', type=argparse.FileType('w'),
                     help='Send output to a file (defaults to stdout).',
                     default=sys.stdout)
-#parser.add_argument('-h', '--help', action="help", help='Show this help text.')
+# parser.add_argument('-h', '--help', action="help", help='Show this help text.')
 
 
 def main():
@@ -113,7 +113,9 @@ def main():
         sys.stderr.write("\nIf your use-case requires this feature, open an Issue on the pyshacl github page.\n")
         sys.exit(3)
     except RuntimeError as re:
-        sys.stderr.write("Validator encountered a Runtime Error.")
+        import traceback
+        traceback.print_tb(re.__traceback__)
+        sys.stderr.write("\n\nValidator encountered a Runtime Error. Please report this to the PySHACL issue tracker.")
         sys.exit(2)
 
     if args.format == 'human':

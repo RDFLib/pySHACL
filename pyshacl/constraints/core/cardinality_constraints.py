@@ -2,12 +2,13 @@
 """
 https://www.w3.org/TR/shacl/#core-components-count
 """
-import rdflib
+from typing import Dict, List
 from rdflib.term import Literal
 from rdflib.namespace import XSD
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError
+from pyshacl.pytypes import GraphLike
 
 XSD_integer = XSD.term('integer')
 SH_minCount = SH.term('minCount')
@@ -42,8 +43,7 @@ class MinCountConstraintComponent(ConstraintComponent):
                 "MinCountConstraintComponent can only be present on a PropertyShape, not a NodeShape.",
                 "https://www.w3.org/TR/shacl/#MinCountConstraintComponent")
         self.min_count = min_count[0]
-        if not (isinstance(self.min_count, Literal) and
-                self.min_count.datatype == XSD_integer):
+        if not (isinstance(self.min_count, Literal) and self.min_count.datatype == XSD_integer):
             raise ConstraintLoadError(
                 "MinCountConstraintComponent sh:minCount must be a literal with datatype xsd:integer.",
                 "https://www.w3.org/TR/shacl/#MinCountConstraintComponent")
@@ -64,11 +64,11 @@ class MinCountConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MinCountConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         min_count = int(self.min_count.value)
         if min_count == 0:
@@ -110,8 +110,7 @@ class MaxCountConstraintComponent(ConstraintComponent):
                 "MaxCountConstraintComponent can only be present on a PropertyShape, not a NodeShape.",
                 "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent")
         self.max_count = max_count[0]
-        if not (isinstance(self.max_count, Literal) and
-                self.max_count.datatype == XSD_integer):
+        if not (isinstance(self.max_count, Literal) and self.max_count.datatype == XSD_integer):
             raise ConstraintLoadError(
                 "MaxCountConstraintComponent sh:maxCount must be a literal with datatype xsd:integer.",
                 "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent")
@@ -132,11 +131,11 @@ class MaxCountConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MaxCountConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         max_count = int(self.max_count.value)
         reports = []
@@ -149,4 +148,3 @@ class MaxCountConstraintComponent(ConstraintComponent):
                 rept = self.make_v_result(target_graph, f)
                 reports.append(rept)
         return (not non_conformant), reports
-

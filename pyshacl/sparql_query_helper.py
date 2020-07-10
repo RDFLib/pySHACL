@@ -12,6 +12,7 @@ from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRun
 
 SH_declare = SH.term('declare')
 
+
 class SPARQLQueryHelper(object):
     bind_this_regex = re.compile(r"([\s{}()])[\$\?]this", flags=re.M)
     bind_value_regex = re.compile(r"([\s{}()])[\$\?]value", flags=re.M)
@@ -21,9 +22,9 @@ class SPARQLQueryHelper(object):
     has_minus_regex = re.compile(r"[^\?\$]MINUS[\s\{]", flags=re.M | re.I)
     has_values_regex = re.compile(r"[^\?\$]VALUES[\s\{]", flags=re.M | re.I)
     has_service_regex = re.compile(r"[^\?\$]SERVICE[\s\<]", flags=re.M | re.I)
-    has_nested_select_regex = re.compile(r"SELECT[\s\(\)\$\?\a-z]*\{[^\}]*SELECT\s+((?:(?:[\?\$]\w+\s+)|(?:\*\s+))+)", flags=re.M | re.I)
+    has_nested_select_regex = re.compile(r"SELECT[\s\(\)\$\?\a-z]*\{[^\}]*SELECT\s+((?:(?:[\?\$]\w+\s+)|(?:\*\s+))+)",
+                                         flags=re.M | re.I)
     has_as_var_regex = re.compile(r"[^\w]+AS[\s]+[\$\?](\w+)", flags=re.M | re.I)
-
 
     def __init__(self, shape, node, select_text, messages=None, deactivated=False):
         self.shape = shape
@@ -65,10 +66,9 @@ class SPARQLQueryHelper(object):
                 if len(prefix_vals) < 1 or len(prefix_vals) > 1:
                     raise ConstraintLoadError(
                         "sh:declare must have exactly one sh:prefix predicate.",
-                         "https://www.w3.org/TR/shacl/#sparql-prefixes")
+                        "https://www.w3.org/TR/shacl/#sparql-prefixes")
                 prefix = next(iter(prefix_vals))
-                if not (isinstance(prefix, rdflib.Literal) and
-                        isinstance(prefix.value, str)):
+                if not (isinstance(prefix, rdflib.Literal) and isinstance(prefix.value, str)):
                     raise ConstraintLoadError(
                         "sh:prefix value must be an RDF Literal with type xsd:string.",
                         "https://www.w3.org/TR/shacl/#sparql-prefixes")
@@ -79,8 +79,7 @@ class SPARQLQueryHelper(object):
                         "sh:declare must have exactly one sh:namespace predicate.",
                         "https://www.w3.org/TR/shacl/#sparql-prefixes")
                 namespace = next(iter(namespace_vals))
-                if not (isinstance(namespace, rdflib.Literal) and
-                        namespace.datatype == XSD.anyURI):
+                if not (isinstance(namespace, rdflib.Literal) and namespace.datatype == XSD.anyURI):
                     raise ConstraintLoadError(
                         "sh:namespace value must be an RDF Literal with type xsd:anyURI.",
                         "https://www.w3.org/TR/shacl/#sparql-prefixes")
@@ -125,8 +124,7 @@ class SPARQLQueryHelper(object):
         if len(sequence_list) > 0:
             all_collected = []
             for s in sg.items(sequence_list):
-                seq1_string = self._shacl_path_to_sparql_path(
-                              s, recursion=recursion + 1)
+                seq1_string = self._shacl_path_to_sparql_path(s, recursion=recursion + 1)
                 all_collected.append(seq1_string)
             if len(all_collected) < 2:
                 raise ReportableRuntimeError(
@@ -137,8 +135,7 @@ class SPARQLQueryHelper(object):
         find_inverse = set(sg.objects(path_val, SH_inversePath))
         if len(find_inverse) > 0:
             inverse_path = next(iter(find_inverse))
-            inverse_path_string = self._shacl_path_to_sparql_path(
-                                  inverse_path, recursion=recursion + 1)
+            inverse_path_string = self._shacl_path_to_sparql_path(inverse_path, recursion=recursion + 1)
             return "^{}".format(inverse_path_string)
 
         find_alternatives = set(sg.objects(path_val, SH_alternativePath))
@@ -146,8 +143,7 @@ class SPARQLQueryHelper(object):
             alternatives_list = next(iter(find_alternatives))
             all_collected = []
             for a in sg.items(alternatives_list):
-                alt1_string = self._shacl_path_to_sparql_path(
-                              a, recursion=recursion + 1)
+                alt1_string = self._shacl_path_to_sparql_path(a, recursion=recursion + 1)
                 all_collected.append(alt1_string)
             if len(all_collected) < 2:
                 raise ReportableRuntimeError(
@@ -158,26 +154,22 @@ class SPARQLQueryHelper(object):
         find_zero_or_more = set(sg.objects(path_val, SH_zeroOrMorePath))
         if len(find_zero_or_more) > 0:
             zero_or_more_path = next(iter(find_zero_or_more))
-            zom_path_string = self._shacl_path_to_sparql_path(
-                              zero_or_more_path, recursion=recursion + 1)
+            zom_path_string = self._shacl_path_to_sparql_path(zero_or_more_path, recursion=recursion + 1)
             return "{}*".format(zom_path_string)
 
         find_zero_or_one = set(sg.objects(path_val, SH_zeroOrOnePath))
         if len(find_zero_or_one) > 0:
             zero_or_one_path = next(iter(find_zero_or_one))
-            zoo_path_string = self._shacl_path_to_sparql_path(
-                              zero_or_one_path, recursion=recursion + 1)
+            zoo_path_string = self._shacl_path_to_sparql_path(zero_or_one_path, recursion=recursion + 1)
             return "{}?".format(zoo_path_string)
 
         find_one_or_more = set(sg.objects(path_val, SH_oneOrMorePath))
         if len(find_one_or_more) > 0:
             one_or_more_path = next(iter(find_one_or_more))
-            oom_path_string = self._shacl_path_to_sparql_path(
-                              one_or_more_path, recursion=recursion + 1)
+            oom_path_string = self._shacl_path_to_sparql_path(one_or_more_path, recursion=recursion + 1)
             return "{}+".format(oom_path_string)
 
-        raise NotImplementedError(
-            "That path method to get value nodes of property shapes is not yet implemented.")
+        raise NotImplementedError("That path method to get value nodes of property shapes is not yet implemented.")
 
     @classmethod
     def _node_to_sparql_text(cls, node):
@@ -244,8 +236,8 @@ class SPARQLQueryHelper(object):
         return True
 
     def pre_bind_variables(self, thisnode, valuenode=None, extravars=None):
-        new_query_text = ""+self.select_text
-        valid = self.check_invalid_sparql(new_query_text, valuenode=valuenode, extravars=extravars)
+        new_query_text = "" + self.select_text
+        _ = self.check_invalid_sparql(new_query_text, valuenode=valuenode, extravars=extravars)
         init_bindings = {}
         found_this = self.bind_this_regex.search(new_query_text)
         if found_this:
@@ -262,17 +254,14 @@ class SPARQLQueryHelper(object):
         path = self.shape.path()
         if path:
             path_string = self._shacl_path_to_sparql_path(path)
-            new_query_text = self.bind_path_regex.sub(
-                             "\g<1>{}".format(path_string),
-                             new_query_text)
+            new_query_text = self.bind_path_regex.sub(r"\g<1>{}".format(path_string), new_query_text)
         else:
             found_path = self.bind_path_regex.search(new_query_text)
             if found_path:
-                raise ReportableRuntimeError(
-                    "SPARQL Constraint text has $PATH in it, "
-                    "but no path is known on this Shape.")
-        #TODO: work out how to get shapesGraph binding from shape.sg
-        #shapes_graph = self.shape.sg
+                raise ReportableRuntimeError("SPARQL Constraint text has $PATH in it, "
+                                             "but no path is known on this Shape.")
+        # TODO: work out how to get shapesGraph binding from shape.sg
+        #  shapes_graph = self.shape.sg
         shapes_graph = False
         if shapes_graph:
             found_sg = self.bind_sg_regex.search(new_query_text)

@@ -2,12 +2,13 @@
 """
 https://www.w3.org/TR/shacl/#core-components-property-pairs
 """
+from typing import Dict, List
+
 import rdflib
-from rdflib.term import Literal
-from rdflib.namespace import XSD
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
+from pyshacl.pytypes import GraphLike
 
 SH_equals = SH.term('equals')
 SH_disjoint = SH.term('disjoint')
@@ -38,7 +39,6 @@ class EqualsConstraintComponent(ConstraintComponent):
                 "https://www.w3.org/TR/shacl/#EqualsConstraintComponent")
         self.property_compare_set = property_compare_set
 
-
     @classmethod
     def constraint_parameters(cls):
         return [SH_equals]
@@ -51,11 +51,11 @@ class EqualsConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_EqualsConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
@@ -74,8 +74,7 @@ class EqualsConstraintComponent(ConstraintComponent):
             compare_values = set(target_graph.objects(f, eq))
             value_nodes_missing = value_node_set.difference(compare_values)
             compare_values_missing = compare_values.difference(value_node_set)
-            if len(value_nodes_missing) > 0 or\
-               len(compare_values_missing) > 0:
+            if len(value_nodes_missing) > 0 or len(compare_values_missing) > 0:
                 non_conformant = True
             else:
                 continue
@@ -106,7 +105,6 @@ class DisjointConstraintComponent(ConstraintComponent):
                 "https://www.w3.org/TR/shacl/#DisjointConstraintComponent")
         self.property_compare_set = property_compare_set
 
-
     @classmethod
     def constraint_parameters(cls):
         return [SH_disjoint]
@@ -119,29 +117,29 @@ class DisjointConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_DisjointConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
 
         for dj in iter(self.property_compare_set):
-            _nc, _r = self._evaluate_propety_disjoint(dj, target_graph, focus_value_nodes)
+            _nc, _r = self._evaluate_property_disjoint(dj, target_graph, focus_value_nodes)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
 
-    def _evaluate_propety_disjoint(self, dj, target_graph, f_v_dict):
+    def _evaluate_property_disjoint(self, dj, target_graph, f_v_dict):
         reports = []
         non_conformant = False
         for f, value_nodes in f_v_dict.items():
             value_node_set = set(value_nodes)
             compare_values = set(target_graph.objects(f, dj))
             common_nodes = value_node_set.intersection(compare_values)
-            if len(common_nodes) > 0 :
+            if len(common_nodes) > 0:
                 non_conformant = True
             else:
                 continue
@@ -174,7 +172,6 @@ class LessThanConstraintComponent(ConstraintComponent):
                 "https://www.w3.org/TR/shacl/#LessThanConstraintComponent")
         self.property_compare_set = property_compare_set
 
-
     @classmethod
     def constraint_parameters(cls):
         return [SH_lessThan]
@@ -187,18 +184,17 @@ class LessThanConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_LessThanConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
 
         for lt in iter(self.property_compare_set):
-            if isinstance(lt, rdflib.Literal) or\
-               isinstance(lt, rdflib.BNode):
+            if isinstance(lt, rdflib.Literal) or isinstance(lt, rdflib.BNode):
                 raise ReportableRuntimeError(
                     "Value of sh:lessThan MUST be a URI Identifier.")
             _nc, _r = self._evaluate_less_than(lt, target_graph, focus_value_nodes)
@@ -222,8 +218,7 @@ class LessThanConstraintComponent(ConstraintComponent):
                 if isinstance(value_node, rdflib.URIRef):
                     value_node = str(value_node)
                     value_is_string = True
-                elif isinstance(value_node, rdflib.Literal) and\
-                    isinstance(value_node.value, str):
+                elif isinstance(value_node, rdflib.Literal) and isinstance(value_node.value, str):
                     value_node = value_node.value
                     value_is_string = True
 
@@ -235,12 +230,10 @@ class LessThanConstraintComponent(ConstraintComponent):
                     if isinstance(compare_value, rdflib.URIRef):
                         compare_value = str(compare_value)
                         compare_is_string = True
-                    elif isinstance(compare_value, rdflib.Literal) and\
-                         isinstance(compare_value.value, str):
+                    elif isinstance(compare_value, rdflib.Literal) and isinstance(compare_value.value, str):
                         compare_value = compare_value.value
                         compare_is_string = True
-                    if (value_is_string and not compare_is_string) or\
-                       (compare_is_string and not value_is_string):
+                    if (value_is_string and not compare_is_string) or (compare_is_string and not value_is_string):
                         non_conformant = True
                     elif not value_node < compare_value:
                         non_conformant = True
@@ -273,7 +266,6 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
                 "https://www.w3.org/TR/shacl/#LessThanOrEqualsConstraintComponent")
         self.property_compare_set = property_compare_set
 
-
     @classmethod
     def constraint_parameters(cls):
         return [SH_lessThanOrEquals]
@@ -286,18 +278,17 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_LessThanOrEqualsConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
 
         for lt in iter(self.property_compare_set):
-            if isinstance(lt, rdflib.Literal) or\
-               isinstance(lt, rdflib.BNode):
+            if isinstance(lt, rdflib.Literal) or isinstance(lt, rdflib.BNode):
                 raise ReportableRuntimeError(
                     "Value of sh:lessThanOrEquals MUST be a URI Identifier.")
             _nc, _r = self._evaluate_ltoe(lt, target_graph, focus_value_nodes)
@@ -321,8 +312,7 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
                 if isinstance(value_node, rdflib.URIRef):
                     value_node = str(value_node)
                     value_is_string = True
-                elif isinstance(value_node, rdflib.Literal) and\
-                    isinstance(value_node.value, str):
+                elif isinstance(value_node, rdflib.Literal) and isinstance(value_node.value, str):
                     value_node = value_node.value
                     value_is_string = True
 
@@ -334,12 +324,10 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
                     if isinstance(compare_value, rdflib.URIRef):
                         compare_value = str(compare_value)
                         compare_is_string = True
-                    elif isinstance(compare_value, rdflib.Literal) and\
-                        isinstance(compare_value.value, str):
+                    elif isinstance(compare_value, rdflib.Literal) and isinstance(compare_value.value, str):
                         compare_value = compare_value.value
                         compare_is_string = True
-                    if (value_is_string and not compare_is_string) or\
-                       (compare_is_string and not value_is_string):
+                    if (value_is_string and not compare_is_string) or (compare_is_string and not value_is_string):
                         non_conformant = True
                     elif not value_node <= compare_value:
                         non_conformant = True

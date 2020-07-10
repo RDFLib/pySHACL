@@ -12,14 +12,14 @@ from pyshacl.rdfutil.clone import mix_datasets
 from pyshacl.pytypes import GraphLike
 
 if owlrl.json_ld_available:
-    import rdflib_jsonld
+    import rdflib_jsonld  # noqa: F401
 from rdflib import Literal, URIRef, BNode
 from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 from pyshacl.inference import CustomRDFSSemantics, CustomRDFSOWLRLSemantics
 from pyshacl.shapes_graph import ShapesGraph
 from pyshacl.consts import RDF_type, SH_conforms, \
     SH_result, SH_ValidationReport, RDFS_Resource, SH_resultMessage, \
-    SH_sourceShape, SH_sourceConstraint, SH_resultPath, RDF_object, RDF_subject, RDF_predicate
+    RDF_object, RDF_subject, RDF_predicate
 from pyshacl.rules import gather_rules, apply_rules, gather_functions
 from pyshacl.rdfutil import load_from_source, clone_graph, \
     clone_node, compare_blank_node, mix_graphs, order_graph_literal
@@ -136,8 +136,7 @@ class Validator(object):
         self._target_graph = None
         self.ont_graph = ont_graph
         self.data_graph_is_multigraph = isinstance(self.data_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph))
-        if self.ont_graph is not None and \
-            isinstance(self.ont_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+        if self.ont_graph is not None and isinstance(self.ont_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
             self.ont_graph.default_union = True
 
         if shacl_graph is None:
@@ -190,7 +189,7 @@ class Validator(object):
             named_graphs = [the_target_graph]
         for g in named_graphs:
             if advanced:
-                #apply functions?
+                # TODO: apply functions?
                 apply_rules(advanced['rules'], g)
             for s in shapes:
                 _is_conform, _reports = s.validate(g)
@@ -202,7 +201,9 @@ class Validator(object):
 
 
 def with_metashacl_shacl_graph_cache(f):
+    # noinspection PyPep8Naming
     EMPTY = object()
+
     @wraps(f)
     def wrapped(*args, **kwargs):
         graph_cache = getattr(wrapped, "graph_cache", None)
@@ -465,7 +466,7 @@ def check_dash_result(data_graph: GraphLike, report_graph: GraphLike, expected_r
         inf_res = compare_inferencing_reports(data_graph, expected_result_graph, expected_result)
     else:
         inf_res = True
-    if gv_res is None and inf_res is None: # pragma: no cover
+    if gv_res is None and inf_res is None:  # pragma: no cover
         raise ReportableRuntimeError("Cannot check the expected result, the given expected result graph does not have a GraphValidationTestCase or InferencingTestCase.")
     return gv_res and inf_res
 
@@ -488,8 +489,3 @@ def check_sht_result(report_graph: GraphLike, sht_graph: GraphLike, sht_result_n
         raise ReportableRuntimeError(
             "SHT expected result must have type sh:ValidationReport")
     return compare_validation_reports(report_graph, sht_graph, sht_result_node)
-
-
-
-
-

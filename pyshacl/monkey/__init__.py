@@ -50,4 +50,3 @@ def apply_patches():
     if RDFLIB_421 >= RDFLIB_VERSION:
         rdflib_term_ge_le_patch()
     return True
-

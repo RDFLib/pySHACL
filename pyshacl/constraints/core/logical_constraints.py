@@ -2,11 +2,12 @@
 """
 https://www.w3.org/TR/shacl/#core-components-logical
 """
+from typing import Dict, List
 from warnings import warn
-import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError, ShapeRecursionWarning
+from pyshacl.pytypes import GraphLike
 
 SH_not = SH.term('not')
 SH_and = SH.term('and')
@@ -53,7 +54,7 @@ class NotConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_NotConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
 
         :type focus_value_nodes: dict
@@ -128,7 +129,7 @@ class AndConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_AndConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
 
         :type focus_value_nodes: dict
@@ -180,8 +181,6 @@ class AndConstraintComponent(ConstraintComponent):
         return (not non_conformant), reports
 
 
-
-
 class OrConstraintComponent(ConstraintComponent):
     """
     sh:or specifies the condition that each value node conforms to at least one of the provided shapes. This is comparable to disjunction and the logical "or" operator.
@@ -212,11 +211,11 @@ class OrConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_OrConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
@@ -293,7 +292,7 @@ class XoneConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_XoneConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
 
         :type focus_value_nodes: dict
@@ -344,5 +343,3 @@ class XoneConstraintComponent(ConstraintComponent):
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
-
-

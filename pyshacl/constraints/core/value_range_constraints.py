@@ -2,10 +2,13 @@
 """
 https://www.w3.org/TR/shacl/#core-components-range
 """
+
 import rdflib
+from typing import Dict, List
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
+from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil.compare import compare_literal
 
 SH_MinExclusiveConstraintComponent = SH.term('MinExclusiveConstraintComponent')
@@ -47,11 +50,11 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MinExclusiveConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
@@ -98,6 +101,7 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
                     reports.append(rept)
         return non_conformant, reports
 
+
 class MinInclusiveConstraintComponent(ConstraintComponent):
     """
     Link:
@@ -127,11 +131,11 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MinInclusiveConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
@@ -208,11 +212,11 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MaxExclusiveConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
@@ -289,11 +293,11 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MaxInclusiveConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False

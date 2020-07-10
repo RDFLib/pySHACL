@@ -2,6 +2,7 @@
 """
 https://www.w3.org/TR/shacl/#core-components-value-type
 """
+from typing import Dict, List
 import rdflib
 from datetime import date, time, datetime
 from rdflib.term import Literal
@@ -11,6 +12,7 @@ from pyshacl.consts import SH, RDFS_subClassOf, RDF_type,\
     SH_IRI, SH_BlankNode, SH_Literal, SH_IRIOrLiteral, SH_BlankNodeOrIRI,\
     SH_BlankNodeORLiteral
 from pyshacl.errors import ConstraintLoadError
+from pyshacl.pytypes import GraphLike
 
 RDF_langString = RDF.term('langString')
 XSD_string = XSD.term('string')
@@ -27,6 +29,7 @@ SH_nodeKind = SH.term('nodeKind')
 SH_ClassConstraintComponent = SH.term('ClassConstraintComponent')
 SH_DatatypeConstraintComponent = SH.term('DatatypeConstraintComponent')
 SH_NodeKindConstraintComponent = SH.term('NodeKindConstraintComponent')
+
 
 class ClassConstraintComponent(ConstraintComponent):
     """
@@ -58,11 +61,11 @@ class ClassConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_ClassConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
@@ -81,8 +84,8 @@ class ClassConstraintComponent(ConstraintComponent):
                 found = False
                 if isinstance(v, Literal):
                     self.shape.logger.debug("Class Constraint won't work with Literals. "
-                                   "Attempting to match Literal node {} to class of {} will fail."
-                                   .format(v, class_rule))
+                                            "Attempting to match Literal node {} to class of {} will fail."
+                                            .format(v, class_rule))
                 else:
                     objs = target_graph.objects(v, RDF_type)
                     for ctype in iter(objs):
@@ -137,11 +140,11 @@ class DatatypeConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_DatatypeConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
@@ -189,6 +192,7 @@ class DatatypeConstraintComponent(ConstraintComponent):
             # We don't know how to check other datatypes. Assume pass.
             return True
 
+
 class NodeKindConstraintComponent(ConstraintComponent):
     """
     sh:nodeKind specifies a condition to be satisfied by the RDF node kind of each value node.
@@ -223,11 +227,11 @@ class NodeKindConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_NodeKindConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         n_rule = self.nodekind_rule
         reports = []

@@ -9,7 +9,7 @@ from pyshacl.constraints.core.logical_constraints import NotConstraintComponent,
 from pyshacl.constraints.core.shape_based_constraints import NodeConstraintComponent, PropertyConstraintComponent, QualifiedValueShapeConstraintComponent
 from pyshacl.constraints.core.other_constraints import ClosedConstraintComponent, InConstraintComponent, HasValueConstraintComponent
 from pyshacl.constraints.sparql.sparql_based_constraints import SPARQLBasedConstraint
-from pyshacl.constraints.sparql.sparql_based_constraint_components import SPARQLConstraintComponent
+from pyshacl.constraints.sparql.sparql_based_constraint_components import SPARQLConstraintComponent  # noqa: F401
 
 ALL_CONSTRAINT_COMPONENTS = [
     ClassConstraintComponent,

@@ -2,12 +2,14 @@
 """
 https://www.w3.org/TR/shacl/#core-components-shape
 """
+from typing import Dict, List
 from warnings import warn
 import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH, SH_property, SH_node
 from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError, ConstraintLoadWarning, \
     ShapeRecursionWarning
+from pyshacl.pytypes import GraphLike
 
 SH_PropertyConstraintComponent = SH.term('PropertyConstraintComponent')
 SH_NodeConstraintComponent = SH.term('NodeConstraintComponent')
@@ -52,7 +54,7 @@ class PropertyConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_PropertyConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
 
         :type focus_value_nodes: dict
@@ -122,7 +124,7 @@ class NodeConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_NodeConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
 
         :type focus_value_nodes: dict
@@ -240,7 +242,7 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
                                   "QualifiedMinCountConstraintComponent or "
                                   "QualifiedMaxCountConstraintComponent")
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
 
         :type focus_value_nodes: dict
@@ -312,4 +314,3 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
-

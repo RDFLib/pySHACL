@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
-
-from pyshacl.consts import RDF_type, SH_TripleRule, SH_SPARQLRule, SH_SPARQLFunction, SH_rule, SH_condition
+from typing import TYPE_CHECKING, Dict, List
+from pyshacl.consts import RDF_type, SH_TripleRule, SH_SPARQLRule, SH_SPARQLFunction, SH_rule
 from pyshacl.errors import RuleLoadError
-from pyshacl.shapes_graph import ShapesGraph
-from pyshacl.rules.shacl_rule import SHACLRule
+from pyshacl.pytypes import GraphLike
 from pyshacl.rules.triple import TripleRule
 from pyshacl.rules.sparql import SPARQLRule
+
+if TYPE_CHECKING:
+    from pyshacl.shapes_graph import ShapesGraph
+    from pyshacl.shape import Shape
+    from .shacl_rule import SHACLRule
 
 ALL_SPARQL_RULES = [
     TripleRule,
@@ -14,7 +18,7 @@ ALL_SPARQL_RULES = [
 ]
 
 
-def gather_functions(shacl_graph):
+def gather_functions(shacl_graph: 'ShapesGraph') -> List['SHACLRule']:
     """
 
     :param shacl_graph:
@@ -25,15 +29,17 @@ def gather_functions(shacl_graph):
     fn_nodes = set(shacl_graph.subjects(RDF_type, SH_SPARQLFunction))
     if len(fn_nodes):
         raise NotImplementedError("SHACL Advanced Feature SPARQLFunction is not yet supported.")
+    # TODO: Finish implementing SPARQL Functions
+    return []
 
 
-def gather_rules(shacl_graph):
+def gather_rules(shacl_graph: 'ShapesGraph') -> Dict[Shape, List['SHACLRule']]:
     """
 
     :param shacl_graph:
     :type shacl_graph: ShapesGraph
     :return:
-    :rtype: [SHACLRule]
+    :rtype: Dict[Shape, List['SHACLRule']]
     """
     triple_rule_nodes = set(shacl_graph.subjects(RDF_type, SH_TripleRule))
     sparql_rule_nodes = set(shacl_graph.subjects(RDF_type, SH_SPARQLRule))
@@ -46,7 +52,7 @@ def gather_rules(shacl_graph):
     ret_rules = defaultdict(list)
     for sub, obj in used_rules:
         try:
-            shape = shacl_graph.lookup_shape_from_node(sub)
+            shape = shacl_graph.lookup_shape_from_node(sub)  # type: Shape
         except (AttributeError, KeyError):
             raise RuleLoadError(
                 "The shape that rule is attached to is not a valid SHACL Shape.",
@@ -63,7 +69,7 @@ def gather_rules(shacl_graph):
     return ret_rules
 
 
-def apply_rules(shapes_rules, data_graph):
+def apply_rules(shapes_rules: Dict, data_graph: GraphLike):
     # short the shapes dict by shapes sh:order before execution
     shapes_rules = sorted(shapes_rules.items(), key=lambda x: x[0].order)
     for shape, rules in shapes_rules:
@@ -73,4 +79,3 @@ def apply_rules(shapes_rules, data_graph):
             if r.deactivated:
                 continue
             r.apply(data_graph)
-

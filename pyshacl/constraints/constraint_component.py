@@ -4,15 +4,19 @@
 https://www.w3.org/TR/shacl/#core-components-value-type
 """
 import abc
-from typing import Optional, Iterable, TYPE_CHECKING
+from typing import Optional, Iterable, Dict, List, TYPE_CHECKING
 
-from rdflib import BNode
-from pyshacl.consts import *
+import rdflib
+from rdflib import BNode, URIRef, Literal
+
+from pyshacl.consts import SH_Violation, RDF_type, SH_ValidationResult, SH_sourceConstraintComponent, SH_sourceShape, \
+    SH_resultSeverity, SH_focusNode, SH_value, SH_resultPath, SH_sourceConstraint, SH_resultMessage
 from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
 
 if TYPE_CHECKING:
     from pyshacl.shape import Shape
+
 
 class ConstraintComponent(object, metaclass=abc.ABCMeta):
     __slots__ = ('shape',)
@@ -46,7 +50,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         raise NotImplementedError()  # pragma: no cover
 
     @abc.abstractmethod
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         raise NotImplementedError()  # pragma: no cover
 
     def make_generic_message(self):
@@ -66,7 +70,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
             _shape, _self = _evaluation_path[eval_length - 2:]
             if _shape is not shape or _self is not self:
                 raise RuntimeError("Bad evaluation path construction")
-            seen_before = [i for i, x in enumerate(_evaluation_path[:eval_length-2]) if x is shape] #_evaluation_path.index(shape, 0, eval_length - 2)
+            seen_before = [i for i, x in enumerate(_evaluation_path[:eval_length - 2]) if x is shape]
             for s in seen_before:
                 for i, p in enumerate(_evaluation_path[s + 1:-2]):
                     if isinstance(p, ConstraintComponent):
@@ -79,8 +83,8 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
                         break
         return maybe_recursive
 
-    def make_v_result_description(self, datagraph: GraphLike, focus_node: rdflib.term.Identifier,
-                                  severity: rdflib.URIRef, value_node: Optional[rdflib.term.Identifier],
+    def make_v_result_description(self, datagraph: GraphLike, focus_node: 'rdflib.term.Identifier',
+                                  severity: URIRef, value_node: Optional['rdflib.term.Identifier'],
                                   result_path=None, constraint_component=None, source_constraint=None,
                                   extra_messages: Optional[Iterable] = None):
 
@@ -129,19 +133,19 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
             for m in iter(extra_messages):
                 if m in self.shape.message:
                     continue
-                if isinstance(m, rdflib.Literal):
+                if isinstance(m, Literal):
                     desc += "\tMessage: {}\n".format(str(m.value))
                 else:  # pragma: no cover
                     desc += "\tMessage: {}\n".format(str(m))
         for m in self.shape.message:
-            if isinstance(m, rdflib.Literal):
+            if isinstance(m, Literal):
                 desc += "\tMessage: {}\n".format(str(m.value))
             else:  # pragma: no cover
                 desc += "\tMessage: {}\n".format(str(m))
         return desc
 
-    def make_v_result(self, datagraph: GraphLike, focus_node: rdflib.term.Identifier,
-                      value_node: Optional[rdflib.term.Identifier] = None, result_path=None,
+    def make_v_result(self, datagraph: GraphLike, focus_node: 'rdflib.term.Identifier',
+                      value_node: Optional['rdflib.term.Identifier'] = None, result_path=None,
                       constraint_component=None, source_constraint=None,
                       extra_messages: Optional[Iterable] = None):
         """

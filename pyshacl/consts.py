@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import rdflib
-
 from rdflib.namespace import Namespace
 from rdflib import RDFS, RDF, OWL
 
@@ -82,4 +80,3 @@ SH_object = SH.term('object')
 SH_parameter = SH.term('parameter')
 SH_select = SH.term('select')
 SH_this = SH.term('this')
-

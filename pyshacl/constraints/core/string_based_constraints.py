@@ -2,11 +2,13 @@
 """
 https://www.w3.org/TR/shacl/#core-components-string
 """
+from typing import Dict, List
 import rdflib
 import re
 from pyshacl.constraints.constraint_component import ConstraintComponent
-from pyshacl.consts import SH, SH_property, SH_node
+from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
+from pyshacl.pytypes import GraphLike
 
 SH_PatternConstraintComponent = SH.term('PatternConstraintComponent')
 SH_MinLengthConstraintComponent = SH.term('MinLengthConstraintComponent')
@@ -19,6 +21,7 @@ SH_minLength = SH.term('minLength')
 SH_maxLength = SH.term('maxLength')
 SH_languageIn = SH.term('languageIn')
 SH_uniqueLang = SH.term('uniqueLang')
+
 
 class StringBasedConstraintBase(ConstraintComponent):
     """
@@ -55,11 +58,11 @@ class StringBasedConstraintBase(ConstraintComponent):
     def _evaluate_string_rule(self, r, target_graph, f_v_dict):
         raise NotImplementedError()
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
@@ -301,15 +304,15 @@ class LanguageInConstraintComponent(StringBasedConstraintBase):
         languages_need = set()
         sg = self.shape.sg.graph
         try:
-            for l in iter(sg.items(r)):
+            for lang_in in iter(sg.items(r)):
                 try:
-                    assert isinstance(l, rdflib.Literal)
-                    assert isinstance(l.value, str)
+                    if not isinstance(lang_in, rdflib.Literal) or not isinstance(lang_in.value, str):
+                        raise ReportableRuntimeError(
+                            "All languages in sh:LanugageIn must be a Literal with type xsd:string")
                 except (AssertionError, AttributeError):
                     raise ReportableRuntimeError(
-                        "All languages in sh:LanugageIn must be a Literal "
-                        "with type xsd:string")
-                languages_need.add(str(l.value).lower())
+                        "All languages in sh:LanugageIn must be a Literal with type xsd:string")
+                languages_need.add(str(lang_in.value).lower())
         except (KeyError, AttributeError, ValueError):
             raise ReportableRuntimeError("Value of sh:LanguageIn must be a RDF List")
         wildcard = False
@@ -403,15 +406,15 @@ class UniqueLangConstraintComponent(StringBasedConstraintBase):
                         else:
                             found_langs[low_lang] = lang
                         # TODO: determine if there is duplicate matching on parts of multi-part langs.
-                        # lang_parts = str(lang).split('-')
-                        # first_part = lang_parts[0]
-                        # if str(first_part).lower() in languages_need:
-                        #     flag = True
+                        #  lang_parts = str(lang).split('-')
+                        #  first_part = lang_parts[0]
+                        #  if str(first_part).lower() in languages_need:
+                        #      flag = True
             for d in iter(found_duplicates):
                 non_conformant = True
                 # Adding value_node here causes SHT validation to fail.
                 # IMHO it should be present
-                #rept = self.make_v_result(target_graph, f, value_node=found_langs[d])
+                # rept = self.make_v_result(target_graph, f, value_node=found_langs[d])
                 rept = self.make_v_result(target_graph, f, value_node=None)
                 reports.append(rept)
         return non_conformant, reports

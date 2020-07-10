@@ -6,8 +6,10 @@ from decimal import Decimal
 
 RDF_first = RDF.term('first')
 
+
 class SHACLRuleCondition(object):
     __slots__ = ("rule", "cond_shape")
+
     def __init__(self, rule, cond_shape):
         self.rule = rule
         self.cond_shape = cond_shape
@@ -60,8 +62,8 @@ class SHACLRule(object):
         cond_nodes = list(self.shape.sg.graph.objects(self.node, SH_condition))
         conditions = []
         for c in cond_nodes:
+            # test_me = list(self.shape.sg.graph.predicate_objects(c))
             # check if this is a rdf:list
-            test_me = list(self.shape.sg.graph.predicate_objects(c))
             first_nodes = list(self.shape.sg.graph.objects(c, RDF_first))
             if len(first_nodes) > 0:
                 for c_item in self.shape.sg.graph.items(c):
@@ -98,4 +100,3 @@ class SHACLRule(object):
 
     def apply(self, data_graph):
         raise NotImplementedError()
-

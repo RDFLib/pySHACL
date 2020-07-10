@@ -1,6 +1,6 @@
 sudo: false
 language: python
-dist: xenial
+dist: bionic
 cache:
   directories:
     - $HOME/.cache/pip
@@ -30,7 +30,8 @@ matrix:
 
 
 install:
-  - pip install -U tox
+  - pip3 install --upgrade pip
+  - pip3 install --upgrade tox
 script: travis_retry tox -e $TOX_ENV
 deploy:
   provider: pypi

@@ -1,27 +1,30 @@
 # -*- coding: utf-8 -*-
+from typing import TYPE_CHECKING
+import rdflib
 from rdflib import Literal
 from rdflib.namespace import XSD
-
-
 from pyshacl.rdfutil import clone_graph
-from pyshacl.shape import Shape
 from pyshacl.errors import RuleLoadError, ReportableRuntimeError
 from pyshacl.consts import SH_construct
 from pyshacl.sparql_query_helper import SPARQLQueryHelper
 from pyshacl.rules.shacl_rule import SHACLRule
 
+if TYPE_CHECKING:
+    from pyshacl.shape import Shape
+
 XSD_string = XSD.term('string')
+
 
 class SPARQLRule(SHACLRule):
     __slots__ = ("_constructs", "_qh")
 
-    def __init__(self, shape, rule_node):
+    def __init__(self, shape: 'Shape', rule_node: 'rdflib.term.Identifier'):
         """
 
         :param shape:
         :type shape: Shape
         :param rule_node:
-        :type rule_node: rdflib.Identifier
+        :type rule_node: rdflib.term.Identifier
         """
         super(SPARQLRule, self).__init__(shape, rule_node)
         construct_nodes = set(self.shape.sg.objects(self.node, SH_construct))

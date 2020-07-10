@@ -2,16 +2,17 @@
 """
 https://www.w3.org/TR/shacl/#sparql-constraints
 """
+from typing import Dict, List
 import rdflib
-
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH, SH_select, SH_message, SH_deactivated
 from pyshacl.errors import ConstraintLoadError, ValidationFailure
+from pyshacl.pytypes import GraphLike
 from pyshacl.sparql_query_helper import SPARQLQueryHelper
 
 SH_sparql = SH.term('sparql')
-
 SH_SPARQLConstraintComponent = SH.term('SPARQLConstraintComponent')
+
 
 class SPARQLBasedConstraint(ConstraintComponent):
     """
@@ -42,8 +43,7 @@ class SPARQLBasedConstraint(ConstraintComponent):
                     "at most one sh:select predicate.",
                     "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent")
             select_node = next(iter(select_node_list))
-            if not (isinstance(select_node, rdflib.Literal) and
-                    isinstance(select_node.value, str)):
+            if not (isinstance(select_node, rdflib.Literal) and isinstance(select_node.value, str)):
                 raise ConstraintLoadError(
                     "SPARQLConstraintComponent value for sh:select must be "
                     "a Literal with type xsd:string.",
@@ -52,8 +52,7 @@ class SPARQLBasedConstraint(ConstraintComponent):
             message_node_list = set(sg.objects(s, SH_message))
             if len(message_node_list) > 0:
                 message = next(iter(message_node_list))
-                if not (isinstance(message, rdflib.Literal) and
-                        isinstance(message.value, str)):
+                if not (isinstance(message, rdflib.Literal) and isinstance(message.value, str)):
                     raise ConstraintLoadError(
                         "SPARQLConstraintComponent value for sh:message must be "
                         "a Literal with type xsd:string.",
@@ -62,8 +61,7 @@ class SPARQLBasedConstraint(ConstraintComponent):
             deactivated_node_list = set(sg.objects(s, SH_deactivated))
             if len(deactivated_node_list) > 0:
                 deactivated = next(iter(deactivated_node_list))
-                if not (isinstance(deactivated, rdflib.Literal) and
-                        isinstance(deactivated.value, bool)):
+                if not (isinstance(deactivated, rdflib.Literal) and isinstance(deactivated.value, bool)):
                     raise ConstraintLoadError(
                         "SPARQLConstraintComponent value for sh:deactivated must be "
                         "a Literal with type xsd:boolean.",
@@ -72,7 +70,6 @@ class SPARQLBasedConstraint(ConstraintComponent):
             query_helper.collect_prefixes()
             sparql_constraints.add(query_helper)
         self.sparql_constraints = sparql_constraints
-
 
     @classmethod
     def constraint_parameters(cls):
@@ -86,11 +83,11 @@ class SPARQLBasedConstraint(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_SPARQLConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
-
-        :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
@@ -161,7 +158,6 @@ class SPARQLBasedConstraint(ConstraintComponent):
                 v = r['value']
             except KeyError:
                 v = None
-                pass
             try:
                 t = r['this']
             except KeyError:
@@ -170,9 +166,8 @@ class SPARQLBasedConstraint(ConstraintComponent):
                 violations.add((t, p, v))
             else:
                 try:
-                    f = r['failure']
+                    _ = r['failure']
                     violations.add(True)
                 except KeyError:
                     pass
         return violations
-

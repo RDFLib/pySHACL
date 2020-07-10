@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from owlrl.RDFSClosure import RDFS_Semantics as OrigRDFSSemantics
 from owlrl.OWLRL import OWLRL_Semantics
-
 from owlrl.RDFS import Resource, Class, Datatype
 from owlrl.OWL import OWLClass, Thing, equivalentClass, DataRange
+
 
 class CustomRDFSSemantics(OrigRDFSSemantics):
     def one_time_rules(self):

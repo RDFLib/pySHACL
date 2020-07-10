@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 #
-from io import IOBase, BytesIO, BufferedRandom, TextIOWrapper, BufferedReader, UnsupportedOperation
+from io import IOBase, BytesIO, UnsupportedOperation
 from pathlib import Path
 import platform
-from typing import Union, Optional, Dict, List, IO, BinaryIO
+from typing import Union, Optional, List, BinaryIO
 from urllib import request
 from urllib.error import HTTPError
 
@@ -12,7 +12,7 @@ import rdflib
 from pyshacl.pytypes import GraphLike
 
 try:
-    import rdflib_jsonld
+    import rdflib_jsonld  # noqa: F401
     has_json_ld = True
 except IndexError:
     has_json_ld = False
@@ -80,8 +80,7 @@ def load_from_source(source: Union[GraphLike, BinaryIO, Union[str, bytes]],
     filename = None
     public_id = None
     uri_prefix = None
-    is_imported_graph = do_owl_imports and isinstance(do_owl_imports, int) \
-                        and do_owl_imports > 1
+    is_imported_graph = do_owl_imports and isinstance(do_owl_imports, int) and do_owl_imports > 1
     if isinstance(source, (rdflib.Graph, rdflib.ConjunctiveGraph, rdflib.Dataset)):
         source_is_graph = True
         if g is None:
@@ -137,8 +136,9 @@ def load_from_source(source: Union[GraphLike, BinaryIO, Union[str, bytes]],
             elif len(source) < 140:
                 source_is_file = True
                 filename = source
-        #if public_id and not public_id.endswith('#'):
-        #    public_id = "{}#".format(public_id)
+        # TODO: Do we still need this? Not sure why this was added, but works better without it
+        #  if public_id and not public_id.endswith('#'):
+        #     public_id = "{}#".format(public_id)
         if not source_is_file and not source_is_open and isinstance(source, str):
             # source is raw RDF data.
             source = source.encode('utf-8')
@@ -189,11 +189,11 @@ def load_from_source(source: Union[GraphLike, BinaryIO, Union[str, bytes]],
         source = BytesIO(source)
         source_is_open = True
     if source_is_open:
-        #Check if we can seek
+        # Check if we can seek
         try:
             source.seek(0)
         except (AttributeError, UnsupportedOperation):
-            #Read it all into memory
+            # Read it all into memory
             new_bytes = BytesIO(source.read())
             if not source_was_open:
                 source.close()
@@ -208,26 +208,26 @@ def load_from_source(source: Union[GraphLike, BinaryIO, Union[str, bytes]],
             # The @base line is not read here, but it is parsed in the n3 parser
             while True:
                 try:
-                    l = source.readline()
-                    assert l is not None and len(l) > 0
+                    line = source.readline()
+                    assert line is not None and len(line) > 0
                 except AssertionError:
                     break
                 # Strip line from start
-                while len(l) > 0 and l[0:1] in b' \t\n\r\x0B\x0C\x85\xA0':
-                    l = l[1:]
+                while len(line) > 0 and line[0:1] in b' \t\n\r\x0B\x0C\x85\xA0':
+                    line = line[1:]
                 # We reached the end of the line, check the next line
-                if len(l) < 1:
+                if len(line) < 1:
                     continue
                 # If this is not a comment, then this is the first non-comment line, we're done.
-                if not l[0:1] == b'#':
+                if not line[0:1] == b'#':
                     break
                 # Strip from start again, but now removing hashes too.
-                while len(l) > 0 and l[0:1] in b'# \t\xA0':
-                    l = l[1:]
+                while len(line) > 0 and line[0:1] in b'# \t\xA0':
+                    line = line[1:]
                 # Strip line from end
-                while len(l) > 0 and l[-1:] in b' \t\n\r\x0B\x0C\x85\xA0':
-                    l = l[:-1]
-                spl = l.split(b':', 1)
+                while len(line) > 0 and line[-1:] in b' \t\n\r\x0B\x0C\x85\xA0':
+                    line = line[:-1]
+                spl = line.split(b':', 1)
                 if len(spl) < 2:
                     continue
                 keyword = spl[0].lower()
