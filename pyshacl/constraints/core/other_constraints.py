@@ -12,6 +12,7 @@ from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH, RDF_type, SH_property
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
 from pyshacl.pytypes import GraphLike
+from pyshacl.rdfutil import stringify_node
 
 
 SH_InConstraintComponent = SH.term('InConstraintComponent')
@@ -62,6 +63,11 @@ class InConstraintComponent(ConstraintComponent):
     @classmethod
     def shacl_constraint_class(cls):
         return SH_InConstraintComponent
+
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        list1 = [stringify_node(self.shape.sg.graph, val) for val in self.in_vals]
+        m = "Value {} not in list {}".format(stringify_node(datagraph, value_node), list1)
+        return [rdflib.Literal(m)]
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
@@ -131,6 +137,12 @@ class ClosedConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_ClosedConstraintComponent
 
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        m = "Node {} is closed. It cannot have value: {}".format(
+            stringify_node(datagraph, focus_node), stringify_node(datagraph, value_node)
+        )
+        return [rdflib.Literal(m)]
+
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
         :type target_graph: rdflib.Graph
@@ -147,8 +159,7 @@ class ClosedConstraintComponent(ConstraintComponent):
             property_shape = self.shape.get_other_shape(p_shape)
             if not property_shape or not property_shape.is_property_shape:
                 raise ReportableRuntimeError(
-                    "The shape pointed to by sh:property does "
-                    "not exist, or is not a well defined SHACL PropertyShape."
+                    "The shape pointed to by sh:property does not exist, or is not a well defined SHACL PropertyShape."
                 )
             working_shapes.add(property_shape)
         working_paths = set()
@@ -175,11 +186,11 @@ class ClosedConstraintComponent(ConstraintComponent):
 
 class HasValueConstraintComponent(ConstraintComponent):
     """
-    sh:equals specifies the condition that the set of all value nodes is equal to the set of objects of the triples that have the focus node as subject and the value of sh:equals as predicate.
+    sh:hasValue specifies the condition that at least one value node is equal to the given RDF term.
     Link:
     https://www.w3.org/TR/shacl/#HasValueConstraintComponent
     Textual Definition:
-    For each value node that does not exist as a value of the property $equals at the focus node, there is a validation result with the value node as sh:value. For each value of the property $equals at the focus node that is not one of the value nodes, there is a validation result with the value as sh:value.
+    If the RDF term $hasValue is not among the value nodes, there is a validation result.
     """
 
     def __init__(self, shape):
@@ -203,6 +214,20 @@ class HasValueConstraintComponent(ConstraintComponent):
     @classmethod
     def shacl_constraint_class(cls):
         return SH_HasValueConstraintComponent
+
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        the_set = [stringify_node(self.shape.sg.graph, s) for s in self.has_value_set]
+        p = self.shape.path()
+        if p:
+            p = stringify_node(self.shape.sg.graph, p)
+            m = "Node {}->{} does not contain a value in the set: {}".format(
+                stringify_node(datagraph, focus_node), p, the_set
+            )
+        else:
+            m = "Node {} value is not a in the set of values: {}".format(
+                stringify_node(datagraph, focus_node), the_set
+            )
+        return [rdflib.Literal(m)]
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """

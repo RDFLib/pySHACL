@@ -24,6 +24,7 @@ from pyshacl.consts import (
 )
 from pyshacl.errors import ConstraintLoadError
 from pyshacl.pytypes import GraphLike
+from pyshacl.rdfutil import stringify_node
 
 
 RDF_langString = RDF.term('langString')
@@ -73,6 +74,14 @@ class ClassConstraintComponent(ConstraintComponent):
     @classmethod
     def shacl_constraint_class(cls):
         return SH_ClassConstraintComponent
+
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+        if len(self.class_rules) < 2:
+            m = "Value does not have class {}".format(stringify_node(datagraph, self.class_rules[0]))
+        else:
+            rules = ", ".join(stringify_node(datagraph, c) for c in self.class_rules)
+            m = "Value class is not in classes ({})".format(rules)
+        return [Literal(m)]
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
@@ -154,6 +163,10 @@ class DatatypeConstraintComponent(ConstraintComponent):
     @classmethod
     def shacl_constraint_class(cls):
         return SH_DatatypeConstraintComponent
+
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+        m = "Value is not Literal with datatype {}".format(stringify_node(datagraph, self.datatype_rule))
+        return [Literal(m)]
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
@@ -243,6 +256,10 @@ class NodeKindConstraintComponent(ConstraintComponent):
     @classmethod
     def shacl_constraint_class(cls):
         return SH_NodeKindConstraintComponent
+
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+        m = "Value is not of Node Kind {}".format(stringify_node(datagraph, self.nodekind_rule))
+        return [Literal(m)]
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """

@@ -27,7 +27,9 @@ matrix:
     - env: TOX_ENV=lint
       python: 3.6
       name: "Python 3.6 Linter checks"
-
+    - env: TOX_ENV=py36,type-checking,lint DEPLOY=true
+      python: 3.6
+      name: "Aggregate or all above, and deploy"
 
 install:
   - pip3 install --upgrade pip "poetry>=1.0.9" tox
@@ -43,6 +45,8 @@ deploy:
   on:
     tags: true
     python: 3.6
+    condition: $DEPLOY = true
+    branch: release
   distributions: "sdist bdist_wheel"
   skip_existing: true
 

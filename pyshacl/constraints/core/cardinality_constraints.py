@@ -11,6 +11,7 @@ from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError
 from pyshacl.pytypes import GraphLike
+from pyshacl.rdfutil import stringify_node
 
 
 XSD_integer = XSD.term('integer')
@@ -72,6 +73,17 @@ class MinCountConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MinCountConstraintComponent
 
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+        p = self.shape.path()
+        if p:
+            p = stringify_node(self.shape.sg.graph, p)
+            m = "Less than {} values on {}->{}".format(
+                str(self.min_count.value), stringify_node(datagraph, focus_node), p
+            )
+        else:
+            m = "Less than {} values on {}".format(str(self.min_count.value), stringify_node(datagraph, focus_node))
+        return [Literal(m)]
+
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
         :type target_graph: rdflib.Graph
@@ -86,8 +98,7 @@ class MinCountConstraintComponent(ConstraintComponent):
         non_conformant = False
 
         for f, value_nodes in focus_value_nodes.items():
-            flag = len(value_nodes) >= min_count
-            if not flag:
+            if not len(value_nodes) >= min_count:
                 non_conformant = True
                 rept = self.make_v_result(target_graph, f)
                 reports.append(rept)
@@ -144,6 +155,17 @@ class MaxCountConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MaxCountConstraintComponent
 
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+        p = self.shape.path()
+        if p:
+            p = stringify_node(self.shape.sg.graph, p)
+            m = "More than {} values on {}->{}".format(
+                str(self.max_count.value), stringify_node(datagraph, focus_node), p
+            )
+        else:
+            m = "More than {} values on {}".format(str(self.max_count.value), stringify_node(datagraph, focus_node))
+        return [Literal(m)]
+
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
         :type target_graph: rdflib.Graph
@@ -155,8 +177,7 @@ class MaxCountConstraintComponent(ConstraintComponent):
         non_conformant = False
 
         for f, value_nodes in focus_value_nodes.items():
-            flag = len(value_nodes) <= max_count
-            if not flag:
+            if not len(value_nodes) <= max_count:
                 non_conformant = True
                 rept = self.make_v_result(target_graph, f)
                 reports.append(rept)

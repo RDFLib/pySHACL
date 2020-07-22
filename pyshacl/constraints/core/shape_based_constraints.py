@@ -17,6 +17,7 @@ from pyshacl.errors import (
     ValidationFailure,
 )
 from pyshacl.pytypes import GraphLike
+from pyshacl.rdfutil import stringify_node
 
 
 SH_PropertyConstraintComponent = SH.term('PropertyConstraintComponent')
@@ -62,6 +63,9 @@ class PropertyConstraintComponent(ConstraintComponent):
     @classmethod
     def shacl_constraint_class(cls):
         return SH_PropertyConstraintComponent
+
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        raise NotImplementedError("A Property Constraint Component should not be able to generate its own message.")
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
@@ -132,6 +136,14 @@ class NodeConstraintComponent(ConstraintComponent):
     @classmethod
     def shacl_constraint_class(cls):
         return SH_NodeConstraintComponent
+
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        if len(self.node_shapes) < 2:
+            m = "Value does not conform to Shape {}".format(stringify_node(self.shape.sg.graph, self.node_shapes[0]))
+        else:
+            rules = "', '".join(stringify_node(self.shape.sg.graph, self.node_shapes[0]) for c in self.node_shapes)
+            m = "Value does not conform to every Shape in ('{}')".format(rules)
+        return [rdflib.Literal(m)]
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
@@ -256,6 +268,11 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
             "QualifiedMinCountConstraintComponent or "
             "QualifiedMaxCountConstraintComponent"
         )
+
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        # TODO:
+        #  Implement default message for QualifiedValueConstraint (seems messy)
+        return []
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """

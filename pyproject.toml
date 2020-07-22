@@ -4,7 +4,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "pyshacl"
-version = "0.12.0"
+version = "0.12.1"
 description = "Python SHACL Validator"
 license = "Apache-2.0"
 authors = [
@@ -15,7 +15,7 @@ repository = "https://github.com/RDFLib/pySHACL"
 homepage = "https://github.com/RDFLib/pySHACL"
 keywords = ["Linked Data", "Semantic Web", "RDF", "Python", "SHACL", "Shapes", "Schema", "Validate"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Topic :: Utilities",
     "Intended Audience :: Developers",
     "Natural Language :: English",

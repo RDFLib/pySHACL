@@ -5,10 +5,13 @@ https://www.w3.org/TR/shacl/#core-components-logical
 from typing import Dict, List
 from warnings import warn
 
+import rdflib
+
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError, ShapeRecursionWarning, ValidationFailure
 from pyshacl.pytypes import GraphLike
+from pyshacl.rdfutil import stringify_node
 
 
 SH_not = SH.term('not')
@@ -57,6 +60,12 @@ class NotConstraintComponent(ConstraintComponent):
     @classmethod
     def shacl_constraint_class(cls):
         return SH_NotConstraintComponent
+
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        m = "Node {} conforms to shape {}".format(
+            stringify_node(datagraph, value_node), stringify_node(self.shape.sg.graph, self.not_list[0])
+        )
+        return [rdflib.Literal(m)]
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
@@ -134,6 +143,13 @@ class AndConstraintComponent(ConstraintComponent):
     @classmethod
     def shacl_constraint_class(cls):
         return SH_AndConstraintComponent
+
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        and_list = " , ".join(
+            stringify_node(self.shape.sg.graph, a_c) for a in self.and_list for a_c in self.shape.sg.graph.items(a)
+        )
+        m = "Node {} does not conforms to all shapes in {}".format(stringify_node(datagraph, value_node), and_list)
+        return [rdflib.Literal(m)]
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
@@ -217,6 +233,15 @@ class OrConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_OrConstraintComponent
 
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        or_list = " , ".join(
+            stringify_node(self.shape.sg.graph, o_c) for o in self.or_list for o_c in self.shape.sg.graph.items(o)
+        )
+        m = "Node {} does not conform to one or more shapes in {}".format(
+            stringify_node(datagraph, value_node), or_list
+        )
+        return [rdflib.Literal(m)]
+
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
         :type target_graph: rdflib.Graph
@@ -297,6 +322,13 @@ class XoneConstraintComponent(ConstraintComponent):
     @classmethod
     def shacl_constraint_class(cls):
         return SH_XoneConstraintComponent
+
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        xone_list = " , ".join(
+            stringify_node(self.shape.sg.graph, a_c) for a in self.xone_nodes for a_c in self.shape.sg.graph.items(a)
+        )
+        m = "Node {} does not conform exactly one shape in {}".format(stringify_node(datagraph, value_node), xone_list)
+        return [rdflib.Literal(m)]
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """

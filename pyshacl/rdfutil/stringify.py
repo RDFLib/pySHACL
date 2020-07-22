@@ -147,7 +147,10 @@ def stringify_node(
             graph = find_node_named_graph(graph, node)
         return stringify_blank_node(graph, node, ns_manager=ns_manager, recursion=recursion + 1)
     if isinstance(node, rdflib.URIRef):
-        return node.n3(namespace_manager=ns_manager)
+        try:
+            node_string = node.n3(namespace_manager=ns_manager)
+        except Exception:
+            node_string = str(node)
     else:
         node_string = str(node)
     return node_string

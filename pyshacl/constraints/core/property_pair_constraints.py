@@ -10,6 +10,7 @@ from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
 from pyshacl.pytypes import GraphLike
+from pyshacl.rdfutil import stringify_node
 
 
 SH_equals = SH.term('equals')
@@ -54,6 +55,21 @@ class EqualsConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_EqualsConstraintComponent
 
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+
+        if len(self.property_compare_set) < 2:
+            m = "Value of {}->{} != {}".format(
+                stringify_node(self.shape.sg.graph, focus_node),
+                stringify_node(self.shape.sg.graph, next(iter(self.property_compare_set))),
+                stringify_node(datagraph, value_node),
+            )
+        else:
+            rules = ", ".join(stringify_node(self.shape.sg.graph, p) for p in self.property_compare_set)
+            m = "Value of {}->{} != {}".format(
+                stringify_node(self.shape.sg.graph, focus_node), rules, stringify_node(datagraph, value_node)
+            )
+        return [rdflib.Literal(m)]
+
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
         :type target_graph: rdflib.Graph
@@ -64,12 +80,12 @@ class EqualsConstraintComponent(ConstraintComponent):
         non_conformant = False
 
         for eq in iter(self.property_compare_set):
-            _nc, _r = self._evaluate_propety_equals(eq, target_graph, focus_value_nodes)
+            _nc, _r = self._evaluate_property_equals(eq, target_graph, focus_value_nodes)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
 
-    def _evaluate_propety_equals(self, eq, target_graph, f_v_dict):
+    def _evaluate_property_equals(self, eq, target_graph, f_v_dict):
         reports = []
         non_conformant = False
         for f, value_nodes in f_v_dict.items():
@@ -120,6 +136,20 @@ class DisjointConstraintComponent(ConstraintComponent):
     @classmethod
     def shacl_constraint_class(cls):
         return SH_DisjointConstraintComponent
+
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        if len(self.property_compare_set) < 2:
+            m = "Value of {}->{} == {}".format(
+                stringify_node(self.shape.sg.graph, focus_node),
+                stringify_node(self.shape.sg.graph, next(iter(self.property_compare_set))),
+                stringify_node(datagraph, value_node),
+            )
+        else:
+            rules = ", ".join(stringify_node(self.shape.sg.graph, p) for p in self.property_compare_set)
+            m = "Value of {}->{} == {}".format(
+                stringify_node(self.shape.sg.graph, focus_node), rules, stringify_node(datagraph, value_node)
+            )
+        return [rdflib.Literal(m)]
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
@@ -189,6 +219,20 @@ class LessThanConstraintComponent(ConstraintComponent):
     @classmethod
     def shacl_constraint_class(cls):
         return SH_LessThanConstraintComponent
+
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        if len(self.property_compare_set) < 2:
+            m = "Value of {}->{} <= {}".format(
+                stringify_node(self.shape.sg.graph, focus_node),
+                stringify_node(self.shape.sg.graph, next(iter(self.property_compare_set))),
+                stringify_node(datagraph, value_node),
+            )
+        else:
+            rules = ", ".join(stringify_node(self.shape.sg.graph, p) for p in self.property_compare_set)
+            m = "Value of {}->{} <= {}".format(
+                stringify_node(self.shape.sg.graph, focus_node), rules, stringify_node(datagraph, value_node)
+            )
+        return [rdflib.Literal(m)]
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
@@ -282,6 +326,20 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
     @classmethod
     def shacl_constraint_class(cls):
         return SH_LessThanOrEqualsConstraintComponent
+
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        if len(self.property_compare_set) < 2:
+            m = "Value of {}->{} < {}".format(
+                stringify_node(self.shape.sg.graph, focus_node),
+                stringify_node(self.shape.sg.graph, next(iter(self.property_compare_set))),
+                stringify_node(datagraph, value_node),
+            )
+        else:
+            rules = ", ".join(stringify_node(self.shape.sg.graph, p) for p in self.property_compare_set)
+            m = "Value of {}->{} < {}".format(
+                stringify_node(self.shape.sg.graph, focus_node), rules, stringify_node(datagraph, value_node)
+            )
+        return [rdflib.Literal(m)]
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """

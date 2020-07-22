@@ -108,9 +108,7 @@ class Validator(object):
             raise ReportableRuntimeError("Error while running OWL-RL Deductive Closure\n" "{}".format(str(e.args[0])))
 
     @classmethod
-    def create_validation_report(
-        cls, conforms: bool, target_graph: GraphLike, shapes_graph: ShapesGraph, results: List[Tuple]
-    ):
+    def create_validation_report(cls, conforms: bool, results: List[Tuple]):
         v_text = "Validation Report\nConforms: {}\n".format(str(conforms))
         result_len = len(results)
         if not conforms:
@@ -118,9 +116,8 @@ class Validator(object):
         if result_len > 0:
             v_text += "Results ({}):\n".format(str(result_len))
         vg = rdflib.Graph()
-        sg = shapes_graph.graph
-        for p, n in sg.namespace_manager.namespaces():
-            vg.namespace_manager.bind(p, n)
+        # for p, n in sg.namespace_manager.namespaces():
+        #     vg.namespace_manager.bind(p, n)
         vr = BNode()
         vg.add((vr, RDF_type, SH_ValidationReport))
         vg.add((vr, SH_conforms, Literal(conforms)))
@@ -133,12 +130,7 @@ class Validator(object):
                 if isinstance(o, tuple):
                     source = o[0]
                     node = o[1]
-                    if source == 'S':
-                        o = clone_node(sg, node, vg)
-                    elif source == 'D':
-                        o = clone_node(target_graph, node, vg)
-                    else:  # pragma: no cover
-                        raise RuntimeError("Adding node to validation report must have source of either 'D' or 'S'.")
+                    o = clone_node(source, node, vg)
                 vg.add((s, p, o))
         return vg, v_text
 
@@ -193,8 +185,7 @@ class Validator(object):
                 self._run_pre_inference(the_target_graph, inference_option, self.logger)
                 self.pre_inferenced = True
         self._target_graph = the_target_graph
-        reports = []
-        non_conformant = False
+
         shapes = self.shacl_graph.shapes  # This property getter triggers shapes harvest.
         if self.options['advanced']:
             advanced = {'functions': gather_functions(self.shacl_graph), 'rules': gather_rules(self.shacl_graph)}
@@ -211,6 +202,8 @@ class Validator(object):
             ]
         else:
             named_graphs = [the_target_graph]
+        reports = []
+        non_conformant = False
         for g in named_graphs:
             if advanced:
                 # TODO: apply functions?
@@ -219,9 +212,7 @@ class Validator(object):
                 _is_conform, _reports = s.validate(g)
                 non_conformant = non_conformant or (not _is_conform)
                 reports.extend(_reports)
-        v_report, v_text = self.create_validation_report(
-            not non_conformant, the_target_graph, self.shacl_graph, reports
-        )
+        v_report, v_text = self.create_validation_report(not non_conformant, reports)
         return (not non_conformant), v_report, v_text
 
 
