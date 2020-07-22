@@ -59,14 +59,14 @@ class EqualsConstraintComponent(ConstraintComponent):
 
         if len(self.property_compare_set) < 2:
             m = "Value of {}->{} != {}".format(
-                stringify_node(self.shape.sg.graph, focus_node),
+                stringify_node(datagraph, focus_node),
                 stringify_node(self.shape.sg.graph, next(iter(self.property_compare_set))),
                 stringify_node(datagraph, value_node),
             )
         else:
             rules = ", ".join(stringify_node(self.shape.sg.graph, p) for p in self.property_compare_set)
             m = "Value of {}->{} != {}".format(
-                stringify_node(self.shape.sg.graph, focus_node), rules, stringify_node(datagraph, value_node)
+                stringify_node(datagraph, focus_node), rules, stringify_node(datagraph, value_node)
             )
         return [rdflib.Literal(m)]
 
@@ -140,14 +140,14 @@ class DisjointConstraintComponent(ConstraintComponent):
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.property_compare_set) < 2:
             m = "Value of {}->{} == {}".format(
-                stringify_node(self.shape.sg.graph, focus_node),
+                stringify_node(datagraph, focus_node),
                 stringify_node(self.shape.sg.graph, next(iter(self.property_compare_set))),
                 stringify_node(datagraph, value_node),
             )
         else:
             rules = ", ".join(stringify_node(self.shape.sg.graph, p) for p in self.property_compare_set)
             m = "Value of {}->{} == {}".format(
-                stringify_node(self.shape.sg.graph, focus_node), rules, stringify_node(datagraph, value_node)
+                stringify_node(datagraph, focus_node), rules, stringify_node(datagraph, value_node)
             )
         return [rdflib.Literal(m)]
 
@@ -223,14 +223,14 @@ class LessThanConstraintComponent(ConstraintComponent):
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.property_compare_set) < 2:
             m = "Value of {}->{} <= {}".format(
-                stringify_node(self.shape.sg.graph, focus_node),
+                stringify_node(datagraph, focus_node),
                 stringify_node(self.shape.sg.graph, next(iter(self.property_compare_set))),
                 stringify_node(datagraph, value_node),
             )
         else:
             rules = ", ".join(stringify_node(self.shape.sg.graph, p) for p in self.property_compare_set)
             m = "Value of {}->{} <= {}".format(
-                stringify_node(self.shape.sg.graph, focus_node), rules, stringify_node(datagraph, value_node)
+                stringify_node(datagraph, focus_node), rules, stringify_node(datagraph, value_node)
             )
         return [rdflib.Literal(m)]
 
@@ -330,14 +330,14 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.property_compare_set) < 2:
             m = "Value of {}->{} < {}".format(
-                stringify_node(self.shape.sg.graph, focus_node),
+                stringify_node(datagraph, focus_node),
                 stringify_node(self.shape.sg.graph, next(iter(self.property_compare_set))),
                 stringify_node(datagraph, value_node),
             )
         else:
             rules = ", ".join(stringify_node(self.shape.sg.graph, p) for p in self.property_compare_set)
             m = "Value of {}->{} < {}".format(
-                stringify_node(self.shape.sg.graph, focus_node), rules, stringify_node(datagraph, value_node)
+                stringify_node(datagraph, focus_node), rules, stringify_node(datagraph, value_node)
             )
         return [rdflib.Literal(m)]
 

@@ -4,7 +4,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "pyshacl"
-version = "0.12.1"
+version = "0.12.1.post1"
 description = "Python SHACL Validator"
 license = "Apache-2.0"
 authors = [
