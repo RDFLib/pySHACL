@@ -6,13 +6,14 @@ import timeit
 # this is a benchmark of the validator, not of rdflib ttl parsing.
 set_up_script = '''
 import rdflib
+from pyshacl import monkey
 import pyshacl
 from os import path
-
+monkey.apply_patches()
 target_ttl_file = \
     '../test/resources/dash_tests/core/complex/personexample.test.ttl'
 target_ttl_file = path.abspath(target_ttl_file)
-target_graph = rdflib.Graph()
+target_graph = rdflib.Graph("Memory2")
 with open(target_ttl_file, 'rb') as file:
     target_graph.parse(file=file, format='turtle')
 '''
