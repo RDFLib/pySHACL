@@ -4,7 +4,7 @@ import logging
 
 from functools import wraps
 from sys import stderr
-from typing import List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import owlrl
 import rdflib
@@ -121,7 +121,7 @@ class Validator(object):
         vr = BNode()
         vg.add((vr, RDF_type, SH_ValidationReport))
         vg.add((vr, SH_conforms, Literal(conforms)))
-        cloned_nodes = dict()
+        cloned_nodes: Dict[Tuple[GraphLike, str], Union[BNode, URIRef]] = {}
         for result in iter(results):
             _d, _bn, _tr = result
             v_text += _d
