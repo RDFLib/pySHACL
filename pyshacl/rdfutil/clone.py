@@ -111,26 +111,36 @@ def mix_graphs(base_graph: GraphLike, extra_graph: GraphLike, target_graph: Opti
     return g
 
 
-def clone_blank_node(graph, bnode, target_graph, recursion=0):
-    assert isinstance(graph, rdflib.Graph)
-    assert isinstance(bnode, rdflib.BNode)
-    cloned_bnode = rdflib.BNode()
+def clone_list(graph, lnode, target_graph, keepid=False, recursion=0):
+    if keepid:
+        cloned_node = rdflib.BNode(str(lnode))
+    else:
+        cloned_node = rdflib.BNode()
+    new_list = Collection(target_graph, cloned_node)
+    for item in iter(graph.items(lnode)):
+        cloned_item = clone_node(graph, item, target_graph, recursion=recursion + 1)
+        new_list.append(cloned_item)
+    return cloned_node
+
+
+def clone_blank_node(graph, bnode, target_graph, keepid=False, recursion=0):
+    if not isinstance(graph, rdflib.Graph):
+        raise RuntimeError("clone_blank_node must take an rdflib.Graph as first parameter")
+    if not isinstance(bnode, rdflib.BNode):
+        raise RuntimeError("clone_blank_node must take an rdflib.BNode as second parameter")
+    if keepid:
+        cloned_bnode = rdflib.BNode(str(bnode))
+    else:
+        cloned_bnode = rdflib.BNode()
     if recursion >= 10:
         return cloned_bnode  # Cannot clone this deep
-
-    def clone_list(l_node):
-        cloned_node = rdflib.BNode()
-        new_list = Collection(target_graph, cloned_node)
-        for item in iter(graph.items(l_node)):
-            cloned_item = clone_node(graph, item, target_graph, recursion=recursion + 1)
-            new_list.append(cloned_item)
-        return cloned_node
 
     predicates = set(graph.predicates(bnode))
     if len(predicates) < 1:
         return cloned_bnode
     if RDF_first in predicates:
-        return clone_list(bnode)
+        # don't increase recursion here, we're not actually going any deeper in the graph, just sideways
+        return clone_list(graph, bnode, target_graph, keepid=keepid, recursion=recursion)
     for p in predicates:
         cloned_p = clone_node(graph, p, target_graph, recursion=recursion + 1)
         objs = list(graph.objects(bnode, p))

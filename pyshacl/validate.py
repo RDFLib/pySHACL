@@ -10,7 +10,6 @@ import owlrl
 import rdflib
 
 from pyshacl.pytypes import GraphLike
-from pyshacl.rdfutil.clone import mix_datasets
 
 
 if owlrl.json_ld_available:
@@ -33,10 +32,11 @@ from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 from pyshacl.inference import CustomRDFSOWLRLSemantics, CustomRDFSSemantics
 from pyshacl.monkey import apply_patches, rdflib_bool_patch, rdflib_bool_unpatch
 from pyshacl.rdfutil import (
+    clone_blank_node,
     clone_graph,
-    clone_node,
     compare_blank_node,
     load_from_source,
+    mix_datasets,
     mix_graphs,
     order_graph_literal,
 )
@@ -111,8 +111,8 @@ class Validator(object):
     def create_validation_report(cls, conforms: bool, results: List[Tuple]):
         v_text = "Validation Report\nConforms: {}\n".format(str(conforms))
         result_len = len(results)
-        if not conforms:
-            assert result_len > 0, "A Non-Conformant Validation Report must have at least one result."
+        if not conforms and result_len < 1:
+            raise RuntimeError("A Non-Conformant Validation Report must have at least one result.")
         if result_len > 0:
             v_text += "Results ({}):\n".format(str(result_len))
         vg = rdflib.Graph()
@@ -121,6 +121,7 @@ class Validator(object):
         vr = BNode()
         vg.add((vr, RDF_type, SH_ValidationReport))
         vg.add((vr, SH_conforms, Literal(conforms)))
+        cloned_nodes = dict()
         for result in iter(results):
             _d, _bn, _tr = result
             v_text += _d
@@ -130,7 +131,16 @@ class Validator(object):
                 if isinstance(o, tuple):
                     source = o[0]
                     node = o[1]
-                    o = clone_node(source, node, vg)
+                    if isinstance(node, Literal):
+                        o = node  # No need to clone a literal from the data graph
+                    else:
+                        _id = str(node)
+                        if (source, _id) in cloned_nodes:
+                            o = cloned_nodes[(source, _id)]
+                        elif isinstance(node, BNode):
+                            cloned_nodes[(source, _id)] = o = clone_blank_node(source, node, vg, keepid=True)
+                        else:
+                            cloned_nodes[(source, _id)] = o = URIRef(_id)
                 vg.add((s, p, o))
         return vg, v_text
 
