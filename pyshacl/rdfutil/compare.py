@@ -57,11 +57,12 @@ def compare_blank_node(graph1: rdflib.Graph, bnode1, graph2: rdflib.Graph, bnode
     pred_objs_in_bnode2_but_not_bnode1: List = list()
 
     def return_eq(direction):
-        nonlocal in_ps2_but_not_in_ps1, in_ps1_but_not_in_ps2
+        nonlocal graph1, graph2, recursion, in_ps2_but_not_in_ps1, in_ps1_but_not_in_ps2
         nonlocal pred_objs_in_bnode1_but_not_bnode2, pred_objs_in_bnode2_but_not_bnode1
         if direction == 0:
             return direction
         if recursion <= 1:
+            # TODO: Add a way to turn off this wall of text
             if direction < 0:
                 print("BNode1 is smaller.")
             else:

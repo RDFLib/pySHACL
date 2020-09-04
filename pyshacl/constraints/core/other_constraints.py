@@ -102,6 +102,12 @@ class ClosedConstraintComponent(ConstraintComponent):
         super(ClosedConstraintComponent, self).__init__(shape)
         sg = self.shape.sg.graph
         closed_vals = list(self.shape.objects(SH_closed))
+        ignored_vals = list(self.shape.objects(SH_ignoredProperties))
+        if len(ignored_vals) > 0 and len(closed_vals) < 1:
+            raise ConstraintLoadError(
+                "ClosedConstraintComponent: You can only use sh:ignoredProperties on a Closed Shape (sh:closed).",
+                "https://www.w3.org/TR/shacl/#ClosedConstraintComponent",
+            )
         if len(closed_vals) < 1:
             raise ConstraintLoadError(
                 "ClosedConstraintComponent must have at least one sh:closed predicate.",
@@ -114,7 +120,6 @@ class ClosedConstraintComponent(ConstraintComponent):
             )
         assert isinstance(closed_vals[0], rdflib.Literal), "sh:closed must take a xsd:boolean literal."
         self.is_closed = bool(closed_vals[0].value)
-        ignored_vals = list(self.shape.objects(SH_ignoredProperties))
         self.ignored_props = set()
         for i in ignored_vals:
             try:

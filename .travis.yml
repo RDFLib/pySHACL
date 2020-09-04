@@ -32,7 +32,7 @@ matrix:
       name: "Aggregate or all above, and deploy"
 
 install:
-  - pip3 install --upgrade pip "poetry>=1.0.9" tox
+  - pip3 install --upgrade pip "poetry>=1.0.10" tox
 script: travis_retry tox -e $TOX_ENV
 before_deploy:
     - poetry build

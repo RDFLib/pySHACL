@@ -2,7 +2,7 @@
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
-from pyshacl.consts import RDF_type, SH_rule, SH_SPARQLFunction, SH_SPARQLRule, SH_TripleRule
+from pyshacl.consts import RDF_type, SH_rule, SH_SPARQLRule, SH_TripleRule
 from pyshacl.errors import RuleLoadError
 from pyshacl.pytypes import GraphLike
 from pyshacl.rules.sparql import SPARQLRule
@@ -16,21 +16,6 @@ if TYPE_CHECKING:
     from .shacl_rule import SHACLRule
 
 ALL_SPARQL_RULES = [TripleRule, SPARQLRule]
-
-
-def gather_functions(shacl_graph: 'ShapesGraph') -> List['SHACLRule']:
-    """
-
-    :param shacl_graph:
-    :type shacl_graph: ShapesGraph
-    :return:
-    :rtype: [SHACLRule]
-    """
-    fn_nodes = set(shacl_graph.subjects(RDF_type, SH_SPARQLFunction))
-    if len(fn_nodes):
-        raise NotImplementedError("SHACL Advanced Feature SPARQLFunction is not yet supported.")
-    # TODO: Finish implementing SPARQL Functions
-    return []
 
 
 def gather_rules(shacl_graph: 'ShapesGraph') -> Dict['Shape', List['SHACLRule']]:

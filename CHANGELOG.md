@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [0.13.0] - 2020-09-04
+
+## Added
+- New SHACL Advanced Spec Features!
+- All NodeExpressions can now be used in SHACL Rules
+  - Focus Node (sh:this)
+  - FilterShape (sh:filterShape)
+  - Function Expressions (any sh:SHACLFunction and args)
+  - Path Expressions (use sh:path in a NodeExpression)
+  - Intersection Expressions (sh:intersection)
+  - Union Expressions (sh:union)
+- SHACLFunctions (including SPARQLFunction)
+  - Both SHACLFunction and SPARQLFunction are now fully implemented including unit tests and edge cases
+  - SHACLFunctions are bound to PySHACL and can be used in SHACL Rules and NodeExpressions
+  - SPARQLFunctions are bound to the RDFLib SPARQL Engine, so they can be used in other SPARQL queries
+  - Read the manual for more info: https://www.w3.org/TR/shacl-af/#functions
+
+## Fixed
+- Short versions of uris were sometimes not used in the Validation Report when they should've been
+- Checking results of some tests was being skipped! Lucky this wasn't letting through any SHACL errors.
+- Fixed error message when using sh:ignoredProperties on a node that isn't sh:closed issue #58
+
+
 ## [0.12.2] - 2020-08-12
 
 ## Fixed
@@ -604,7 +627,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.12.2...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/RDFLib/pySHACL/compare/v0.12.2...v0.13.0
 [0.12.2]: https://github.com/RDFLib/pySHACL/compare/v0.12.1.post2...v0.12.2
 [0.12.1.post2]: https://github.com/RDFLib/pySHACL/compare/v0.12.1.post1...v0.12.1.post2
 [0.12.1.post1]: https://github.com/RDFLib/pySHACL/compare/v0.12.1...v0.12.1.post1

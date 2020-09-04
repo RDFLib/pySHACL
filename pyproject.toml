@@ -1,10 +1,10 @@
 [build-system]
-requires = ["poetry>=1.0.9"]
+requires = ["poetry>=1.0.10"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "pyshacl"
-version = "0.12.2"
+version = "0.13.0"
 # Don't forget to change the version number in __init__.py along with this one
 description = "Python SHACL Validator"
 license = "Apache-2.0"
@@ -120,7 +120,7 @@ envlist = py36, py37, py38, lint, type-checking
 
 [testenv]
 deps =
-    poetry>=1.0.9
+    poetry>=1.0.10
     py36: coveralls
 passenv = TRAVIS TRAVIS_JOB_ID TRAVIS_BRANCH
 skip_install = true

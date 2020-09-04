@@ -10,7 +10,7 @@ import rdflib
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.constraints.sparql.sparql_based_constraints import SPARQLQueryHelper
-from pyshacl.consts import SH, RDF_type, SH_message, SH_select
+from pyshacl.consts import SH, RDF_type, SH_ask, SH_message, SH_parameter, SH_select
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
 from pyshacl.pytypes import GraphLike
 
@@ -18,10 +18,7 @@ from pyshacl.pytypes import GraphLike
 SH_nodeValidator = SH.term('nodeValidator')
 SH_propertyValidator = SH.term('propertyValidator')
 SH_validator = SH.term('validator')
-SH_parameter = SH.term('parameter')
 SH_optional = SH.term('optional')
-SH_ask = SH.term('ask')
-
 
 SH_ConstraintComponent = SH.term('ConstraintComponent')
 SH_SPARQLSelectValidator = SH.term('SPARQLSelectValidator')

@@ -4,10 +4,12 @@ import logging
 
 from functools import wraps
 from sys import stderr
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import owlrl
 import rdflib
+
+from rdflib.util import from_n3
 
 from pyshacl.pytypes import GraphLike
 
@@ -29,18 +31,20 @@ from pyshacl.consts import (
     SH_ValidationReport,
 )
 from pyshacl.errors import ReportableRuntimeError, ValidationFailure
+from pyshacl.functions import apply_functions, gather_functions, unapply_functions
 from pyshacl.inference import CustomRDFSOWLRLSemantics, CustomRDFSSemantics
 from pyshacl.monkey import apply_patches, rdflib_bool_patch, rdflib_bool_unpatch
 from pyshacl.rdfutil import (
     clone_blank_node,
     clone_graph,
     compare_blank_node,
+    compare_node,
     load_from_source,
     mix_datasets,
     mix_graphs,
     order_graph_literal,
 )
-from pyshacl.rules import apply_rules, gather_functions, gather_rules
+from pyshacl.rules import apply_rules, gather_rules
 from pyshacl.shapes_graph import ShapesGraph
 
 
@@ -108,7 +112,7 @@ class Validator(object):
             raise ReportableRuntimeError("Error while running OWL-RL Deductive Closure\n" "{}".format(str(e.args[0])))
 
     @classmethod
-    def create_validation_report(cls, conforms: bool, results: List[Tuple]):
+    def create_validation_report(cls, sg, conforms: bool, results: List[Tuple]):
         v_text = "Validation Report\nConforms: {}\n".format(str(conforms))
         result_len = len(results)
         if not conforms and result_len < 1:
@@ -116,8 +120,8 @@ class Validator(object):
         if result_len > 0:
             v_text += "Results ({}):\n".format(str(result_len))
         vg = rdflib.Graph()
-        # for p, n in sg.namespace_manager.namespaces():
-        #     vg.namespace_manager.bind(p, n)
+        for p, n in sg.graph.namespace_manager.namespaces():
+            vg.namespace_manager.bind(p, n)
         vr = BNode()
         vg.add((vr, RDF_type, SH_ValidationReport))
         vg.add((vr, SH_conforms, Literal(conforms)))
@@ -216,13 +220,15 @@ class Validator(object):
         non_conformant = False
         for g in named_graphs:
             if advanced:
-                # TODO: apply functions?
+                apply_functions(advanced['functions'], g)
                 apply_rules(advanced['rules'], g)
             for s in shapes:
                 _is_conform, _reports = s.validate(g)
                 non_conformant = non_conformant or (not _is_conform)
                 reports.extend(_reports)
-        v_report, v_text = self.create_validation_report(not non_conformant, reports)
+            if advanced:
+                unapply_functions(advanced['functions'], g)
+        v_report, v_text = self.create_validation_report(self.shacl_graph, not non_conformant, reports)
         return (not non_conformant), v_report, v_text
 
 
@@ -339,7 +345,7 @@ def validate(
         report_graph = e
         report_text = "Validation Failure - {}".format(e.message)
     if do_check_dash_result:
-        passes = check_dash_result(validator.target_graph, report_graph, shacl_graph or data_graph)
+        passes = check_dash_result(validator, report_graph, shacl_graph or data_graph)
         return passes, report_graph, report_text
     if do_check_sht_result:
         (sht_graph, sht_result_node) = kwargs.pop('sht_validate', (False, None))
@@ -386,7 +392,7 @@ def clean_validation_reports(actual_graph, actual_report, expected_graph, expect
     return True
 
 
-def compare_validation_reports(report_graph, expected_graph, expected_result):
+def compare_validation_reports(report_graph: GraphLike, expected_graph: GraphLike, expected_result):
     expected_conforms = expected_graph.objects(expected_result, SH_conforms)
     expected_conforms = set(expected_conforms)
     if len(expected_conforms) < 1:  # pragma: no cover
@@ -436,62 +442,93 @@ def compare_validation_reports(report_graph, expected_graph, expected_result):
     return True
 
 
-def compare_inferencing_reports(data_graph: GraphLike, expected_graph: GraphLike, expected_result: GraphLike):
-    expected_object = set(expected_graph.objects(expected_result, RDF_object))
-    if len(expected_object) < 1:
-        raise ReportableRuntimeError(
-            "Cannot check the expected result, the given expectedResult does not have an rdf:object."
-        )
-    expected_object = next(iter(expected_object))
-    expected_subject = set(expected_graph.objects(expected_result, RDF_subject))
-    if len(expected_subject) < 1:
-        raise ReportableRuntimeError(
-            "Cannot check the expected result, the given expectedResult does not have an rdf:subject."
-        )
-    expected_subject = next(iter(expected_subject))
-    expected_predicate = set(expected_graph.objects(expected_result, RDF_predicate))
-    if len(expected_predicate) < 1:
-        raise ReportableRuntimeError(
-            "Cannot check the expected result, the given expectedResult does not have an rdf:predicate."
-        )
-    expected_predicate = next(iter(expected_predicate))
-    if isinstance(expected_object, Literal):
-        found_objs = set(data_graph.objects(expected_subject, expected_predicate))
-        if len(found_objs) < 1:
-            return False
-        found = False
-        for o in found_objs:
-            if isinstance(o, Literal):
-                found = 0 == order_graph_literal(expected_graph, expected_object, data_graph, o)
-        return found
+def compare_inferencing_reports(data_graph: GraphLike, expected_graph: GraphLike, expected_results: Union[List, Set]):
+    all_good = True
+    for expected_result in expected_results:
+        expected_object = set(expected_graph.objects(expected_result, RDF_object))
+        if len(expected_object) < 1:
+            raise ReportableRuntimeError(
+                "Cannot check the expected result, the given expectedResult does not have an rdf:object."
+            )
+        expected_object = next(iter(expected_object))
+        expected_subject = set(expected_graph.objects(expected_result, RDF_subject))
+        if len(expected_subject) < 1:
+            raise ReportableRuntimeError(
+                "Cannot check the expected result, the given expectedResult does not have an rdf:subject."
+            )
+        expected_subject = next(iter(expected_subject))
+        expected_predicate = set(expected_graph.objects(expected_result, RDF_predicate))
+        if len(expected_predicate) < 1:
+            raise ReportableRuntimeError(
+                "Cannot check the expected result, the given expectedResult does not have an rdf:predicate."
+            )
+        expected_predicate = next(iter(expected_predicate))
+        if isinstance(expected_object, Literal):
+            found_objs = set(data_graph.objects(expected_subject, expected_predicate))
+            if len(found_objs) < 1:
+                all_good = False
+                print("Found no sub/pred matching {} {}".format(expected_subject, expected_predicate))
+                continue
+            found = False
+            for o in found_objs:
+                if isinstance(o, Literal):
+                    found = 0 == order_graph_literal(expected_graph, expected_object, data_graph, o)
+                    if found:
+                        break
+            if not found:
+                print(
+                    "Found no sub/pred/obj matching {} {} {}".format(
+                        expected_subject, expected_predicate, expected_object
+                    )
+                )
+            all_good = all_good and found
+            continue
 
-    elif isinstance(expected_object, BNode):
-        found_objs = set(data_graph.objects(expected_subject, expected_predicate))
-        if len(found_objs) < 1:
-            return False
-        found = False
-        for o in found_objs:
-            if isinstance(o, BNode):
-                found = 0 == compare_blank_node(expected_graph, expected_object, data_graph, o)
-        return found
-    else:
-        found_triples = set(data_graph.triples((expected_subject, expected_predicate, expected_object)))
-        if len(found_triples) < 1:
-            return False
-    return True
+        elif isinstance(expected_object, BNode):
+            found_objs = set(data_graph.objects(expected_subject, expected_predicate))
+            if len(found_objs) < 1:
+                all_good = False
+                print("Found no sub/pred matching {} {}".format(expected_subject, expected_predicate))
+                continue
+            found = False
+            for o in found_objs:
+                if isinstance(o, BNode):
+                    found = 0 == compare_blank_node(expected_graph, expected_object, data_graph, o)
+                    if found:
+                        break
+            if not found:
+                print(
+                    "Found no sub/pred/obj matching {} {} {}".format(
+                        expected_subject, expected_predicate, expected_object
+                    )
+                )
+            all_good = all_good and found
+            continue
+        else:
+            found_triples = set(data_graph.triples((expected_subject, expected_predicate, expected_object)))
+            if len(found_triples) < 1:
+                all_good = False
+
+    return all_good
 
 
-def check_dash_result(data_graph: GraphLike, report_graph: GraphLike, expected_result_graph: GraphLike):
+def check_dash_result(validator: Validator, report_graph: GraphLike, expected_result_graph: GraphLike):
     DASH = rdflib.namespace.Namespace('http://datashapes.org/dash#')
     DASH_GraphValidationTestCase = DASH.term('GraphValidationTestCase')
     DASH_InferencingTestCase = DASH.term('InferencingTestCase')
+    DASH_FunctionTestCase = DASH.term('FunctionTestCase')
     DASH_expectedResult = DASH.term('expectedResult')
-
+    DASH_expression = DASH.term('expression')
+    was_default_union = None
+    if isinstance(expected_result_graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
+        was_default_union = expected_result_graph.default_union
+        expected_result_graph.default_union = True  # Force default-union to make all of this a bit easier
     gv_test_cases = expected_result_graph.subjects(RDF_type, DASH_GraphValidationTestCase)
     gv_test_cases = set(gv_test_cases)
     inf_test_cases = expected_result_graph.subjects(RDF_type, DASH_InferencingTestCase)
     inf_test_cases = set(inf_test_cases)
-
+    fn_test_cases = expected_result_graph.subjects(RDF_type, DASH_FunctionTestCase)
+    fn_test_cases = set(fn_test_cases)
     if len(gv_test_cases) > 0:
         test_case = next(iter(gv_test_cases))
         expected_results = expected_result_graph.objects(test_case, DASH_expectedResult)
@@ -501,26 +538,75 @@ def check_dash_result(data_graph: GraphLike, report_graph: GraphLike, expected_r
                 "Cannot check the expected result, the given GraphValidationTestCase does not have an expectedResult."
             )
         expected_result = next(iter(expected_results))
-        gv_res = compare_validation_reports(report_graph, expected_result_graph, expected_result)
+        gv_res: Union[bool, None] = compare_validation_reports(report_graph, expected_result_graph, expected_result)
     else:
-        gv_res = True
+        gv_res = None
     if len(inf_test_cases) > 0:
-        test_case = next(iter(inf_test_cases))
-        expected_results = expected_result_graph.objects(test_case, DASH_expectedResult)
-        expected_results = set(expected_results)
-        if len(expected_results) < 1:  # pragma: no cover
-            raise ReportableRuntimeError(
-                "Cannot check the expected result, the given InferencingTestCase does not have an expectedResult."
-            )
-        expected_result = next(iter(expected_results))
-        inf_res = compare_inferencing_reports(data_graph, expected_result_graph, expected_result)
+        data_graph = validator.target_graph
+        inf_res: Union[bool, None] = True
+        for test_case in inf_test_cases:
+            expected_results = expected_result_graph.objects(test_case, DASH_expectedResult)
+            expected_results = set(expected_results)
+            if len(expected_results) < 1:  # pragma: no cover
+                raise ReportableRuntimeError(
+                    "Cannot check the expected result, the given InferencingTestCase does not have an expectedResult."
+                )
+            inf_res = inf_res and compare_inferencing_reports(data_graph, expected_result_graph, expected_results)
     else:
-        inf_res = True
-    if gv_res is None and inf_res is None:  # pragma: no cover
+        inf_res = None
+    if len(fn_test_cases) > 0:
+        data_graph = validator.target_graph
+        fns = gather_functions(validator.shacl_graph)
+        apply_functions(fns, data_graph)
+        fn_res: Union[bool, None] = True
+        for test_case in fn_test_cases:
+            expected_results = set(expected_result_graph.objects(test_case, DASH_expectedResult))
+            if len(expected_results) < 1:  # pragma: no cover
+                raise ReportableRuntimeError(
+                    "Cannot check the expected result, the given FunctionTestCase does not have an expectedResult."
+                )
+            expected_result = next(iter(expected_results))
+            expressions = set(expected_result_graph.objects(test_case, DASH_expression))
+            if len(expressions) < 1:
+                raise ReportableRuntimeError(
+                    "Cannot check the expected result, the given FunctionTestCase does not have an expression."
+                )
+            expression = next(iter(expressions))
+            expression = str(expression).strip()
+            parts = [e.strip() for e in expression.split("(", 1)]
+            if len(parts) < 1:
+                expression = parts[0]
+                eargs: List[Union[str, URIRef]] = []
+            else:
+                expression, sargs = parts
+                sargs = sargs.rstrip(")")
+                if len(sargs) < 1:
+                    eargs = []
+                else:
+                    eargs = [a.strip() for a in sargs.split(',')]
+                eargs = [
+                    from_n3(e, None, expected_result_graph.store, expected_result_graph.namespace_manager)
+                    for e in eargs
+                ]
+            find_uri = from_n3(expression, None, expected_result_graph.store, expected_result_graph.namespace_manager)
+            try:
+                fn, options = validator.shacl_graph.get_shacl_function(find_uri)
+            except KeyError:
+                raise ReportableRuntimeError(
+                    "Cannot execute function {}.\nCannot find it in the ShapesGraph object.".format(find_uri)
+                )
+            result = fn(data_graph, *eargs)
+            fn_res = fn_res and 0 == compare_node(expected_result_graph, expected_result, data_graph, result)
+
+    else:
+        fn_res = None
+    if was_default_union is not None:
+        expected_result_graph.default_union = was_default_union
+    if gv_res is None and inf_res is None and fn_res is None:  # pragma: no cover
         raise ReportableRuntimeError(
             "Cannot check the expected result, the given expected result graph does not have a GraphValidationTestCase or InferencingTestCase."
         )
-    return gv_res and inf_res
+    return (gv_res or gv_res is None) and (inf_res or inf_res is None) and (fn_res or fn_res is None)
 
 
 def check_sht_result(report_graph: GraphLike, sht_graph: GraphLike, sht_result_node: Union[URIRef, BNode]):

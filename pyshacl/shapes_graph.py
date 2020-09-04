@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import warnings
 
 import rdflib
 
@@ -53,6 +54,7 @@ class ShapesGraph(object):
         self._node_shape_cache = {}
         self._shapes = None
         self._custom_constraints = None
+        self._shacl_functions = {}
         self._add_system_triples()
 
     def _add_system_triples(self):
@@ -145,6 +147,34 @@ class ShapesGraph(object):
             components.add(component)
         return components
 
+    def add_shacl_function(self, uri, function, optionals):
+        uri = str(uri)
+        if uri in self._shacl_functions:
+            warnings.warn(Warning("SHACLFunction {} is already registered.".format(uri)))
+        else:
+            self._shacl_functions[uri] = (function, optionals)
+
+    def get_shacl_function(self, uri):
+        uri = str(uri)
+        try:
+            f = self._shacl_functions[uri]
+        except LookupError:
+            raise KeyError("SHACLFunction {} not found.".format(uri))
+        return f
+
+    def remove_shacl_function(self, uri, function):
+        uri = str(uri)
+        try:
+            f, _ = self.get_shacl_function(uri)
+            if f != function:
+                warnings.warn(
+                    Warning("Cannot remove a different function than what was registered for {}.".format(uri))
+                )
+                return
+        except KeyError:
+            return  # Not registered
+        del self._shacl_functions[uri]
+
     @property
     def shapes(self):
         """
@@ -171,8 +201,8 @@ class ShapesGraph(object):
 
     def _build_node_shape_cache(self):
         """
-        :returns: [Shape]
-        :rtype: list(pyshacl.shape.Shape)
+        :returns: None
+        :rtype: NoneType
         """
         g = self.graph
         defined_node_shapes = set(g.subjects(RDF_type, SH_NodeShape))
