@@ -55,7 +55,7 @@
 | `sh:xone`  | `XoneConstraintComponent`  | [▶][XoneConstraintComponent]  | ![status-complete] 	|           |
 
 
-### [Shape-based Constraint Components](https://www.w3.org/TR/shacl/#core-components-shape)  
+### [Shape-based Constraint Components](https://www.w3.org/TR/shacl/#core-components-shape)
 | Parameter                 | Constraint                                |  Link 	                                   |      Status      	  |  Comments                                     |
 |:----------                |:-------------                             |:------:	                                   |:-------------:	      |:------	                                      |
 | `sh:node`                 | `NodeConstraintComponent`                 | [▶][NodeConstraintComponent]                 | ![status-complete]   |                                               |
@@ -65,7 +65,7 @@
 | `sh:qualifiedMaxCount`    | `QualifiedMaxCountConstraintComponent`    | [▶][QualifiedValueShapeConstraintComponent]  | ![status-complete]   |                                               |
 
 
-### [Other Constraint Components](https://www.w3.org/TR/shacl/#core-components-others)  
+### [Other Constraint Components](https://www.w3.org/TR/shacl/#core-components-others)
 | Parameter               | Constraint                    |  Link 	                          |      Status      	|  Comments	                 |
 |:----------              |:-------------                 |:------:	                          |:-------------:	    |:------	                 |
 | `sh:closed`             | `ClosedConstraintComponent`   | [▶][ClosedConstraintComponent]    | ![status-complete]	|                            |
@@ -73,15 +73,15 @@
 | `sh:hasValue`           | `HasValueConstraintComponent` | [▶][HasValueConstraintComponent]  | ![status-complete] 	|                            |
 | `sh:in`                 | `InConstraintComponent`       | [▶][InConstraintComponent]        | ![status-complete] 	|                            |
 
-## [SPARQL Constraints](https://www.w3.org/TR/shacl/#sparql-constraints)  
+## [SPARQL Constraints](https://www.w3.org/TR/shacl/#sparql-constraints)
 
-### [SPARQL Based Constraints](https://www.w3.org/TR/shacl/#sparql-constraints)  
+### [SPARQL Based Constraints](https://www.w3.org/TR/shacl/#sparql-constraints)
 | Parameter               | Constraint                    |  Link 	                          |      Status      	|  Comments	                 |
 |:----------              |:-------------                 |:------:	                          |:-------------:	    |:------	                 |
 | `sh:sparql`             | `SPARQLConstraintComponent`   | [▶][SPARQLConstraintComponent]    | ![status-complete]	|                            |
 
 
-### [SPARQL Based Constraint Components](https://www.w3.org/TR/shacl/#dfn-sparql-based-constraint-component)  
+### [SPARQL Based Constraint Components](https://www.w3.org/TR/shacl/#dfn-sparql-based-constraint-component)
 | Parameter               | Constraint                    |  Link 	                          |      Status      	|  Comments	                 |
 |:----------              |:-------------                 |:------:	                          |:-------------:	    |:------	                 |
 | `sh:validator`          | `ConstraintComponent`         | [▶][ConstraintComponent]          | ![status-complete]	|                            |
@@ -130,28 +130,29 @@
 
 ### [SHACL Functions](https://www.w3.org/TR/shacl-af/#functions)
 | Parameter               |  Link 	              |      Status      	|  Comments	|
-|:----------              |:------:	              |:-------------:	    |:------	|
-| `sh:SPARQLFunction`     | [▶][AFSPARQLFunction] | ![status-missing]	| RDFLib not supporting Extensible Value Testing in SPARQL |
+|:----------              |:------:	              |:-------------:	    |:------:	|
+| `sh:SHACLFunction`      | [▶][AFSPARQLFunction] | ![status-complete]	| fully implemented        |
+| `sh:SPARQLFunction`     | [▶][AFSPARQLFunction] | ![status-complete]	| implemented using RDFLib |
 
 ### [Node Expressions](https://www.w3.org/TR/shacl-af/#node-expressions)
-| Path                |  Link 	                 |      Status      	|  Comments	|
-|:----------          |:------:	                 |:-------------:	    |:------	|
-| `sh:this`           | [▶][AFExpressionFocus]   | ![status-complete]	|           |
-| Constant Term       | [▶][AFExpConstantTerm]   | ![status-complete]	|           |
-| `sh:filterShape`    | [▶][AFExpFilterShape]    | ![status-missing] 	|           |
-| SHACL Function      | [▶][AFExpFunction]       | ![status-missing] 	|           |
-| `sh:path`           | [▶][AFExpPath]           | ![status-complete] 	|           |
-| `sh:intersection`   | [▶][AFExpIntersection]   | ![status-missing] 	|           |
-| `sh:union`          | [▶][AFExpUnion]          | ![status-missing] 	|           |
+| Path                |  Link 	                 |      Status      	|  Comments	 |
+|:----------          |:------:	                 |:-------------:	    |:---------: |
+| `sh:this`           | [▶][AFExpressionFocus]   | ![status-complete]	|            |
+| Constant Term       | [▶][AFExpConstantTerm]   | ![status-complete]	|            |
+| `sh:filterShape`    | [▶][AFExpFilterShape]    | ![status-complete] 	| not tested |
+| SHACL Function      | [▶][AFExpFunction]       | ![status-complete] 	|            |
+| `sh:path`           | [▶][AFExpPath]           | ![status-complete] 	|            |
+| `sh:intersection`   | [▶][AFExpIntersection]   | ![status-complete] 	| not tested |
+| `sh:union`          | [▶][AFExpUnion]          | ![status-complete] 	| not tested |
 
 ### [Expression Constraints][AFExpression]
 | Path                               |  Link 	              |      Status      	|  Comments	|
-|:----------                         |:------:	              |:-------------:	    |:------	|
+|:----------                         |:------:	              |:-------------:	    |:------:   |
 | `sh:ExpressionConstraintComponent` | [▶][AFExpression]      | ![status-missing]	|           |
 
 ### [SHACL Rules](https://www.w3.org/TR/shacl-af/#rules)
 | Parameter               |  Link 	              |      Status      	|  Comments	|
-|:----------              |:------:	              |:-------------:	    |:------	|
+|:----------              |:------:	              |:-------------:	    |:------:   |
 | `sh:condition`          | [▶][AFCondition]      | ![status-complete]	|           |
 | `sh:order`              | [▶][AFOrder]          | ![status-complete]	|           |
 | `sh:deactivated`        | [▶][AFDeactivated]    | ![status-complete]	|           |
