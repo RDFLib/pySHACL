@@ -240,15 +240,15 @@ class Shape(object):
         result_set = dict()
         for c in custom_targets:
             ct = dict()
-            is_types = set(self.sg.graph.objects(c, RDF_type))
-            is_target_type = False
-            parameters = set(self.sg.graph.objects(c, SH_parameter))
-            if SH_SPARQLTargetType in is_types or len(parameters) > 0:
-                is_target_type = True
-            ct['type'] = SH_SPARQLTargetType if is_target_type else SH_SPARQLTarget
             selects = set(self.sg.graph.objects(c, SH_select))
             if len(selects) < 1:
                 continue
+            is_types = set(self.sg.graph.objects(c, RDF_type))
+            is_type_target_type = False
+            parameters = set(self.sg.graph.objects(c, SH_parameter))
+            if SH_SPARQLTargetType in is_types or len(parameters) > 0:
+                is_type_target_type = True
+            ct['type'] = SH_SPARQLTargetType if is_type_target_type else SH_SPARQLTarget
             ct['select'] = next(iter(selects))
             qh = SPARQLQueryHelper(self, c, ct['select'], deactivated=self._deactivated)
             ct['qh'] = qh

@@ -311,7 +311,7 @@ class BoundShapeValidatorComponent(ConstraintComponent):
     @classmethod
     def constraint_parameters(cls):
         # TODO:coverage: this is never used for this constraint?
-        return [SH_validator, SH_nodeValidator, SH_propertyValidator, SH_parameter]
+        return [SH_validator, SH_nodeValidator, SH_propertyValidator]
 
     @classmethod
     def constraint_name(cls):
@@ -399,12 +399,12 @@ class SPARQLConstraintComponent(object):
         path = str(parameter.path())
         hash_index = path.find('#')
         if hash_index > 0:
-            ending = path[hash_index + 1 :]
+            ending = path[hash_index + 1:]
             return ending
         right_slash_index = path.rfind('/')
         if right_slash_index > 0:
             # TODO:coverage: No test for this case where path has a right slash
-            ending = path[right_slash_index + 1 :]
+            ending = path[right_slash_index + 1:]
             return ending
         raise ReportableRuntimeError("Cannot get a local name for {}".format(path))
 

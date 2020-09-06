@@ -266,9 +266,6 @@ class HasValueConstraintComponent(ConstraintComponent):
                 #     a_value_node = next(iter(value_nodes))
                 #     rept = self.make_v_result(f, value_node=a_value_node)
                 # else:
-                if not self.shape.is_property_shape:
-                    rept = self.make_v_result(target_graph, f, value_node=f)
-                else:
-                    rept = self.make_v_result(target_graph, f, value_node=None)
+                rept = self.make_v_result(target_graph, f, value_node=None)
                 reports.append(rept)
         return non_conformant, reports

@@ -37,7 +37,7 @@ ex:TestShape
           sh:resultSeverity sh:Violation ;
           sh:sourceConstraintComponent sh:HasValueConstraintComponent ;
           sh:sourceShape ex:TestShape ;
-          sh:value "Invalid String" ;
+          # See See https://github.com/w3c/data-shapes/issues/111: don't create sh:value "Invalid String" ;
         ] ;
     ] ;
   mf:status sht:approved ;
