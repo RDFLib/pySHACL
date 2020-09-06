@@ -61,7 +61,9 @@ class TripleRule(SHACLRule):
             raise RuntimeError("Too many sh:object")
         self.o = next(iter(my_object_nodes))
 
-    def get_nodes_from_node_expression(self, expr, focus_node, data_graph: 'GraphLike', recurse_depth=0) -> Union[Set['RDFNode'], List['RDFNode']] :
+    def get_nodes_from_node_expression(
+        self, expr, focus_node, data_graph: 'GraphLike', recurse_depth=0
+    ) -> Union[Set['RDFNode'], List['RDFNode']]:
         if expr == SH_this:
             return [focus_node]
         sg = self.shape.sg  # type: ShapesGraph

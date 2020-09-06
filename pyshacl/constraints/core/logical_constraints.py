@@ -327,7 +327,9 @@ class XoneConstraintComponent(ConstraintComponent):
         xone_list = " , ".join(
             stringify_node(self.shape.sg.graph, a_c) for a in self.xone_nodes for a_c in self.shape.sg.graph.items(a)
         )
-        m = "Node {} does not conform exactly one shape in {}".format(stringify_node(datagraph, value_node), xone_list)
+        m = "Node {} does not conform to exactly one shape in {}".format(
+            stringify_node(datagraph, value_node), xone_list
+        )
         return [rdflib.Literal(m)]
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
