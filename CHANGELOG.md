@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [0.13.1] - 2020-09-07
+
+## Added
+- SPARQLTargetType
+  - New SPARQL-based Target Type feature
+  - The Paramaterisable form of SPARQLTarget from the SHACL Advanced Features spec
+  - https://www.w3.org/TR/shacl-af/#SPARQLTargetType
+- Added a test for SPARQLTargetType - Theres none in the SHT suite, or the DASH suite.
+
+## Changed
+- Refactored `sh:parameter` code in SPARQL-based Constraint Components, SHACLFunctions, and SPARQL-Based Target Types
+  - They all now share a common SHACLParameter helper class, reducing code duplication
+- Refactored `SPARQLQueryHelper`
+  - `SPARQLQueryHelper` internal class is now more helpful
+  - `query_helper` can now extract param bindings into param-value pairs for parameterised queries
+  - Reduces more code duplication
+
+
 ## [0.13.0] - 2020-09-04
 
 ## Added
@@ -627,7 +645,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.13.1...HEAD
+[0.13.1]: https://github.com/RDFLib/pySHACL/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/RDFLib/pySHACL/compare/v0.12.2...v0.13.0
 [0.12.2]: https://github.com/RDFLib/pySHACL/compare/v0.12.1.post2...v0.12.2
 [0.12.1.post2]: https://github.com/RDFLib/pySHACL/compare/v0.12.1.post1...v0.12.1.post2

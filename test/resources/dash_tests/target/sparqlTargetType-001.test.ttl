@@ -1,0 +1,109 @@
+# baseURI: http://datashapes.org/sh/tests/sparql/target/sparqlTargetType-001.test
+# imports: http://datashapes.org/dash
+# prefix: ex
+
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix ex: <http://datashapes.org/sh/tests/sparql/target/sparqlTargetType-001.test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://datashapes.org/sh/tests/sparql/target/sparqlTargetType-001.test>
+  rdf:type owl:Ontology ;
+  rdfs:label "Test of sh:SPARQLTargetType 001" ;
+  owl:imports <http://datashapes.org/dash> ;
+.
+ex:GraphValidationTestCase
+  rdf:type dash:GraphValidationTestCase ;
+  dash:expectedResult [
+      rdf:type sh:ValidationReport ;
+      sh:conforms "false"^^xsd:boolean ;
+      sh:result [
+          rdf:type sh:ValidationResult ;
+          sh:focusNode ex:Barry ;
+          sh:resultSeverity sh:Violation ;
+          sh:sourceConstraintComponent sh:ClassConstraintComponent ;
+          sh:sourceShape ex:USCitizenShape ;
+          sh:value ex:Barry ;
+        ] ;
+    ] ;
+.
+
+ex:Person
+  rdf:type owl:Class ;
+  rdfs:label "A person" ;
+.
+
+ex:Country
+  rdf:type owl:Class ;
+  rdfs:label "A country" ;
+.
+
+ex:USA
+  rdf:type ex:Country ;
+.
+
+ex:Germany
+  rdf:type ex:Country ;
+.
+
+ex:bornIn
+  rdf:type owl:ObjectProperty ;
+.
+
+ex:GermanCitizen
+  rdf:type owl:Class ;
+.
+ex:USCitizen
+  rdf:type owl:Class ;
+.
+
+ex:Ludwig
+  rdf:type ex:Person ;
+  rdf:type ex:GermanCitizen ;
+  ex:bornIn ex:Germany .
+
+ex:Barry
+  rdf:type ex:Person ;
+  ex:bornIn ex:USA .
+
+
+ex:PeopleBornInCountryTarget
+	a sh:SPARQLTargetType ;
+	rdfs:subClassOf sh:Target ;
+	sh:labelTemplate "All persons born in {$country}" ;
+	sh:parameter [
+		sh:path ex:country ;
+		sh:description "The country that the focus nodes are 'born' in." ;
+		sh:class ex:Country ;
+		sh:nodeKind sh:IRI ;
+	] ;
+	sh:prefixes ex: ;
+	sh:select """
+		SELECT ?this
+		WHERE {
+			?this a ex:Person .
+			?this ex:bornIn $country .
+		}
+		""" ;
+.
+
+ex:GermanCitizenShape
+	a sh:NodeShape ;
+	sh:target [
+		a ex:PeopleBornInCountryTarget ;
+		ex:country ex:Germany ;
+	] ;
+	sh:class ex:GermanCitizen ;
+.
+
+ex:USCitizenShape
+	a sh:NodeShape ;
+	sh:target [
+		a ex:PeopleBornInCountryTarget ;
+		ex:country ex:USA ;
+	] ;
+	sh:class ex:USCitizen ;
+.

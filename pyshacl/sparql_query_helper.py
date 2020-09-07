@@ -8,7 +8,7 @@ import rdflib
 
 from rdflib import RDF, XSD
 
-from pyshacl.consts import (
+from .consts import (
     SH,
     OWL_Ontology,
     RDF_type,
@@ -21,10 +21,11 @@ from pyshacl.consts import (
     SH_zeroOrMorePath,
     SH_zeroOrOnePath,
 )
-from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
+from .errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
 
 
 SH_declare = SH.term('declare')
+invalid_parameter_names = {'this', 'shapesGraph', 'currentShape', 'path', 'PATH', 'value'}
 
 
 class SPARQLQueryHelper(object):
@@ -41,17 +42,84 @@ class SPARQLQueryHelper(object):
     )
     has_as_var_regex = re.compile(r"[^\w]+AS[\s]+[\$\?](\w+)", flags=re.M | re.I)
 
-    def __init__(self, shape, node, select_text, messages=None, deactivated=False):
-        self.shape = shape
+    def __init__(self, shape, node, select_text, parameters=None, messages=None, deactivated=False):
+        self._shape = None
         self.node = node
         self.select_text = select_text
-        self.messages = messages
+        self.unbound_messages = messages or set()
         self.deactivated = deactivated
+        self.parameters = [] if parameters is None else parameters
+        self.param_bind_map = {}
+        self.bound_messages = set()
         self.prefixes = {
             'rdf': rdflib.namespace.RDF.uri,
             'rdfs': rdflib.namespace.RDFS.uri,
             'owl': str(rdflib.namespace.OWL),
         }
+        if shape:
+            self.shape = shape
+
+    @property
+    def shape(self):
+        return self._shape
+
+    @shape.setter
+    def shape(self, newshape):
+        self._shape = newshape
+        if len(self.parameters) > 0:
+            self.bind_params()
+            self.bind_messages()
+
+    @property
+    def messages(self):
+        if len(self.bound_messages) < 1:
+            return self.unbound_messages
+        return self.bound_messages
+
+    def bind_params(self):
+        bind_map = {}
+        shape = self.shape
+        for p in self.parameters:
+            name = p.localname
+            if name in invalid_parameter_names:
+                # TODO:coverage: No test for this case
+                raise ReportableRuntimeError("Parameter name {} cannot be used.".format(name))
+            shape_params = set(shape.objects(p.path()))
+            if len(shape_params) < 1:
+                if not p.optional:
+                    # TODO:coverage: No test for this case
+                    raise ReportableRuntimeError("Shape does not have mandatory parameter {}.".format(str(p.path())))
+                continue
+            # TODO: Can shapes have more than one value for the predicate?
+            # Just use one for now.
+            # TODO: Check for sh:class and sh:nodeKind on the found param value
+            bind_map[name] = next(iter(shape_params))
+        self.param_bind_map = bind_map
+
+    def bind_messages(self):
+        # must call bind_params _before_ bind_messages
+        message_var_finder = re.compile(r"([\s()\"\'])\{[\$\?](\w+)\}", flags=re.M)
+        param_bind_map = self.param_bind_map
+        var_replacers = {}
+        bound_messages = set()
+        for m in self.unbound_messages:
+            m_val = str(m.value)
+            finds = message_var_finder.findall(m_val)
+            if len(finds) < 1:
+                bound_messages.add(m)
+                continue
+            for f in finds:
+                variable = f[1]
+                if variable not in param_bind_map.keys():
+                    continue
+                try:
+                    replacer = var_replacers[variable]
+                except KeyError:
+                    replacer = re.compile(r"([\s()\"\'])\{[\$\?]" + f[1] + r"\}", flags=re.M)
+                    var_replacers[variable] = replacer
+                m_val = replacer.sub(r"\g<1>{}".format(param_bind_map[variable].value), m_val, 1)
+            bound_messages.add(rdflib.Literal(m_val, lang=m.language, datatype=m.datatype))
+        self.bound_messages = bound_messages
 
     def collect_prefixes(self):
         sg = self.shape.sg.graph
@@ -276,7 +344,7 @@ class SPARQLQueryHelper(object):
             found_path = self.bind_path_regex.search(new_query_text)
             if found_path:
                 raise ReportableRuntimeError(
-                    "SPARQL Constraint text has $PATH in it, " "but no path is known on this Shape."
+                    "SPARQL Constraint text has $PATH in it, but no path is known on this Shape."
                 )
         # TODO: work out how to get shapesGraph binding from shape.sg
         #  shapes_graph = self.shape.sg
@@ -289,7 +357,7 @@ class SPARQLQueryHelper(object):
             found_sg = self.bind_sg_regex.search(new_query_text)
             if found_sg:
                 raise NotImplementedError(
-                    "SPARQL Constraint text has $shapesGraph in it, " "but Shapes Graph is not currently supported."
+                    "SPARQL Constraint text has $shapesGraph in it, but Shapes Graph is not currently supported."
                 )
 
         return init_bindings, new_query_text

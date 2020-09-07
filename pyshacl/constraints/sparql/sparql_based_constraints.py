@@ -38,31 +38,32 @@ class SPARQLBasedConstraint(ConstraintComponent):
             select_node_list = set(sg.objects(s, SH_select))
             if len(select_node_list) < 1:
                 raise ConstraintLoadError(
-                    "SPARQLConstraintComponent value for sh:select must have " "at least one sh:select predicate.",
+                    "SPARQLConstraintComponent value for sh:select must have at least one sh:select predicate.",
                     "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent",
                 )
             elif len(select_node_list) > 1:
                 raise ConstraintLoadError(
-                    "SPARQLConstraintComponent value for sh:select must have " "at most one sh:select predicate.",
+                    "SPARQLConstraintComponent value for sh:select must have at most one sh:select predicate.",
                     "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent",
                 )
             select_node = next(iter(select_node_list))
             if not (isinstance(select_node, rdflib.Literal) and isinstance(select_node.value, str)):
                 raise ConstraintLoadError(
-                    "SPARQLConstraintComponent value for sh:select must be " "a Literal with type xsd:string.",
+                    "SPARQLConstraintComponent value for sh:select must be a Literal with type xsd:string.",
                     "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent",
                 )
-            query_helper = SPARQLQueryHelper(self.shape, s, select_node.value)
             message_node_list = set(sg.objects(s, SH_message))
+            msgs = None
             if len(message_node_list) > 0:
                 message = next(iter(message_node_list))
                 if not (isinstance(message, rdflib.Literal) and isinstance(message.value, str)):
                     raise ConstraintLoadError(
-                        "SPARQLConstraintComponent value for sh:message must be " "a Literal with type xsd:string.",
+                        "SPARQLConstraintComponent value for sh:message must be a Literal with type xsd:string.",
                         "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent",
                     )
-                query_helper.messages = message_node_list
+                msgs = message_node_list
             deactivated_node_list = set(sg.objects(s, SH_deactivated))
+            deact = False
             if len(deactivated_node_list) > 0:
                 deactivated = next(iter(deactivated_node_list))
                 if not (isinstance(deactivated, rdflib.Literal) and isinstance(deactivated.value, bool)):
@@ -71,7 +72,8 @@ class SPARQLBasedConstraint(ConstraintComponent):
                         "a Literal with type xsd:boolean.",
                         "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent",
                     )
-                query_helper.deactivated = deactivated.value
+                deact = bool(deactivated.value)
+            query_helper = SPARQLQueryHelper(self.shape, s, select_node.value, messages=msgs, deactivated=deact)
             query_helper.collect_prefixes()
             sparql_constraints.add(query_helper)
         self.sparql_constraints = sparql_constraints

@@ -7,8 +7,7 @@ from typing import TYPE_CHECKING, List, Optional, Set, Tuple, Union
 
 from rdflib import RDF, BNode, Literal, URIRef
 
-from pyshacl.constraints import ALL_CONSTRAINT_PARAMETERS, CONSTRAINT_PARAMETERS_MAP
-from pyshacl.consts import (
+from .consts import (
     RDF_type,
     RDFS_Class,
     RDFS_subClassOf,
@@ -20,7 +19,6 @@ from pyshacl.consts import (
     SH_name,
     SH_oneOrMorePath,
     SH_order,
-    SH_parameter,
     SH_property,
     SH_select,
     SH_severity,
@@ -35,9 +33,9 @@ from pyshacl.consts import (
     SH_zeroOrMorePath,
     SH_zeroOrOnePath,
 )
-from pyshacl.errors import ConstraintLoadError, ConstraintLoadWarning, ReportableRuntimeError, ShapeLoadError
-from pyshacl.pytypes import GraphLike
-from pyshacl.sparql_query_helper import SPARQLQueryHelper
+from .errors import ConstraintLoadError, ConstraintLoadWarning, ReportableRuntimeError, ShapeLoadError
+from .pytypes import GraphLike
+from .sparql_query_helper import SPARQLQueryHelper
 
 
 if TYPE_CHECKING:
@@ -224,9 +222,6 @@ class Shape(object):
             return self._path
         raise RuntimeError("property shape has no _path!")  # pragma: no cover
 
-    def parameters(self):
-        return (p for p, v in self.sg.predicate_objects(self.node) if p in ALL_CONSTRAINT_PARAMETERS)
-
     def target(self):
         target_nodes = self.target_nodes()
         target_classes = self.target_classes()
@@ -236,23 +231,32 @@ class Shape(object):
         return (target_nodes, target_classes, implicit_targets, target_objects_of, target_subjects_of)
 
     def advanced_target(self):
-        custom_targets = set(self.sg.graph.objects(self.node, SH_target))
+        custom_targets = set(self.sg.objects(self.node, SH_target))
         result_set = dict()
         for c in custom_targets:
             ct = dict()
-            selects = set(self.sg.graph.objects(c, SH_select))
-            if len(selects) < 1:
-                continue
-            is_types = set(self.sg.graph.objects(c, RDF_type))
-            is_type_target_type = False
-            parameters = set(self.sg.graph.objects(c, SH_parameter))
-            if SH_SPARQLTargetType in is_types or len(parameters) > 0:
-                is_type_target_type = True
-            ct['type'] = SH_SPARQLTargetType if is_type_target_type else SH_SPARQLTarget
-            ct['select'] = next(iter(selects))
-            qh = SPARQLQueryHelper(self, c, ct['select'], deactivated=self._deactivated)
-            ct['qh'] = qh
-            qh.collect_prefixes()
+            selects = list(self.sg.objects(c, SH_select))
+            has_select = len(selects) > 0
+            is_types = set(self.sg.objects(c, RDF_type))
+            if has_select or (SH_SPARQLTarget in is_types):
+                ct['type'] = SH_SPARQLTarget
+                qh = SPARQLQueryHelper(self, c, selects[0], deactivated=self._deactivated)
+                qh.collect_prefixes()
+                ct['qh'] = qh
+            else:
+                found_tt = None
+                for t in is_types:
+                    try:
+                        found_tt = self.sg.get_shacl_target_type(t)
+                        break
+                    except LookupError:
+                        continue
+                if not found_tt:
+                    msg = "None of these types match a TargetType: {}".format(" ".join(is_types))
+                    raise ShapeLoadError(msg, "https://www.w3.org/TR/shacl-af/#SPARQLTargetType")
+                ct['type'] = SH_SPARQLTargetType
+                bound_tt = found_tt.bind(self, c)
+                ct['qt'] = bound_tt
             result_set[c] = ct
         return result_set
 
@@ -299,12 +303,12 @@ class Shape(object):
         found_node_targets.update(found_target_object_of)
         if advanced_targets:
             for at_node, at in advanced_targets.items():
-                if at['type'] == SH_SPARQLTargetType:
-                    # SPARQLTargetType not supported yet
-                    continue
-                qh = at['qh']
-                c = qh.apply_prefixes(at['select'])
-                results = data_graph.query(c, initBindings=None)
+                if at['type'] == SH_SPARQLTarget:
+                    qh = at['qh']
+                    select = qh.apply_prefixes(qh.select_text)
+                    results = data_graph.query(select, initBindings=None)
+                else:
+                    results = at['qt'].find_targets(data_graph)
                 if not results or len(results.bindings) < 1:
                     continue
                 for r in results:
@@ -438,7 +442,7 @@ class Shape(object):
     def find_custom_constraints(self):
         applicable_custom_constraints = set()
         for c in self.sg.custom_constraints:
-            mandatory = c.mandatory_parameters
+            mandatory = (p for p in c.parameters if not p.optional)
             found_all_mandatory = True
             for mandatory_param in mandatory:
                 path = mandatory_param.path()
@@ -480,7 +484,10 @@ class Shape(object):
         elif len(_evaluation_path) >= 28:  # 27 is the depth required to successfully do the meta-shacl test
             path_str = "->".join((str(e) for e in _evaluation_path))
             raise ReportableRuntimeError("Evaluation path too deep!\n{}".format(path_str))
-        parameters = self.parameters()
+        # Lazy import here to avoid an import loop
+        from .constraints import ALL_CONSTRAINT_PARAMETERS, CONSTRAINT_PARAMETERS_MAP
+
+        parameters = (p for p, v in self.sg.predicate_objects(self.node) if p in ALL_CONSTRAINT_PARAMETERS)
         reports = []
         focus_value_nodes = self.value_nodes(target_graph, focus)
         non_conformant = False

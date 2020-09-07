@@ -11,7 +11,8 @@ import rdflib
 
 from rdflib.util import from_n3
 
-from pyshacl.pytypes import GraphLike
+from .pytypes import GraphLike
+from .target import apply_target_types, gather_target_types
 
 
 if owlrl.json_ld_available:
@@ -19,7 +20,7 @@ if owlrl.json_ld_available:
 
 from rdflib import BNode, Literal, URIRef
 
-from pyshacl.consts import (
+from .consts import (
     RDF_object,
     RDF_predicate,
     RDF_subject,
@@ -30,11 +31,11 @@ from pyshacl.consts import (
     SH_resultMessage,
     SH_ValidationReport,
 )
-from pyshacl.errors import ReportableRuntimeError, ValidationFailure
-from pyshacl.functions import apply_functions, gather_functions, unapply_functions
-from pyshacl.inference import CustomRDFSOWLRLSemantics, CustomRDFSSemantics
-from pyshacl.monkey import apply_patches, rdflib_bool_patch, rdflib_bool_unpatch
-from pyshacl.rdfutil import (
+from .errors import ReportableRuntimeError, ValidationFailure
+from .functions import apply_functions, gather_functions, unapply_functions
+from .inference import CustomRDFSOWLRLSemantics, CustomRDFSSemantics
+from .monkey import apply_patches, rdflib_bool_patch, rdflib_bool_unpatch
+from .rdfutil import (
     clone_blank_node,
     clone_graph,
     compare_blank_node,
@@ -44,8 +45,8 @@ from pyshacl.rdfutil import (
     mix_graphs,
     order_graph_literal,
 )
-from pyshacl.rules import apply_rules, gather_rules
-from pyshacl.shapes_graph import ShapesGraph
+from .rules import apply_rules, gather_rules
+from .shapes_graph import ShapesGraph
 
 
 log_handler = logging.StreamHandler(stderr)
@@ -202,9 +203,11 @@ class Validator(object):
 
         shapes = self.shacl_graph.shapes  # This property getter triggers shapes harvest.
         if self.options['advanced']:
+            target_types = gather_target_types(self.shacl_graph)
             advanced = {'functions': gather_functions(self.shacl_graph), 'rules': gather_rules(self.shacl_graph)}
             for s in shapes:
                 s.set_advanced(True)
+            apply_target_types(target_types)
         else:
             advanced = {}
         if isinstance(the_target_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
@@ -218,6 +221,7 @@ class Validator(object):
             named_graphs = [the_target_graph]
         reports = []
         non_conformant = False
+
         for g in named_graphs:
             if advanced:
                 apply_functions(advanced['functions'], g)

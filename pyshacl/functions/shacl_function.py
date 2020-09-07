@@ -4,115 +4,29 @@ import typing
 
 from typing import Dict, List
 
-from rdflib import XSD, Literal, URIRef
+from rdflib import XSD, Literal
 from rdflib.plugins.sparql.operators import register_custom_function, unregister_custom_function
 from rdflib.plugins.sparql.sparql import SPARQLError
 
-from pyshacl.consts import SH, RDFS_comment, SH_ask, SH_description, SH_order, SH_parameter, SH_path, SH_select
-from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
-from pyshacl.sparql_query_helper import SPARQLQueryHelper
+from ..consts import SH, RDFS_comment, SH_ask, SH_parameter, SH_select
+from ..errors import ConstraintLoadError, ReportableRuntimeError
+from ..parameter import SHACLParameter
+from ..sparql_query_helper import SPARQLQueryHelper
 
 
 if typing.TYPE_CHECKING:
-    from pyshacl.pytypes import GraphLike
-    from pyshacl.shapes_graph import ShapesGraph
+    from ..pytypes import GraphLike
+    from ..shapes_graph import ShapesGraph
 
-SH_datatype = SH.term('datatype')
+
 SH_returnType = SH.term('returnType')
 SH_optional = SH.term('optional')
-
-
-class SHACLFunctionParameter(object):
-    __slots__ = ("node", "path", "datatype", "description", "order", "optional")
-
-    def __init__(self, pa_node, fn):
-        """
-        :type fn: SHACLFunction
-
-        """
-        sg = fn.sg  # type: ShapesGraph
-        self.node = pa_node
-        paths = list(sg.objects(pa_node, SH_path))
-        if len(paths) < 1:
-            self.path = URIRef("http://")  # todo: is this a blank path?
-        elif len(paths) > 1:
-            raise ConstraintLoadError(
-                "sh:parameter cannot have more than one value for sh:path.",
-                "https://www.w3.org/TR/shacl-af/#functions-example",
-            )
-        else:
-            self.path = paths[0]
-        datatypes = list(sg.objects(pa_node, SH_datatype))
-        if len(datatypes) < 1:
-            self.datatype = None
-        elif len(datatypes) > 1:
-            raise ConstraintLoadError(
-                "sh:parameter cannot have more than one value for sh:datatype.",
-                "https://www.w3.org/TR/shacl-af/#functions-example",
-            )
-        else:
-            self.datatype = datatypes[0]
-        descs = list(sg.objects(pa_node, SH_description))
-        if len(descs) < 1:
-            self.description = None
-        elif len(descs) > 1:
-            raise ConstraintLoadError(
-                "sh:parameter cannot have more than one value for sh:description.",
-                "https://www.w3.org/TR/shacl-af/#functions-example",
-            )
-        else:
-            self.description = descs[0]
-        orders = list(sg.objects(pa_node, SH_order))
-        if len(orders) < 1:
-            self.order = None
-        elif len(orders) > 1:
-            raise ConstraintLoadError(
-                "sh:parameter cannot have more than one value for sh:order.",
-                "https://www.w3.org/TR/shacl-af/#functions-example",
-            )
-        else:
-            # TODO: check order is a literal with type Int
-            self.order = int(orders[0])
-        optionals = list(sg.objects(pa_node, SH_optional))
-        if len(optionals) < 1:
-            self.optional = False
-        elif len(optionals) > 1:
-            raise ConstraintLoadError(
-                "sh:parameter cannot have more than one value for sh:optional.",
-                "https://www.w3.org/TR/shacl-af/#functions-example",
-            )
-        else:
-            # TODO: check optional is a literal with type Bool
-            self.optional = bool(optionals[0])
-
-    @property
-    def localname(self):
-        path = self.path
-        if path.startswith("http:"):
-            path = path[5:]
-        elif path.startswith("https:"):
-            path = path[6:]
-        try:
-            parts = [p for p in path.split("/") if len(p)]
-        except (LookupError, ValueError):
-            return ""
-        if len(parts) < 1 or len(parts[-1]) < 1:
-            return ""
-        last_part = parts[-1]
-        try:
-            parts = last_part.split("#", 1)
-            if len(parts) < 2:
-                return parts[0]
-            else:
-                return parts[1]
-        except (LookupError, ValueError):
-            return last_part
 
 
 class SHACLFunction(object):
     __slots__ = ("sg", "node", "comments", "parameters", "rtype")
 
-    def __init__(self, fn_node, sg):
+    def __init__(self, fn_node, sg: 'ShapesGraph'):
         """
 
         :param fn_node:
@@ -124,7 +38,7 @@ class SHACLFunction(object):
         self.node = fn_node
         self.sg = sg
         params = list(sg.objects(fn_node, SH_parameter))
-        self.parameters = [SHACLFunctionParameter(p, self) for p in params]  # type: List[SHACLFunctionParameter]
+        self.parameters = [SHACLParameter(sg, p) for p in params]  # type: List[SHACLParameter]
         self.comments = set(sg.objects(fn_node, RDFS_comment))
         rtypes = list(sg.objects(fn_node, SH_returnType))
         if len(rtypes) < 1:
@@ -141,10 +55,10 @@ class SHACLFunction(object):
     def get_params_in_order(self):
         if len(self.parameters) < 1:
             return []
-        orders = (p.order for p in self.parameters)
+        orders = (p.param_order for p in self.parameters)
         if None not in orders:
-            # sort by _order_ field
-            params = sorted(self.parameters, key=lambda x: x.order)
+            # sort by _param_order_ field
+            params = sorted(self.parameters, key=lambda x: x.param_order)
         else:
             # sort by _localname_ of path
             params = sorted(self.parameters, key=lambda x: x.localname)
@@ -153,6 +67,9 @@ class SHACLFunction(object):
     def get_optional_map(self):
         params = self.get_params_in_order()
         return [True if p.optional else False for p in params]
+
+    def objects(self, predicate=None):
+        return self.sg.graph.objects(self.node, predicate)
 
     def apply(self, g):
         self.sg.add_shacl_function(self.node, self.execute, self.get_optional_map())
@@ -207,7 +124,9 @@ class SPARQLFunction(SHACLFunction):
         else:
             self.ask = None
         self.select = selects[0] if num_selects else None
-        query_helper = SPARQLQueryHelper(self, self.node, None, deactivated=False)
+        # deliberately not passing in Parameters to queryHelper here, because we can't bind them to this function
+        # (this function is not a Shape, and Function Params don't get bound to it)
+        query_helper = SPARQLQueryHelper(self, self.node, None, None, deactivated=False)
         query_helper.collect_prefixes()
         self._qh = query_helper
 

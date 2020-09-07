@@ -2,16 +2,15 @@
 """
 https://www.w3.org/TR/shacl/#sparql-constraint-components
 """
-import re
-
 from typing import Dict, List, Tuple, Union
 
 import rdflib
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.constraints.sparql.sparql_based_constraints import SPARQLQueryHelper
-from pyshacl.consts import SH, RDF_type, SH_ask, SH_message, SH_parameter, SH_select
-from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
+from pyshacl.consts import SH, RDF_type, SH_ask, SH_message, SH_parameter, SH_path, SH_select
+from pyshacl.errors import ConstraintLoadError, ValidationFailure
+from pyshacl.parameter import SHACLParameter
 from pyshacl.pytypes import GraphLike
 
 
@@ -24,7 +23,81 @@ SH_ConstraintComponent = SH.term('ConstraintComponent')
 SH_SPARQLSelectValidator = SH.term('SPARQLSelectValidator')
 SH_SPARQLAskValidator = SH.term('SPARQLAskValidator')
 
-invalid_parameter_names = {'this', 'shapesGraph', 'currentShape', 'path', 'PATH', 'value'}
+
+class BoundShapeValidatorComponent(ConstraintComponent):
+    def __init__(self, constraint, shape, validator):
+        """
+        Create a new custom constraint, by applying a ConstraintComponent and a Validator to a Shape
+        :param constraint: The source ConstraintComponent, this is needed to bind the parameters in the query_helper
+        :type constraint: SPARQLConstraintComponent
+        :param shape:
+        :type shape: pyshacl.shape.Shape
+        :param validator:
+        :type validator: AskConstraintValidator | SelectConstraintValidator
+        """
+        super(BoundShapeValidatorComponent, self).__init__(shape)
+        self.constraint = constraint
+        self.validator = validator
+        params = constraint.parameters
+        self.query_helper = SPARQLQueryHelper(
+            self.shape, validator.node, validator.query_text, params, messages=validator.messages
+        )
+        # Setting self.shape into QueryHelper automatically applies query_helper.bind_params and bind_messages
+        self.query_helper.collect_prefixes()
+
+    @classmethod
+    def constraint_parameters(cls):
+        # TODO:coverage: this is never used for this constraint?
+        return [SH_validator, SH_nodeValidator, SH_propertyValidator]
+
+    @classmethod
+    def constraint_name(cls):
+        return "ConstraintComponent"
+
+    @classmethod
+    def shacl_constraint_class(cls):
+        # TODO:coverage: this is never used for this constraint?
+        return SH_ConstraintComponent
+
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+        """
+        :type focus_value_nodes: dict
+        :type target_graph: rdflib.Graph
+        """
+        reports = []
+        non_conformant = False
+        extra_messages = self.query_helper.messages or None
+        rept_kwargs = {
+            # TODO, determine if we need sourceConstraint here
+            #  'source_constraint': self.validator.node,
+            'constraint_component': self.constraint.node,
+            'extra_messages': extra_messages,
+        }
+        for f, value_nodes in focus_value_nodes.items():
+            # we don't use value_nodes in the sparql constraint
+            # All queries are done on the corresponding focus node.
+            try:
+                violations = self.validator.validate(f, value_nodes, target_graph, self.query_helper)
+            except ValidationFailure as e:
+                raise e
+            if not self.shape.is_property_shape:
+                result_val = f
+            else:
+                result_val = None
+            for v in violations:
+                non_conformant = True
+                if isinstance(v, bool) and v is True:
+                    # TODO:coverage: No test for when violation is `True`
+                    rept = self.make_v_result(target_graph, f, value_node=result_val, **rept_kwargs)
+                elif isinstance(v, tuple):
+                    t, p, v = v
+                    if v is None:
+                        v = result_val
+                    rept = self.make_v_result(target_graph, t or f, value_node=v, result_path=p, **rept_kwargs)
+                else:
+                    rept = self.make_v_result(target_graph, f, value_node=v, **rept_kwargs)
+                reports.append(rept)
+        return (not non_conformant), reports
 
 
 class SPARQLConstraintComponentValidator(object):
@@ -63,9 +136,9 @@ class SPARQLConstraintComponentValidator(object):
         cls.validator_cache[cache_key] = validator
         return validator
 
-    def apply_to_shape_via_constraint(self, constraint, shape, **kwargs):
+    def apply_to_shape_via_constraint(self, constraint, shape, **kwargs) -> BoundShapeValidatorComponent:
         """
-
+        Create a new Custom Constraint (BoundShapeValidatorComponent)
         :param constraint:
         :type constraint: SPARQLConstraintComponent
         :param shape:
@@ -87,30 +160,8 @@ class SPARQLConstraintComponentValidator(object):
                 "Validator for a NodeShape or a PropertyShape must be of type SPARQLSelectValidator.",
                 "https://www.w3.org/TR/shacl/#ConstraintComponent",
             )
-        bind_map = {}
-        for m in constraint.mandatory_parameters:
-            name = constraint.parameter_name(m)
-            if name in invalid_parameter_names:
-                # TODO:coverage: No test for this case
-                raise ReportableRuntimeError("Parameter name {} cannot be used.".format(name))
-            shape_params = set(shape.objects(m.path()))
-            if len(shape_params) < 1:
-                # TODO:coverage: No test for this case
-                raise ReportableRuntimeError("Shape does not have mandatory parameter {}.".format(str(m.path())))
-            # TODO: Can shapes have more than one value for the predicate?
-            # Just use one for now.
-            bind_map[name] = next(iter(shape_params))
-        for o in constraint.optional_parameters:
-            name = constraint.parameter_name(o)
-            if name in invalid_parameter_names:
-                # TODO:coverage: No test for this case
-                raise ReportableRuntimeError("Parameter name {} cannot be used.".format(name))
-            shape_params = set(shape.objects(o.path()))
-            if len(shape_params) > 0:
-                # TODO: Can shapes have more than one value for the predicate?
-                # Just use one for now.
-                bind_map[name] = next(iter(shape_params))
-        return BoundShapeValidatorComponent(constraint, shape, self, bind_map)
+
+        return BoundShapeValidatorComponent(constraint, shape, self)
 
     def __init__(self, shacl_graph, node, **kwargs):
         initialised = getattr(self, 'initialised', False)
@@ -154,7 +205,7 @@ class AskConstraintValidator(SPARQLConstraintComponentValidator):
             )
         self.query_text = ask_val.value
 
-    def validate(self, focus, value_nodes, target_graph, query_helper=None, bind_vals=None):
+    def validate(self, focus, value_nodes, target_graph, query_helper=None, new_bind_vals=None):
         """
 
         :param focus:
@@ -162,10 +213,13 @@ class AskConstraintValidator(SPARQLConstraintComponentValidator):
         :param query_helper:
         :param target_graph:
         :type target_graph: rdflib.Graph
-        :param bind_vals:
+        :param new_bind_vals:
         :return:
         """
-        bind_vals = bind_vals or {}
+        param_bind_vals = query_helper.param_bind_map if query_helper else {}
+        new_bind_vals = new_bind_vals or {}
+        bind_vals = param_bind_vals.copy()
+        bind_vals.update(new_bind_vals)
         violations = []
         for v in value_nodes:
             if query_helper is None:
@@ -212,7 +266,7 @@ class SelectConstraintValidator(SPARQLConstraintComponentValidator):
             )
         self.query_text = select_val.value
 
-    def validate(self, focus, value_nodes, target_graph, query_helper=None, bind_vals=None):
+    def validate(self, focus, value_nodes, target_graph, query_helper=None, new_bind_vals=None):
         """
 
         :param focus:
@@ -220,17 +274,22 @@ class SelectConstraintValidator(SPARQLConstraintComponentValidator):
         :param query_helper:
         :param target_graph:
         :type target_graph: rdflib.Graph
-        :param bind_vals:
+        :param new_bind_vals:
         :return:
         """
-        bind_vals = bind_vals or {}
+        param_bind_vals = query_helper.param_bind_map if query_helper else {}
+        new_bind_vals = new_bind_vals or {}
+        bind_vals = param_bind_vals.copy()
+        bind_vals.update(new_bind_vals)
         for v in value_nodes:
             if query_helper is None:
                 # TODO:coverage: No test for this case when query_helper is None
                 init_binds = {}
                 sparql_text = self.query_text
             else:
-                init_binds, sparql_text = query_helper.pre_bind_variables(focus, valuenode=v)
+                init_binds, sparql_text = query_helper.pre_bind_variables(
+                    focus, valuenode=v, extravars=bind_vals.keys()
+                )
                 sparql_text = query_helper.apply_prefixes(sparql_text)
                 init_binds.update(bind_vals)
             results = target_graph.query(sparql_text, initBindings=init_binds)
@@ -265,106 +324,6 @@ class SelectConstraintValidator(SPARQLConstraintComponentValidator):
             return violations
 
 
-class BoundShapeValidatorComponent(ConstraintComponent):
-    def __init__(self, constraint, shape, validator, param_bind_map):
-        """
-
-        :param constraint:
-        :type constraint: SPARQLConstraintComponent
-        :param shape:
-        :type shape: pyshacl.shape.Shape
-        :param validator:
-        :type validator: AskConstraintValidator | SelectConstraintValidator
-        :param param_bind_map:
-        :type param_bind_map: dict
-        """
-        super(BoundShapeValidatorComponent, self).__init__(shape)
-        self.constraint = constraint
-        self.validator = validator
-        self.param_bind_map = param_bind_map
-        self.query_helper = SPARQLQueryHelper(
-            self.shape, validator.node, validator.query_text, messages=validator.messages
-        )
-        self.query_helper.collect_prefixes()
-        self.message_bind_map = {}
-        message_var_finder = re.compile(r"([\s()\"\'])\{[\$\?](\w+)\}", flags=re.M)
-        var_replacers = {}
-        self.messages = set()
-        for m in self.query_helper.messages:
-            m_val = str(m.value)
-            finds = message_var_finder.findall(m_val)
-            if len(finds) < 1:
-                self.messages.add(m)
-                continue
-            for f in finds:
-                variable = f[1]
-                if variable not in param_bind_map.keys():
-                    continue
-                try:
-                    replacer = var_replacers[variable]
-                except KeyError:
-                    replacer = re.compile(r"([\s()\"\'])\{[\$\?]" + f[1] + r"\}", flags=re.M)
-                    var_replacers[variable] = replacer
-                m_val = replacer.sub(r"\g<1>{}".format(param_bind_map[variable].value), m_val, 1)
-            self.messages.add(rdflib.Literal(m_val, lang=m.language, datatype=m.datatype))
-
-    @classmethod
-    def constraint_parameters(cls):
-        # TODO:coverage: this is never used for this constraint?
-        return [SH_validator, SH_nodeValidator, SH_propertyValidator]
-
-    @classmethod
-    def constraint_name(cls):
-        return "ConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        # TODO:coverage: this is never used for this constraint?
-        return SH_ConstraintComponent
-
-    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
-        """
-        :type focus_value_nodes: dict
-        :type target_graph: rdflib.Graph
-        """
-        reports = []
-        non_conformant = False
-        extra_messages = self.messages or None
-        rept_kwargs = {
-            # TODO, determine if we need sourceConstraint here
-            #  'source_constraint': self.validator.node,
-            'constraint_component': self.constraint.node,
-            'extra_messages': extra_messages,
-        }
-        for f, value_nodes in focus_value_nodes.items():
-            # we don't use value_nodes in the sparql constraint
-            # All queries are done on the corresponding focus node.
-            try:
-                violations = self.validator.validate(
-                    f, value_nodes, target_graph, self.query_helper, self.param_bind_map
-                )
-            except ValidationFailure as e:
-                raise e
-            if not self.shape.is_property_shape:
-                result_val = f
-            else:
-                result_val = None
-            for v in violations:
-                non_conformant = True
-                if isinstance(v, bool) and v is True:
-                    # TODO:coverage: No test for when violation is `True`
-                    rept = self.make_v_result(target_graph, f, value_node=result_val, **rept_kwargs)
-                elif isinstance(v, tuple):
-                    t, p, v = v
-                    if v is None:
-                        v = result_val
-                    rept = self.make_v_result(target_graph, t or f, value_node=v, result_path=p, **rept_kwargs)
-                else:
-                    rept = self.make_v_result(target_graph, f, value_node=v, **rept_kwargs)
-                reports.append(rept)
-        return (not non_conformant), reports
-
-
 class SPARQLConstraintComponent(object):
     """
     SPARQL-based constraints provide a lot of flexibility but may be hard to understand for some people or lead to repetition. This section introduces SPARQL-based constraint components as a way to abstract the complexity of SPARQL and to declare high-level reusable components similar to the Core constraint components. Such constraint components can be declared using the SHACL RDF vocabulary and thus shared and reused.
@@ -372,11 +331,45 @@ class SPARQLConstraintComponent(object):
     https://www.w3.org/TR/shacl/#sparql-constraint-components
     """
 
-    def __init__(self, shacl_graph, node, mandatory_parameters, optional_parameters):
+    def __init__(self, shacl_graph, node):
         self.sg = shacl_graph
         self.node = node
-        self.mandatory_parameters = mandatory_parameters
-        self.optional_parameters = optional_parameters
+        optional_params = []
+        mandatory_params = []
+        param_nodes = set(self.sg.objects(self.node, SH_parameter))
+        if len(param_nodes) < 1:
+            # TODO:coverage: we don't have any tests for invalid constraints
+            raise ConstraintLoadError(
+                "A sh:ConstraintComponent must have at least one value for sh:parameter",
+                "https://www.w3.org/TR/shacl/#constraint-components-parameters",
+            )
+        for param_node in iter(param_nodes):
+            path_nodes = set(self.sg.objects(param_node, SH_path))
+            if len(path_nodes) < 1:
+                # TODO:coverage: we don't have any tests for invalid constraints
+                raise ConstraintLoadError(
+                    "A sh:ConstraintComponent parameter value must have at least one value for sh:path",
+                    "https://www.w3.org/TR/shacl/#constraint-components-parameters",
+                )
+            elif len(path_nodes) > 1:
+                # TODO:coverage: we don't have any tests for invalid constraints
+                raise ConstraintLoadError(
+                    "A sh:ConstraintComponent parameter value must have at most one value for sh:path",
+                    "https://www.w3.org/TR/shacl/#constraint-components-parameters",
+                )
+            path = next(iter(path_nodes))
+            parameter = SHACLParameter(self.sg, param_node, path=path, logger=None)  # pass in logger?
+            if parameter.optional:
+                optional_params.append(parameter)
+            else:
+                mandatory_params.append(parameter)
+        if len(mandatory_params) < 1:
+            # TODO:coverage: we don't have any tests for invalid constraint components
+            raise ConstraintLoadError(
+                "A sh:ConstraintComponent must have at least one non-optional parameter.",
+                "https://www.w3.org/TR/shacl/#constraint-components-parameters",
+            )
+        self.parameters = mandatory_params + optional_params
         validator_node_list = set(self.sg.graph.objects(node, SH_validator))
         node_val_node_list = set(self.sg.graph.objects(node, SH_nodeValidator))
         prop_val_node_list = set(self.sg.graph.objects(node, SH_propertyValidator))
@@ -393,20 +386,6 @@ class SPARQLConstraintComponent(object):
                 "sh:nodeValidator, or sh:propertyValidator predicates.",
                 "https://www.w3.org/TR/shacl/#ConstraintComponent",
             )
-
-    @classmethod
-    def parameter_name(cls, parameter):
-        path = str(parameter.path())
-        hash_index = path.find('#')
-        if hash_index > 0:
-            ending = path[hash_index + 1:]
-            return ending
-        right_slash_index = path.rfind('/')
-        if right_slash_index > 0:
-            # TODO:coverage: No test for this case where path has a right slash
-            ending = path[right_slash_index + 1:]
-            return ending
-        raise ReportableRuntimeError("Cannot get a local name for {}".format(path))
 
     def make_validator_for_shape(self, shape):
         """
