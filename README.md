@@ -130,9 +130,9 @@ Some other optional keyword variables available available on the `validate` func
 
 Return value:
 * a three-component `tuple` containing:
-  * `conforms` a `bool`, indicating whether or not the `data_graph` conforms to the `shacl_graph`
-  * `results_graph` an rdflib `Graph` object built according to the SHACL specification's [Validation Report](https://www.w3.org/TR/shacl/#validation-report) structure
-  * `results_text` python string representing a verbose textual representation of the [Validation Report](https://www.w3.org/TR/shacl/#validation-report)
+  * `conforms`: a `bool`, indicating whether or not the `data_graph` conforms to the `shacl_graph`
+  * `results_graph`: a `Graph` object built according to the SHACL specification's [Validation Report](https://www.w3.org/TR/shacl/#validation-report) structure
+  * `results_text`: python string representing a verbose textual representation of the [Validation Report](https://www.w3.org/TR/shacl/#validation-report)
 
 
 ## Python Module Call
