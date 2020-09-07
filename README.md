@@ -81,7 +81,7 @@ optional arguments:
                         owl:imports.
   -a, --advanced        Enable support for SHACL Advanced Features.
   --abort               Abort on first error.
-  -d, --debug           Output additional runtime messages, including violations that didn't
+  -d, --debug           Output additional runtime messages, including violations that didn\'t
                         lead to non-conformance.
   -f {human,turtle,xml,json-ld,nt,n3}, --format {human,turtle,xml,json-ld,nt,n3}
                         Choose an output format. Default is "human".
@@ -98,29 +98,6 @@ optional arguments:
   -o [OUTPUT], --output [OUTPUT]
                         Send output to a file (defaults to stdout).
 ```
-
-## Windows CLI
-
-[Pyinstaller](https://www.pyinstaller.org/) can be
-[used](https://pyinstaller.readthedocs.io/en/stable/usage.html) to create an
-executable for Windows that has the same characteristics as the Linux/Mac
-CLI program.
-The necessary ``.spec`` file is already included in ``pyshacl/pyshacl-cli.spec``.
-The ``pyshacl-cli.spec`` PyInstaller spec file creates a ``.exe`` for the
-pySHACL Command Line utility. See above for the pySHACL command line util usage instructions.
-
-See [the PyInstaller installation guide](https://pyinstaller.readthedocs.io/en/stable/installation.html#installing-in-windows) for info on how to install PyInstaller for Windows.
-
-Once you have pyinstaller, use pyinstaller to generate the ``pyshacl.exe`` CLI file like so:
-```
-    $ cd src/pyshacl
-    $ pyinstaller pyshacl-cli.spec
-```
-This will output ``pyshacl.exe`` in the ``dist`` directory in ``src/pyshacl``.
-
-You can now run the pySHACL Command Line utility via ``pyshacl.exe``.
-See above for the pySHACL command line util usage instructions.
-
 
 ## Python Module Use
 For basic use of this module, you can just call the `validate` function of the `pyshacl` module like this:
@@ -179,6 +156,29 @@ Other errors the validator can generate:
 Unlike `ValidationFailure`, these errors are not passed back as a result by the `validate()` function, but thrown as exceptions by the validation engine and must be
 caught in a `try ... except` block.
 In the case of `ShapeLoadError` and `ConstraintLoadError`, see the `str()` string representation of the exception instance for the error message along with a link to the relevant section in the SHACL spec document.
+
+
+## Windows CLI
+
+[Pyinstaller](https://www.pyinstaller.org/) can be
+[used](https://pyinstaller.readthedocs.io/en/stable/usage.html) to create an
+executable for Windows that has the same characteristics as the Linux/Mac
+CLI program.
+The necessary ``.spec`` file is already included in ``pyshacl/pyshacl-cli.spec``.
+The ``pyshacl-cli.spec`` PyInstaller spec file creates a ``.exe`` for the
+pySHACL Command Line utility. See above for the pySHACL command line util usage instructions.
+
+See [the PyInstaller installation guide](https://pyinstaller.readthedocs.io/en/stable/installation.html#installing-in-windows) for info on how to install PyInstaller for Windows.
+
+Once you have pyinstaller, use pyinstaller to generate the ``pyshacl.exe`` CLI file like so:
+```
+    $ cd src/pyshacl
+    $ pyinstaller pyshacl-cli.spec
+```
+This will output ``pyshacl.exe`` in the ``dist`` directory in ``src/pyshacl``.
+
+You can now run the pySHACL Command Line utility via ``pyshacl.exe``.
+See above for the pySHACL command line util usage instructions.
 
 
 ## Compatibility
