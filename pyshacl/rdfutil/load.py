@@ -292,10 +292,12 @@ def load_from_source(
                 elif keyword == b"prefix":
                     uri_prefix = wordval
             try:
+                # The only way we can get here is if we were able to see before
                 source.seek(0)
             except (AttributeError, UnsupportedOperation):
-                print("here")
-                raise
+                raise RuntimeError("Seek failed while pre-parsing Turtle File.")
+            except ValueError:
+                raise RuntimeError("File closed while pre-parsing Turtle File.")
         g.parse(source=source, format=rdf_format, publicID=public_id)
         # If the target was open to begin with, leave it open.
         if not source_was_open:
@@ -306,6 +308,7 @@ def load_from_source(
             except (AttributeError, UnsupportedOperation):
                 pass
             except ValueError:
+                # The parser closed our file!
                 pass
         source_is_graph = True
     elif source_is_graph and (g != source):

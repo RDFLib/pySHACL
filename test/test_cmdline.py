@@ -192,3 +192,4 @@ if __name__ == "__main__":
     test_cmdline()
     test_cmdline_fail()
     test_cmdline_web()
+    test_cmdline_jsonld()
