@@ -1,0 +1,26 @@
+{
+  "@context": {
+    "ex": "http://example.com/ex#",
+    "exOnt": "http://example.com/exOnt#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "ex:Pet1",
+      "@type": "exOnt:Lizard",
+      "exOnt:nLegs": 4,
+      "rdf:label": "Sebastian"
+    },
+    {
+      "@id": "ex:Human1",
+      "@type": "exOnt:Human",
+      "exOnt:hasPet": {
+        "@id": "ex:Pet1"
+      },
+      "exOnt:nLegs": 2,
+      "rdf:label": "Amy"
+    }
+  ]
+}
