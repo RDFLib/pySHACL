@@ -6,8 +6,12 @@ import rdflib
 
 from .constraints.core.logical_constraints import SH_and, SH_not, SH_or, SH_xone
 from .constraints.core.shape_based_constraints import SH_qualifiedValueShape
-from .constraints.sparql.sparql_based_constraint_components import SH_ConstraintComponent, SPARQLConstraintComponent
+from .constraints.sparql.sparql_based_constraint_components import (
+    CustomConstraintComponentFactory,
+    SH_ConstraintComponent,
+)
 from .consts import (
+    SH,
     OWL_Class,
     OWL_DatatypeProperty,
     RDF_Property,
@@ -94,7 +98,10 @@ class ShapesGraph(object):
             constraint_component_set.update(subclass_components)
         components = set()
         for c in iter(constraint_component_set):
-            components.add(SPARQLConstraintComponent(self, c))
+            if c.startswith(SH):
+                # ignore all constraint components from shacl.ttl, these are all hardcoded into PySHACL
+                continue
+            components.add(CustomConstraintComponentFactory(self, c))
         return components
 
     def add_shacl_function(self, uri, function, optionals):

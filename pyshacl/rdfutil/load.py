@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #
+import pickle
 import platform
 
 from io import BytesIO, IOBase, UnsupportedOperation
@@ -10,7 +11,11 @@ from urllib.error import HTTPError
 
 import rdflib
 
-from pyshacl.pytypes import GraphLike
+from .clone import clone_dataset, clone_graph
+
+
+ConjunctiveLike = Union[rdflib.ConjunctiveGraph, rdflib.Dataset]
+GraphLike = Union[ConjunctiveLike, rdflib.Graph]
 
 
 try:
@@ -23,6 +28,13 @@ except IndexError:
 is_windows = platform.system() == "Windows"
 
 
+baked_in = {}
+
+
+def add_baked_in(url, graph_path):
+    baked_in[url] = graph_path
+
+
 def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
     """
 
@@ -30,9 +42,19 @@ def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
     :type url: rdflib.URIRef | str
     :return:
     """
-    headers = {
-        'Accept': 'text/turtle, application/rdf+xml, ' 'application/ld+json, application/n-triples,' 'text/plain'
-    }
+    nohash = url.rstrip("#")
+    if nohash in baked_in:
+        g = baked_in[nohash]
+        if g[-7:] == ".pickle":
+            with open(g, 'rb') as g_pickle:
+                u = pickle.Unpickler(g_pickle, fix_imports=False)
+                g_store, identifier = u.load()
+            graph = rdflib.Graph(store=g_store, identifier=identifier)
+            return graph, "graph"
+        else:
+            return g, None
+
+    headers = {'Accept': 'text/turtle, application/rdf+xml, application/ld+json, application/n-triples, text/plain'}
     r = request.Request(url, headers=headers)
     resp = request.urlopen(r)
     code = resp.getcode()
@@ -122,10 +144,14 @@ def load_from_source(
                     return g
                 else:
                     raise
-            filename = resp.geturl()
-            source = resp.fp
-            source_was_open = False
-            source_is_open = True
+            if rdf_format == 'graph':
+                source = resp
+                source_is_graph = True
+            else:
+                filename = resp.geturl()
+                source = resp.fp
+                source_was_open = False
+                source_is_open = True
         else:
             first_char = source[0]
             if is_windows and (first_char == '\\' or (len(source) > 3 and source[1:3] == ":\\")):
@@ -176,7 +202,10 @@ def load_from_source(
     else:
         raise ValueError("Cannot determine the format of the input graph")
     if g is None:
-        g = rdflib.Dataset() if multigraph else rdflib.Graph()
+        if source_is_graph:
+            g = source
+        else:
+            g = rdflib.Dataset() if multigraph else rdflib.Graph()
     else:
         if not isinstance(g, (rdflib.Graph, rdflib.Dataset, rdflib.ConjunctiveGraph)):
             raise RuntimeError("Passing in g must be a Graph.")
@@ -277,6 +306,21 @@ def load_from_source(
             except (AttributeError, UnsupportedOperation):
                 pass
         source_is_graph = True
+    elif source_is_graph and (g != source):
+        # clone source into g
+        if isinstance(g, (rdflib.Dataset, rdflib.ConjunctiveGraph)) and isinstance(
+            source, (rdflib.Dataset, rdflib.ConjunctiveGraph)
+        ):
+            clone_dataset(source, g)
+        elif isinstance(g, rdflib.Graph) and isinstance(source, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+            raise RuntimeError("Cannot load a Dataset source into a Graph target.")
+        elif isinstance(g, (rdflib.Dataset, rdflib.ConjunctiveGraph)) and isinstance(source, rdflib.Graph):
+            target = rdflib.Graph(store=g.store, identifier=public_id)
+            clone_graph(source, target)
+        elif isinstance(g, rdflib.Graph) and isinstance(source, rdflib.Graph):
+            clone_graph(source, g)
+        else:
+            raise RuntimeError("Cannot merge source graph into target graph.")
 
     if not source_is_graph:
         raise RuntimeError("Error opening graph from source.")

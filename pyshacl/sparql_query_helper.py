@@ -4,6 +4,8 @@ https://www.w3.org/TR/shacl/#sparql-constraints
 """
 import re
 
+from warnings import warn
+
 import rdflib
 
 from rdflib import RDF, XSD
@@ -165,12 +167,26 @@ class SPARQLQueryHelper(object):
                         "sh:declare must have exactly one sh:namespace predicate.",
                         "https://www.w3.org/TR/shacl/#sparql-prefixes",
                     )
-                namespace = next(iter(namespace_vals))
+                namespace = next(iter(namespace_vals))  # type: rdflib.Literal
                 if not (isinstance(namespace, rdflib.Literal) and namespace.datatype == XSD.anyURI):
-                    raise ConstraintLoadError(
-                        "sh:namespace value must be an RDF Literal with type xsd:anyURI.",
-                        "https://www.w3.org/TR/shacl/#sparql-prefixes",
-                    )
+                    if prefix == "sh" and isinstance(namespace.value, str):
+                        # Known bug in shacl.ttl https://github.com/w3c/data-shapes/issues/125
+                        pass
+                    elif namespace.language is not None or isinstance(namespace.value, str):
+                        warn(
+                            Warning(
+                                "sh:namespace value must be an RDF Literal with type xsd:anyURI.\nLiteral: \"{}\" type={}".format(
+                                    namespace.value, namespace.datatype or namespace.language
+                                )
+                            )
+                        )
+                    else:
+                        raise ConstraintLoadError(
+                            "sh:namespace value must be an RDF Literal with type xsd:anyURI.\nLiteral: {} type={}".format(
+                                namespace.value, namespace.datatype or namespace.language
+                            ),
+                            "https://www.w3.org/TR/shacl/#sparql-prefixes",
+                        )
                 namespace = rdflib.URIRef(str(namespace.value))
                 self.prefixes[prefix] = namespace
 

@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 #
 import logging
+import sys
 
 from functools import wraps
+from os import path
 from sys import stderr
 from typing import Dict, List, Optional, Set, Tuple, Union
 
@@ -45,6 +47,7 @@ from .rdfutil import (
     mix_graphs,
     order_graph_literal,
 )
+from .rdfutil.load import add_baked_in
 from .rules import apply_rules, gather_rules
 from .shapes_graph import ShapesGraph
 
@@ -236,6 +239,22 @@ class Validator(object):
         return (not non_conformant), v_report, v_text
 
 
+def assign_baked_in():
+    if getattr(sys, 'frozen', False):
+        # runs in a pyinstaller bundle
+        HERE = sys._MEIPASS
+    else:
+        HERE = path.dirname(__file__)
+    shacl_file = path.join(HERE, "assets", "shacl.pickle")
+    add_baked_in("http://www.w3.org/ns/shacl", shacl_file)
+    add_baked_in("https://www.w3.org/ns/shacl", shacl_file)
+    add_baked_in("http://www.w3.org/ns/shacl.ttl", shacl_file)
+    shacl_shacl_file = path.join(HERE, "assets", "shacl-shacl.pickle")
+    add_baked_in("http://www.w3.org/ns/shacl-shacl", shacl_shacl_file)
+    add_baked_in("https://www.w3.org/ns/shacl-shacl", shacl_shacl_file)
+    add_baked_in("http://www.w3.org/ns/shacl-shacl.ttl", shacl_shacl_file)
+
+
 def with_metashacl_shacl_graph_cache(f):
     # noinspection PyPep8Naming
     EMPTY = object()
@@ -246,21 +265,17 @@ def with_metashacl_shacl_graph_cache(f):
         assert graph_cache is not None
         if graph_cache is EMPTY:
             import pickle
-            import sys
-
-            from os import path
 
             if getattr(sys, 'frozen', False):
                 # runs in a pyinstaller bundle
                 here_dir = sys._MEIPASS
-                pickle_file = path.join(here_dir, "shacl-shacl.pickle")
             else:
                 here_dir = path.dirname(__file__)
-                pickle_file = path.join(here_dir, "shacl-shacl.pickle")
+            pickle_file = path.join(here_dir, "assets", "shacl-shacl.pickle")
             with open(pickle_file, 'rb') as shacl_pickle:
                 u = pickle.Unpickler(shacl_pickle, fix_imports=False)
-                shacl_shacl_store = u.load()
-            shacl_shacl_graph = rdflib.Graph(store=shacl_shacl_store, identifier="http://www.w3.org/ns/shacl-shacl")
+                shacl_shacl_store, identifier = u.load()
+            shacl_shacl_graph = rdflib.Graph(store=shacl_shacl_store, identifier=identifier)
             setattr(wrapped, "graph_cache", shacl_shacl_graph)
         return f(*args, **kwargs)
 
@@ -310,6 +325,7 @@ def validate(
         log_handler.setLevel(logging.DEBUG)
         log.setLevel(logging.DEBUG)
     apply_patches()
+    assign_baked_in()
     do_check_dash_result = kwargs.pop('check_dash_result', False)  # type: bool
     do_check_sht_result = kwargs.pop('check_sht_result', False)  # type: bool
     if kwargs.get('meta_shacl', False):

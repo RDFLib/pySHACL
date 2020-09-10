@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [0.13.2] - 2020-09-07
+
+## Added
+- Added the ability for PySHACL to use baked in graphs instead of fetching them from a HTTP endpoint when a known graph
+  is imported using owl:imports
+  - This allows for time savings on graph-load and saves a HTTP request
+  - Also allows us to embed fixed errata versions of files in place of release-time ones online
+
+## Fixed
+- With new features, comes new bugs
+- With the ability to now load SPARQLFunctions, this removes the barrier for loading Schema.org SHACL in advanced mode
+- But when doing so revealed more issues. They are now fixed:
+- Fixed SPARQLConstraintComponent getting confused when `shacl.ttl` was loaded into your Shapes file using owl:imports
+- Fixed https://github.com/RDFLib/pySHACL/issues/61
+
+## Changed
+- Refactored `SPARQLConstraintComponent` code, to allow for other custom constraint components in the future
+  - This prevented SPARQLConstraintComponent getting confused when `shacl.ttl` was loaded into the Shapes file
+  using owl:imports
+
+
 ## [0.13.1] - 2020-09-07
 
 ## Added
@@ -645,7 +666,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.13.1...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.13.2...HEAD
+[0.13.2]: https://github.com/RDFLib/pySHACL/compare/v0.13.1...v0.13.2
 [0.13.1]: https://github.com/RDFLib/pySHACL/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/RDFLib/pySHACL/compare/v0.12.2...v0.13.0
 [0.12.2]: https://github.com/RDFLib/pySHACL/compare/v0.12.1.post2...v0.12.2

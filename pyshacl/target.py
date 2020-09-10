@@ -14,68 +14,12 @@ from .sparql_query_helper import SPARQLQueryHelper
 if typing.TYPE_CHECKING:
     from .shapes_graph import ShapesGraph
 
-# class SHACLFunction(object):
-#     __slots__ = ("sg", "node", "comments", "parameters", "rtype")
-#
-#     def __init__(self, fn_node, sg):
-#         """
-#
-#         :param fn_node:
-#         :type fn_node: rdflib.Identifier
-#         :param sg:
-#         :type sg: ShapesGraph
-#         """
-#         super(SHACLFunction, self).__init__()
-#         self.node = fn_node
-#         self.sg = sg
-#         params = list(sg.objects(fn_node, SH_parameter))
-#         self.parameters = [SHACLParameter(sg, p) for p in params]  # type: List[SHACLParameter]
-#         self.comments = set(sg.objects(fn_node, RDFS_comment))
-#         rtypes = list(sg.objects(fn_node, SH_returnType))
-#         if len(rtypes) < 1:
-#             self.rtype = None
-#         elif len(rtypes) > 1:
-#             raise ConstraintLoadError(
-#                 "SHACLFunction cannot have more than one value for sh:returnType.",
-#                 "https://www.w3.org/TR/shacl-af/#functions-example",
-#             )
-#         else:
-#             self.rtype = rtypes[0]
-#
-#     # TODO: Maybe cache this? Its called a few times per loop
-#     def get_params_in_order(self):
-#         if len(self.parameters) < 1:
-#             return []
-#         orders = (p.param_order for p in self.parameters)
-#         if None not in orders:
-#             # sort by _param_order_ field
-#             params = sorted(self.parameters, key=lambda x: x.param_order)
-#         else:
-#             # sort by _localname_ of path
-#             params = sorted(self.parameters, key=lambda x: x.localname)
-#         return params
-#
-#     def get_optional_map(self):
-#         params = self.get_params_in_order()
-#         return [True if p.optional else False for p in params]
-#
-#     def objects(self, predicate=None):
-#         return self.sg.graph.objects(self.node, predicate)
-#
-#     def apply(self, g):
-#         self.sg.add_shacl_function(self.node, self.execute, self.get_optional_map())
-#
-#     def unapply(self, g):
-#         self.sg.remove_shacl_function(self.node, self.execute)
-#
-#     def execute(self, g, *args):
-#         raise NotImplementedError(
-#             "SHACLFunction cannot be executed by itself. " "It needs to be a SPARQLFunction or something similar."
-#         )
-
 SH_labelTempalate = SH.term('labelTemplate')
 SH_Target = SH.term('Target')
 SH_TargetType = SH.term('TargetType')
+SH_JSTarget = SH.term('JSTarget')
+SH_JSTargetType = SH.term('JSTargetType')
+SH_SPARQLTarget = SH.term('SPARQLTarget')
 
 
 class SHACLTargetType(object):
@@ -236,11 +180,19 @@ def gather_target_types(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLTarg
     all_target_types: List[Union['SHACLTargetType', 'SPARQLTargetType']] = []
     sub_targets = set(shacl_graph.subjects(RDFS_subClassOf, SH_Target))
 
+    # remove these two which are the known native types in shacl.ttl
+    sub_targets = sub_targets.difference({SH_JSTarget, SH_SPARQLTarget})
+
     for s in sub_targets:
         types = set(shacl_graph.objects(s, RDF_type))
+        found = False
         if SH_SPARQLTargetType in types:
             all_target_types.append(SPARQLTargetType(s, shacl_graph))
-        else:
+            found = True
+        if SH_JSTargetType in types:
+            warn(Warning("sh:JSTargetType is not implemented in PySHACL.\n<{}> a <{}>".format(s, SH_JSTargetType)))
+            found = True
+        if not found:
             warn(Warning("The only SHACLTargetType currently implemented is SPARQLTargetType."))
 
     return all_target_types
