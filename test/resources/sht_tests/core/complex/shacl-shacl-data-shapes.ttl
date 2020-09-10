@@ -7,7 +7,6 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sh:   <http://www.w3.org/ns/shacl#> .
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
-
 @prefix shsh: <http://www.w3.org/ns/shacl-shacl#> .
 
 shsh:
@@ -18,7 +17,7 @@ shsh:
 		sh:namespace "http://www.w3.org/ns/shacl-shacl#" ;
 	] .
 
-	
+
 shsh:ListShape
 	a sh:NodeShape ;
 	rdfs:label "List shape"@en ;
@@ -64,7 +63,7 @@ shsh:ShapeShape
 	a sh:NodeShape ;
 	rdfs:label "Shape shape"@en ;
 	rdfs:comment "A shape that can be used to validate syntax rules for other shapes."@en ;
-	
+
 	# See https://www.w3.org/TR/shacl/#shapes for what counts as a shape
 	sh:targetClass sh:NodeShape ;
 	sh:targetClass sh:PropertyShape ;
@@ -86,7 +85,7 @@ shsh:ShapeShape
 	sh:property [
 		sh:path sh:targetNode ;
 		sh:nodeKind	sh:IRIOrLiteral ;   # targetNode-nodeKind
-	] ; 
+	] ;
 	sh:property [
 		sh:path sh:targetClass ;
 		sh:nodeKind sh:IRI ;            # targetClass-nodeKind
@@ -99,13 +98,13 @@ shsh:ShapeShape
 		sh:path sh:targetObjectsOf ;
 		sh:nodeKind sh:IRI ;            # targetObjectsOf-nodeKind
 	] ;
-	sh:or ( [ sh:not [ 
-				sh:class rdfs:Class ; 
+	sh:or ( [ sh:not [
+				sh:class rdfs:Class ;
 				sh:or ( [ sh:class sh:NodeShape ] [ sh:class sh:PropertyShape ] )
 			] ]
 			[ sh:nodeKind sh:IRI ]
 		  ) ;                           # implicit-targetClass-nodeKind
-	
+
 	sh:property [
 		sh:path sh:severity ;
 		sh:maxCount 1 ;                 # severity-maxCount
@@ -158,7 +157,7 @@ shsh:ShapeShape
 	] ;
 	sh:property [
 		sh:path sh:in ;
-		sh:maxCount 1 ;                 # in-maxCount		
+		sh:maxCount 1 ;                 # in-maxCount
 		sh:node shsh:ListShape ;        # in-node
 	] ;
 	sh:property [
@@ -266,7 +265,7 @@ shsh:ShapeShape
 		sh:path sh:xone ;
 		sh:node shsh:ListShape ;        # xone-node
 	] .
-	
+
 shsh:NodeShapeShape
 	a sh:NodeShape ;
 	sh:targetObjectsOf sh:node ;        # node-node
@@ -306,7 +305,7 @@ shsh:PropertyShapeShape
 		sh:path sh:path ;
 		sh:maxCount 1 ;                 # path-maxCount
 		sh:minCount 1 ;                 # PropertyShape-path-minCount
-		sh:node shsh:PathShape ;        # path-node
+		sh:or ( shsh:PathShape [ sh:nodeKind sh:IRI ] ) ;        # path-node
 	] .
 
 # Values of sh:and, sh:or and sh:xone must be lists of shapes
@@ -329,7 +328,7 @@ _:PathPath
 		sh:inversePath
 		sh:zeroOrMorePath
 		sh:oneOrMorePath
-		sh:zeroOrOnePath 
+		sh:zeroOrOnePath
 	) .
 
 shsh:PathShape
@@ -363,7 +362,7 @@ shsh:PathNodeShape
 			    sh:path sh:inversePath ;
 			    sh:minCount 1 ;
 			    sh:maxCount 1 ;
-			  ] 
+			  ]
 			]
 			[ sh:nodeKind sh:BlankNode ;    # 2.3.1.5: Zero-or-more path
 			  sh:closed true ;
@@ -371,7 +370,7 @@ shsh:PathNodeShape
 			    sh:path sh:zeroOrMorePath ;
 			    sh:minCount 1 ;
 			    sh:maxCount 1 ;
-			  ] 
+			  ]
 			]
 			[ sh:nodeKind sh:BlankNode ;    # 2.3.1.6: One-or-more path
 			  sh:closed true ;
@@ -379,7 +378,7 @@ shsh:PathNodeShape
 			    sh:path sh:oneOrMorePath ;
 			    sh:minCount 1 ;
 			    sh:maxCount 1 ;
-			  ] 
+			  ]
 			]
 			[ sh:nodeKind sh:BlankNode ;    # 2.3.1.7: Zero-or-one path
 			  sh:closed true ;
@@ -387,7 +386,7 @@ shsh:PathNodeShape
 			    sh:path sh:zeroOrOnePath ;
 			    sh:minCount 1 ;
 			    sh:maxCount 1 ;
-			  ] 
+			  ]
 			]
 		) .
 
