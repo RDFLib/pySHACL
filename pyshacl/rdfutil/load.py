@@ -305,6 +305,8 @@ def load_from_source(
                 source.seek(0)
             except (AttributeError, UnsupportedOperation):
                 pass
+            except ValueError:
+                pass
         source_is_graph = True
     elif source_is_graph and (g != source):
         # clone source into g
