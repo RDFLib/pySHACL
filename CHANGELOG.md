@@ -4,7 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
-## [0.13.2] - 2020-09-07
+## [0.13.3] - 2020-09-11
+
+## Fixed
+- Fixed a long standing issue where our fancy loader would try to `seek()` on a file, after the file
+  was closed by the JSON-LD parser
+  - (thanks @nicholsn for reporting it)
+- Fixed https://github.com/RDFLib/pySHACL/issues/62
+
+
+## [0.13.2] - 2020-09-10
 
 ## Added
 - Added the ability for PySHACL to use baked in graphs instead of fetching them from a HTTP endpoint when a known graph
@@ -666,7 +675,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.13.2...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.13.3...HEAD
+[0.13.3]: https://github.com/RDFLib/pySHACL/compare/v0.13.2...v0.13.3
 [0.13.2]: https://github.com/RDFLib/pySHACL/compare/v0.13.1...v0.13.2
 [0.13.1]: https://github.com/RDFLib/pySHACL/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/RDFLib/pySHACL/compare/v0.12.2...v0.13.0
