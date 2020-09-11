@@ -4,7 +4,7 @@ https://www.w3.org/TR/shacl/#sparql-constraint-components
 """
 import typing
 
-from typing import Dict, List, Tuple, Union
+from typing import Any, Dict, List, Set, Tuple, Type, Union
 
 import rdflib
 
@@ -117,7 +117,7 @@ class SPARQLConstraintComponentValidator(object):
             return found_in_cache
         sg = shacl_graph.graph
         type_vals = set(sg.objects(node, RDF_type))
-        validator_type = None
+        validator_type: Union[Type[SelectConstraintValidator], Type[AskConstraintValidator], None] = None
         if len(type_vals) > 0:
             if SH_SPARQLSelectValidator in type_vals:
                 validator_type = SelectConstraintValidator
@@ -332,10 +332,10 @@ class SelectConstraintValidator(SPARQLConstraintComponentValidator):
 
 
 class CustomConstraintComponentFactory(object):
-    __slots__ = set()
+    __slots__: Tuple = tuple()
 
     def __new__(cls, shacl_graph: 'ShapesGraph', node):
-        self = list()
+        self: List[Any] = list()
         self.append(shacl_graph)
         self.append(node)
         optional_params = []
@@ -406,7 +406,15 @@ class CustomConstraintComponentFactory(object):
 
 
 class CustomConstraintComponent(object):
-    __slots__ = ('sg', 'node', 'parameters', 'validators', 'node_validators', 'property_validators')
+    __slots__: Tuple = ('sg', 'node', 'parameters', 'validators', 'node_validators', 'property_validators')
+
+    if typing.TYPE_CHECKING:
+        sg: ShapesGraph
+        node: Any
+        parameters: List[SHACLParameter]
+        validators: Set
+        node_validators: Set
+        property_validators: Set
 
     def __new__(cls, shacl_graph: 'ShapesGraph', node, parameters, validators, node_validators, property_validators):
         self = super(CustomConstraintComponent, cls).__new__(cls)
@@ -429,7 +437,7 @@ class SPARQLConstraintComponent(CustomConstraintComponent):
     https://www.w3.org/TR/shacl/#sparql-constraint-components
     """
 
-    __slots__ = set()
+    __slots__: Tuple = tuple()
 
     def __new__(cls, shacl_graph, node, parameters, validators, node_validators, property_validators):
         return super(SPARQLConstraintComponent, cls).__new__(
