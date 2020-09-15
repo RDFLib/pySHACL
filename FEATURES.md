@@ -118,7 +118,7 @@
 |:----------            |:------:	               |:-------------:	    |:------	|
 | `sh:target`           | [▶][AFSPARQLTarget]      | ![status-complete]	|           |
 | `sh:SPARQLTarget`     | [▶][AFSPARQLTarget]      | ![status-complete]	|           |
-| `sh:SPARQLTargetType` | [▶][AFSPARQLTargetType]  | ![status-missing]	|           |
+| `sh:SPARQLTargetType` | [▶][AFSPARQLTargetType]  | ![status-complete]	|           |
 
 
 ### [Annotation Properties](https://www.w3.org/TR/shacl-af/#sparql-constraints-annotations)
@@ -168,14 +168,6 @@
 - core/property/datatype-ill-formed.ttl : Waiting on RDFLib support for determining ill-formed Literals https://github.com/RDFLib/rdflib/issues/848
 - sparql/pre-binding/shapesGraph-001.ttl : Prebinding to $shapesGraph is currently unsupported. This will be supported in the future.
 ```
-
-## DASH Tests Failures:
-```
-- /rules/triple/rectangle.test.ttl : Stuck on not-implemented Advanced Feature SPARQLFunction feature, due to RDFLib not supporting Extensible Value Testing
-- /rules/triple/person2schema.test.ttl : Stuck on not-implemented Advanced Feature SPARQLFunction feature, due to RDFLib not supporting Extensible Value Testing
-- /rules/triple/functions-permutations.test.ttl : Stuck on not-implemented Advanced Feature SPARQLFunction feature, due to RDFLib not supporting Extensible Value Testing
-```
-
 
 [status-complete]: https://img.shields.io/badge/status-complete-green.svg?longCache=true&style=popout
 [status-partial]: https://img.shields.io/badge/status-partial-yellow.svg?longCache=true&style=popout
