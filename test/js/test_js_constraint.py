@@ -31,8 +31,9 @@ ex:InvalidCountry a ex:Country ;
 	ex:germanLabel "Spain"@en .
 '''
 
-s1 = Graph().parse(data=shapes_graph, format="turtle")
-g1 = Graph().parse(data=data_graph, format="turtle")
+def test_js_constraint():
+    s1 = Graph().parse(data=shapes_graph, format="turtle")
+    g1 = Graph().parse(data=data_graph, format="turtle")
+    conforms, result_graph, result_text = validate(g1, shacl_graph=s1, advanced=True, debug=True, js=True)
+    assert not conforms
 
-
-res = validate(g1, shacl_graph=s1, advanced=True, debug=True, js=True)

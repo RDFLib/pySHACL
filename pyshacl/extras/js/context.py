@@ -60,7 +60,7 @@ class LiteralNativeWrapper(object):
 
     @property
     def lexical(self):
-        return self.inner.lexical_or_value
+        return self.inner.value
 
     @property
     def language(self):
@@ -146,14 +146,14 @@ def _native_iterator_next(args):
             raise RuntimeError("Bad item returned from iterator!")
     return wrapped_list
 
-def _print(args):
+def _pprint(args):
     arg0 = getattr(args, '0')
     pprint.pprint(arg0)
 
 
 printJs = '''\
-function print(o) {
-    return _print({'0': o});
+function pprint(o) {
+    return _pprint({'0': o});
 }
 '''
 
@@ -229,10 +229,6 @@ function Literal(lex, languageOrDatatype, _native) {
 Literal.from_native = function(native) {
     var lex = native.lexical;
     var languageOrDatatype;
-    print("lang");
-    print(native.lang);
-    print("dt");
-    print(native.datatype);
     var lang = native.language;
     var dt = native.datatype;
     if (lang) {
@@ -340,7 +336,7 @@ class SHACLJSContext(object):
     def __init__(self, shapes_graph, data_graph, *args, **kwargs):
         context = pyduktape2.DuktapeContext()
         context.set_globals(
-            _print=_print, _make_uriref=_make_uriref, _make_bnode=_make_bnode, _make_literal=_make_literal,
+            _pprint=_pprint, _make_uriref=_make_uriref, _make_bnode=_make_bnode, _make_literal=_make_literal,
             _native_node_equals=_native_node_equals, _native_iterator_next=_native_iterator_next,
             _native_graph_find=_native_graph_find,
         )
@@ -403,6 +399,8 @@ class SHACLJSContext(object):
                                 p = p.toPython()
                             except AttributeError:
                                 pass
+                        if p is not None and hasattr(p, 'inner'):
+                            p = p.inner
                         r = {'value': v, 'message': m, 'path': p}
                         new_res.append(r)
                     return new_res

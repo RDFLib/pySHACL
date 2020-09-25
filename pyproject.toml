@@ -57,7 +57,6 @@ flake8 = "^3.7"
 isort = {version="^5.0.0", python=">=3.6"}
 black = {version=">=18.9b0,<=19.10b0", python=">=3.6"}
 mypy = {version="^0.770.0", python=">=3.6"}
-mypy = {version="^0.770.0", python=">=3.6"}
 
 
 [tool.poetry.extras]

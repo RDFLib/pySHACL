@@ -8,11 +8,10 @@ from typing import Any, Dict, List, Set, Tuple, Type, Union
 
 import rdflib
 
-from pyshacl.constraints.constraint_component import ConstraintComponent
+from pyshacl.constraints.constraint_component import ConstraintComponent, CustomConstraintComponent
 from pyshacl.constraints.sparql.sparql_based_constraints import SPARQLQueryHelper
-from pyshacl.consts import SH, RDF_type, SH_ask, SH_message, SH_parameter, SH_path, SH_select
+from pyshacl.consts import SH, RDF_type, SH_ask, SH_message, SH_select, SH_ConstraintComponent
 from pyshacl.errors import ConstraintLoadError, ValidationFailure
-from pyshacl.parameter import SHACLParameter
 from pyshacl.pytypes import GraphLike
 
 
@@ -21,12 +20,6 @@ if typing.TYPE_CHECKING:
     from pyshacl.shapes_graph import ShapesGraph
 
 
-SH_nodeValidator = SH.term('nodeValidator')
-SH_propertyValidator = SH.term('propertyValidator')
-SH_validator = SH.term('validator')
-SH_optional = SH.term('optional')
-
-SH_ConstraintComponent = SH.term('ConstraintComponent')
 SH_SPARQLSelectValidator = SH.term('SPARQLSelectValidator')
 SH_SPARQLAskValidator = SH.term('SPARQLAskValidator')
 
@@ -55,7 +48,7 @@ class BoundShapeValidatorComponent(ConstraintComponent):
     @classmethod
     def constraint_parameters(cls):
         # TODO:coverage: this is never used for this constraint?
-        return [SH_validator, SH_nodeValidator, SH_propertyValidator]
+        return []
 
     @classmethod
     def constraint_name(cls):
@@ -329,106 +322,6 @@ class SelectConstraintValidator(SPARQLConstraintComponentValidator):
                     except KeyError:
                         pass
             return violations
-
-
-class CustomConstraintComponentFactory(object):
-    __slots__: Tuple = tuple()
-
-    def __new__(cls, shacl_graph: 'ShapesGraph', node):
-        self: List[Any] = list()
-        self.append(shacl_graph)
-        self.append(node)
-        optional_params = []
-        mandatory_params = []
-        param_nodes = set(shacl_graph.objects(node, SH_parameter))
-        if len(param_nodes) < 1:
-            # TODO:coverage: we don't have any tests for invalid constraints
-            raise ConstraintLoadError(
-                "A sh:ConstraintComponent must have at least one value for sh:parameter",
-                "https://www.w3.org/TR/shacl/#constraint-components-parameters",
-            )
-        for param_node in iter(param_nodes):
-            path_nodes = set(shacl_graph.objects(param_node, SH_path))
-            if len(path_nodes) < 1:
-                # TODO:coverage: we don't have any tests for invalid constraints
-                raise ConstraintLoadError(
-                    "A sh:ConstraintComponent parameter value must have at least one value for sh:path",
-                    "https://www.w3.org/TR/shacl/#constraint-components-parameters",
-                )
-            elif len(path_nodes) > 1:
-                # TODO:coverage: we don't have any tests for invalid constraints
-                raise ConstraintLoadError(
-                    "A sh:ConstraintComponent parameter value must have at most one value for sh:path",
-                    "https://www.w3.org/TR/shacl/#constraint-components-parameters",
-                )
-            path = next(iter(path_nodes))
-            parameter = SHACLParameter(shacl_graph, param_node, path=path, logger=None)  # pass in logger?
-            if parameter.optional:
-                optional_params.append(parameter)
-            else:
-                mandatory_params.append(parameter)
-        if len(mandatory_params) < 1:
-            # TODO:coverage: we don't have any tests for invalid constraint components
-            raise ConstraintLoadError(
-                "A sh:ConstraintComponent must have at least one non-optional parameter.",
-                "https://www.w3.org/TR/shacl/#constraint-components-parameters",
-            )
-        self.append(mandatory_params + optional_params)
-
-        validator_node_set = set(shacl_graph.graph.objects(node, SH_validator))
-        node_val_node_set = set(shacl_graph.graph.objects(node, SH_nodeValidator))
-        prop_val_node_set = set(shacl_graph.graph.objects(node, SH_propertyValidator))
-        validator_node_set = validator_node_set.difference(node_val_node_set)
-        validator_node_set = validator_node_set.difference(prop_val_node_set)
-        self.append(validator_node_set)
-        self.append(node_val_node_set)
-        self.append(prop_val_node_set)
-        is_sparql_constraint_component = False
-        for s in (validator_node_set, node_val_node_set, prop_val_node_set):
-            for v in s:
-                v_types = set(shacl_graph.graph.objects(v, RDF_type))
-                if SH_SPARQLAskValidator in v_types or SH_SPARQLSelectValidator in v_types:
-                    is_sparql_constraint_component = True
-                    break
-                v_props = set(p[0] for p in shacl_graph.graph.predicate_objects(v))
-                if SH_ask in v_props or SH_select in v_props:
-                    is_sparql_constraint_component = True
-                    break
-                if is_sparql_constraint_component:
-                    raise ConstraintLoadError(
-                        "Found a mix of SPARQL-based validators and non-SPARQL validators on a SPARQLConstraintComponent.",
-                        'https://www.w3.org/TR/shacl/#constraint-components-validators',
-                    )
-        if is_sparql_constraint_component:
-            return SPARQLConstraintComponent(*self)
-        else:
-            return CustomConstraintComponent(*self)
-
-
-class CustomConstraintComponent(object):
-    __slots__: Tuple = ('sg', 'node', 'parameters', 'validators', 'node_validators', 'property_validators')
-
-    if typing.TYPE_CHECKING:
-        sg: ShapesGraph
-        node: Any
-        parameters: List[SHACLParameter]
-        validators: Set
-        node_validators: Set
-        property_validators: Set
-
-    def __new__(cls, shacl_graph: 'ShapesGraph', node, parameters, validators, node_validators, property_validators):
-        self = super(CustomConstraintComponent, cls).__new__(cls)
-        self.sg = shacl_graph
-        self.node = node
-        self.parameters = parameters
-        self.validators = validators
-        self.node_validators = node_validators
-        self.property_validators = property_validators
-        return self
-
-    def make_validator_for_shape(self, shape: 'Shape'):
-        raise NotImplementedError()
-
 
 class SPARQLConstraintComponent(CustomConstraintComponent):
     """

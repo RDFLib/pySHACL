@@ -490,9 +490,9 @@ class Shape(object):
         if self.sg.js_enabled:
             search_parameters = ALL_CONSTRAINT_PARAMETERS.copy()
             constraint_map = CONSTRAINT_PARAMETERS_MAP.copy()
-            from pyshacl.extras.js.constraint import JSConstraintComponent, SH_js
+            from pyshacl.extras.js.constraint import JSConstraint, SH_js
             search_parameters.append(SH_js)
-            constraint_map[SH_js] = JSConstraintComponent
+            constraint_map[SH_js] = JSConstraint
         else:
             search_parameters = ALL_CONSTRAINT_PARAMETERS
             constraint_map = CONSTRAINT_PARAMETERS_MAP
