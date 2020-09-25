@@ -487,14 +487,23 @@ class Shape(object):
         # Lazy import here to avoid an import loop
         from .constraints import ALL_CONSTRAINT_PARAMETERS, CONSTRAINT_PARAMETERS_MAP
 
-        parameters = (p for p, v in self.sg.predicate_objects(self.node) if p in ALL_CONSTRAINT_PARAMETERS)
+        if self.sg.js_enabled:
+            search_parameters = ALL_CONSTRAINT_PARAMETERS.copy()
+            constraint_map = CONSTRAINT_PARAMETERS_MAP.copy()
+            from pyshacl.extras.js.constraint import JSConstraintComponent, SH_js
+            search_parameters.append(SH_js)
+            constraint_map[SH_js] = JSConstraintComponent
+        else:
+            search_parameters = ALL_CONSTRAINT_PARAMETERS
+            constraint_map = CONSTRAINT_PARAMETERS_MAP
+        parameters = (p for p, v in self.sg.predicate_objects(self.node) if p in search_parameters)
         reports = []
         focus_value_nodes = self.value_nodes(target_graph, focus)
         non_conformant = False
         done_constraints = set()
         run_count = 0
         _evaluation_path.append(self)
-        constraint_components = [CONSTRAINT_PARAMETERS_MAP[p] for p in iter(parameters)]
+        constraint_components = [constraint_map[p] for p in iter(parameters)]
         for constraint_component in constraint_components:
             if constraint_component in done_constraints:
                 continue

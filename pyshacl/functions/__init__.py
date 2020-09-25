@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 import typing
 
 from typing import List, Sequence, Union

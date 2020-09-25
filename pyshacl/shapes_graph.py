@@ -55,7 +55,15 @@ class ShapesGraph(object):
         self._custom_constraints = None
         self._shacl_functions = {}
         self._shacl_target_types = {}
+        self._use_js = False
         self._add_system_triples()
+
+    def enable_js(self):
+        self._use_js = True
+
+    @property
+    def js_enabled(self):
+        return bool(self._use_js)
 
     def _add_system_triples(self):
         if isinstance(self.graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):

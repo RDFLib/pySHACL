@@ -13,6 +13,7 @@ import rdflib
 
 from rdflib.util import from_n3
 
+from .extras import check_extra_installed
 from .pytypes import GraphLike
 from .target import apply_target_types, gather_target_types
 
@@ -179,7 +180,10 @@ class Validator(object):
             shacl_graph = clone_graph(data_graph, identifier='shacl')
         assert isinstance(shacl_graph, rdflib.Graph), "shacl_graph must be a rdflib Graph object"
         self.shacl_graph = ShapesGraph(shacl_graph, self.logger)
-
+        if self.options.get('use_js', None):
+            is_js_installed = check_extra_installed('js')
+            if is_js_installed:
+                self.shacl_graph.enable_js()
     @property
     def target_graph(self):
         return self._target_graph
@@ -205,6 +209,7 @@ class Validator(object):
         self._target_graph = the_target_graph
 
         shapes = self.shacl_graph.shapes  # This property getter triggers shapes harvest.
+
         if self.options['advanced']:
             target_types = gather_target_types(self.shacl_graph)
             advanced = {'functions': gather_functions(self.shacl_graph), 'rules': gather_rules(self.shacl_graph)}
@@ -346,18 +351,22 @@ def validate(
         )
     shacl_graph_format = kwargs.pop('shacl_graph_format', None)
     if shacl_graph is not None:
-        # SHACL spec requires rdf BOOL literals to operate in a very specific way
         rdflib_bool_patch()
         shacl_graph = load_from_source(
             shacl_graph, rdf_format=shacl_graph_format, multigraph=True, do_owl_imports=do_owl_imports
         )
         rdflib_bool_unpatch()
+    use_js = kwargs.pop('js', None)
+    validator = None
     try:
         validator = Validator(
             data_graph,
             shacl_graph=shacl_graph,
             ont_graph=ont_graph,
-            options={'inference': inference, 'abort_on_error': abort_on_error, 'advanced': advanced, 'logger': log},
+            options={
+                'inference': inference, 'abort_on_error': abort_on_error, 'advanced': advanced,
+                'use_js': use_js, 'logger': log
+            },
         )
         conforms, report_graph, report_text = validator.run()
     except ValidationFailure as e:
