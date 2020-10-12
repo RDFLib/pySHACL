@@ -1,7 +1,13 @@
+#
+#
 import typing
+import regex
 from urllib import request
 if typing.TYPE_CHECKING:
     from pyduktape2 import DuktapeContext
+
+JS_FN_RE1 = regex.compile(rb'function\s+([^ \n]+)\s*\((.*)\)\s*\{', regex.MULTILINE, regex.IGNORECASE)
+JS_FN_RE2 = regex.compile(rb'(?:let|const|var)\s+([^ \n]+)\s*=\s*function\s*\((.*)\)\s*\{', regex.MULTILINE, regex.IGNORECASE)
 
 def get_js_from_web(url: str):
     """
@@ -25,6 +31,21 @@ def get_js_from_file(filepath: str):
     f = open(filepath, "rb")
     return f
 
+def extract_functions(content):
+    fns = {}
+    matches1 = regex.findall(JS_FN_RE1, content)
+    for m in matches1:
+        name = m[0].decode('utf-8')
+        params = tuple(p.strip().decode('utf-8') for p in m[1].split(b',') if p)
+        fns[name] = params
+    matches2 = regex.findall(JS_FN_RE2, content)
+    for m in matches2:
+        name = m[0].decode('utf-8')
+        params = tuple(p.strip().decode('utf-8') for p in m[1].split(b',') if p)
+        fns[name] = params
+    return fns
+
+
 def load_into_context(context: 'DuktapeContext', location: str):
     f = None
     try:
@@ -36,5 +57,6 @@ def load_into_context(context: 'DuktapeContext', location: str):
     finally:
         if f:
             f.close()
+    fns = extract_functions(contents)
     context.eval_js(contents)
-    return
+    return fns

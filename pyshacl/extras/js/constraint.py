@@ -88,22 +88,15 @@ class JSExecutable(object):
                     libraries[libn2].append(str(u2))
         self.libraries = libraries
 
-    def execute(self, datagraph, *args, **kwargs):
+    def execute(self, datagraph, args_map, *args, **kwargs):
         ctx = SHACLJSContext(self.sg, datagraph, **kwargs)
         for lib_node, lib_urls in self.libraries.items():
             for lib_url in lib_urls:
                 ctx.load_js_library(lib_url)
-        return ctx.run_js_function(self.fn_name, args)
+        fn_args = ctx.get_fn_args(self.fn_name, args_map)
+        return ctx.run_js_function(self.fn_name, fn_args)
 
 class JSConstraint(ConstraintComponent):
-    """
-    sh:minCount specifies the minimum number of value nodes that satisfy the condition. If the minimum cardinality value is 0 then this constraint is always satisfied and so may be omitted.
-    Link:
-    https://www.w3.org/TR/shacl/#MinCountConstraintComponent
-    Textual Definition:
-    If the number of value nodes is less than $minCount, there is a validation result.
-    """
-
     def __init__(self, shape):
         super(JSConstraint, self).__init__(shape)
         js_decls = list(self.shape.objects(SH_js))
@@ -150,7 +143,9 @@ class JSConstraint(ConstraintComponent):
             for v in value_nodes:
                 failed = False
                 try:
-                    res = js_exe.execute(data_graph, f, v)
+                    args_map = {'this': f, 'value': v}
+                    res_dict = js_exe.execute(data_graph, args_map)
+                    res = res_dict['_result']
                     if isinstance(res, bool) and not res:
                         failed = True
                         reports.append(self.make_v_result(data_graph, f, value_node=v))
@@ -250,10 +245,10 @@ class BoundShapeJSValidatorComponent(ConstraintComponent):
         # TODO:coverage: this is never used for this constraint?
         return SH_ConstraintComponent
 
-    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+    def evaluate(self, data_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
         :type focus_value_nodes: dict
-        :type target_graph: rdflib.Graph
+        :type data_graph: rdflib.Graph
         """
         reports = []
         non_conformant = False
@@ -265,29 +260,60 @@ class BoundShapeJSValidatorComponent(ConstraintComponent):
             'extra_messages': extra_messages,
         }
         for f, value_nodes in focus_value_nodes.items():
-            # we don't use value_nodes in the sparql constraint
-            # All queries are done on the corresponding focus node.
             try:
-                violations = self.validator.validate(f, value_nodes, target_graph, self.param_bind_map)
+                p = self.shape.path()
+                results = self.validator.validate(f, value_nodes, p, data_graph, self.param_bind_map)
             except ValidationFailure as e:
                 raise e
-            if not self.shape.is_property_shape:
-                result_val = f
-            else:
-                result_val = None
-            for v in violations:
-                non_conformant = True
-                if isinstance(v, bool) and v is True:
-                    # TODO:coverage: No test for when violation is `True`
-                    rept = self.make_v_result(target_graph, f, value_node=result_val, **rept_kwargs)
-                elif isinstance(v, tuple):
-                    t, p, v = v
-                    if v is None:
-                        v = result_val
-                    rept = self.make_v_result(target_graph, t or f, value_node=v, result_path=p, **rept_kwargs)
-                else:
-                    rept = self.make_v_result(target_graph, f, value_node=v, **rept_kwargs)
-                reports.append(rept)
+            for (v, res) in results:
+                if isinstance(res, bool) and not res:
+                    non_conformant = True
+                    reports.append(self.make_v_result(data_graph, f, value_node=v, **rept_kwargs))
+                elif isinstance(res, str):
+                    non_conformant = True
+                    m = Literal(res)
+                    new_kwargs = rept_kwargs.copy()
+                    new_kwargs['extra_messages'] = [m]
+                    reports.append(self.make_v_result(data_graph, f, value_node=v, **rept_kwargs))
+                elif isinstance(res, dict):
+                    non_conformant = True
+                    val = res.get('value', None)
+                    if val is None:
+                        val = v
+                    path = res.get('path', None) if not self.shape.is_property_shape else None
+                    msgs = []
+                    message = res.get('message', None)
+                    if message is not None:
+                        msgs.append(Literal(message))
+                    new_kwargs = rept_kwargs.copy()
+                    new_kwargs['extra_messages'] = msgs
+                    reports.append(
+                        self.make_v_result(data_graph, f, value_node=val, result_path=path, **rept_kwargs))
+                elif isinstance(res, list):
+                    for r in res:
+                        if isinstance(r, bool) and not r:
+                            non_conformant = True
+                            reports.append(self.make_v_result(data_graph, f, value_node=v, **rept_kwargs))
+                        elif isinstance(r, str):
+                            non_conformant = True
+                            m = Literal(r)
+                            new_kwargs = rept_kwargs.copy()
+                            new_kwargs['extra_messages'] = [m]
+                            reports.append(self.make_v_result(data_graph, f, value_node=v, **rept_kwargs))
+                        elif isinstance(r, dict):
+                            non_conformant = True
+                            val = r.get('value', None)
+                            if val is None:
+                                val = v
+                            path = r.get('path', None) if not self.shape.is_property_shape else None
+                            msgs = []
+                            message = r.get('message', None)
+                            if message is not None:
+                                msgs.append(Literal(message))
+                            new_kwargs = rept_kwargs.copy()
+                            new_kwargs['extra_messages'] = msgs
+                            reports.append(self.make_v_result(data_graph, f, value_node=val, result_path=path,
+                                                              **rept_kwargs))
         return (not non_conformant), reports
 
 class JSConstraintComponent(CustomConstraintComponent):
@@ -313,8 +339,10 @@ class JSConstraintComponent(CustomConstraintComponent):
         val_count = len(self.validators)
         node_val_count = len(self.node_validators)
         prop_val_count = len(self.property_validators)
+        is_property_val = False
         if shape.is_property_shape and prop_val_count > 0:
             validator_node = next(iter(self.property_validators))
+            is_property_val = True
         elif (not shape.is_property_shape) and node_val_count > 0:
             validator_node = next(iter(self.node_validators))
         elif val_count > 0:
@@ -324,8 +352,10 @@ class JSConstraintComponent(CustomConstraintComponent):
                 "Cannot select a validator to use, according to the rules.",
                 "https://www.w3.org/TR/shacl/#constraint-components-validators",
             )
-
-        validator = JSConstraintComponentValidator(self.sg, validator_node)
+        if is_property_val:
+            validator = JSConstraintComponentPathValidator(self.sg, validator_node)
+        else:
+            validator = JSConstraintComponentValidator(self.sg, validator_node)
         applied_validator = validator.apply_to_shape_via_constraint(self, shape)
         return applied_validator
 
@@ -360,64 +390,73 @@ class JSConstraintComponentValidator(object):
         self.js_exe = JSExecutable(shacl_graph, node)
         self.initialised = True
 
-    def validate(self, focus, value_nodes, target_graph, param_bind_vals, new_bind_vals=None):
+    def validate(self, f, value_nodes, path, data_graph, param_bind_vals, new_bind_vals=None):
         """
 
-        :param focus:
+        :param f:
         :param value_nodes:
-        :param query_helper:
-        :param target_graph:
-        :type target_graph: rdflib.Graph
+        :param path:
+        :param data_graph:
+        :type data_graph: rdflib.Graph
         :param new_bind_vals:
         :return:
         """
         new_bind_vals = new_bind_vals or {}
         bind_vals = param_bind_vals.copy()
         bind_vals.update(new_bind_vals)
+        results = []
         for v in value_nodes:
-            # bind v, and bind_vals
-            args = [v, bind_vals['maxLength']]
-            # TODO: Determine which variables the fn takes, and determine the order it takes them
-            results = self.js_exe.execute(target_graph, *args)
-            if not results or len(results.bindings) < 1:
-                return []
-            violations = set()
-            for r in results:
-                try:
-                    p = r['path']
-                except KeyError:
-                    p = None
-                try:
-                    v = r['value']
-                except KeyError:
-                    v = None
-                try:
-                    t = r['this']
-                except KeyError:
-                    # TODO:coverage: No test for when result has no 'this' key
-                    t = None
-                if p or v or t:
-                    violations.add((t, p, v))
-                else:
-                    # TODO:coverage: No test for generic failure, when
-                    #  'path' and 'value' and 'this' are not returned.
-                    #  here 'failure' must exist
-                    try:
-                        _ = r['failure']
-                        violations.add(True)
-                    except KeyError:
-                        pass
-            return violations
+            args_map = bind_vals.copy()
+            args_map.update({
+                'this': f,
+                'value': v
+            })
+            try:
+                result_dict = self.js_exe.execute(data_graph, args_map)
+                results.append((v, result_dict['_result']))
+            except Exception as e:
+                raise
+        return results
 
-    def apply_to_shape_via_constraint(self, constraint, shape, **kwargs) -> BoundShapeJSValidatorComponent:
+    def apply_to_shape_via_constraint(self, constraint, shape, **kwargs)\
+            -> BoundShapeJSValidatorComponent:
         """
         Create a new Custom Constraint (BoundShapeValidatorComponent)
         :param constraint:
-        :type constraint: SPARQLConstraintComponent
+        :type constraint: JSConstraintComponent
         :param shape:
         :type shape: pyshacl.shape.Shape
         :param kwargs:
         :return:
+        :rtype: BoundShapeJSValidatorComponent
         """
         return BoundShapeJSValidatorComponent(constraint, shape, self)
 
+
+class JSConstraintComponentPathValidator(JSConstraintComponentValidator):
+
+    def validate(self, f, value_nodes, path, data_graph, param_bind_vals, new_bind_vals=None):
+        """
+
+        :param f:
+        :param value_nodes:
+        :param path:
+        :param data_graph:
+        :type data_graph: rdflib.Graph
+        :param new_bind_vals:
+        :return:
+        """
+        new_bind_vals = new_bind_vals or {}
+        args_map = param_bind_vals.copy()
+        args_map.update(new_bind_vals)
+        args_map.update({
+            'this': f,
+            'path': path
+        })
+        results = []
+        try:
+            result_dict = self.js_exe.execute(data_graph, args_map)
+            results.append((f, result_dict['_result']))
+        except Exception as e:
+            raise
+        return results

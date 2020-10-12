@@ -7,8 +7,8 @@ from .constraints import ConstraintComponent
 from .consts import SH, RDF_type, RDFS_subClassOf, SH_parameter, SH_select, SH_SPARQLTargetType
 from .errors import ConstraintLoadError, ShapeLoadError
 from .parameter import SHACLParameter
+from .helper import get_query_helper_cls
 from .pytypes import GraphLike
-from .sparql_query_helper import SPARQLQueryHelper
 
 
 if typing.TYPE_CHECKING:
@@ -129,6 +129,7 @@ class BoundSPARQLTargetType(BoundSHACLTargetType):
     def __init__(self, target_type, target_declaration, shape):
         super(BoundSPARQLTargetType, self).__init__(target_type, target_declaration, shape)
         params = self.target_type.parameters
+        SPARQLQueryHelper = get_query_helper_cls()
         self.query_helper = SPARQLQueryHelper(
             self.target_declaration, self.target_type.node, self.target_type.select, params
         )
@@ -201,3 +202,4 @@ def gather_target_types(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLTarg
 def apply_target_types(tts: Sequence):
     for t in tts:
         t.apply()
+

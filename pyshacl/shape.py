@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 #
 import logging
-
 from decimal import Decimal
 from typing import TYPE_CHECKING, List, Optional, Set, Tuple, Union
 
@@ -34,13 +33,11 @@ from .consts import (
     SH_zeroOrOnePath,
 )
 from .errors import ConstraintLoadError, ConstraintLoadWarning, ReportableRuntimeError, ShapeLoadError
+from .helper import get_query_helper_cls
 from .pytypes import GraphLike
-from .sparql_query_helper import SPARQLQueryHelper
-
 
 if TYPE_CHECKING:
     from pyshacl.shapes_graph import ShapesGraph
-
 
 class Shape(object):
 
@@ -240,6 +237,7 @@ class Shape(object):
             is_types = set(self.sg.objects(c, RDF_type))
             if has_select or (SH_SPARQLTarget in is_types):
                 ct['type'] = SH_SPARQLTarget
+                SPARQLQueryHelper = get_query_helper_cls()
                 qh = SPARQLQueryHelper(self, c, selects[0], deactivated=self._deactivated)
                 qh.collect_prefixes()
                 ct['qh'] = qh
@@ -535,7 +533,4 @@ class Shape(object):
             non_conformant = non_conformant or (not _is_conform)
             reports.extend(_r)
             run_count += 1
-        # TODO: Can these two lines be completely removed?
-        #  if run_count < 1:
-        #      raise RuntimeError("A SHACL Shape should have at least one parameter or attached property shape.")
         return (not non_conformant), reports

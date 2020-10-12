@@ -10,8 +10,8 @@ from rdflib.plugins.sparql.sparql import SPARQLError
 
 from ..consts import SH, RDFS_comment, SH_ask, SH_parameter, SH_select
 from ..errors import ConstraintLoadError, ReportableRuntimeError
+from ..helper import get_query_helper_cls
 from ..parameter import SHACLParameter
-from ..sparql_query_helper import SPARQLQueryHelper
 
 
 if typing.TYPE_CHECKING:
@@ -126,6 +126,7 @@ class SPARQLFunction(SHACLFunction):
         self.select = selects[0] if num_selects else None
         # deliberately not passing in Parameters to queryHelper here, because we can't bind them to this function
         # (this function is not a Shape, and Function Params don't get bound to it)
+        SPARQLQueryHelper = get_query_helper_cls()
         query_helper = SPARQLQueryHelper(self, self.node, None, None, deactivated=False)
         query_helper.collect_prefixes()
         self._qh = query_helper
@@ -194,3 +195,4 @@ class SPARQLFunction(SHACLFunction):
     def unapply(self, g):
         super(SPARQLFunction, self).unapply(g)
         unregister_custom_function(self.node, self.execute_from_sparql)
+

@@ -47,7 +47,7 @@ python = "^3.6"  # Compatible python versions must be declared here
 rdflib = "^5.0.0"
 rdflib-jsonld = "^0.5.0"
 owlrl = "^5.2.1"
-pyduktape2 = {version="^0.3.1", optional=true}
+pyduktape2 = {version="^0.4.1", optional=true}
 
 [tool.poetry.dev-dependencies]
 coverage = "^4.5"
@@ -57,7 +57,6 @@ flake8 = "^3.7"
 isort = {version="^5.0.0", python=">=3.6"}
 black = {version=">=18.9b0,<=19.10b0", python=">=3.6"}
 mypy = {version="^0.770.0", python=">=3.6"}
-
 
 [tool.poetry.extras]
 js = ["pyduktape2"]

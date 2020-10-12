@@ -9,9 +9,9 @@ from typing import Any, Dict, List, Set, Tuple, Type, Union
 import rdflib
 
 from pyshacl.constraints.constraint_component import ConstraintComponent, CustomConstraintComponent
-from pyshacl.constraints.sparql.sparql_based_constraints import SPARQLQueryHelper
 from pyshacl.consts import SH, RDF_type, SH_ask, SH_message, SH_select, SH_ConstraintComponent
 from pyshacl.errors import ConstraintLoadError, ValidationFailure
+from pyshacl.helper import get_query_helper_cls
 from pyshacl.pytypes import GraphLike
 
 
@@ -39,6 +39,7 @@ class BoundShapeValidatorComponent(ConstraintComponent):
         self.constraint = constraint
         self.validator = validator
         params = constraint.parameters
+        SPARQLQueryHelper = get_query_helper_cls()
         self.query_helper = SPARQLQueryHelper(
             self.shape, validator.node, validator.query_text, params, messages=validator.messages
         )
@@ -281,6 +282,7 @@ class SelectConstraintValidator(SPARQLConstraintComponentValidator):
         new_bind_vals = new_bind_vals or {}
         bind_vals = param_bind_vals.copy()
         bind_vals.update(new_bind_vals)
+        violations = set()
         for v in value_nodes:
             if query_helper is None:
                 # TODO:coverage: No test for this case when query_helper is None
@@ -294,8 +296,7 @@ class SelectConstraintValidator(SPARQLConstraintComponentValidator):
                 init_binds.update(bind_vals)
             results = target_graph.query(sparql_text, initBindings=init_binds)
             if not results or len(results.bindings) < 1:
-                return []
-            violations = set()
+                continue
             for r in results:
                 try:
                     p = r['path']
@@ -321,7 +322,7 @@ class SelectConstraintValidator(SPARQLConstraintComponentValidator):
                         violations.add(True)
                     except KeyError:
                         pass
-            return violations
+        return violations
 
 class SPARQLConstraintComponent(CustomConstraintComponent):
     """
@@ -368,3 +369,4 @@ class SPARQLConstraintComponent(CustomConstraintComponent):
             self, shape, must_be_ask_val=must_be_ask_val, must_be_select_val=must_be_select_val
         )
         return applied_validator
+

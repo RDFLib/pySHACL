@@ -10,7 +10,7 @@ import rdflib
 
 from rdflib import RDF, XSD
 
-from .consts import (
+from ..consts import (
     SH,
     OWL_Ontology,
     RDF_type,
@@ -23,7 +23,7 @@ from .consts import (
     SH_zeroOrMorePath,
     SH_zeroOrOnePath,
 )
-from .errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
+from ..errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
 
 
 SH_declare = SH.term('declare')

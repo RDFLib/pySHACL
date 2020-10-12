@@ -15,9 +15,6 @@ if TYPE_CHECKING:
 
     from .shacl_rule import SHACLRule
 
-ALL_SPARQL_RULES = [TripleRule, SPARQLRule]
-
-
 def gather_rules(shacl_graph: 'ShapesGraph') -> Dict['Shape', List['SHACLRule']]:
     """
 

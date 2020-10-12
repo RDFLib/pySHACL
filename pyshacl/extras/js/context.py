@@ -4,6 +4,8 @@ import pyduktape2
 from pyduktape2 import JSProxy
 
 from . import load_into_context
+from ...errors import ReportableRuntimeError
+
 
 class URIRefNativeWrapper(object):
     inner_type = "URIRef"
@@ -234,20 +236,20 @@ Literal.from_native = function(native) {
     if (lang) {
         languageOrDatatype = ""+lang;
     } else if (dt) {
-        languageOrDatatype = dt;
+        languageOrDatatype = new NamedNode(dt);
     } else {
-        languageOrDatatype = new NamedNode("http://www.w3.org/2001/XMLSchema#");
+        languageOrDatatype = new NamedNode("http://www.w3.org/2001/XMLSchema#string");
     }
     return new Literal(lex, languageOrDatatype, native);
 }
 Literal.prototype.toPython = function() { return this._native; }
-Literal.prototype.toString = function() { return "Literal("+this.lexical+")"; }
+Literal.prototype.toString = function() { return "Literal("+this.lex+", dt="+this.datatype+", lang='"+this.language+"')"; }
 Literal.prototype.isURI = function() { return false; }
 Literal.prototype.isBlankNode = function() { return false; }
 Literal.prototype.isLiteral = function() { return true; }
 Literal.prototype.equals = function(other) {
     if (other.constructor && other.constructor === Literal) {
-        return _native_node_equals({"0": this._native, "1": other._native});
+        return _native_node_equals({'0': this._native, '1': other._native});
     }
     return false;
 }
@@ -322,7 +324,7 @@ Graph.prototype.find = function(s, p, o) {
     if (s && s.hasOwnProperty('_native')) { s = s._native; }
     if (p && p.hasOwnProperty('_native')) { p = p._native; }
     if (o && o.hasOwnProperty('_native')) { o = o._native; }
-    var native_it = _native_graph_find({"0": this._native, "1": s, "2": p, "3": o});
+    var native_it = _native_graph_find({'0': this._native, '1': s, '2': p, '3': o});
     var it = Iterator.from_native(native_it);
     return it;
 }
@@ -331,7 +333,7 @@ Graph.prototype.find = function(s, p, o) {
 
 
 class SHACLJSContext(object):
-    __slots__ = ("context",)
+    __slots__ = ("context", "fns")
 
     def __init__(self, shapes_graph, data_graph, *args, **kwargs):
         context = pyduktape2.DuktapeContext()
@@ -355,9 +357,11 @@ class SHACLJSContext(object):
         context.set_globals(*args, **kwargs)
 
         self.context = context
+        self.fns = {}
 
     def load_js_library(self, library: str):
-        load_into_context(self.context, library)
+        fns = load_into_context(self.context, library)
+        self.fns.update(fns)
 
     @classmethod
     def build_results(cls, res):
@@ -423,6 +427,42 @@ class SHACLJSContext(object):
                     res = keys
         return res
 
+    def get_fn_args(self, fn_name, args_map):
+        c = self.context
+        try:
+            fn = c.get_global(fn_name)
+        except BaseException as e:
+            print(e)
+            raise
+        if not fn:
+            raise ReportableRuntimeError("JS Function {} cannot be found in the loaded files.".format(fn_name))
+        if fn_name not in self.fns:
+            raise ReportableRuntimeError("JS Function {} args cannot be determined. Bad JS structure?".format(fn_name))
+        known_fn_args = self.fns[fn_name]  # type: tuple
+        needed_args = []
+        for k, v in args_map.items():
+            look_for = "$"+str(k)
+            positions = []
+            start = 0
+            while True:
+                try:
+                    pos = known_fn_args.index(look_for, start)
+                    positions.append(pos)
+                except ValueError:
+                    break
+                start = pos+1
+            if not positions:
+                continue
+            for p in positions:
+                needed_args.append((p, k, v))
+        for i, a in enumerate(known_fn_args):
+            if a.startswith("$"):
+                a = a[1:]
+            if a not in args_map:
+                needed_args.append((i, a, None))
+        needed_args = [v for p,k,v in sorted(needed_args)]
+        return needed_args
+
     def run_js_function(self, fn_name, args, returns: list = None):
         if returns is None:
             returns = []
@@ -435,18 +475,20 @@ class SHACLJSContext(object):
             if isinstance(a, URIRef):
                 wrapped_a = URIRefNativeWrapper(a)
                 native_name = "_{}_native".format(arg_name)
-                preamble += "var {} = NamedNode.from_native({})\n".format(arg_name, native_name)
+                preamble += "var {} = NamedNode.from_native({});\n".format(arg_name, native_name)
                 bind_dict[native_name] = wrapped_a
             elif isinstance(a, BNode):
                 wrapped_a = BNodeNativeWrapper(a)
                 native_name = "_{}_native".format(arg_name)
-                preamble += "var {} = BlankNode.from_native({})\n".format(arg_name, native_name)
+                preamble += "var {} = BlankNode.from_native({});\n".format(arg_name, native_name)
                 bind_dict[native_name] = wrapped_a
             elif isinstance(a, Literal):
                 wrapped_a = LiteralNativeWrapper(a)
                 native_name = "_{}_native".format(arg_name)
-                preamble += "var {} = Literal.from_native({})\n".format(arg_name, native_name)
+                preamble += "var {} = Literal.from_native({});\n".format(arg_name, native_name)
                 bind_dict[native_name] = wrapped_a
+            elif a is None:  # this is how we set an undefined variable
+                preamble += "var {};\n".format(arg_name)
             else:
                 bind_dict[arg_name] = a
 
@@ -463,4 +505,5 @@ class SHACLJSContext(object):
                 print(e)
                 returns_dict[r] = None
         res = self.build_results(res)
-        return res
+        returns_dict['_result'] = res
+        return returns_dict

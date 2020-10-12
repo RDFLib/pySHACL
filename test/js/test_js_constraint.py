@@ -37,3 +37,5 @@ def test_js_constraint():
     conforms, result_graph, result_text = validate(g1, shacl_graph=s1, advanced=True, debug=True, js=True)
     assert not conforms
 
+if __name__ == "__main__":
+    test_js_constraint()
