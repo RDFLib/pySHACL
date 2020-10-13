@@ -333,7 +333,7 @@ class CustomConstraintComponentFactory(object):
             from pyshacl.constraints.sparql.sparql_based_constraint_components import SPARQLConstraintComponent
             return SPARQLConstraintComponent(*self)
         elif is_js_constraint_component and shacl_graph.js_enabled:
-            from pyshacl.extras.js.constraint import JSConstraintComponent
+            from pyshacl.extras.js.constraint_component import JSConstraintComponent
             return JSConstraintComponent(*self)
         else:
             return CustomConstraintComponent(*self)

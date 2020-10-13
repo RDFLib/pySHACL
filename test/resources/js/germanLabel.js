@@ -8,7 +8,6 @@ function validateGermanLabel($this) {
 		if(!object.isLiteral() || !object.language.startsWith("de")) {
 			results.push({
 				value : object,
-				message : "Hello World.",
 				path : p,
 			});
 		}
