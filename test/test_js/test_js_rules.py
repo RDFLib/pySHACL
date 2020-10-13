@@ -14,6 +14,12 @@ ex:RectangleShape
 		a sh:JSRule ;    # This triple is optional
 		sh:jsFunctionName "computeArea" ;
 		sh:jsLibrary [ sh:jsLibraryURL "resources/js/rectangle.js"^^xsd:anyURI ] ;
+    ] ;
+    sh:property [
+        sh:path ex:area ;
+        sh:datatype xsd:double ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
     ] .
 '''
 
