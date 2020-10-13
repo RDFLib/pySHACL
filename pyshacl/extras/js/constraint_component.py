@@ -108,6 +108,8 @@ class BoundShapeJSValidatorComponent(ConstraintComponent):
                 else:
                     result = [result]
                 for res in result:
+                    if isinstance(res, Literal):
+                        res = res.value
                     if isinstance(res, bool):
                         if res:
                             continue

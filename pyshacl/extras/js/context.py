@@ -1,5 +1,7 @@
 import pprint
 from rdflib import URIRef, BNode, Literal
+from rdflib.namespace import XSD
+from decimal import Decimal
 import pyduktape2
 from pyduktape2 import JSProxy
 
@@ -335,7 +337,7 @@ Graph.prototype.find = function(s, p, o) {
 class SHACLJSContext(object):
     __slots__ = ("context", "fns")
 
-    def __init__(self, shapes_graph, data_graph, *args, **kwargs):
+    def __init__(self, data_graph, *args, shapes_graph=None, **kwargs):
         context = pyduktape2.DuktapeContext()
         context.set_globals(
             _pprint=_pprint, _make_uriref=_make_uriref, _make_bnode=_make_bnode, _make_literal=_make_literal,
@@ -348,12 +350,17 @@ class SHACLJSContext(object):
         context.eval_js(blankNodeJs)
         context.eval_js(literalJs)
         context.eval_js(graphJs)
-        context.set_globals(_native_shapes_graph=GraphNativeWrapper(shapes_graph))
+
         context.set_globals(_native_data_graph=GraphNativeWrapper(data_graph))
-        context.eval_js('''\
-        var $data = new Graph(_native_data_graph);
-        var $shapes = new Graph(_native_shapes_graph);
-        ''')
+        if shapes_graph is not None:
+            context.set_globals(_native_shapes_graph=GraphNativeWrapper(shapes_graph))
+        else:
+            context.set_globals(_native_shapes_graph=None)
+        context.eval_js('''var $data = new Graph(_native_data_graph);\n''')
+        if shapes_graph is not None:
+            context.eval_js('''var $shapes = new Graph(_native_shapes_graph);\n''')
+        else:
+            context.eval_js('''var $shapes;\n''')  # leave $shapes undefined
         context.set_globals(*args, **kwargs)
 
         self.context = context
@@ -364,7 +371,7 @@ class SHACLJSContext(object):
         self.fns.update(fns)
 
     @classmethod
-    def build_results(cls, res):
+    def build_results_as_constraint(cls, res):
         if isinstance(res, JSProxy):
             try:
                 return res.toPython()
@@ -425,6 +432,97 @@ class SHACLJSContext(object):
                 except AttributeError:
                     # This must be an array of something else
                     res = keys
+        elif isinstance(res, (Literal, URIRef, BNode)):
+            pass
+        elif isinstance(res, Decimal):
+            res = Literal(res, datatype=XSD['decimal'])
+        elif isinstance(res, (int, float, str, bytes, bool)):
+            res = Literal(res)
+        return res
+
+    @classmethod
+    def build_results_as_construct(cls, res):
+        if isinstance(res, JSProxy):
+            try:
+                return res.toPython()
+            except AttributeError:
+                pass
+            # this means its a JS Array or Object
+            keys = list(iter(res))
+            if len(keys) < 1:
+                res = []
+            else:
+                first_key = keys[0]
+                if isinstance(first_key, JSProxy):
+                    # res is an array of objects or array of arrays
+                    new_res = []
+                    for k in keys:
+                        try:
+                            new_res.append(k.toPython())
+                            continue
+                        except AttributeError:
+                            pass
+                        subkeys = list(iter(k))
+                        if len(subkeys) < 1:
+                            new_res.append([])
+                        else:
+                            first_subkey = subkeys[0]
+                            if isinstance(first_subkey, JSProxy):
+                                if len(subkeys) >= 3:
+                                    # res is an array of arrays
+                                    this_s = subkeys[0]
+                                    this_p = subkeys[1]
+                                    this_o = subkeys[2]
+                                else:
+                                    raise ReportableRuntimeError("JS Function returned incorrect number of items in the array.")
+                            else:
+                                this_s = getattr(k, 'subject', None)
+                                this_p = getattr(k, 'predicate', None)
+                                this_o = getattr(k, 'object', None)
+                            try:
+                                this_s = this_s.toPython()
+                            except AttributeError:
+                                pass
+                            if this_s is not None and hasattr(this_s, 'inner'):
+                                this_s = this_s.inner
+                            try:
+                                this_p = this_p.toPython()
+                            except AttributeError:
+                                pass
+                            if this_p is not None and hasattr(this_p, 'inner'):
+                                this_p = this_p.inner
+                            try:
+                                this_o = this_o.toPython()
+                            except AttributeError:
+                                pass
+                            if this_o is not None and hasattr(this_o, 'inner'):
+                                this_o = this_o.inner
+                            new_res.append((this_s, this_p, this_o))
+                    return new_res
+                else:
+                    # a JS Rules function must return an array of arrays, or array of objects
+                    # otherwise, it does nothing!
+                    return []
+        return res
+
+    @classmethod
+    def build_results_as_shacl_function(cls, res, return_type=None):
+        if isinstance(res, JSProxy):
+            try:
+                return res.toPython()
+            except AttributeError:
+                return None
+        elif isinstance(res, (Literal, URIRef, BNode)):
+            pass
+        elif return_type is not None and isinstance(res, (int, float)):
+            lex = str(res)
+            res = Literal(lex, datatype=return_type, normalize=False)
+        elif isinstance(res, (float, Decimal)):
+            res = Literal(str(res), datatype=XSD['decimal'])
+        elif isinstance(res, bool):
+            res = Literal(res, datatype=XSD['boolean'])
+        elif isinstance(res, (int, float, str, bytes, bool)):
+            res = Literal(res, datatype=return_type, normalize=False)
         return res
 
     def get_fn_args(self, fn_name, args_map):
@@ -504,6 +602,5 @@ class SHACLJSContext(object):
             except BaseException as e:
                 print(e)
                 returns_dict[r] = None
-        res = self.build_results(res)
         returns_dict['_result'] = res
         return returns_dict

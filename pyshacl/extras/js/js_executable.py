@@ -87,10 +87,32 @@ class JSExecutable(object):
                     libraries[libn2].append(str(u2))
         self.libraries = libraries
 
-    def execute(self, datagraph, args_map, *args, **kwargs):
-        ctx = SHACLJSContext(self.sg, datagraph, **kwargs)
+    def execute(self, data_graph, args_map, *args, mode=None, return_type=None, **kwargs):
+        """
+        :param data_graph:
+        :param args_map:
+        :param args:
+        :param mode:
+        :param return_type:
+        :param kwargs:
+        :return:
+        :rtype: dict
+        """
+        if mode == "function":
+            ctx = SHACLJSContext(data_graph, shapes_graph=None, **kwargs)
+        else:
+            ctx = SHACLJSContext(data_graph, shapes_graph=self.sg, **kwargs)
+
         for lib_node, lib_urls in self.libraries.items():
             for lib_url in lib_urls:
                 ctx.load_js_library(lib_url)
         fn_args = ctx.get_fn_args(self.fn_name, args_map)
-        return ctx.run_js_function(self.fn_name, fn_args)
+        rvals = ctx.run_js_function(self.fn_name, fn_args)
+        res = rvals['_result']
+        if mode == "function":
+            rvals['_result'] = ctx.build_results_as_shacl_function(res, return_type)
+        elif mode == "construct":
+            rvals['_result'] = ctx.build_results_as_construct(res)
+        else:
+            rvals['_result'] = ctx.build_results_as_constraint(res)
+        return rvals
