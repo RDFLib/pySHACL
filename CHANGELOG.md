@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [0.14.0] - 2020-10-14
+
+## Added
+- SHACL-JS Support!
+- Implements all of the features in the SHACL-JS SHACL Extension specification: https://www.w3.org/TR/shacl-js/
+- Includes:
+  - JS Constraints
+  - JS ConstraintComponents
+  - JS SHACL Functions
+  - JS SHACL Rules
+  - JS Target
+  - JS TargetType
+- To install it, make sure you do `pip3 install pyshacl[js]` to get the correct extra packages.
+
+## Changed
+- Added JS flag to the CLI tool to enable SHACL-JS features
+- Updated README and FEATURES matrix
+
+
 ## [0.13.3] - 2020-09-11
 
 ## Fixed
@@ -675,7 +694,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.13.3...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/RDFLib/pySHACL/compare/v0.13.3...v0.14.0
 [0.13.3]: https://github.com/RDFLib/pySHACL/compare/v0.13.2...v0.13.3
 [0.13.2]: https://github.com/RDFLib/pySHACL/compare/v0.13.1...v0.13.2
 [0.13.1]: https://github.com/RDFLib/pySHACL/compare/v0.13.0...v0.13.1
