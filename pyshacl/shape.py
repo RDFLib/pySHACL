@@ -30,7 +30,7 @@ from .consts import (
     SH_targetSubjectsOf,
     SH_Violation,
     SH_zeroOrMorePath,
-    SH_zeroOrOnePath,
+    SH_zeroOrOnePath, SH_jsFunctionName, SH_JSTarget, SH_JSTargetType,
 )
 from .errors import ConstraintLoadError, ConstraintLoadWarning, ReportableRuntimeError, ShapeLoadError
 from .helper import get_query_helper_cls
@@ -230,10 +230,18 @@ class Shape(object):
     def advanced_target(self):
         custom_targets = set(self.sg.objects(self.node, SH_target))
         result_set = dict()
+        if self.sg.js_enabled:
+            use_js = True
+            from pyshacl.extras.js.target import JSTarget
+        else:
+            use_js = False
+            JSTarget = object  # for linter
         for c in custom_targets:
             ct = dict()
             selects = list(self.sg.objects(c, SH_select))
             has_select = len(selects) > 0
+            fn_names = list(self.sg.objects(c, SH_jsFunctionName))
+            has_fnname = len(fn_names) > 0
             is_types = set(self.sg.objects(c, RDF_type))
             if has_select or (SH_SPARQLTarget in is_types):
                 ct['type'] = SH_SPARQLTarget
@@ -241,6 +249,13 @@ class Shape(object):
                 qh = SPARQLQueryHelper(self, c, selects[0], deactivated=self._deactivated)
                 qh.collect_prefixes()
                 ct['qh'] = qh
+            elif has_fnname or (SH_JSTarget in is_types):
+                if use_js:
+                    ct['type'] = SH_JSTarget
+                    ct['targeter'] = JSTarget(self.sg, c)
+                else:
+                    #  Found JSTarget, but JS is not enabled in PySHACL. Ignore this target.
+                    pass
             else:
                 found_tt = None
                 for t in is_types:
@@ -252,9 +267,12 @@ class Shape(object):
                 if not found_tt:
                     msg = "None of these types match a TargetType: {}".format(" ".join(is_types))
                     raise ShapeLoadError(msg, "https://www.w3.org/TR/shacl-af/#SPARQLTargetType")
-                ct['type'] = SH_SPARQLTargetType
                 bound_tt = found_tt.bind(self, c)
-                ct['qt'] = bound_tt
+                ct['type'] = bound_tt.shacl_constraint_class()
+                if ct['type'] == SH_SPARQLTargetType:
+                    ct['qt'] = bound_tt
+                elif ct['type'] == SH_JSTargetType:
+                    ct['targeter'] = bound_tt
             result_set[c] = ct
         return result_set
 
@@ -305,14 +323,22 @@ class Shape(object):
                     qh = at['qh']
                     select = qh.apply_prefixes(qh.select_text)
                     results = data_graph.query(select, initBindings=None)
+                    if not results or len(results.bindings) < 1:
+                        continue
+                    for r in results:
+                        t = r['this']
+                        found_node_targets.add(t)
+                elif at['type'] in (SH_JSTarget, SH_JSTargetType):
+                    results = at['targeter'].find_targets(data_graph)
+                    for r in results:
+                        found_node_targets.add(r)
                 else:
                     results = at['qt'].find_targets(data_graph)
-                if not results or len(results.bindings) < 1:
-                    continue
-                for r in results:
-                    t = r['this']
-                    found_node_targets.add(t)
-
+                    if not results or len(results.bindings) < 1:
+                        continue
+                    for r in results:
+                        t = r['this']
+                        found_node_targets.add(t)
         return found_node_targets
 
     @classmethod

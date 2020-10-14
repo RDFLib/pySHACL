@@ -113,6 +113,8 @@ class JSExecutable(object):
             rvals['_result'] = ctx.build_results_as_shacl_function(res, return_type)
         elif mode == "construct":
             rvals['_result'] = ctx.build_results_as_construct(res)
+        elif mode == 'target':
+            rvals['_result'] = ctx.build_results_as_target(res)
         else:
             rvals['_result'] = ctx.build_results_as_constraint(res)
         return rvals

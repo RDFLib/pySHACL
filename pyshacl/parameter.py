@@ -3,13 +3,13 @@ from typing import Union
 
 from rdflib import Literal, URIRef
 
-from .consts import SH_datatype, SH_optional, SH_order, SH_path
+from .consts import SH_datatype, SH_optional, SH_order, SH_path, SH_nodeKind
 from .errors import ConstraintLoadError, ReportableRuntimeError
 from .shape import Shape
 
 
 class SHACLParameter(Shape):
-    __slots__ = ("datatype", "param_order", "optional")
+    __slots__ = ("nodekind", "datatype", "param_order", "optional")
 
     def __init__(self, sg, param_node, path=None, logger: Union[Logger, None] = None):
         """
@@ -29,6 +29,17 @@ class SHACLParameter(Shape):
                 path = paths[0]
         super(SHACLParameter, self).__init__(sg, param_node, p=True, path=path, logger=logger)
 
+        nodekinds = list(sg.objects(self.node, SH_nodeKind))
+        if len(nodekinds) < 1:
+            self.nodekind = None
+        elif len(nodekinds) > 1:
+            raise ConstraintLoadError(
+                "sh:parameter cannot have more than one value for sh:nodeKind.",
+                "https://www.w3.org/TR/shacl-af/#functions-example",
+            )
+        else:
+            self.nodekind = nodekinds[0]
+
         datatypes = list(sg.objects(self.node, SH_datatype))
         if len(datatypes) < 1:
             self.datatype = None
@@ -39,6 +50,7 @@ class SHACLParameter(Shape):
             )
         else:
             self.datatype = datatypes[0]
+
         orders = list(sg.objects(self.node, SH_order))
         if len(orders) < 1:
             self.param_order = None
@@ -67,6 +79,10 @@ class SHACLParameter(Shape):
                     "https://www.w3.org/TR/shacl/#constraint-components-parameters",
                 )
             self.optional = bool(optionals[0])
+
+    def __str__(self):
+        name = str(self.node)
+        return "<Parameter {}>".format(name)
 
     @property
     def localname(self):

@@ -160,6 +160,39 @@
 | `sh:TripleRule`         | [▶][AFTripleRule]     | ![status-complete]	|           |
 | `sh:SPARQLRule`         | [▶][AFSPARQLRule]     | ![status-complete]	|           |
 
+# SHACL-JS [spec](https://www.w3.org/TR/shacl-js/)
+
+The SHACL-JS features are implemented behind a Python "extras" feature.
+To enable it, you must install PySHACL using PIP with the extras included like `pyshacl[js]`
+
+### [Javascript-based Constraints](https://www.w3.org/TR/shacl-js/#js-constraints)
+| Parameter             |  Link 	                	|      Status       	|  Comments	|
+|:----------            |:------:	                	|:-----------------:	|:------	|
+| `sh:js`               | [▶][JSConstraintValidation]	| ![status-complete]	|           |
+
+### [Javascript-based Constraints-Components](https://www.w3.org/TR/shacl-js/#js-components)
+| Parameter             |  Link 	                	|      Status       	|  Comments	|
+|:----------            |:------:	                	|:-----------------:	|:------	|
+| `sh:validator`        | [▶][JSConstraintComponentValidation]	| ![status-complete]	|           |
+| `sh:JSValidator`      | [▶][JSConstraintComponentValidation]	| ![status-complete]	|           |
+
+### [Javascript-based SHACL Functions](https://www.w3.org/TR/shacl-js/#js-functions)
+| Parameter             |  Link 	                	|      Status       	|  Comments	|
+|:----------            |:------:	                	|:-----------------:	|:------	|
+| `sh:JSFunction`       | [▶][JSFunctionsSyntax]    	| ![status-complete]	|           |
+| `sh:parameter`        | [▶][JSFunctionsSyntax]    	| ![status-complete]	|           |
+
+### [Javascript-based SHACL Rules](https://www.w3.org/TR/shacl-js/#rules)
+| Parameter             |  Link 	                	|      Status       	|  Comments	|
+|:----------            |:------:	                	|:-----------------:	|:------	|
+| `sh:JSRule`           | [▶][JSRulesExecution]     	| ![status-complete]	|           |
+
+### [Javascript-based Custom Targets](https://www.w3.org/TR/shacl-js/#targets)
+| Parameter             |  Link 	                	|      Status       	|  Comments	|
+|:----------            |:------:	                	|:-----------------:	|:------	|
+| `sh:JSTarget`         | [▶][JSTarget]             	| ![status-complete]	|           |
+| `sh:JSTargetType`     | [▶][JSTargetType]         	| ![status-complete]	|           |
+
 
 # Implementation Notes
 
@@ -240,3 +273,10 @@
 [AFEntailment]: https://www.w3.org/TR/shacl-af/#Rules
 [AFTripleRule]: https://www.w3.org/TR/shacl-af/#TripleRule
 [AFSPARQLRule]: https://www.w3.org/TR/shacl-af/#SPARQLRule
+
+[JSConstraintValidation]: https://www.w3.org/TR/shacl-js/#js-constraints-validation
+[JSConstraintComponentValidation]: https://www.w3.org/TR/shacl-js/#validation-of-javascript-based-constraint-components
+[JSFunctionsSyntax]: https://www.w3.org/TR/shacl-js/#syntax-and-semantics-of-javascript-based-functions
+[JSRulesExecution]: https://www.w3.org/TR/shacl-js/#rules-execution
+[JSTarget]: https://www.w3.org/TR/shacl-js/#JSTarget
+[JSTargetType]: https://www.w3.org/TR/shacl-js/#JSTargetType

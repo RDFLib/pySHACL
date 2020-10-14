@@ -506,6 +506,37 @@ class SHACLJSContext(object):
         return res
 
     @classmethod
+    def build_results_as_target(cls, res):
+        if isinstance(res, JSProxy):
+            try:
+                return res.toPython()
+            except AttributeError:
+                pass
+            # this means its a JS Array or Object
+            keys = list(iter(res))
+            if len(keys) < 1:
+                res = []
+            else:
+                first_key = keys[0]
+                if isinstance(first_key, JSProxy):
+                    # res is an array of objects or array of arrays
+                    new_res = []
+                    for k in keys:
+                        try:
+                            k = k.toPython()
+                        except AttributeError:
+                            pass
+                        if k is not None and hasattr(k, 'inner'):
+                            k = k.inner
+                        new_res.append(k)
+                    return new_res
+                else:
+                    # a JS Target function must return an array of Nodes
+                    # otherwise, it does nothing!
+                    return []
+        return res
+
+    @classmethod
     def build_results_as_shacl_function(cls, res, return_type=None):
         if isinstance(res, JSProxy):
             try:
@@ -532,7 +563,7 @@ class SHACLJSContext(object):
         except BaseException as e:
             print(e)
             raise
-        if not fn:
+        if fn is None:
             raise ReportableRuntimeError("JS Function {} cannot be found in the loaded files.".format(fn_name))
         if fn_name not in self.fns:
             raise ReportableRuntimeError("JS Function {} args cannot be determined. Bad JS structure?".format(fn_name))

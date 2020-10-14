@@ -53,6 +53,7 @@ class SHACLTargetType(object):
         self.sg.add_shacl_target_type(self.node, self)
 
     def check_params(self, target_declaration):
+        assert False  # is this even used?
         param_kv = {}
         for p in self.parameters:
             n = p.node
@@ -70,6 +71,7 @@ class SHACLTargetType(object):
         return param_kv
 
     def bind(self, shape, target_declaration):
+        assert False  # is this even used?
         param_vals = self.check_params(target_declaration)
         return BoundSHACLTargetType(self, target_declaration, shape, param_vals)
 
@@ -110,11 +112,11 @@ class BoundSHACLTargetType(ConstraintComponent):
 
     @classmethod
     def constraint_name(cls):
-        return "TargetType"
+        return "SPARQLTargetType"
 
     @classmethod
     def shacl_constraint_class(cls):
-        return SH_TargetType
+        return SH_SPARQLTargetType
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: typing.Dict, _evaluation_path: List):
         raise NotImplementedError()
@@ -184,6 +186,13 @@ def gather_target_types(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLTarg
     # remove these two which are the known native types in shacl.ttl
     sub_targets = sub_targets.difference({SH_JSTarget, SH_SPARQLTarget})
 
+    if shacl_graph.js_enabled:
+        use_js = True
+        from pyshacl.extras.js.target import JSTargetType
+    else:
+        use_js = False
+        JSTargetType = object  # for linter
+
     for s in sub_targets:
         types = set(shacl_graph.objects(s, RDF_type))
         found = False
@@ -191,8 +200,11 @@ def gather_target_types(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLTarg
             all_target_types.append(SPARQLTargetType(s, shacl_graph))
             found = True
         if SH_JSTargetType in types:
-            warn(Warning("sh:JSTargetType is not implemented in PySHACL.\n<{}> a <{}>".format(s, SH_JSTargetType)))
             found = True
+            if use_js:
+                all_target_types.append(JSTargetType(s, shacl_graph))
+            else:
+                pass  # JS Mode is not enabled. Silently ignore JSTargetTypes
         if not found:
             warn(Warning("The only SHACLTargetType currently implemented is SPARQLTargetType."))
 
