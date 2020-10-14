@@ -184,6 +184,7 @@ class Validator(object):
             is_js_installed = check_extra_installed('js')
             if is_js_installed:
                 self.shacl_graph.enable_js()
+
     @property
     def target_graph(self):
         return self._target_graph
@@ -364,8 +365,11 @@ def validate(
             shacl_graph=shacl_graph,
             ont_graph=ont_graph,
             options={
-                'inference': inference, 'abort_on_error': abort_on_error, 'advanced': advanced,
-                'use_js': use_js, 'logger': log
+                'inference': inference,
+                'abort_on_error': abort_on_error,
+                'advanced': advanced,
+                'use_js': use_js,
+                'logger': log,
             },
         )
         conforms, report_graph, report_text = validator.run()
@@ -373,7 +377,7 @@ def validate(
         conforms = False
         report_graph = e
         report_text = "Validation Failure - {}".format(e.message)
-    if do_check_dash_result:
+    if do_check_dash_result and validator is not None:
         passes = check_dash_result(validator, report_graph, shacl_graph or data_graph)
         return passes, report_graph, report_text
     if do_check_sht_result:

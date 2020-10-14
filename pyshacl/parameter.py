@@ -3,7 +3,7 @@ from typing import Union
 
 from rdflib import Literal, URIRef
 
-from .consts import SH_datatype, SH_optional, SH_order, SH_path, SH_nodeKind
+from .consts import SH_datatype, SH_nodeKind, SH_optional, SH_order, SH_path
 from .errors import ConstraintLoadError, ReportableRuntimeError
 from .shape import Shape
 

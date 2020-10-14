@@ -1,13 +1,13 @@
 import typing
 
-from typing import List, Sequence, Union
+from typing import List, Sequence, Type, Union
 from warnings import warn
 
 from .constraints import ConstraintComponent
 from .consts import SH, RDF_type, RDFS_subClassOf, SH_parameter, SH_select, SH_SPARQLTargetType
 from .errors import ConstraintLoadError, ShapeLoadError
-from .parameter import SHACLParameter
 from .helper import get_query_helper_cls
+from .parameter import SHACLParameter
 from .pytypes import GraphLike
 
 
@@ -187,11 +187,11 @@ def gather_target_types(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLTarg
     sub_targets = sub_targets.difference({SH_JSTarget, SH_SPARQLTarget})
 
     if shacl_graph.js_enabled:
-        use_js = True
         from pyshacl.extras.js.target import JSTargetType
+
+        use_js: Union[bool, Type] = JSTargetType
     else:
         use_js = False
-        JSTargetType = object  # for linter
 
     for s in sub_targets:
         types = set(shacl_graph.objects(s, RDF_type))
@@ -214,4 +214,3 @@ def gather_target_types(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLTarg
 def apply_target_types(tts: Sequence):
     for t in tts:
         t.apply()
-

@@ -19,10 +19,10 @@ from pyshacl.consts import (
     SH_BlankNode,
     SH_BlankNodeOrIRI,
     SH_BlankNodeORLiteral,
+    SH_datatype,
     SH_IRIOrLiteral,
     SH_Literal,
     SH_nodeKind,
-    SH_datatype
 )
 from pyshacl.errors import ConstraintLoadError
 from pyshacl.pytypes import GraphLike

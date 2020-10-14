@@ -4,12 +4,12 @@ https://www.w3.org/TR/shacl/#sparql-constraint-components
 """
 import typing
 
-from typing import Any, Dict, List, Set, Tuple, Type, Union
+from typing import Dict, List, Tuple, Type, Union
 
 import rdflib
 
 from pyshacl.constraints.constraint_component import ConstraintComponent, CustomConstraintComponent
-from pyshacl.consts import SH, RDF_type, SH_ask, SH_message, SH_select, SH_ConstraintComponent
+from pyshacl.consts import SH, RDF_type, SH_ask, SH_ConstraintComponent, SH_message, SH_select
 from pyshacl.errors import ConstraintLoadError, ValidationFailure
 from pyshacl.helper import get_query_helper_cls
 from pyshacl.pytypes import GraphLike
@@ -363,6 +363,7 @@ class SelectConstraintValidator(SPARQLConstraintComponentValidator):
                         pass
         return violations
 
+
 class SPARQLConstraintComponent(CustomConstraintComponent):
     """
     SPARQL-based constraints provide a lot of flexibility but may be hard to understand for some people or lead to repetition. This section introduces SPARQL-based constraint components as a way to abstract the complexity of SPARQL and to declare high-level reusable components similar to the Core constraint components. Such constraint components can be declared using the SHACL RDF vocabulary and thus shared and reused.
@@ -413,4 +414,3 @@ class SPARQLConstraintComponent(CustomConstraintComponent):
             self, shape, must_be_ask_val=must_be_ask_val, must_be_select_val=must_be_select_val
         )
         return applied_validator
-

@@ -1,19 +1,22 @@
 #
 #
 import typing
+
 from rdflib.plugins.sparql.operators import register_custom_function, unregister_custom_function
 from rdflib.plugins.sparql.sparql import SPARQLError
 
 from pyshacl.consts import SH
-from pyshacl.functions import SHACLFunction
 from pyshacl.errors import ReportableRuntimeError
+from pyshacl.functions import SHACLFunction
+
 from .js_executable import JSExecutable
 
+
 if typing.TYPE_CHECKING:
-    from pyshacl.pytypes import GraphLike
     from pyshacl.shapes_graph import ShapesGraph
 
 SH_JSFunction = SH.term('JSFunction')
+
 
 class JSFunction(SHACLFunction):
     __slots__ = ('js_exe',)
@@ -64,8 +67,3 @@ class JSFunction(SHACLFunction):
     def unapply(self, g):
         super(JSFunction, self).unapply(g)
         unregister_custom_function(self.node, self.execute_from_sparql)
-
-
-
-
-

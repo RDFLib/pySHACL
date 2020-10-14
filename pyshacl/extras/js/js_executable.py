@@ -1,10 +1,16 @@
 #
 #
 import typing
+
+from typing import Dict
+
 from rdflib import Literal
-from pyshacl.consts import SH, SH_jsLibrary, SH_jsFunctionName
+
+from pyshacl.consts import SH, SH_jsFunctionName, SH_jsLibrary
 from pyshacl.errors import ConstraintLoadError
+
 from .context import SHACLJSContext
+
 
 if typing.TYPE_CHECKING:
     from pyshacl.shapes_graph import ShapesGraph
@@ -43,7 +49,7 @@ class JSExecutable(object):
         self.fn_name = fn_name
         library_defs = shapes_graph.objects(node, SH_jsLibrary)
         seen_library_defs = []
-        libraries = {}
+        libraries: Dict = {}
         for libn in library_defs:
             # Library defs can only do two levels deep for now.
             # TODO: Make this recursive somehow to some further depth

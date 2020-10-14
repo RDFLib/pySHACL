@@ -1,13 +1,18 @@
 #
 #
 import typing
-from typing import List, Dict
+
+from typing import Dict, List
+
 from rdflib import Literal
+
 from pyshacl.constraints import ConstraintComponent
 from pyshacl.consts import SH, SH_js, SH_message
 from pyshacl.errors import ConstraintLoadError
 from pyshacl.pytypes import GraphLike
+
 from .js_executable import JSExecutable
+
 
 if typing.TYPE_CHECKING:
     from pyshacl.shape import Shape
@@ -28,8 +33,7 @@ class JSConstraintImpl(JSExecutable):
         for m in msgs_iter:
             if not isinstance(m, Literal):
                 raise ConstraintLoadError(
-                    "JSConstraint sh:message must be a RDF Literal.",
-                    "https://www.w3.org/TR/shacl-js/#js-constraints",
+                    "JSConstraint sh:message must be a RDF Literal.", "https://www.w3.org/TR/shacl-js/#js-constraints",
                 )
             if not isinstance(m.value, str):
                 raise ConstraintLoadError(
@@ -139,11 +143,14 @@ class JSConstraint(ConstraintComponent):
                             message = res.get('message', None)
                             if message is not None:
                                 msgs.append(Literal(message))
-                            reports.append(self.make_v_result(data_graph, f, value_node=val, result_path=path, extra_messages=msgs))
+                            reports.append(
+                                self.make_v_result(
+                                    data_graph, f, value_node=val, result_path=path, extra_messages=msgs
+                                )
+                            )
                 except Exception as e:
+                    print(e)
                     raise
                 if failed:
                     non_conformant = True
         return non_conformant, reports
-
-

@@ -5,24 +5,31 @@ https://www.w3.org/TR/shacl/#core-components-value-type
 """
 import abc
 import typing
-from typing import TYPE_CHECKING, Dict, Iterable, Tuple, List, Set, Optional, Any
+
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple
 
 import rdflib
 
 from rdflib import BNode, Literal, URIRef
 
 from pyshacl.consts import (
+    SH,
     RDF_type,
+    SH_ask,
     SH_focusNode,
+    SH_jsFunctionName,
+    SH_parameter,
+    SH_path,
     SH_resultMessage,
     SH_resultPath,
     SH_resultSeverity,
+    SH_select,
     SH_sourceConstraint,
     SH_sourceConstraintComponent,
     SH_sourceShape,
     SH_ValidationResult,
     SH_value,
-    SH_Violation, SH_parameter, SH_path, SH, SH_ask, SH_select, SH_jsFunctionName,
+    SH_Violation,
 )
 from pyshacl.errors import ConstraintLoadError
 from pyshacl.parameter import SHACLParameter
@@ -249,6 +256,7 @@ SH_SPARQLSelectValidator = SH.term('SPARQLSelectValidator')
 SH_SPARQLAskValidator = SH.term('SPARQLAskValidator')
 SH_JSValidator = SH.term('JSValidator')
 
+
 class CustomConstraintComponentFactory(object):
     __slots__: Tuple = tuple()
 
@@ -331,9 +339,11 @@ class CustomConstraintComponentFactory(object):
                     )
         if is_sparql_constraint_component:
             from pyshacl.constraints.sparql.sparql_based_constraint_components import SPARQLConstraintComponent
+
             return SPARQLConstraintComponent(*self)
         elif is_js_constraint_component and shacl_graph.js_enabled:
             from pyshacl.extras.js.constraint_component import JSConstraintComponent
+
             return JSConstraintComponent(*self)
         else:
             return CustomConstraintComponent(*self)

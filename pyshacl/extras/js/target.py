@@ -1,23 +1,26 @@
 #
 #
 import typing
-from typing import List, Dict
+
+from typing import Dict, List
 from warnings import warn
 
 from rdflib import URIRef
-from pyshacl.target import SHACLTargetType, BoundSHACLTargetType
-from pyshacl.consts import SH, SH_JSTarget, SH_JSTargetType
+
+from pyshacl.consts import SH_JSTargetType
+from pyshacl.errors import ShapeLoadError
+from pyshacl.target import BoundSHACLTargetType, SHACLTargetType
+
 from .js_executable import JSExecutable
-from ...errors import ShapeLoadError
+
 
 if typing.TYPE_CHECKING:
     from pyshacl.pytypes import GraphLike
-    from pyshacl.shapes_graph import ShapesGraph
     from pyshacl.shape import Shape
+    from pyshacl.shapes_graph import ShapesGraph
 
 
 class JSTarget(JSExecutable):
-
     def __init__(self, shapes_graph: 'ShapesGraph', exe_node):
         super(JSTarget, self).__init__(shapes_graph, exe_node)
 
@@ -74,13 +77,10 @@ class JSTargetType(SHACLTargetType):
                     "https://www.w3.org/TR/shacl-js/#JSTargetType",
                 )
             if len(vals) > 1:
-                warn(Warning("Found more than one value for {} on sh:target. Using just first one.".format(n)))
+                warn(Warning("Found more than one value for {} on sh:target. Using just first one.".format(name)))
             param_kv[name] = next(iter(vals))
         return param_kv
 
     def bind(self, shape, target_declaration):
         param_vals = self.check_params(target_declaration)
         return BoundJSTargetType(self, target_declaration, shape, param_vals)
-
-
-

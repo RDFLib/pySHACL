@@ -195,4 +195,3 @@ class SPARQLFunction(SHACLFunction):
     def unapply(self, g):
         super(SPARQLFunction, self).unapply(g)
         unregister_custom_function(self.node, self.execute_from_sparql)
-

@@ -1,12 +1,17 @@
 import pprint
-from rdflib import URIRef, BNode, Literal
-from rdflib.namespace import XSD
+
 from decimal import Decimal
+from typing import Union
+
 import pyduktape2
+
 from pyduktape2 import JSProxy
+from rdflib import BNode, Literal, URIRef
+from rdflib.namespace import XSD
+
+from pyshacl.errors import ReportableRuntimeError
 
 from . import load_into_context
-from ...errors import ReportableRuntimeError
 
 
 class URIRefNativeWrapper(object):
@@ -86,6 +91,7 @@ class GraphNativeWrapper(object):
     def __init__(self, g):
         self.inner = g
 
+
 class IteratorNativeWrapper(object):
     def __init__(self, it):
         self.it = it
@@ -93,13 +99,16 @@ class IteratorNativeWrapper(object):
     def it_next(self):
         return next(self.it)
 
+
 def _make_uriref(args):
     uri = getattr(args, '0')
     return URIRefNativeWrapper(uri)
 
+
 def _make_bnode(args):
     id_ = getattr(args, '0')
     return BNodeNativeWrapper(id_)
+
 
 def _make_literal(args):
     lexical, dtype, lang = getattr(args, '0'), getattr(args, '1'), getattr(args, '2')
@@ -109,6 +118,7 @@ def _make_literal(args):
             dtype = as_native
     return LiteralNativeWrapper(lexical, dtype, lang)
 
+
 def _native_node_equals(args):
     this, other = getattr(args, '0'), getattr(args, '1')
     if isinstance(this, (URIRefNativeWrapper, BNodeNativeWrapper, LiteralNativeWrapper)):
@@ -117,8 +127,9 @@ def _native_node_equals(args):
         other = other.inner
     return this == other
 
+
 def _native_graph_find(args):
-    #args are: g, s, p, o
+    # args are: g, s, p, o
     triple = [getattr(args, '0'), getattr(args, '1'), getattr(args, '2'), getattr(args, '3')]
     wrapped_triples = []
     for t in triple:
@@ -129,6 +140,7 @@ def _native_graph_find(args):
     g, s, p, o = wrapped_triples[:4]
     it = iter(g.triples((s, p, o)))
     return IteratorNativeWrapper(it)
+
 
 def _native_iterator_next(args):
     arg0 = getattr(args, "0")
@@ -149,6 +161,7 @@ def _native_iterator_next(args):
         else:
             raise RuntimeError("Bad item returned from iterator!")
     return wrapped_list
+
 
 def _pprint(args):
     arg0 = getattr(args, '0')
@@ -333,15 +346,18 @@ Graph.prototype.find = function(s, p, o) {
 '''
 
 
-
 class SHACLJSContext(object):
     __slots__ = ("context", "fns")
 
     def __init__(self, data_graph, *args, shapes_graph=None, **kwargs):
         context = pyduktape2.DuktapeContext()
         context.set_globals(
-            _pprint=_pprint, _make_uriref=_make_uriref, _make_bnode=_make_bnode, _make_literal=_make_literal,
-            _native_node_equals=_native_node_equals, _native_iterator_next=_native_iterator_next,
+            _pprint=_pprint,
+            _make_uriref=_make_uriref,
+            _make_bnode=_make_bnode,
+            _make_literal=_make_literal,
+            _native_node_equals=_native_node_equals,
+            _native_iterator_next=_native_iterator_next,
             _native_graph_find=_native_graph_find,
         )
         context.eval_js(printJs)
@@ -474,7 +490,9 @@ class SHACLJSContext(object):
                                     this_p = subkeys[1]
                                     this_o = subkeys[2]
                                 else:
-                                    raise ReportableRuntimeError("JS Function returned incorrect number of items in the array.")
+                                    raise ReportableRuntimeError(
+                                        "JS Function returned incorrect number of items in the array."
+                                    )
                             else:
                                 this_s = getattr(k, 'subject', None)
                                 this_p = getattr(k, 'predicate', None)
@@ -570,7 +588,7 @@ class SHACLJSContext(object):
         known_fn_args = self.fns[fn_name]  # type: tuple
         needed_args = []
         for k, v in args_map.items():
-            look_for = "$"+str(k)
+            look_for = "$" + str(k)
             positions = []
             start = 0
             while True:
@@ -579,7 +597,7 @@ class SHACLJSContext(object):
                     positions.append(pos)
                 except ValueError:
                     break
-                start = pos+1
+                start = pos + 1
             if not positions:
                 continue
             for p in positions:
@@ -589,7 +607,7 @@ class SHACLJSContext(object):
                 a = a[1:]
             if a not in args_map:
                 needed_args.append((i, a, None))
-        needed_args = [v for p,k,v in sorted(needed_args)]
+        needed_args = [v for p, k, v in sorted(needed_args)]
         return needed_args
 
     def run_js_function(self, fn_name, args, returns: list = None):
@@ -600,9 +618,11 @@ class SHACLJSContext(object):
         bind_dict = {}
         preamble = ""
         for i, a in enumerate(args):
-            arg_name = "fn_arg_"+str(i+1)
+            arg_name = "fn_arg_" + str(i + 1)
             if isinstance(a, URIRef):
-                wrapped_a = URIRefNativeWrapper(a)
+                wrapped_a: Union[URIRefNativeWrapper, BNodeNativeWrapper, LiteralNativeWrapper] = URIRefNativeWrapper(
+                    a
+                )
                 native_name = "_{}_native".format(arg_name)
                 preamble += "var {} = NamedNode.from_native({});\n".format(arg_name, native_name)
                 bind_dict[native_name] = wrapped_a
@@ -621,7 +641,7 @@ class SHACLJSContext(object):
             else:
                 bind_dict[arg_name] = a
 
-            args_string = args_string+arg_name+","
+            args_string = args_string + arg_name + ","
         c.set_globals(**bind_dict)
         args_string = args_string.rstrip(',')
         c.eval_js(preamble)

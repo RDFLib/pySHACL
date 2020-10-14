@@ -1,13 +1,20 @@
 #
 #
 import typing
-import regex
+
 from urllib import request
+
+import regex
+
+
 if typing.TYPE_CHECKING:
     from pyduktape2 import DuktapeContext
 
 JS_FN_RE1 = regex.compile(rb'function\s+([^ \n]+)\s*\((.*)\)\s*\{', regex.MULTILINE, regex.IGNORECASE)
-JS_FN_RE2 = regex.compile(rb'(?:let|const|var)\s+([^ \n]+)\s*=\s*function\s*\((.*)\)\s*\{', regex.MULTILINE, regex.IGNORECASE)
+JS_FN_RE2 = regex.compile(
+    rb'(?:let|const|var)\s+([^ \n]+)\s*=\s*function\s*\((.*)\)\s*\{', regex.MULTILINE, regex.IGNORECASE
+)
+
 
 def get_js_from_web(url: str):
     """
@@ -16,8 +23,9 @@ def get_js_from_web(url: str):
     :type url: str
     :return:
     """
-    headers = {'Accept': 'application/javascript, text/javascript, application/ecmascript, text/ecmascript,'
-                         'text/plain'}
+    headers = {
+        'Accept': 'application/javascript, text/javascript, application/ecmascript, text/ecmascript,' 'text/plain'
+    }
     r = request.Request(url, headers=headers)
     resp = request.urlopen(r)
     code = resp.getcode()
@@ -25,11 +33,13 @@ def get_js_from_web(url: str):
         raise RuntimeError("Cannot pull JS Library URL from the web: {}, code: {}".format(url, str(code)))
     return resp
 
+
 def get_js_from_file(filepath: str):
     if filepath.startswith("file://"):
         filepath = filepath[7:]
     f = open(filepath, "rb")
     return f
+
 
 def extract_functions(content):
     fns = {}

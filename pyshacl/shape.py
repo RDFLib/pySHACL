@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 #
 import logging
+
 from decimal import Decimal
-from typing import TYPE_CHECKING, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Set, Tuple, Type, Union
 
 from rdflib import RDF, BNode, Literal, URIRef
 
@@ -14,6 +15,9 @@ from .consts import (
     SH_deactivated,
     SH_description,
     SH_inversePath,
+    SH_jsFunctionName,
+    SH_JSTarget,
+    SH_JSTargetType,
     SH_message,
     SH_name,
     SH_oneOrMorePath,
@@ -30,14 +34,16 @@ from .consts import (
     SH_targetSubjectsOf,
     SH_Violation,
     SH_zeroOrMorePath,
-    SH_zeroOrOnePath, SH_jsFunctionName, SH_JSTarget, SH_JSTargetType,
+    SH_zeroOrOnePath,
 )
 from .errors import ConstraintLoadError, ConstraintLoadWarning, ReportableRuntimeError, ShapeLoadError
 from .helper import get_query_helper_cls
 from .pytypes import GraphLike
 
+
 if TYPE_CHECKING:
     from pyshacl.shapes_graph import ShapesGraph
+
 
 class Shape(object):
 
@@ -231,11 +237,12 @@ class Shape(object):
         custom_targets = set(self.sg.objects(self.node, SH_target))
         result_set = dict()
         if self.sg.js_enabled:
-            use_js = True
             from pyshacl.extras.js.target import JSTarget
+
+            use_JSTarget: Union[bool, Type] = JSTarget
         else:
-            use_js = False
-            JSTarget = object  # for linter
+            use_JSTarget = False
+
         for c in custom_targets:
             ct = dict()
             selects = list(self.sg.objects(c, SH_select))
@@ -250,9 +257,9 @@ class Shape(object):
                 qh.collect_prefixes()
                 ct['qh'] = qh
             elif has_fnname or (SH_JSTarget in is_types):
-                if use_js:
+                if use_JSTarget:
                     ct['type'] = SH_JSTarget
-                    ct['targeter'] = JSTarget(self.sg, c)
+                    ct['targeter'] = use_JSTarget(self.sg, c)
                 else:
                     #  Found JSTarget, but JS is not enabled in PySHACL. Ignore this target.
                     pass
@@ -515,6 +522,7 @@ class Shape(object):
             search_parameters = ALL_CONSTRAINT_PARAMETERS.copy()
             constraint_map = CONSTRAINT_PARAMETERS_MAP.copy()
             from pyshacl.extras.js.constraint import JSConstraint, SH_js
+
             search_parameters.append(SH_js)
             constraint_map[SH_js] = JSConstraint
         else:

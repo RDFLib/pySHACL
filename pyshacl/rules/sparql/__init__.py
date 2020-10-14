@@ -8,9 +8,11 @@ from rdflib.namespace import XSD
 
 from pyshacl.consts import SH_construct
 from pyshacl.errors import ReportableRuntimeError, RuleLoadError
-from pyshacl.rdfutil import clone_graph
 from pyshacl.helper import get_query_helper_cls
+from pyshacl.rdfutil import clone_graph
+
 from ..shacl_rule import SHACLRule
+
 
 if TYPE_CHECKING:
     from pyshacl.shape import Shape
@@ -65,5 +67,3 @@ class SPARQLRule(SHACLRule):
                 construct_graphs.add(results.graph)
         for g in construct_graphs:
             data_graph = clone_graph(g, target_graph=data_graph)
-
-

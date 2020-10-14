@@ -1,19 +1,19 @@
 #
 #
 import typing
-from rdflib.plugins.sparql.operators import register_custom_function, unregister_custom_function
-from rdflib.plugins.sparql.sparql import SPARQLError
 
 from pyshacl.consts import SH
 from pyshacl.rules.shacl_rule import SHACLRule
-from pyshacl.errors import ReportableRuntimeError
+
 from .js_executable import JSExecutable
 
+
 if typing.TYPE_CHECKING:
-    from pyshacl.shapes_graph import ShapesGraph
     from pyshacl.shape import Shape
+    from pyshacl.shapes_graph import ShapesGraph
 
 SH_JSRule = SH.term('JSRule')
+
 
 class JSRule(SHACLRule):
     __slots__ = ('js_exe',)
@@ -34,15 +34,10 @@ class JSRule(SHACLRule):
             if triples is not None and isinstance(triples, (list, tuple)):
                 set_to_add = set()
                 for t in triples:
-                    s,p,o = t[:3]
-                    set_to_add.add((s,p,o))
+                    s, p, o = t[:3]
+                    set_to_add.add((s, p, o))
                 sets_to_add.append(set_to_add)
         for s in sets_to_add:
             for t in s:
                 data_graph.add(t)
         return
-
-
-
-
-

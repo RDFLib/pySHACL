@@ -4,9 +4,9 @@ import warnings
 
 import rdflib
 
+from .constraints.constraint_component import CustomConstraintComponentFactory
 from .constraints.core.logical_constraints import SH_and, SH_not, SH_or, SH_xone
 from .constraints.core.shape_based_constraints import SH_qualifiedValueShape
-from .constraints.constraint_component import CustomConstraintComponentFactory
 from .consts import (
     SH,
     OWL_Class,
@@ -15,6 +15,7 @@ from .consts import (
     RDF_type,
     RDFS_Class,
     RDFS_subClassOf,
+    SH_ConstraintComponent,
     SH_node,
     SH_NodeShape,
     SH_path,
@@ -24,7 +25,6 @@ from .consts import (
     SH_targetNode,
     SH_targetObjectsOf,
     SH_targetSubjectsOf,
-    SH_ConstraintComponent
 )
 from .errors import ShapeLoadError
 from .shape import Shape

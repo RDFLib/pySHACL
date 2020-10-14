@@ -1,25 +1,32 @@
 #
 #
 import typing
-from typing import List, Dict, Tuple
+
+from typing import Any, Dict, List, Tuple, Union
+
 from rdflib import Literal
+
 from pyshacl.constraints import ConstraintComponent
 from pyshacl.constraints.constraint_component import CustomConstraintComponent
-from pyshacl.consts import SH, SH_message, SH_js, SH_jsLibrary, SH_jsFunctionName, SH_ConstraintComponent
-from pyshacl.errors import ConstraintLoadError, ValidationFailure, ReportableRuntimeError
+from pyshacl.consts import SH, SH_ConstraintComponent, SH_message
+from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
 from pyshacl.pytypes import GraphLike
+
 from .js_executable import JSExecutable
 
+
 if typing.TYPE_CHECKING:
-    from pyshacl.shapes_graph import ShapesGraph
     from pyshacl.shape import Shape
+    from pyshacl.shapes_graph import ShapesGraph
 
 
 SH_JSConstraint = SH.term('JSConstraint')
 SH_JSConstraintComponent = SH.term('JSConstraintComponent')
 
+
 class BoundShapeJSValidatorComponent(ConstraintComponent):
     invalid_parameter_names = {'this', 'shapesGraph', 'currentShape', 'path', 'PATH', 'value'}
+
     def __init__(self, constraint, shape: 'Shape', validator):
         """
         Create a new custom constraint, by applying a ConstraintComponent and a Validator to a Shape
@@ -33,8 +40,8 @@ class BoundShapeJSValidatorComponent(ConstraintComponent):
         super(BoundShapeJSValidatorComponent, self).__init__(shape)
         self.constraint = constraint
         self.validator = validator
-        self.param_bind_map = {}
-        self.messages = []
+        self.param_bind_map: Dict[str, Any] = {}
+        self.messages: List[Any] = []
         self.bind_params()
 
     def bind_params(self):
@@ -49,15 +56,13 @@ class BoundShapeJSValidatorComponent(ConstraintComponent):
             if len(shape_params) < 1:
                 if not p.optional:
                     # TODO:coverage: No test for this case
-                    raise ReportableRuntimeError(
-                        "Shape does not have mandatory parameter {}.".format(str(p.path())))
+                    raise ReportableRuntimeError("Shape does not have mandatory parameter {}.".format(str(p.path())))
                 continue
             # TODO: Can shapes have more than one value for the predicate?
             # Just use one for now.
             # TODO: Check for sh:class and sh:nodeKind on the found param value
             bind_map[name] = next(iter(shape_params))
         self.param_bind_map = bind_map
-
 
     @classmethod
     def constraint_parameters(cls):
@@ -142,10 +147,12 @@ class BoundShapeJSValidatorComponent(ConstraintComponent):
                         new_kwargs = rept_kwargs.copy()
                         new_kwargs['extra_messages'].extend(msgs)
                         reports.append(
-                            self.make_v_result(data_graph, f, value_node=val, result_path=path, **new_kwargs))
+                            self.make_v_result(data_graph, f, value_node=val, result_path=path, **new_kwargs)
+                        )
                 if failed:
                     non_conformant = True
         return (not non_conformant), reports
+
 
 class JSConstraintComponent(CustomConstraintComponent):
     """
@@ -184,7 +191,9 @@ class JSConstraintComponent(CustomConstraintComponent):
                 "https://www.w3.org/TR/shacl/#constraint-components-validators",
             )
         if is_property_val:
-            validator = JSConstraintComponentPathValidator(self.sg, validator_node)
+            validator: Union[
+                JSConstraintComponentValidator, JSConstraintComponentPathValidator
+            ] = JSConstraintComponentPathValidator(self.sg, validator_node)
         else:
             validator = JSConstraintComponentValidator(self.sg, validator_node)
         applied_validator = validator.apply_to_shape_via_constraint(self, shape)
@@ -253,19 +262,16 @@ class JSConstraintComponentValidator(JSExecutable):
         results = []
         for v in value_nodes:
             args_map = bind_vals.copy()
-            args_map.update({
-                'this': f,
-                'value': v
-            })
+            args_map.update({'this': f, 'value': v})
             try:
                 result_dict = self.execute(data_graph, args_map)
                 results.append((v, result_dict['_result']))
             except Exception as e:
+                print(e)
                 raise
         return results
 
-    def apply_to_shape_via_constraint(self, constraint, shape, **kwargs)\
-            -> BoundShapeJSValidatorComponent:
+    def apply_to_shape_via_constraint(self, constraint, shape, **kwargs) -> BoundShapeJSValidatorComponent:
         """
         Create a new Custom Constraint (BoundShapeValidatorComponent)
         :param constraint:
@@ -280,15 +286,15 @@ class JSConstraintComponentValidator(JSExecutable):
 
 
 class JSConstraintComponentPathValidator(JSConstraintComponentValidator):
-    validator_cache: Dict[Tuple[int, str], 'JSConstraintComponentPathValidator'] = {}
+    path_validator_cache: Dict[Tuple[int, str], 'JSConstraintComponentPathValidator'] = {}
 
     def __new__(cls, shacl_graph: 'ShapesGraph', node, *args, **kwargs):
         cache_key = (id(shacl_graph.graph), str(node))
-        found_in_cache = cls.validator_cache.get(cache_key, False)
+        found_in_cache = cls.path_validator_cache.get(cache_key, False)
         if found_in_cache:
             return found_in_cache
         self = super(JSConstraintComponentPathValidator, cls).__new__(cls, shacl_graph, node)
-        cls.validator_cache[cache_key] = self
+        cls.path_validator_cache[cache_key] = self
         return self
 
     def validate(self, f, value_nodes, path, data_graph, param_bind_vals, new_bind_vals=None):
@@ -305,15 +311,12 @@ class JSConstraintComponentPathValidator(JSConstraintComponentValidator):
         new_bind_vals = new_bind_vals or {}
         args_map = param_bind_vals.copy()
         args_map.update(new_bind_vals)
-        args_map.update({
-            'this': f,
-            'path': path
-        })
+        args_map.update({'this': f, 'path': path})
         results = []
         try:
             result_dict = self.execute(data_graph, args_map)
             results.append((f, result_dict['_result']))
         except Exception as e:
+            print(e)
             raise
         return results
-
