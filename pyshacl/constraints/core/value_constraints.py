@@ -19,8 +19,10 @@ from pyshacl.consts import (
     SH_BlankNode,
     SH_BlankNodeOrIRI,
     SH_BlankNodeORLiteral,
+    SH_datatype,
     SH_IRIOrLiteral,
     SH_Literal,
+    SH_nodeKind,
 )
 from pyshacl.errors import ConstraintLoadError
 from pyshacl.pytypes import GraphLike
@@ -37,8 +39,6 @@ XSD_time = XSD.term('time')
 XSD_dateTime = XSD.term('dateTime')
 
 SH_class = SH.term('class')
-SH_datatype = SH.term('datatype')
-SH_nodeKind = SH.term('nodeKind')
 SH_ClassConstraintComponent = SH.term('ClassConstraintComponent')
 SH_DatatypeConstraintComponent = SH.term('DatatypeConstraintComponent')
 SH_NodeKindConstraintComponent = SH.term('NodeKindConstraintComponent')

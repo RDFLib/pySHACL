@@ -6,6 +6,5 @@ include pyshacl/assets/*.pickle
 include pyshacl/*.spec
 include test/*.py
 include test/issues/*.py
-recursive-include test/resources *.ttl
+recursive-include test/resources *.ttl *.js
 recursive-include docs *.txt *.md
-

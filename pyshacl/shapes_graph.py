@@ -4,12 +4,9 @@ import warnings
 
 import rdflib
 
+from .constraints.constraint_component import CustomConstraintComponentFactory
 from .constraints.core.logical_constraints import SH_and, SH_not, SH_or, SH_xone
 from .constraints.core.shape_based_constraints import SH_qualifiedValueShape
-from .constraints.sparql.sparql_based_constraint_components import (
-    CustomConstraintComponentFactory,
-    SH_ConstraintComponent,
-)
 from .consts import (
     SH,
     OWL_Class,
@@ -18,6 +15,7 @@ from .consts import (
     RDF_type,
     RDFS_Class,
     RDFS_subClassOf,
+    SH_ConstraintComponent,
     SH_node,
     SH_NodeShape,
     SH_path,
@@ -55,7 +53,15 @@ class ShapesGraph(object):
         self._custom_constraints = None
         self._shacl_functions = {}
         self._shacl_target_types = {}
+        self._use_js = False
         self._add_system_triples()
+
+    def enable_js(self):
+        self._use_js = True
+
+    @property
+    def js_enabled(self):
+        return bool(self._use_js)
 
     def _add_system_triples(self):
         if isinstance(self.graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):

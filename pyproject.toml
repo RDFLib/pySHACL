@@ -4,7 +4,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "pyshacl"
-version = "0.13.3"
+version = "0.14.0"
 # Don't forget to change the version number in __init__.py along with this one
 description = "Python SHACL Validator"
 license = "Apache-2.0"
@@ -47,18 +47,21 @@ python = "^3.6"  # Compatible python versions must be declared here
 rdflib = "^5.0.0"
 rdflib-jsonld = "^0.5.0"
 owlrl = "^5.2.1"
+pyduktape2 = {version="^0.4.1", python=">=3.6", optional=true}
 
 [tool.poetry.dev-dependencies]
 coverage = "^4.5"
 pytest = "^5.0"
 pytest-cov = "^2.8.1"
 flake8 = "^3.7"
+pyduktape2 = {version="^0.4.1", python=">=3.6"}
 isort = {version="^5.0.0", python=">=3.6"}
 black = {version=">=18.9b0,<=19.10b0", python=">=3.6"}
 mypy = {version="^0.770.0", python=">=3.6"}
 
 
 [tool.poetry.extras]
+js = ["pyduktape2"]
 dev-lint = ["isort", "black", "flake8"]
 dev-type-checking = ["mypy"]
 
@@ -124,7 +127,7 @@ deps =
     py36: coveralls
 passenv = TRAVIS TRAVIS_JOB_ID TRAVIS_BRANCH
 skip_install = true
-commands_pre = poetry install -vvv
+commands_pre = poetry install -vvv --extras "js"
 commands =
     - poetry show
     poetry run pytest --cov=pyshacl test/

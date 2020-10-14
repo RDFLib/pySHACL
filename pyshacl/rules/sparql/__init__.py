@@ -8,9 +8,10 @@ from rdflib.namespace import XSD
 
 from pyshacl.consts import SH_construct
 from pyshacl.errors import ReportableRuntimeError, RuleLoadError
+from pyshacl.helper import get_query_helper_cls
 from pyshacl.rdfutil import clone_graph
-from pyshacl.rules.shacl_rule import SHACLRule
-from pyshacl.sparql_query_helper import SPARQLQueryHelper
+
+from ..shacl_rule import SHACLRule
 
 
 if TYPE_CHECKING:
@@ -43,6 +44,7 @@ class SPARQLRule(SHACLRule):
                     "SPARQLRule sh:construct must be an xsd:string", "https://www.w3.org/TR/shacl-af/#SPARQLRule"
                 )
             self._constructs.append(str(c.value))
+        SPARQLQueryHelper = get_query_helper_cls()
         query_helper = SPARQLQueryHelper(self.shape, self.node, None, deactivated=self._deactivated)
         query_helper.collect_prefixes()
         self._qh = query_helper
@@ -51,6 +53,7 @@ class SPARQLRule(SHACLRule):
         focus_nodes = self.shape.focus_nodes(data_graph)  # uses target nodes to find focus nodes
         applicable_nodes = self.filter_conditions(focus_nodes, data_graph)
         construct_graphs = set()
+        SPARQLQueryHelper = get_query_helper_cls()
         for a in applicable_nodes:
             for c in self._constructs:
                 init_bindings = {}

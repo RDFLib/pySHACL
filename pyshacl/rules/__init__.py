@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type, Union
 
 from pyshacl.consts import RDF_type, SH_rule, SH_SPARQLRule, SH_TripleRule
 from pyshacl.errors import RuleLoadError
@@ -15,8 +15,6 @@ if TYPE_CHECKING:
 
     from .shacl_rule import SHACLRule
 
-ALL_SPARQL_RULES = [TripleRule, SPARQLRule]
-
 
 def gather_rules(shacl_graph: 'ShapesGraph') -> Dict['Shape', List['SHACLRule']]:
     """
@@ -28,11 +26,29 @@ def gather_rules(shacl_graph: 'ShapesGraph') -> Dict['Shape', List['SHACLRule']]
     """
     triple_rule_nodes = set(shacl_graph.subjects(RDF_type, SH_TripleRule))
     sparql_rule_nodes = set(shacl_graph.subjects(RDF_type, SH_SPARQLRule))
+    if shacl_graph.js_enabled:
+        from pyshacl.extras.js.rules import JSRule, SH_JSRule
+
+        js_rule_nodes = set(shacl_graph.subjects(RDF_type, SH_JSRule))
+        use_JSRule: Union[bool, Type] = JSRule
+    else:
+        use_JSRule = False
+        js_rule_nodes = set()
     overlaps = triple_rule_nodes.intersection(sparql_rule_nodes)
     if len(overlaps) > 0:
         raise RuleLoadError(
             "A SHACL Rule cannot be both a TripleRule and a SPARQLRule.",
             "https://www.w3.org/TR/shacl-af/#rules-syntax",
+        )
+    overlaps = triple_rule_nodes.intersection(js_rule_nodes)
+    if len(overlaps) > 0:
+        raise RuleLoadError(
+            "A SHACL Rule cannot be both a TripleRule and a JSRule.", "https://www.w3.org/TR/shacl-af/#rules-syntax",
+        )
+    overlaps = sparql_rule_nodes.intersection(js_rule_nodes)
+    if len(overlaps) > 0:
+        raise RuleLoadError(
+            "A SHACL Rule cannot be both a SPARQLRule and a JSRule.", "https://www.w3.org/TR/shacl-af/#rules-syntax",
         )
     used_rules = shacl_graph.subject_objects(SH_rule)
     ret_rules = defaultdict(list)
@@ -48,6 +64,8 @@ def gather_rules(shacl_graph: 'ShapesGraph') -> Dict['Shape', List['SHACLRule']]
             rule: SHACLRule = TripleRule(shape, obj)
         elif obj in sparql_rule_nodes:
             rule = SPARQLRule(shape, obj)
+        elif use_JSRule and callable(use_JSRule) and obj in js_rule_nodes:
+            rule = use_JSRule(shape, obj)
         else:
             raise RuleLoadError(
                 "when using sh:rule, the Rule must be defined as either a TripleRule or SPARQLRule.",

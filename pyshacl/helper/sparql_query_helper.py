@@ -10,7 +10,7 @@ import rdflib
 
 from rdflib import RDF, XSD
 
-from .consts import (
+from ..consts import (
     SH,
     OWL_Ontology,
     RDF_type,
@@ -23,7 +23,7 @@ from .consts import (
     SH_zeroOrMorePath,
     SH_zeroOrOnePath,
 )
-from .errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
+from ..errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
 
 
 SH_declare = SH.term('declare')
@@ -43,6 +43,7 @@ class SPARQLQueryHelper(object):
         r"SELECT[\s\(\)\$\?\a-z]*\{[^\}]*SELECT\s+((?:(?:[\?\$]\w+\s+)|(?:\*\s+))+)", flags=re.M | re.I
     )
     has_as_var_regex = re.compile(r"[^\w]+AS[\s]+[\$\?](\w+)", flags=re.M | re.I)
+    find_msg_subs = re.compile(r"({[\$\?](.+)})", flags=re.M)
 
     def __init__(self, shape, node, select_text, parameters=None, messages=None, deactivated=False):
         self._shape = None
@@ -98,28 +99,28 @@ class SPARQLQueryHelper(object):
             bind_map[name] = next(iter(shape_params))
         self.param_bind_map = bind_map
 
-    def bind_messages(self):
+    def bind_messages(self, param_map=None):
         # must call bind_params _before_ bind_messages
-        message_var_finder = re.compile(r"([\s()\"\'])\{[\$\?](\w+)\}", flags=re.M)
-        param_bind_map = self.param_bind_map
+        if param_map is None:
+            param_map = self.param_bind_map
         var_replacers = {}
         bound_messages = set()
         for m in self.unbound_messages:
             m_val = str(m.value)
-            finds = message_var_finder.findall(m_val)
+            finds = self.find_msg_subs.findall(m_val)
             if len(finds) < 1:
                 bound_messages.add(m)
                 continue
             for f in finds:
                 variable = f[1]
-                if variable not in param_bind_map.keys():
+                if variable not in param_map.keys():
                     continue
                 try:
                     replacer = var_replacers[variable]
                 except KeyError:
-                    replacer = re.compile(r"([\s()\"\'])\{[\$\?]" + f[1] + r"\}", flags=re.M)
+                    replacer = re.compile(r"{[\$\?]" + variable + r"}", flags=re.M)
                     var_replacers[variable] = replacer
-                m_val = replacer.sub(r"\g<1>{}".format(param_bind_map[variable].value), m_val, 1)
+                m_val = replacer.sub(str(param_map[variable].value), m_val, 1)
             bound_messages.add(rdflib.Literal(m_val, lang=m.language, datatype=m.datatype))
         self.bound_messages = bound_messages
 

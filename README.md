@@ -34,7 +34,7 @@ $ deactivate
 For command line use:
 _(these example commandline instructions are for a Linux/Unix based OS)_
 ```bash
-pyshacl -s /path/to/shapesGraph.ttl -m -i rdfs -a -f human /path/to/dataGraph.ttl
+pyshacl -s /path/to/shapesGraph.ttl -m -i rdfs -a -j -f human /path/to/dataGraph.ttl
 ```
 Where
  - `-s` is an (optional) path to the shapes graph to use
@@ -43,6 +43,7 @@ Where
  - `-f` is the ValidationReport output format (`human` = human-readable validation report)
  - `-m` enable the meta-shacl feature
  - `-a` enable SHACL Advanced Features
+ - `-j` enable SHACL-JS Features (if `pyhsacl[js]` is installed)
 
 System exit codes are:
 `0` = DataGraph is Conformant
@@ -53,7 +54,7 @@ System exit codes are:
 Full CLI Usage options:
 ```bash
 usage: pyshacl [-h] [-s [SHACL]] [-e [ONT]] [-i {none,rdfs,owlrl,both}] [-m]
-               [--imports] [--abort] [-a] [-d] [-f {human,turtle,xml,json-ld,nt,n3}]
+               [--imports] [--abort] [-a] [-j] [-d] [-f {human,turtle,xml,json-ld,nt,n3}]
                [-df {auto,turtle,xml,json-ld,nt,n3}]
                [-sf {auto,turtle,xml,json-ld,nt,n3}]
                [-ef {auto,turtle,xml,json-ld,nt,n3}] [-V] [-o [OUTPUT]]
@@ -80,6 +81,7 @@ optional arguments:
   --imports             Allow import of sub-graphs defined in statements with
                         owl:imports.
   -a, --advanced        Enable support for SHACL Advanced Features.
+  -j, --js              Enable support for SHACL-JS Features.
   --abort               Abort on first error.
   -d, --debug           Output additional runtime messages, including violations that didn\'t
                         lead to non-conformance.
@@ -104,7 +106,7 @@ For basic use of this module, you can just call the `validate` function of the `
 
 ```
 from pyshacl import validate
-r = validate(data_graph, shacl_graph=sg, ont_graph=og, inference='rdfs', abort_on_error=False, meta_shacl=False, advanced=False, debug=False)
+r = validate(data_graph, shacl_graph=sg, ont_graph=og, inference='rdfs', abort_on_error=False, meta_shacl=False, advanced=False, js=False, debug=False)
 conforms, results_graph, results_text = r
 ```
 
@@ -117,6 +119,7 @@ Options are 'rdfs', 'owlrl', 'both', or 'none'. The default is 'none'.
 * `abort_on_error` (optional) a Python `bool` value to indicate whether or not the program should abort after encountering a validation error or to continue. Default is to continue.
 * `meta_shacl` (optional) a Python `bool` value to indicate whether or not the program should enable the Meta-SHACL feature. Default is False.
 * `advanced`: (optional) a Python `bool` value to enable SHACL Advanced Features
+* `js`: (optional) a Python `bool` value to enable SHACL-JS Features (if `pyshacl[js]` is installed)
 * `debug` (optional) a Python `bool` value to indicate whether or not the program should emit debugging output text, including violations that didn't lead to non-conformance overall. So when debug is True don't judge conformance by absense of violation messages. Default is False.
 
 Some other optional keyword variables available available on the `validate` function:

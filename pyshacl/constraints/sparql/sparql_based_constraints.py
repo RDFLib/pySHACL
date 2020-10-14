@@ -9,8 +9,8 @@ import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH, SH_deactivated, SH_message, SH_select
 from pyshacl.errors import ConstraintLoadError, ValidationFailure
+from pyshacl.helper import get_query_helper_cls
 from pyshacl.pytypes import GraphLike
-from pyshacl.sparql_query_helper import SPARQLQueryHelper
 
 
 SH_sparql = SH.term('sparql')
@@ -73,6 +73,7 @@ class SPARQLBasedConstraint(ConstraintComponent):
                         "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent",
                     )
                 deact = bool(deactivated.value)
+            SPARQLQueryHelper = get_query_helper_cls()
             query_helper = SPARQLQueryHelper(self.shape, s, select_node.value, messages=msgs, deactivated=deact)
             query_helper.collect_prefixes()
             sparql_constraints.add(query_helper)
