@@ -80,8 +80,9 @@ version = "4.5.4"
 [[package]]
 category = "main"
 description = "The Cython compiler for writing C extensions for the Python language."
+marker = "python_version >= \"3.6\""
 name = "cython"
-optional = true
+optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 version = "0.29.21"
 
@@ -253,8 +254,9 @@ version = "2.6.0"
 [[package]]
 category = "main"
 description = "Python integration for the Duktape Javascript interpreter"
+marker = "python_version >= \"3.6\""
 name = "pyduktape2"
-optional = true
+optional = false
 python-versions = "*"
 version = "0.4.1"
 
@@ -419,7 +421,7 @@ dev-type-checking = []
 js = ["pyduktape2"]
 
 [metadata]
-content-hash = "aa9587d8256b5b2fe98784e5f9ebec5a83ec213201374cd0f024280ba0ae7ac1"
+content-hash = "f18f78fa2063744efb8014dd0f5554f12f8946a8e663d384ee4e794366996c15"
 python-versions = "^3.6"  # Compatible python versions must be declared here
 
 [metadata.files]

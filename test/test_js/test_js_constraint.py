@@ -13,7 +13,7 @@ ex:LanguageExampleShape
 	sh:js [
 		a sh:JSConstraint ;
 		sh:message "Values are literals with German language tag." ;
-		sh:jsLibrary [ sh:jsLibraryURL "file://resources/js/germanLabel.js" ] ;
+		sh:jsLibrary [ sh:jsLibraryURL "file://test/resources/js/germanLabel.js" ] ;
 		sh:jsFunctionName "validateGermanLabel" ;
 	] .
 '''

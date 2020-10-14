@@ -69,7 +69,7 @@ ex:multiply
     sh:description "The second operand" ;
   ] ;
   sh:returnType xsd:integer ;
-  sh:jsLibrary [ sh:jsLibraryURL "file://resources/js/multiply.js" ] ;
+  sh:jsLibrary [ sh:jsLibraryURL "file://test/resources/js/multiply.js" ] ;
   sh:jsFunctionName "multiply" ;
 .
 '''
