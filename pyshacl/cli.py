@@ -68,6 +68,14 @@ parser.add_argument(
     default=False,
     help='Enable features from the SHACL Advanced Features specification.',
 )
+parser.add_argument(
+    '-j',
+    '--js',
+    dest='js',
+    action='store_true',
+    default=False,
+    help='Enable features from the SHACL-JS Specification.',
+)
 parser.add_argument('--abort', dest='abort', action='store_true', default=False, help='Abort on first error.')
 parser.add_argument(
     '-d', '--debug', dest='debug', action='store_true', default=False, help='Output additional runtime messages.'
@@ -141,6 +149,8 @@ def main():
         validator_kwargs['meta_shacl'] = True
     if args.advanced:
         validator_kwargs['advanced'] = True
+    if args.js:
+        validator_kwargs['js'] = True
     if args.abort:
         validator_kwargs['abort_on_error'] = True
     if args.shacl_file_format:

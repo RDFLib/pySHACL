@@ -8,8 +8,7 @@ import pkg_resources
 from pkg_resources import DistributionNotFound, UnknownExtra
 
 
-dev_mode = True
-
+dev_mode = False
 
 @lru_cache()
 def check_extra_installed(extra_name: str):
