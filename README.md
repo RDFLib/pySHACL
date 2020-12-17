@@ -34,7 +34,7 @@ $ deactivate
 For command line use:
 _(these example commandline instructions are for a Linux/Unix based OS)_
 ```bash
-pyshacl -s /path/to/shapesGraph.ttl -m -i rdfs -a -j -f human /path/to/dataGraph.ttl
+$ pyshacl -s /path/to/shapesGraph.ttl -m -i rdfs -a -j -f human /path/to/dataGraph.ttl
 ```
 Where
  - `-s` is an (optional) path to the shapes graph to use
@@ -53,6 +53,8 @@ System exit codes are:
 
 Full CLI Usage options:
 ```bash
+$ pyshacl -h
+$ python3 -m pyshacl -h
 usage: pyshacl [-h] [-s [SHACL]] [-e [ONT]] [-i {none,rdfs,owlrl,both}] [-m]
                [--imports] [--abort] [-a] [-j] [-d] [-f {human,turtle,xml,json-ld,nt,n3}]
                [-df {auto,turtle,xml,json-ld,nt,n3}]
@@ -104,9 +106,17 @@ optional arguments:
 ## Python Module Use
 For basic use of this module, you can just call the `validate` function of the `pyshacl` module like this:
 
-```
+```python
 from pyshacl import validate
-r = validate(data_graph, shacl_graph=sg, ont_graph=og, inference='rdfs', abort_on_error=False, meta_shacl=False, advanced=False, js=False, debug=False)
+r = validate(data_graph,
+      shacl_graph=sg,
+      ont_graph=og,
+      inference='rdfs',
+      abort_on_error=False,
+      meta_shacl=False,
+      advanced=False,
+      js=False,
+      debug=False)
 conforms, results_graph, results_text = r
 ```
 
@@ -142,7 +152,9 @@ Return value:
 
 You can get an equivalent of the Command Line Tool using the Python3 executable by doing:
 
-`python3 -m pyshacl`
+```bash
+$ python3 -m pyshacl
+```
 
 
 ## Errors
@@ -174,9 +186,9 @@ pySHACL Command Line utility. See above for the pySHACL command line util usage 
 See [the PyInstaller installation guide](https://pyinstaller.readthedocs.io/en/stable/installation.html#installing-in-windows) for info on how to install PyInstaller for Windows.
 
 Once you have pyinstaller, use pyinstaller to generate the ``pyshacl.exe`` CLI file like so:
-```
-    $ cd src/pyshacl
-    $ pyinstaller pyshacl-cli.spec
+```bash powershell
+$ cd src/pyshacl
+$ pyinstaller pyshacl-cli.spec
 ```
 This will output ``pyshacl.exe`` in the ``dist`` directory in ``src/pyshacl``.
 
