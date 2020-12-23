@@ -67,6 +67,8 @@ class Validator(object):
     def _load_default_options(cls, options_dict: dict):
         options_dict.setdefault('advanced', False)
         options_dict.setdefault('inference', 'none')
+        options_dict.setdefault('inplace', False)
+        options_dict.setdefault('use_js', False)
         options_dict.setdefault('abort_on_error', False)
         if 'logger' not in options_dict:
             options_dict['logger'] = logging.getLogger(__name__)
@@ -79,8 +81,11 @@ class Validator(object):
         Note, this is the OWL/RDFS pre-inference,
         it is not the Advanced Spec SHACL-Rule inferencing step.
         :param target_graph:
+        :type target_graph: rdflib.Graph|rdflib.ConjunctiveGraph|rdflib.Dataset
         :param inference_option:
+        :type inference_option: str
         :return:
+        :rtype: NoneType
         """
         if logger is None:
             logger = logging.getLogger(__name__)
@@ -167,6 +172,7 @@ class Validator(object):
         self.options = options  # type: dict
         self.logger = options['logger']  # type: logging.Logger
         self.pre_inferenced = kwargs.pop('pre_inferenced', False)
+        self.inplace = options['inplace']
         if not isinstance(data_graph, rdflib.Graph):
             raise RuntimeError("data_graph must be a rdflib Graph object")
         self.data_graph = data_graph
@@ -180,7 +186,8 @@ class Validator(object):
             shacl_graph = clone_graph(data_graph, identifier='shacl')
         assert isinstance(shacl_graph, rdflib.Graph), "shacl_graph must be a rdflib Graph object"
         self.shacl_graph = ShapesGraph(shacl_graph, self.logger)
-        if self.options.get('use_js', None):
+
+        if options['use_js']:
             is_js_installed = check_extra_installed('js')
             if is_js_installed:
                 self.shacl_graph.enable_js()
@@ -191,23 +198,27 @@ class Validator(object):
 
     def mix_in_ontology(self):
         if not self.data_graph_is_multigraph:
-            return mix_graphs(self.data_graph, self.ont_graph)
-        return mix_datasets(self.data_graph, self.ont_graph)
+            return mix_graphs(self.data_graph, self.ont_graph, "inplace" if self.inplace else None)
+        return mix_datasets(self.data_graph, self.ont_graph, "inplace" if self.inplace else None)
 
     def run(self):
-        if self.ont_graph is not None:
-            # creates a copy of self.data_graph, doesn't modify it
-            the_target_graph = self.mix_in_ontology()
+        if self.target_graph is not None:
+            the_target_graph = self.target_graph
         else:
-            the_target_graph = self.data_graph
-        inference_option = self.options.get('inference', 'none')
-        if inference_option:
-            if self.pre_inferenced:
-                the_target_graph = self._target_graph
-            elif str(inference_option) != "none":
+            has_cloned = False
+            if self.ont_graph is not None:
+                # creates a copy of self.data_graph, doesn't modify it
+                the_target_graph = self.mix_in_ontology()
+                has_cloned = True
+            else:
+                the_target_graph = self.data_graph
+            inference_option = self.options.get('inference', 'none')
+            if inference_option and not self.pre_inferenced and str(inference_option) != "none":
+                if not has_cloned and not self.inplace:
+                    the_target_graph = clone_graph(the_target_graph)
                 self._run_pre_inference(the_target_graph, inference_option, self.logger)
                 self.pre_inferenced = True
-        self._target_graph = the_target_graph
+            self._target_graph = the_target_graph
 
         shapes = self.shacl_graph.shapes  # This property getter triggers shapes harvest.
 
@@ -304,6 +315,7 @@ def validate(
     ont_graph: Optional[Union[GraphLike, str, bytes]] = None,
     advanced: Optional[bool] = False,
     inference: Optional[str] = None,
+    inplace: Optional[bool] = False,
     abort_on_error: Optional[bool] = False,
     **kwargs,
 ):
@@ -321,6 +333,8 @@ def validate(
     :type advanced: bool | None
     :param inference: One of "rdfs", "owlrl", "both", "none", or None
     :type inference: str | None
+    :param inplace: If this is enabled, do not clone the datagraph, manipulate it inplace
+    :type inplace: bool
     :param abort_on_error:
     :type abort_on_error: bool | None
     :param kwargs:
@@ -366,6 +380,7 @@ def validate(
             ont_graph=ont_graph,
             options={
                 'inference': inference,
+                'inplace': inplace,
                 'abort_on_error': abort_on_error,
                 'advanced': advanced,
                 'use_js': use_js,
@@ -576,6 +591,10 @@ def check_dash_result(validator: Validator, report_graph: GraphLike, expected_re
         gv_res = None
     if len(inf_test_cases) > 0:
         data_graph = validator.target_graph
+        if isinstance(data_graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
+            named_graphs = list(data_graph.contexts())
+        else:
+            named_graphs = [data_graph]
         inf_res: Union[bool, None] = True
         for test_case in inf_test_cases:
             expected_results = expected_result_graph.objects(test_case, DASH_expectedResult)
@@ -584,7 +603,10 @@ def check_dash_result(validator: Validator, report_graph: GraphLike, expected_re
                 raise ReportableRuntimeError(
                     "Cannot check the expected result, the given InferencingTestCase does not have an expectedResult."
                 )
-            inf_res = inf_res and compare_inferencing_reports(data_graph, expected_result_graph, expected_results)
+            found = False
+            for g in named_graphs:
+                found = found or compare_inferencing_reports(g, expected_result_graph, expected_results)
+            inf_res = inf_res and found
     else:
         inf_res = None
     if len(fn_test_cases) > 0:

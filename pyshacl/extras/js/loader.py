@@ -4,15 +4,19 @@ import typing
 
 from urllib import request
 
-import regex
 
+try:
+    import regex
+except ImportError:
+    import re
+    regex = re
 
 if typing.TYPE_CHECKING:
     from pyduktape2 import DuktapeContext
 
-JS_FN_RE1 = regex.compile(rb'function\s+([^ \n]+)\s*\((.*)\)\s*\{', regex.MULTILINE, regex.IGNORECASE)
+JS_FN_RE1 = regex.compile(rb'function\s+([^ \n]+)\s*\((.*)\)\s*\{', regex.MULTILINE | regex.IGNORECASE)
 JS_FN_RE2 = regex.compile(
-    rb'(?:let|const|var)\s+([^ \n]+)\s*=\s*function\s*\((.*)\)\s*\{', regex.MULTILINE, regex.IGNORECASE
+    rb'(?:let|const|var)\s+([^ \n]+)\s*=\s*function\s*\((.*)\)\s*\{', regex.MULTILINE | regex.IGNORECASE
 )
 
 

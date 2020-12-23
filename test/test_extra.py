@@ -6,7 +6,7 @@
 # are added as required.
 import os
 import re
-
+from rdflib import Graph
 from pyshacl import validate
 from pyshacl.errors import ReportableRuntimeError
 
@@ -124,12 +124,28 @@ ex:Pet1 rdf:type exOnt:Goanna ;
 """
 
 def test_validate_with_ontology():
-    res = validate(data_file_text, shacl_graph=shacl_file_text,
-                   data_graph_format='turtle', shacl_graph_format='turtle',
-                   ont_graph=ontology_file_text,  ont_graph_format="turtle",
-                   inference='both', debug=True)
+    g = Graph().parse(data=data_file_text, format='turtle')
+    e = Graph().parse(data=ontology_file_text, format='turtle')
+    g_len = len(g)
+    res = validate(g, shacl_graph=shacl_file_text,
+                   shacl_graph_format='turtle',
+                   ont_graph=e, inference='both', debug=True)
     conforms, graph, string = res
+    g_len2 = len(g)
     assert conforms
+    assert g_len2 == g_len
+
+def test_validate_with_ontology_inplace():
+    g = Graph().parse(data=data_file_text, format='turtle')
+    e = Graph().parse(data=ontology_file_text, format='turtle')
+    g_len = len(g)
+    res = validate(g, shacl_graph=shacl_file_text,
+                   shacl_graph_format='turtle',
+                   ont_graph=e, inference='both', debug=True, inplace=True)
+    conforms, graph, string = res
+    g_len2 = len(g)
+    assert conforms
+    assert g_len2 != g_len
 
 def test_validate_with_ontology_fail1():
     res = validate(data_file_text_bad, shacl_graph=shacl_file_text,

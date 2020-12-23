@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [0.14.1] - 2020-12-23
+
+## Added
+- Inplace Mode, for when cloning your datagraph is undesirable
+  - Normally pyshacl will create an in-memory copy of your datagraph before modifying it (when using ontology mixin, or inferencing features)
+  - This might be unwanted if your datagraph is very large or remote and cloning it into memory is not a good option
+  - Enabling inplace mode will bypass this clone step, and apply modification operations directly on your data_graph (use with caution!)
+  - Enable with `inplace=True` kwarg on `validate()`.
+  - Inplace mode is not yet available via the CLI application, and perhaps doesn't even make sense to have it available there.
+
+## Fixed
+- Inferencing will no longer incorrectly place expanded triples into your original data_graph, unless you enable 'inplace'
+- SHACL-JS loader will no longer fail if the `regex` module is not installed (it will fall back to using builtin `re`)
+- SHACL-Rule DASH-tests will now pass when the SHACL-rule is applied on multigraph (Dataset or ConjunctiveGraph)
+
+
 ## [0.14.0] - 2020-10-14
 
 ## Added
@@ -694,7 +710,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.14.1...HEAD
+[0.14.1]: https://github.com/RDFLib/pySHACL/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/RDFLib/pySHACL/compare/v0.13.3...v0.14.0
 [0.13.3]: https://github.com/RDFLib/pySHACL/compare/v0.13.2...v0.13.3
 [0.13.2]: https://github.com/RDFLib/pySHACL/compare/v0.13.1...v0.13.2

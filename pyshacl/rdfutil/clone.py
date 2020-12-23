@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-from typing import Optional
+from typing import Optional, Union
 
 import rdflib
 
@@ -62,34 +62,58 @@ def clone_graph(source_graph, target_graph=None, identifier=None):
     return g
 
 
-def mix_datasets(base_ds: ConjunctiveLike, extra_ds: GraphLike, target_ds: Optional[ConjunctiveLike] = None):
+def mix_datasets(base_ds: ConjunctiveLike, extra_ds: GraphLike, target_ds: Optional[Union[ConjunctiveLike, str]] = None):
+    """
+    Make a clone of base_ds (dataset) and add in the triples from extra_ds (dataset)
+    :param base_ds:
+    :type base_ds: rdflib.Dataset
+    :param extra_ds:
+    :type extra_ds: rdflib.Dataset
+    :param target_ds:
+    :type target_ds: rdflib.Dataset|str|NoneType
+    :return: The cloned Dataset with mixed in triples from extra_ds
+    :rtype: rdflib.Dataset
+    """
     default_union = base_ds.default_union
     base_named_graphs = list(base_ds.contexts())
     if target_ds is None:
         target_ds = rdflib.Dataset(default_union=default_union)
+    elif target_ds == "inplace":
+        pass  # do nothing here
     elif not isinstance(target_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
         raise RuntimeError("Cannot mix datasets if target_ds passed in is not a Dataset itself.")
     if isinstance(extra_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
         mixin_graphs = list(extra_ds.contexts())
     else:
         mixin_graphs = [extra_ds]
-    mixed_graphs = {}
-    for mg in mixin_graphs:
-        mod_named_graphs = {
-            g.identifier: mix_graphs(g, mg, target_graph=rdflib.Graph(store=target_ds.store, identifier=g.identifier))
-            for g in base_named_graphs
-        }
-        mixed_graphs.update(mod_named_graphs)
-    default_context_id = target_ds.default_context.identifier
-    for i, m in mixed_graphs.items():
-        if i == default_context_id:
-            target_ds.store.remove_graph(target_ds.default_context)
-            target_ds.default_context = m
-        target_ds.add_graph(m)
+    if target_ds == "inplace":
+        target_ds = base_ds
+        for mg in mixin_graphs:
+            mod_named_graphs = {
+                g.identifier: mix_graphs(g, mg, target_graph="inplace")
+                for g in base_named_graphs
+            }
+    elif isinstance(target_ds, str):
+        raise RuntimeError("target_ds cannot be a string (unless it is 'inplace')")
+    else:
+
+        mixed_graphs = {}
+        for mg in mixin_graphs:
+            mod_named_graphs = {
+                g.identifier: mix_graphs(g, mg, target_graph=rdflib.Graph(store=target_ds.store, identifier=g.identifier))
+                for g in base_named_graphs
+            }
+            mixed_graphs.update(mod_named_graphs)
+        default_context_id = target_ds.default_context.identifier
+        for i, m in mixed_graphs.items():
+            if i == default_context_id:
+                target_ds.store.remove_graph(target_ds.default_context)
+                target_ds.default_context = m
+            target_ds.add_graph(m)
     return target_ds
 
 
-def mix_graphs(base_graph: GraphLike, extra_graph: GraphLike, target_graph: Optional[ConjunctiveLike] = None):
+def mix_graphs(base_graph: GraphLike, extra_graph: GraphLike, target_graph: Optional[Union[GraphLike, str]] = None):
     """
     Make a clone of base_graph and add in the triples from extra_graph
     :param base_graph:
@@ -97,7 +121,7 @@ def mix_graphs(base_graph: GraphLike, extra_graph: GraphLike, target_graph: Opti
     :param extra_graph:
     :type extra_graph: rdflib.Graph
     :param target_graph:
-    :type target_graph: rdflib.Graph
+    :type target_graph: rdflib.Graph|str|NoneType
     :return: The cloned graph with mixed in triples from extra_graph
     :rtype: rdflib.Graph
     """
@@ -105,6 +129,11 @@ def mix_graphs(base_graph: GraphLike, extra_graph: GraphLike, target_graph: Opti
         return mix_datasets(base_graph, extra_graph, target_ds=target_graph)
     if target_graph is None:
         g = clone_graph(base_graph, target_graph=None, identifier=base_graph.identifier)
+    elif target_graph == "inplace":
+        # Special case, don't clone the basegraph, just put extra straight in
+        g = base_graph
+    elif isinstance(target_graph, str):
+        raise RuntimeError("target_graph cannot be a string (unless it is 'inplace')")
     else:
         g = clone_graph(base_graph, target_graph=target_graph)
     g = clone_graph(extra_graph, target_graph=g)

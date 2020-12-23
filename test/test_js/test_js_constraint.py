@@ -1,5 +1,5 @@
 from rdflib import Graph
-from pyshacl import validate
+from pyshacl import validate, extras
 shapes_graph = '''\
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -30,6 +30,8 @@ ex:ValidCountry a ex:Country ;
 ex:InvalidCountry a ex:Country ;
 	ex:germanLabel "Spain"@en .
 '''
+
+extras.dev_mode = True
 
 def test_js_constraint():
     s1 = Graph().parse(data=shapes_graph, format="turtle")
