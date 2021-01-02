@@ -5,17 +5,14 @@ import typing
 from rdflib.plugins.sparql.operators import register_custom_function, unregister_custom_function
 from rdflib.plugins.sparql.sparql import SPARQLError
 
-from pyshacl.consts import SH
 from pyshacl.errors import ReportableRuntimeError
-from pyshacl.functions import SHACLFunction
+from pyshacl.functions.shacl_function import SHACLFunction
 
 from .js_executable import JSExecutable
 
 
 if typing.TYPE_CHECKING:
     from pyshacl.shapes_graph import ShapesGraph
-
-SH_JSFunction = SH.term('JSFunction')
 
 
 class JSFunction(SHACLFunction):

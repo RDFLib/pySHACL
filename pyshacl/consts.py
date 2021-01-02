@@ -35,6 +35,7 @@ SH_SPARQLTarget = SH.term('SPARQLTarget')
 SH_SPARQLTargetType = SH.term('SPARQLTargetType')
 SH_JSTarget = SH.term('JSTarget')
 SH_JSTargetType = SH.term('JSTargetType')
+SH_JSFunction = SH.term('JSFunction')
 
 # predicates
 RDF_type = RDF.term('type')

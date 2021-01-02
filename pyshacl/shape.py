@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 import logging
+import sys
 
 from decimal import Decimal
 from typing import TYPE_CHECKING, List, Optional, Set, Tuple, Type, Union
@@ -43,6 +44,8 @@ from .pytypes import GraphLike
 
 if TYPE_CHECKING:
     from pyshacl.shapes_graph import ShapesGraph
+
+module = sys.modules[__name__]
 
 
 class Shape(object):
@@ -237,9 +240,7 @@ class Shape(object):
         custom_targets = set(self.sg.objects(self.node, SH_target))
         result_set = dict()
         if self.sg.js_enabled:
-            from pyshacl.extras.js.target import JSTarget
-
-            use_JSTarget: Union[bool, Type] = JSTarget
+            use_JSTarget: Union[bool, Type] = True
         else:
             use_JSTarget = False
 
@@ -258,8 +259,14 @@ class Shape(object):
                 ct['qh'] = qh
             elif has_fnname or (SH_JSTarget in is_types):
                 if use_JSTarget:
+                    JST = getattr(module, "JSTarget", None)
+                    if not JST:
+                        # Lazy-import JS-Target to prevent RDFLib import error
+                        from pyshacl.extras.js.target import JSTarget as JST
+
+                        setattr(module, "JSTarget", JST)
                     ct['type'] = SH_JSTarget
-                    ct['targeter'] = use_JSTarget(self.sg, c)
+                    ct['targeter'] = JST(self.sg, c)
                 else:
                     #  Found JSTarget, but JS is not enabled in PySHACL. Ignore this target.
                     pass
@@ -516,18 +523,23 @@ class Shape(object):
             path_str = "->".join((str(e) for e in _evaluation_path))
             raise ReportableRuntimeError("Evaluation path too deep!\n{}".format(path_str))
         # Lazy import here to avoid an import loop
-        from .constraints import ALL_CONSTRAINT_PARAMETERS, CONSTRAINT_PARAMETERS_MAP
+        CONSTRAINT_PARAMETERS, PARAMETER_MAP = getattr(module, 'CONSTRAINT_PARAMS', (None, None))
+        if not CONSTRAINT_PARAMETERS:
+            from .constraints import ALL_CONSTRAINT_PARAMETERS, CONSTRAINT_PARAMETERS_MAP
 
+            setattr(module, 'CONSTRAINT_PARAMS', (ALL_CONSTRAINT_PARAMETERS, CONSTRAINT_PARAMETERS_MAP))
+            CONSTRAINT_PARAMETERS = ALL_CONSTRAINT_PARAMETERS
+            PARAMETER_MAP = CONSTRAINT_PARAMETERS_MAP
         if self.sg.js_enabled:
-            search_parameters = ALL_CONSTRAINT_PARAMETERS.copy()
-            constraint_map = CONSTRAINT_PARAMETERS_MAP.copy()
+            search_parameters = CONSTRAINT_PARAMETERS.copy()
+            constraint_map = PARAMETER_MAP.copy()
             from pyshacl.extras.js.constraint import JSConstraint, SH_js
 
             search_parameters.append(SH_js)
             constraint_map[SH_js] = JSConstraint
         else:
-            search_parameters = ALL_CONSTRAINT_PARAMETERS
-            constraint_map = CONSTRAINT_PARAMETERS_MAP
+            search_parameters = CONSTRAINT_PARAMETERS
+            constraint_map = PARAMETER_MAP
         parameters = (p for p, v in self.sg.predicate_objects(self.node) if p in search_parameters)
         reports = []
         focus_value_nodes = self.value_nodes(target_graph, focus)

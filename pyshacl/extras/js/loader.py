@@ -9,6 +9,7 @@ try:
     import regex
 except ImportError:
     import re
+
     regex = re
 
 if typing.TYPE_CHECKING:

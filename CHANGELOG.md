@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [0.14.2] - 2021-01-02
+
+## Added
+- Potential speedups when executing validation by lazy-loading large modules which may never be required in a normal validation run.
+
+## Fixed
+- Black and Flake8 issues outstanding from 0.14.1 release.
+- Workaround a RDFLib bug trying to import `requests` when requests is not required to be installed.
+  - This bug will still be observed if you use SPARQLConstraints, SPARQLFunction or JSFunction features, but it can be worked around by simply installing `requests` in your python enviornment.
+
+
 ## [0.14.1] - 2020-12-23
 
 ## Added
@@ -710,7 +721,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.14.1...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.14.2...HEAD
+[0.14.2]: https://github.com/RDFLib/pySHACL/compare/v0.14.1...v0.14.2
 [0.14.1]: https://github.com/RDFLib/pySHACL/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/RDFLib/pySHACL/compare/v0.13.3...v0.14.0
 [0.13.3]: https://github.com/RDFLib/pySHACL/compare/v0.13.2...v0.13.3

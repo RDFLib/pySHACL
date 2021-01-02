@@ -62,7 +62,9 @@ def clone_graph(source_graph, target_graph=None, identifier=None):
     return g
 
 
-def mix_datasets(base_ds: ConjunctiveLike, extra_ds: GraphLike, target_ds: Optional[Union[ConjunctiveLike, str]] = None):
+def mix_datasets(
+    base_ds: ConjunctiveLike, extra_ds: GraphLike, target_ds: Optional[Union[ConjunctiveLike, str]] = None
+):
     """
     Make a clone of base_ds (dataset) and add in the triples from extra_ds (dataset)
     :param base_ds:
@@ -89,10 +91,7 @@ def mix_datasets(base_ds: ConjunctiveLike, extra_ds: GraphLike, target_ds: Optio
     if target_ds == "inplace":
         target_ds = base_ds
         for mg in mixin_graphs:
-            mod_named_graphs = {
-                g.identifier: mix_graphs(g, mg, target_graph="inplace")
-                for g in base_named_graphs
-            }
+            mod_named_graphs = {g.identifier: mix_graphs(g, mg, target_graph="inplace") for g in base_named_graphs}
     elif isinstance(target_ds, str):
         raise RuntimeError("target_ds cannot be a string (unless it is 'inplace')")
     else:
@@ -100,7 +99,9 @@ def mix_datasets(base_ds: ConjunctiveLike, extra_ds: GraphLike, target_ds: Optio
         mixed_graphs = {}
         for mg in mixin_graphs:
             mod_named_graphs = {
-                g.identifier: mix_graphs(g, mg, target_graph=rdflib.Graph(store=target_ds.store, identifier=g.identifier))
+                g.identifier: mix_graphs(
+                    g, mg, target_graph=rdflib.Graph(store=target_ds.store, identifier=g.identifier)
+                )
                 for g in base_named_graphs
             }
             mixed_graphs.update(mod_named_graphs)

@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 #
-from typing import TYPE_CHECKING, List, Sequence, Type, Union
+import sys
+
+from typing import TYPE_CHECKING, List, Sequence, Union
 
 from pyshacl.consts import (
     RDF_type,
     SH_ask,
+    SH_JSFunction,
     SH_jsFunctionName,
     SH_jsLibrary,
     SH_select,
@@ -13,11 +16,15 @@ from pyshacl.consts import (
 )
 from pyshacl.pytypes import GraphLike
 
-from .shacl_function import SHACLFunction, SPARQLFunction
-
 
 if TYPE_CHECKING:
+    from pyshacl.extras.js.function import JSFunction
     from pyshacl.shapes_graph import ShapesGraph
+
+    from .shacl_function import SHACLFunction, SPARQLFunction
+
+
+module = sys.modules[__name__]
 
 
 def gather_functions(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLFunction', 'SPARQLFunction']]:
@@ -31,10 +38,8 @@ def gather_functions(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLFunctio
 
     spq_nodes = set(shacl_graph.subjects(RDF_type, SH_SPARQLFunction))
     if shacl_graph.js_enabled:
-        from pyshacl.extras.js.function import JSFunction, SH_JSFunction
-
         js_nodes = set(shacl_graph.subjects(RDF_type, SH_JSFunction))
-        use_JSFunction: Union[bool, Type] = JSFunction
+        use_JSFunction = True
     else:
         use_JSFunction = False
         js_nodes = set()
@@ -60,13 +65,34 @@ def gather_functions(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLFunctio
         js_nodes.add(n)
 
     all_fns: List[Union['SHACLFunction', 'SPARQLFunction', 'JSFunction']] = []
-    for n in spq_nodes:
-        all_fns.append(SPARQLFunction(n, shacl_graph))
-    for n in scl_nodes:
-        all_fns.append(SHACLFunction(n, shacl_graph))
-    if use_JSFunction and callable(use_JSFunction):
+    if spq_nodes:
+        SPQ = getattr(module, 'SPARQLFunction', None)
+        if not SPQ:
+            # Lazy-import SPARQLFunction to prevent rdflib import error
+            from .shacl_function import SPARQLFunction
+            setattr(module, 'SPARQLFunction', SPARQLFunction)
+            SPQ = SPARQLFunction
+        for n in spq_nodes:
+            all_fns.append(SPQ(n, shacl_graph))
+    if scl_nodes:
+        SCL = getattr(module, 'SHACLFunction', None)
+        if not SCL:
+            # Lazy-import SHACLFunction to prevent rdflib import error
+            from .shacl_function import SHACLFunction
+            setattr(module, 'SHACLFunction', SHACLFunction)
+            SCL = SHACLFunction
+        for n in scl_nodes:
+            all_fns.append(SCL(n, shacl_graph))
+    if use_JSFunction and js_nodes:
+        JSF = getattr(module, 'JSFunction', None)
+        if not JSF:
+            # Lazy-import JSFunction to prevent rdflib import error
+            from pyshacl.extras.js.function import JSFunction
+
+            setattr(module, 'JSFunction', JSFunction)
+            JSF = JSFunction
         for n in js_nodes:
-            all_fns.append(use_JSFunction(n, shacl_graph))
+            all_fns.append(JSF(n, shacl_graph))
     return all_fns
 
 
