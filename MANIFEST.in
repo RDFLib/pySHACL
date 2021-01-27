@@ -1,6 +1,7 @@
 include *.txt *.md
 include pyproject.toml
 include poetry.lock
+include Makefile
 include MANIFEST.in
 include pyshacl/assets/*.pickle
 include pyshacl/*.spec
