@@ -38,6 +38,7 @@ include = [
 	"pyproject.toml",
     "MANIFEST.in",
     "Makefile",
+    "poetry.lock",
     "pyshacl/assets/*.pickle",
     "pyshacl/*.spec"
 ]
