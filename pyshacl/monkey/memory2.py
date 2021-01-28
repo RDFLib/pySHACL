@@ -295,7 +295,7 @@ class Memory2(Store):
 
     def __get_context_for_triple(self, triple, skipQuoted=False):
         """return a list of contexts (str) for the triple, skipping
-           quoted contexts if skipQuoted==True"""
+        quoted contexts if skipQuoted==True"""
 
         ctxs = self.__tripleContexts.get(triple, self.__defaultContexts)
 
@@ -338,7 +338,7 @@ class Memory2(Store):
 
     def __contexts(self, triple):
         """return a generator for all the non-quoted contexts
-           (dereferenced) the encoded triple appears in"""
+        (dereferenced) the encoded triple appears in"""
         return (
             self.__context_obj_map.get(ctx_str, ctx_str)
             for ctx_str in self.__get_context_for_triple(triple, skipQuoted=True)

@@ -1,6 +1,6 @@
 [build-system]
-requires = ["poetry>=1.0.10"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyshacl"
@@ -31,16 +31,17 @@ packages = [
     { include = "benchmarks", format = "sdist" },
     { include = "test", format = "sdist" }
 ]
-# Note, when Poetry 1.1.0 is released, we can include some of these only in the sdist
+
 include = [
 	"*.md",
 	"*.txt",
-	"pyproject.toml",
-    "MANIFEST.in",
-    "Makefile",
-    "poetry.lock",
     "pyshacl/assets/*.pickle",
-    "pyshacl/*.spec"
+    "pyshacl/*.spec",
+    { path = "pyshacl/assets/*.ttl", format = "sdist" },
+    { path = "MANIFEST.in", format = "sdist" },
+    { path = "pyproject.toml", format = "sdist" },
+    { path = "poetry.lock", format = "sdist" },
+    { path = "Makefile", format = "sdist" },
 ]
 
 
@@ -55,11 +56,11 @@ pyduktape2 = {version="^0.4.1", python=">=3.6", optional=true}
 coverage = "^4.5"
 pytest = "^5.0"
 pytest-cov = "^2.8.1"
-flake8 = "^3.7"
-pyduktape2 = {version="^0.4.1", python=">=3.6"}
-isort = {version="^5.0.0", python=">=3.6"}
-black = {version=">=18.9b0,<=19.10b0", python=">=3.6"}
-mypy = {version="^0.770.0", python=">=3.6"}
+flake8 = {version="^3.8.0", python=">=3.6", optional=true}
+pyduktape2 = {version="^0.4.1", python=">=3.6", optional=true}
+isort = {version="^5.7.0", python=">=3.6", optional=true}
+black = {version=">=20.8b1,<=21", python=">=3.6", optional=true}
+mypy = {version="^0.800", python=">=3.6", optional=true}
 
 
 [tool.poetry.extras]
@@ -121,11 +122,11 @@ legacy_tox_ini = """
 [tox]
 isolated_build = true
 skipsdist = true
-envlist = py36, py37, py38, lint, type-checking
+envlist = py36, py37, py38, py39, lint, type-checking
 
 [testenv]
 deps =
-    poetry>=1.0.10
+    poetry>=1.1.0
     py36: coveralls
 passenv = TRAVIS TRAVIS_JOB_ID TRAVIS_BRANCH
 skip_install = true
@@ -139,6 +140,7 @@ commands =
     py36: - coveralls
 
 [testenv:lint]
+commands_pre = poetry install -vvv --extras "dev-lint"
 commands =
     - poetry show
     poetry run flake8 pyshacl
@@ -146,6 +148,7 @@ commands =
     poetry run black --check --verbose --config ./pyproject.toml pyshacl
 
 [testenv:type-checking]
+commands_pre = poetry install -vvv --extras "dev-type-checking"
 commands =
     - poetry show
     poetry run mypy --ignore-missing-imports pyshacl

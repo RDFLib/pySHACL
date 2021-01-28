@@ -70,6 +70,7 @@ def gather_functions(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLFunctio
         if not SPQ:
             # Lazy-import SPARQLFunction to prevent rdflib import error
             from .shacl_function import SPARQLFunction
+
             setattr(module, 'SPARQLFunction', SPARQLFunction)
             SPQ = SPARQLFunction
         for n in spq_nodes:
@@ -79,6 +80,7 @@ def gather_functions(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLFunctio
         if not SCL:
             # Lazy-import SHACLFunction to prevent rdflib import error
             from .shacl_function import SHACLFunction
+
             setattr(module, 'SHACLFunction', SHACLFunction)
             SCL = SHACLFunction
         for n in scl_nodes:
