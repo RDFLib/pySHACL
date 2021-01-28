@@ -78,8 +78,8 @@ ALL_CONSTRAINT_COMPONENTS: List[Type[ConstraintComponent]] = [
     InConstraintComponent,
     SPARQLBasedConstraint,
     # SPARQLConstraintComponent
-    # This one is deliberately not included
-    # Because it gets matched to shapes manually
+    # ^ ^ This one is deliberately not included in this
+    # list because it gets matched to shapes manually later
 ]
 
 CONSTRAINT_PARAMETERS_MAP: Dict[Any, Type[ConstraintComponent]] = {

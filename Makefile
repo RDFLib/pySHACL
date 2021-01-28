@@ -28,7 +28,7 @@ test: venvcheck		## Run the TOX tests in a TOX environment
 	poetry run tox
 
 .PHONY: dev-test
-test: venvcheck		## Run the tests in dev environment
+dev-test: venvcheck		## Run the tests in dev environment
 	poetry run pytest --cov=pyshacl test/
 
 .PHONY: format
