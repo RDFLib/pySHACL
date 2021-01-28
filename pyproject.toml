@@ -33,15 +33,15 @@ packages = [
 ]
 
 include = [
-	"*.md",
-	"*.txt",
-    "pyshacl/assets/*.pickle",
-    "pyshacl/*.spec",
     { path = "pyshacl/assets/*.ttl", format = "sdist" },
     { path = "MANIFEST.in", format = "sdist" },
     { path = "pyproject.toml", format = "sdist" },
     { path = "poetry.lock", format = "sdist" },
     { path = "Makefile", format = "sdist" },
+	"*.md",
+	"*.txt",
+    "pyshacl/assets/*.pickle",
+    "pyshacl/*.spec"
 ]
 
 
