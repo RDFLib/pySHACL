@@ -130,7 +130,7 @@ deps =
     py36: coveralls
 passenv = TRAVIS TRAVIS_JOB_ID TRAVIS_BRANCH
 skip_install = true
-commands_pre = poetry install -vvv --extras "js"
+commands_pre = poetry install -vvv --no-root --extras "js"
 commands =
     - poetry show
     poetry run pytest --cov=pyshacl test/
@@ -140,7 +140,7 @@ commands =
     py36: - coveralls
 
 [testenv:lint]
-commands_pre = poetry install -vvv --extras "dev-lint"
+commands_pre = poetry install -vvv --no-root --extras "dev-lint"
 commands =
     - poetry show
     poetry run flake8 pyshacl
@@ -148,7 +148,7 @@ commands =
     poetry run black --check --verbose --config ./pyproject.toml pyshacl
 
 [testenv:type-checking]
-commands_pre = poetry install -vvv --extras "dev-type-checking"
+commands_pre = poetry install -vvv --no-root --extras "dev-type-checking"
 commands =
     - poetry show
     poetry run mypy --ignore-missing-imports pyshacl
