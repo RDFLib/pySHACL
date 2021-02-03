@@ -34,6 +34,7 @@ packages = [
 
 include = [
     { path = "pyshacl/assets/*.ttl", format = "sdist" },
+    { path = "hooks/*", format = "sdist" },
     { path = "MANIFEST.in", format = "sdist" },
     { path = "pyproject.toml", format = "sdist" },
     { path = "poetry.lock", format = "sdist" },

@@ -53,6 +53,14 @@ else
 	poetry run isort --check-only "$(FilePath)"
 endif
 
+.PHONY: type-check
+type-check: venvcheck	## Validate with Black and isort in check-only mode
+ifeq ("$(FilePath)", "")
+	poetry run python3 -m mypy --ignore-missing-imports pyshacl
+else
+	poetry run python3 -m mypy --ignore-missing-imports "$(FilePath)"
+endif
+
 .PHONY: upgrade
 upgrade: venvcheck	## Upgrade the dependencies
 	poetry update
