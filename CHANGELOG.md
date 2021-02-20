@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [0.14.3] - 2021-02-20
+
+## Changed
+- Relaxed the Max Evaluation Depth from 28 to 30, we were seeing some real-world cases where meta-shacl was failing on large Shapes Graphs at 28 levels deep.
+- sh:namespace values can now be xsd:anyURI or xsd:string or "literal string", but now cannot be <URI nodes>.
+- sh:order can now support xsd:decimal values and xsd:integer values, and can be interchanged at will.
+
+
 ## [0.14.2] - 2021-01-02
 
 ## Added
@@ -12,7 +20,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## Fixed
 - Black and Flake8 issues outstanding from 0.14.1 release.
 - Workaround a RDFLib bug trying to import `requests` when requests is not required to be installed.
-  - This bug will still be observed if you use SPARQLConstraints, SPARQLFunction or JSFunction features, but it can be worked around by simply installing `requests` in your python enviornment.
+  - This bug will still be observed if you use SPARQLConstraints, SPARQLFunction or JSFunction features, but it can be worked around by simply installing `requests` in your python environment.
 
 
 ## [0.14.1] - 2020-12-23

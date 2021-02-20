@@ -1,3 +1,4 @@
+from decimal import Decimal
 from logging import Logger
 from typing import Union
 
@@ -60,8 +61,24 @@ class SHACLParameter(Shape):
                 "https://www.w3.org/TR/shacl-af/#functions-example",
             )
         else:
-            # TODO: check order is a literal with type Int
-            self.param_order = int(orders[0])
+            order = orders[0]
+            if not isinstance(order, Literal):
+                raise ConstraintLoadError(
+                    "sh:order value must be a literal of type Decimal or Integer",
+                    "https://www.w3.org/TR/shacl-af/#functions-example",
+                )
+            if isinstance(order.value, Decimal):
+                order = order.value
+            elif isinstance(order.value, int):
+                order = Decimal(order.value)
+            elif isinstance(order.value, float):
+                order = Decimal(str(order.value))
+            else:
+                raise ConstraintLoadError(
+                    "sh:order value must be a literal of type Decimal or Integer",
+                    "https://www.w3.org/TR/shacl-af/#functions-example",
+                )
+            self.param_order = order
         optionals = list(sg.objects(self.node, SH_optional))
         if len(optionals) < 1:
             self.optional = False

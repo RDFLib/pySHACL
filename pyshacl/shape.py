@@ -198,7 +198,17 @@ class Shape(object):
             raise ShapeLoadError(
                 "A SHACL Shape must be a numeric literal.", "https://www.w3.org/TR/shacl-af/#rules-order"
             )
-        return Decimal(order_node.value)
+        if isinstance(order_node.value, Decimal):
+            order = order_node.value
+        elif isinstance(order_node.value, int):
+            order = Decimal(order_node.value)
+        elif isinstance(order_node.value, float):
+            order = Decimal(str(order_node.value))
+        else:
+            raise ShapeLoadError(
+                "A SHACL Shape must be a numeric literal.", "https://www.w3.org/TR/shacl-af/#rules-order"
+            )
+        return order
 
     def target_nodes(self):
         return self.sg.graph.objects(self.node, SH_targetNode)
@@ -519,7 +529,8 @@ class Shape(object):
             return True, []
         if _evaluation_path is None:
             _evaluation_path = []
-        elif len(_evaluation_path) >= 28:  # 27 is the depth required to successfully do the meta-shacl test
+        elif len(_evaluation_path) >= 30:
+            # 27 is the depth required to successfully do the meta-shacl test on shacl.ttl
             path_str = "->".join((str(e) for e in _evaluation_path))
             raise ReportableRuntimeError("Evaluation path too deep!\n{}".format(path_str))
         # Lazy import here to avoid an import loop

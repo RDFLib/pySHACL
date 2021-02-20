@@ -4,8 +4,6 @@ https://www.w3.org/TR/shacl/#sparql-constraints
 """
 import re
 
-from warnings import warn
-
 import rdflib
 
 from rdflib import RDF, XSD
@@ -173,14 +171,13 @@ class SPARQLQueryHelper(object):
                     if prefix == "sh" and isinstance(namespace.value, str):
                         # Known bug in shacl.ttl https://github.com/w3c/data-shapes/issues/125
                         pass
-                    elif namespace.language is not None or isinstance(namespace.value, str):
-                        warn(
-                            Warning(
-                                "sh:namespace value must be an RDF Literal with type xsd:anyURI.\nLiteral: \"{}\" type={}".format(
-                                    namespace.value, namespace.datatype or namespace.language
-                                )
-                            )
-                        )
+                    elif (
+                        namespace.datatype == XSD.string
+                        or namespace.language is not None
+                        or isinstance(namespace.value, str)
+                    ):
+                        # Its now possible for namespace to be xsd:string or string literal
+                        pass
                     else:
                         raise ConstraintLoadError(
                             "sh:namespace value must be an RDF Literal with type xsd:anyURI.\nLiteral: {} type={}".format(
