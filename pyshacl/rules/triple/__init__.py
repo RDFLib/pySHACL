@@ -190,7 +190,7 @@ class TripleRule(SHACLRule):
         iterate_limit = 100
         while True:
             if iterate_limit < 1:
-                raise ReportableRuntimeError("Local rule iteration exceeded iteration limit of 100.")
+                raise ReportableRuntimeError("sh:rule iteration exceeded iteration limit of 100.")
             iterate_limit -= 1
             added = 0
             to_add = []
@@ -201,9 +201,9 @@ class TripleRule(SHACLRule):
                 new_triples = itertools.product(s_set, p_set, o_set)
                 this_added = False
                 for i in iter(new_triples):
-                    if i not in data_graph:
-                        to_add.append(i)
+                    if not this_added and i not in data_graph:
                         this_added = True
+                    to_add.append(i)
                 if this_added:
                     added += 1
             if added > 0:

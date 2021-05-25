@@ -45,9 +45,9 @@ class JSRule(SHACLRule):
                     set_to_add = set()
                     for t in triples:
                         s, p, o = tr = t[:3]
-                        if tr not in data_graph:
+                        if not this_added and tr not in data_graph:
                             this_added = True
-                            set_to_add.add(tr)
+                        set_to_add.add(tr)
                     sets_to_add.append(set_to_add)
                 if this_added:
                     added += 1

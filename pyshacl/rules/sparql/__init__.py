@@ -74,7 +74,7 @@ class SPARQLRule(SHACLRule):
                         raise ReportableRuntimeError("Query executed by a SHACL SPARQLRule must be CONSTRUCT query.")
                     this_added = False
                     for i in results.graph:
-                        if i not in data_graph:
+                        if not this_added and i not in data_graph:
                             this_added = True
                             # We only need to know at least one triple was added, then break!
                             break
