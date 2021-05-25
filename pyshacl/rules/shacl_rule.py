@@ -25,9 +25,9 @@ class SHACLRuleCondition(object):
 
 
 class SHACLRule(object):
-    __slots__ = ("shape", "node", "_deactivated")
+    __slots__ = ("shape", "node", "iterate", "_deactivated")
 
-    def __init__(self, shape, rule_node):
+    def __init__(self, shape, rule_node, iterate=False):
         """
 
         :param shape:
@@ -38,6 +38,8 @@ class SHACLRule(object):
         super(SHACLRule, self).__init__()
         self.shape = shape
         self.node = rule_node
+        self.iterate = False
+
         deactivated_nodes = list(self.shape.sg.objects(self.node, SH_deactivated))
         self._deactivated = len(deactivated_nodes) > 0 and bool(deactivated_nodes[0])
 

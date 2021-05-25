@@ -76,6 +76,13 @@ parser.add_argument(
     default=False,
     help='Enable features from the SHACL-JS Specification.',
 )
+parser.add_argument(
+    '--iterate-rules',
+    dest='iterate_rules',
+    action='store_true',
+    default=False,
+    help="Run Shape's SHACL Rules iteratively until the data_graph reaches a steady state.",
+)
 parser.add_argument('--abort', dest='abort', action='store_true', default=False, help='Abort on first error.')
 parser.add_argument(
     '-d', '--debug', dest='debug', action='store_true', default=False, help='Output additional runtime messages.'
@@ -128,7 +135,6 @@ parser.add_argument(
 )
 # parser.add_argument('-h', '--help', action="help", help='Show this help text.')
 
-
 def main():
     basename = os.path.basename(sys.argv[0])
     if basename == "__main__.py":
@@ -151,6 +157,11 @@ def main():
         validator_kwargs['advanced'] = True
     if args.js:
         validator_kwargs['js'] = True
+    if args.iterate_rules:
+        if not args.advanced:
+            sys.stderr.write("Iterate-Rules option only works when you enable Advanced Mode.\n")
+        else:
+            validator_kwargs['iterate_rules'] = True
     if args.abort:
         validator_kwargs['abort_on_error'] = True
     if args.shacl_file_format:
