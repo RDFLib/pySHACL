@@ -276,6 +276,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         msg = re.sub('{[?$]value}', str(bound_vars[2]), msg)
         return msg
 
+
 SH_nodeValidator = SH.term('nodeValidator')
 SH_propertyValidator = SH.term('propertyValidator')
 SH_validator = SH.term('validator')
