@@ -2,15 +2,32 @@
 """
 https://www.w3.org/TR/shacl/#core-components-value-type
 """
+from datetime import date, datetime, time
+from typing import Dict, List
+
 import rdflib
-from datetime import date, time, datetime
-from rdflib.term import Literal
+
 from rdflib.namespace import RDF, XSD
+from rdflib.term import Literal
+
 from pyshacl.constraints.constraint_component import ConstraintComponent
-from pyshacl.consts import SH, RDFS_subClassOf, RDF_type,\
-    SH_IRI, SH_BlankNode, SH_Literal, SH_IRIOrLiteral, SH_BlankNodeOrIRI,\
-    SH_BlankNodeORLiteral
+from pyshacl.consts import (
+    SH,
+    SH_IRI,
+    RDF_type,
+    RDFS_subClassOf,
+    SH_BlankNode,
+    SH_BlankNodeOrIRI,
+    SH_BlankNodeORLiteral,
+    SH_datatype,
+    SH_IRIOrLiteral,
+    SH_Literal,
+    SH_nodeKind,
+)
 from pyshacl.errors import ConstraintLoadError
+from pyshacl.pytypes import GraphLike
+from pyshacl.rdfutil import stringify_node
+
 
 RDF_langString = RDF.term('langString')
 XSD_string = XSD.term('string')
@@ -22,11 +39,10 @@ XSD_time = XSD.term('time')
 XSD_dateTime = XSD.term('dateTime')
 
 SH_class = SH.term('class')
-SH_datatype = SH.term('datatype')
-SH_nodeKind = SH.term('nodeKind')
 SH_ClassConstraintComponent = SH.term('ClassConstraintComponent')
 SH_DatatypeConstraintComponent = SH.term('DatatypeConstraintComponent')
 SH_NodeKindConstraintComponent = SH.term('NodeKindConstraintComponent')
+
 
 class ClassConstraintComponent(ConstraintComponent):
     """
@@ -43,7 +59,8 @@ class ClassConstraintComponent(ConstraintComponent):
         if len(class_rules) < 1:
             raise ConstraintLoadError(
                 "ClassConstraintComponent must have at least one sh:class predicate.",
-                "https://www.w3.org/TR/shacl/#ClassConstraintComponent")
+                "https://www.w3.org/TR/shacl/#ClassConstraintComponent",
+            )
         self.class_rules = class_rules
 
     @classmethod
@@ -58,17 +75,24 @@ class ClassConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_ClassConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
-        """
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+        if len(self.class_rules) < 2:
+            m = "Value does not have class {}".format(stringify_node(self.shape.sg.graph, self.class_rules[0]))
+        else:
+            rules = ", ".join(stringify_node(self.shape.sg.graph, c) for c in self.class_rules)
+            m = "Value class is not in classes ({})".format(rules)
+        return [Literal(m)]
 
-        :type focus_value_nodes: dict
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+        """
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
         for c in self.class_rules:
-            _n, _r = self._evaluate_class_rules(
-                target_graph, focus_value_nodes, c)
+            _n, _r = self._evaluate_class_rules(target_graph, focus_value_nodes, c)
             non_conformant = non_conformant or _n
             reports.extend(_r)
         return (not non_conformant), reports
@@ -80,9 +104,10 @@ class ClassConstraintComponent(ConstraintComponent):
             for v in value_nodes:
                 found = False
                 if isinstance(v, Literal):
-                    self.shape.logger.debug("Class Constraint won't work with Literals. "
-                                   "Attempting to match Literal node {} to class of {} will fail."
-                                   .format(v, class_rule))
+                    self.shape.logger.debug(
+                        "Class Constraint won't work with Literals. "
+                        "Attempting to match Literal node {} to class of {} will fail.".format(v, class_rule)
+                    )
                 else:
                     objs = target_graph.objects(v, RDF_type)
                     for ctype in iter(objs):
@@ -118,11 +143,13 @@ class DatatypeConstraintComponent(ConstraintComponent):
         if len(datatype_rules) < 1:
             raise ConstraintLoadError(
                 "DatatypeConstraintComponent must have at least one sh:datatype predicate.",
-                "https://www.w3.org/TR/shacl/#DatatypeConstraintComponent")
+                "https://www.w3.org/TR/shacl/#DatatypeConstraintComponent",
+            )
         elif len(datatype_rules) > 1:
             raise ConstraintLoadError(
                 "DatatypeConstraintComponent must have at most one sh:datatype predicate.",
-                "https://www.w3.org/TR/shacl/#DatatypeConstraintComponent")
+                "https://www.w3.org/TR/shacl/#DatatypeConstraintComponent",
+            )
         self.datatype_rule = datatype_rules[0]
 
     @classmethod
@@ -137,11 +164,15 @@ class DatatypeConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_DatatypeConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
-        """
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+        m = "Value is not Literal with datatype {}".format(stringify_node(self.shape.sg.graph, self.datatype_rule))
+        return [Literal(m)]
 
-        :type focus_value_nodes: dict
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+        """
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
@@ -154,15 +185,15 @@ class DatatypeConstraintComponent(ConstraintComponent):
                     lang = v.language
                     if datatype == dtype_rule:
                         matches = self._assert_actual_datatype(v, dtype_rule)
-                    elif datatype is None and lang is None and \
-                            dtype_rule == XSD_string:
+                    elif datatype is None and lang is None and dtype_rule == XSD_string:
                         matches = self._assert_actual_datatype(v, dtype_rule)
                     elif dtype_rule == RDF_langString and lang:
                         matches = self._assert_actual_datatype(v, dtype_rule)
                 else:
-                    self.shape.logger.debug("Datatype Constraint only works on Literal datatypes. "
-                                            "Attempting to match non-Literal node {} to datatype of {} will fail."
-                                            .format(v, dtype_rule))
+                    self.shape.logger.debug(
+                        "Datatype Constraint only works on Literal datatypes. "
+                        "Attempting to match non-Literal node {} to datatype of {} will fail.".format(v, dtype_rule)
+                    )
                 if not matches:
                     non_conformant = True
                     rept = self.make_v_result(target_graph, f, value_node=v)
@@ -189,6 +220,7 @@ class DatatypeConstraintComponent(ConstraintComponent):
             # We don't know how to check other datatypes. Assume pass.
             return True
 
+
 class NodeKindConstraintComponent(ConstraintComponent):
     """
     sh:nodeKind specifies a condition to be satisfied by the RDF node kind of each value node.
@@ -204,11 +236,13 @@ class NodeKindConstraintComponent(ConstraintComponent):
         if len(nodekind_rules) < 1:
             raise ConstraintLoadError(
                 "NodeKindConstraintComponent must have at least one sh:nodeKind predicate.",
-                "https://www.w3.org/TR/shacl/#NodeKindConstraintComponent")
+                "https://www.w3.org/TR/shacl/#NodeKindConstraintComponent",
+            )
         elif len(nodekind_rules) > 1:
             raise ConstraintLoadError(
                 "NodeKindConstraintComponent must have at most one sh:nodeKind predicate.",
-                "https://www.w3.org/TR/shacl/#NodeKindConstraintComponent")
+                "https://www.w3.org/TR/shacl/#NodeKindConstraintComponent",
+            )
         self.nodekind_rule = nodekind_rules[0]
 
     @classmethod
@@ -223,11 +257,15 @@ class NodeKindConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_NodeKindConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
-        """
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+        m = "Value is not of Node Kind {}".format(stringify_node(self.shape.sg.graph, self.nodekind_rule))
+        return [Literal(m)]
 
-        :type focus_value_nodes: dict
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+        """
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         n_rule = self.nodekind_rule
         reports = []

@@ -1,0 +1,115 @@
+# baseURI: http://datashapes.org/sh/tests/sparql/function/callSPARQLFunction.test
+# imports: http://datashapes.org/dash
+# prefix: ex
+
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix ex: <http://datashapes.org/sh/tests/sparql/function/callSPARQLFunction.test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://datashapes.org/sh/tests/sparql/function/callSPARQLFunction.test>
+  rdf:type owl:Ontology ;
+  rdfs:label "Test calling a SPARQLFunction from another SPARQL Select" ;
+  owl:imports <http://datashapes.org/dash> ;
+.
+ex:GraphValidationTestCase
+  rdf:type dash:GraphValidationTestCase ;
+  dash:expectedResult [
+      rdf:type sh:ValidationReport ;
+      sh:conforms "false"^^xsd:boolean ;
+      sh:result [
+          rdf:type sh:ValidationResult ;
+          sh:focusNode ex:SquareRectangle ;
+          sh:resultPath ex:area ;
+          sh:resultSeverity sh:Violation ;
+          sh:sourceConstraint ex:CheckArea-sparql ;
+          sh:sourceShape ex:CheckArea ;
+          sh:sourceConstraintComponent sh:SPARQLConstraintComponent ;
+          sh:value 12 ;
+        ] ;
+    ] ;
+.
+
+ex:NonSquareRectangle
+  rdf:type ex:Rectangle ;
+  ex:height 3 ;
+  ex:width 4 ;
+  ex:area 12 ;
+.
+ex:SquareRectangle
+  rdf:type ex:Rectangle ;
+  ex:height 6 ;
+  ex:width 6 ;
+  ex:area 12 ;
+.
+
+ex:Rectangle
+  rdf:type rdfs:Class ;
+  rdf:type sh:NodeShape ;
+  rdfs:label "Rectangle" ;
+  rdfs:subClassOf rdfs:Resource ;
+  sh:property [
+      sh:path ex:height ;
+      sh:datatype xsd:integer ;
+      sh:maxCount 1 ;
+      sh:minCount 1 ;
+      sh:name "height" ;
+    ] ;
+  sh:property [
+      sh:path ex:width ;
+      sh:datatype xsd:integer ;
+      sh:maxCount 1 ;
+      sh:minCount 1 ;
+      sh:name "width" ;
+    ] ;
+  sh:property [
+      sh:path ex:area ;
+      sh:datatype xsd:integer ;
+      sh:maxCount 1 ;
+      sh:minCount 1 ;
+      sh:name "area" ;
+    ] ;
+.
+
+ex:CheckArea
+  rdf:type sh:PropertyShape ;
+  sh:path ex:area ;
+  sh:sparql ex:CheckArea-sparql ;
+  sh:targetClass ex:Rectangle ;
+.
+ex:CheckArea-sparql
+  rdf:type sh:SPARQLConstraintObject ;
+  sh:message "Height * Width = Area." ;
+  sh:prefixes <http://datashapes.org/sh/tests/sparql/function/callSPARQLFunction.test> ;
+  sh:select """
+		SELECT $this ?value
+		WHERE {
+		    $this ex:width ?width .
+		    $this ex:height ?height .
+			$this $PATH ?value .
+			FILTER (ex:multiply(?width, ?height) != ?value)
+		}
+		""" ;
+.
+ex:multiply
+  a sh:SPARQLFunction ;
+  rdfs:comment "Multiplies its two arguments $op1 and $op2." ;
+  sh:parameter [
+    sh:path ex:op1 ;
+    sh:datatype xsd:integer ;
+    sh:description "The first operand" ;
+  ] ;
+  sh:parameter [
+    sh:path ex:op2 ;
+    sh:datatype xsd:integer ;
+    sh:description "The second operand" ;
+  ] ;
+  sh:returnType xsd:integer ;
+  sh:select """
+    SELECT ($op1 * $op2 AS ?result)
+    WHERE {
+    }
+  	""" .

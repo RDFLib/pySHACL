@@ -55,7 +55,7 @@
 | `sh:xone`  | `XoneConstraintComponent`  | [▶][XoneConstraintComponent]  | ![status-complete] 	|           |
 
 
-### [Shape-based Constraint Components](https://www.w3.org/TR/shacl/#core-components-shape)  
+### [Shape-based Constraint Components](https://www.w3.org/TR/shacl/#core-components-shape)
 | Parameter                 | Constraint                                |  Link 	                                   |      Status      	  |  Comments                                     |
 |:----------                |:-------------                             |:------:	                                   |:-------------:	      |:------	                                      |
 | `sh:node`                 | `NodeConstraintComponent`                 | [▶][NodeConstraintComponent]                 | ![status-complete]   |                                               |
@@ -65,7 +65,7 @@
 | `sh:qualifiedMaxCount`    | `QualifiedMaxCountConstraintComponent`    | [▶][QualifiedValueShapeConstraintComponent]  | ![status-complete]   |                                               |
 
 
-### [Other Constraint Components](https://www.w3.org/TR/shacl/#core-components-others)  
+### [Other Constraint Components](https://www.w3.org/TR/shacl/#core-components-others)
 | Parameter               | Constraint                    |  Link 	                          |      Status      	|  Comments	                 |
 |:----------              |:-------------                 |:------:	                          |:-------------:	    |:------	                 |
 | `sh:closed`             | `ClosedConstraintComponent`   | [▶][ClosedConstraintComponent]    | ![status-complete]	|                            |
@@ -73,15 +73,15 @@
 | `sh:hasValue`           | `HasValueConstraintComponent` | [▶][HasValueConstraintComponent]  | ![status-complete] 	|                            |
 | `sh:in`                 | `InConstraintComponent`       | [▶][InConstraintComponent]        | ![status-complete] 	|                            |
 
-## [SPARQL Constraints](https://www.w3.org/TR/shacl/#sparql-constraints)  
+## [SPARQL Constraints](https://www.w3.org/TR/shacl/#sparql-constraints)
 
-### [SPARQL Based Constraints](https://www.w3.org/TR/shacl/#sparql-constraints)  
+### [SPARQL Based Constraints](https://www.w3.org/TR/shacl/#sparql-constraints)
 | Parameter               | Constraint                    |  Link 	                          |      Status      	|  Comments	                 |
 |:----------              |:-------------                 |:------:	                          |:-------------:	    |:------	                 |
 | `sh:sparql`             | `SPARQLConstraintComponent`   | [▶][SPARQLConstraintComponent]    | ![status-complete]	|                            |
 
 
-### [SPARQL Based Constraint Components](https://www.w3.org/TR/shacl/#dfn-sparql-based-constraint-component)  
+### [SPARQL Based Constraint Components](https://www.w3.org/TR/shacl/#dfn-sparql-based-constraint-component)
 | Parameter               | Constraint                    |  Link 	                          |      Status      	|  Comments	                 |
 |:----------              |:-------------                 |:------:	                          |:-------------:	    |:------	                 |
 | `sh:validator`          | `ConstraintComponent`         | [▶][ConstraintComponent]          | ![status-complete]	|                            |
@@ -118,7 +118,7 @@
 |:----------            |:------:	               |:-------------:	    |:------	|
 | `sh:target`           | [▶][AFSPARQLTarget]      | ![status-complete]	|           |
 | `sh:SPARQLTarget`     | [▶][AFSPARQLTarget]      | ![status-complete]	|           |
-| `sh:SPARQLTargetType` | [▶][AFSPARQLTargetType]  | ![status-missing]	|           |
+| `sh:SPARQLTargetType` | [▶][AFSPARQLTargetType]  | ![status-complete]	|           |
 
 
 ### [Annotation Properties](https://www.w3.org/TR/shacl-af/#sparql-constraints-annotations)
@@ -130,34 +130,68 @@
 
 ### [SHACL Functions](https://www.w3.org/TR/shacl-af/#functions)
 | Parameter               |  Link 	              |      Status      	|  Comments	|
-|:----------              |:------:	              |:-------------:	    |:------	|
-| `sh:SPARQLFunction`     | [▶][AFSPARQLFunction] | ![status-missing]	| RDFLib not supporting Extensible Value Testing in SPARQL |
+|:----------              |:------:	              |:-------------:	    |:------:	|
+| `sh:SHACLFunction`      | [▶][AFSPARQLFunction] | ![status-complete]	| fully implemented        |
+| `sh:SPARQLFunction`     | [▶][AFSPARQLFunction] | ![status-complete]	| implemented using RDFLib |
 
 ### [Node Expressions](https://www.w3.org/TR/shacl-af/#node-expressions)
-| Path                |  Link 	                 |      Status      	|  Comments	|
-|:----------          |:------:	                 |:-------------:	    |:------	|
-| `sh:this`           | [▶][AFExpressionFocus]   | ![status-complete]	|           |
-| Constant Term       | [▶][AFExpConstantTerm]   | ![status-complete]	|           |
-| `sh:filterShape`    | [▶][AFExpFilterShape]    | ![status-missing] 	|           |
-| SHACL Function      | [▶][AFExpFunction]       | ![status-missing] 	|           |
-| `sh:path`           | [▶][AFExpPath]           | ![status-complete] 	|           |
-| `sh:intersection`   | [▶][AFExpIntersection]   | ![status-missing] 	|           |
-| `sh:union`          | [▶][AFExpUnion]          | ![status-missing] 	|           |
+| Path                |  Link 	                 |      Status      	|  Comments	 |
+|:----------          |:------:	                 |:-------------:	    |:---------: |
+| `sh:this`           | [▶][AFExpressionFocus]   | ![status-complete]	|            |
+| Constant Term       | [▶][AFExpConstantTerm]   | ![status-complete]	|            |
+| `sh:filterShape`    | [▶][AFExpFilterShape]    | ![status-complete] 	| not tested |
+| SHACL Function      | [▶][AFExpFunction]       | ![status-complete] 	|            |
+| `sh:path`           | [▶][AFExpPath]           | ![status-complete] 	|            |
+| `sh:intersection`   | [▶][AFExpIntersection]   | ![status-complete] 	| not tested |
+| `sh:union`          | [▶][AFExpUnion]          | ![status-complete] 	| not tested |
 
 ### [Expression Constraints][AFExpression]
 | Path                               |  Link 	              |      Status      	|  Comments	|
-|:----------                         |:------:	              |:-------------:	    |:------	|
+|:----------                         |:------:	              |:-------------:	    |:------:   |
 | `sh:ExpressionConstraintComponent` | [▶][AFExpression]      | ![status-missing]	|           |
 
 ### [SHACL Rules](https://www.w3.org/TR/shacl-af/#rules)
 | Parameter               |  Link 	              |      Status      	|  Comments	|
-|:----------              |:------:	              |:-------------:	    |:------	|
+|:----------              |:------:	              |:-------------:	    |:------:   |
 | `sh:condition`          | [▶][AFCondition]      | ![status-complete]	|           |
 | `sh:order`              | [▶][AFOrder]          | ![status-complete]	|           |
 | `sh:deactivated`        | [▶][AFDeactivated]    | ![status-complete]	|           |
 | `sh:entailment`         | [▶][AFEntailment]     | ![status-missing]	|           |
 | `sh:TripleRule`         | [▶][AFTripleRule]     | ![status-complete]	|           |
 | `sh:SPARQLRule`         | [▶][AFSPARQLRule]     | ![status-complete]	|           |
+
+# SHACL-JS [spec](https://www.w3.org/TR/shacl-js/)
+
+The SHACL-JS features are implemented behind a Python "extras" feature.
+To enable it, you must install PySHACL using PIP with the extras included like `pyshacl[js]`
+
+### [Javascript-based Constraints](https://www.w3.org/TR/shacl-js/#js-constraints)
+| Parameter             |  Link 	                	|      Status       	|  Comments	|
+|:----------            |:------:	                	|:-----------------:	|:------	|
+| `sh:js`               | [▶][JSConstraintValidation]	| ![status-complete]	|           |
+
+### [Javascript-based Constraints-Components](https://www.w3.org/TR/shacl-js/#js-components)
+| Parameter             |  Link 	                	|      Status       	|  Comments	|
+|:----------            |:------:	                	|:-----------------:	|:------	|
+| `sh:validator`        | [▶][JSConstraintComponentValidation]	| ![status-complete]	|           |
+| `sh:JSValidator`      | [▶][JSConstraintComponentValidation]	| ![status-complete]	|           |
+
+### [Javascript-based SHACL Functions](https://www.w3.org/TR/shacl-js/#js-functions)
+| Parameter             |  Link 	                	|      Status       	|  Comments	|
+|:----------            |:------:	                	|:-----------------:	|:------	|
+| `sh:JSFunction`       | [▶][JSFunctionsSyntax]    	| ![status-complete]	|           |
+| `sh:parameter`        | [▶][JSFunctionsSyntax]    	| ![status-complete]	|           |
+
+### [Javascript-based SHACL Rules](https://www.w3.org/TR/shacl-js/#rules)
+| Parameter             |  Link 	                	|      Status       	|  Comments	|
+|:----------            |:------:	                	|:-----------------:	|:------	|
+| `sh:JSRule`           | [▶][JSRulesExecution]     	| ![status-complete]	|           |
+
+### [Javascript-based Custom Targets](https://www.w3.org/TR/shacl-js/#targets)
+| Parameter             |  Link 	                	|      Status       	|  Comments	|
+|:----------            |:------:	                	|:-----------------:	|:------	|
+| `sh:JSTarget`         | [▶][JSTarget]             	| ![status-complete]	|           |
+| `sh:JSTargetType`     | [▶][JSTargetType]         	| ![status-complete]	|           |
 
 
 # Implementation Notes
@@ -167,14 +201,6 @@
 - core/property/datatype-ill-formed.ttl : Waiting on RDFLib support for determining ill-formed Literals https://github.com/RDFLib/rdflib/issues/848
 - sparql/pre-binding/shapesGraph-001.ttl : Prebinding to $shapesGraph is currently unsupported. This will be supported in the future.
 ```
-
-## DASH Tests Failures:
-```
-- /rules/triple/rectangle.test.ttl : Stuck on not-implemented Advanced Feature SPARQLFunction feature, due to RDFLib not supporting Extensible Value Testing
-- /rules/triple/person2schema.test.ttl : Stuck on not-implemented Advanced Feature SPARQLFunction feature, due to RDFLib not supporting Extensible Value Testing
-- /rules/triple/functions-permutations.test.ttl : Stuck on not-implemented Advanced Feature SPARQLFunction feature, due to RDFLib not supporting Extensible Value Testing
-```
-
 
 [status-complete]: https://img.shields.io/badge/status-complete-green.svg?longCache=true&style=popout
 [status-partial]: https://img.shields.io/badge/status-partial-yellow.svg?longCache=true&style=popout
@@ -247,3 +273,10 @@
 [AFEntailment]: https://www.w3.org/TR/shacl-af/#Rules
 [AFTripleRule]: https://www.w3.org/TR/shacl-af/#TripleRule
 [AFSPARQLRule]: https://www.w3.org/TR/shacl-af/#SPARQLRule
+
+[JSConstraintValidation]: https://www.w3.org/TR/shacl-js/#js-constraints-validation
+[JSConstraintComponentValidation]: https://www.w3.org/TR/shacl-js/#validation-of-javascript-based-constraint-components
+[JSFunctionsSyntax]: https://www.w3.org/TR/shacl-js/#syntax-and-semantics-of-javascript-based-functions
+[JSRulesExecution]: https://www.w3.org/TR/shacl-js/#rules-execution
+[JSTarget]: https://www.w3.org/TR/shacl-js/#JSTarget
+[JSTargetType]: https://www.w3.org/TR/shacl-js/#JSTargetType

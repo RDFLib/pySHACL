@@ -4,6 +4,231 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [0.14.3] - 2021-02-20
+
+## Changed
+- Relaxed the Max Evaluation Depth from 28 to 30, we were seeing some real-world cases where meta-shacl was failing on large Shapes Graphs at 28 levels deep.
+- sh:namespace values can now be xsd:anyURI or xsd:string or "literal string", but now cannot be <URI nodes>.
+- sh:order can now support xsd:decimal values and xsd:integer values, and can be interchanged at will.
+
+
+## [0.14.2] - 2021-01-02
+
+## Added
+- Potential speedups when executing validation by lazy-loading large modules which may never be required in a normal validation run.
+
+## Fixed
+- Black and Flake8 issues outstanding from 0.14.1 release.
+- Workaround a RDFLib bug trying to import `requests` when requests is not required to be installed.
+  - This bug will still be observed if you use SPARQLConstraints, SPARQLFunction or JSFunction features, but it can be worked around by simply installing `requests` in your python environment.
+
+
+## [0.14.1] - 2020-12-23
+
+## Added
+- Inplace Mode, for when cloning your datagraph is undesirable
+  - Normally pyshacl will create an in-memory copy of your datagraph before modifying it (when using ontology mixin, or inferencing features)
+  - This might be unwanted if your datagraph is very large or remote and cloning it into memory is not a good option
+  - Enabling inplace mode will bypass this clone step, and apply modification operations directly on your data_graph (use with caution!)
+  - Enable with `inplace=True` kwarg on `validate()`.
+  - Inplace mode is not yet available via the CLI application, and perhaps doesn't even make sense to have it available there.
+
+## Fixed
+- Inferencing will no longer incorrectly place expanded triples into your original data_graph, unless you enable 'inplace'
+- SHACL-JS loader will no longer fail if the `regex` module is not installed (it will fall back to using builtin `re`)
+- SHACL-Rule DASH-tests will now pass when the SHACL-rule is applied on multigraph (Dataset or ConjunctiveGraph)
+
+
+## [0.14.0] - 2020-10-14
+
+## Added
+- SHACL-JS Support!
+- Implements all of the features in the SHACL-JS SHACL Extension specification: https://www.w3.org/TR/shacl-js/
+- Includes:
+  - JS Constraints
+  - JS ConstraintComponents
+  - JS SHACL Functions
+  - JS SHACL Rules
+  - JS Target
+  - JS TargetType
+- To install it, make sure you do `pip3 install pyshacl[js]` to get the correct extra packages.
+
+## Changed
+- Added JS flag to the CLI tool to enable SHACL-JS features
+- Updated README and FEATURES matrix
+
+
+## [0.13.3] - 2020-09-11
+
+## Fixed
+- Fixed a long standing issue where our fancy loader would try to `seek()` on a file, after the file
+  was closed by the JSON-LD parser
+  - (thanks @nicholsn for reporting it)
+- Fixed https://github.com/RDFLib/pySHACL/issues/62
+
+
+## [0.13.2] - 2020-09-10
+
+## Added
+- Added the ability for PySHACL to use baked in graphs instead of fetching them from a HTTP endpoint when a known graph
+  is imported using owl:imports
+  - This allows for time savings on graph-load and saves a HTTP request
+  - Also allows us to embed fixed errata versions of files in place of release-time ones online
+
+## Fixed
+- With new features, comes new bugs
+- With the ability to now load SPARQLFunctions, this removes the barrier for loading Schema.org SHACL in advanced mode
+- But when doing so revealed more issues. They are now fixed:
+- Fixed SPARQLConstraintComponent getting confused when `shacl.ttl` was loaded into your Shapes file using owl:imports
+- Fixed https://github.com/RDFLib/pySHACL/issues/61
+
+## Changed
+- Refactored `SPARQLConstraintComponent` code, to allow for other custom constraint components in the future
+  - This prevented SPARQLConstraintComponent getting confused when `shacl.ttl` was loaded into the Shapes file
+  using owl:imports
+
+
+## [0.13.1] - 2020-09-07
+
+## Added
+- SPARQLTargetType
+  - New SPARQL-based Target Type feature
+  - The Paramaterisable form of SPARQLTarget from the SHACL Advanced Features spec
+  - https://www.w3.org/TR/shacl-af/#SPARQLTargetType
+- Added a test for SPARQLTargetType - Theres none in the SHT suite, or the DASH suite.
+
+## Changed
+- Refactored `sh:parameter` code in SPARQL-based Constraint Components, SHACLFunctions, and SPARQL-Based Target Types
+  - They all now share a common SHACLParameter helper class, reducing code duplication
+- Refactored `SPARQLQueryHelper`
+  - `SPARQLQueryHelper` internal class is now more helpful
+  - `query_helper` can now extract param bindings into param-value pairs for parameterised queries
+  - Reduces more code duplication
+
+
+## [0.13.0] - 2020-09-04
+
+## Added
+- New SHACL Advanced Spec Features!
+- All NodeExpressions can now be used in SHACL Rules
+  - Focus Node (sh:this)
+  - FilterShape (sh:filterShape)
+  - Function Expressions (any sh:SHACLFunction and args)
+  - Path Expressions (use sh:path in a NodeExpression)
+  - Intersection Expressions (sh:intersection)
+  - Union Expressions (sh:union)
+- SHACLFunctions (including SPARQLFunction)
+  - Both SHACLFunction and SPARQLFunction are now fully implemented including unit tests and edge cases
+  - SHACLFunctions are bound to PySHACL and can be used in SHACL Rules and NodeExpressions
+  - SPARQLFunctions are bound to the RDFLib SPARQL Engine, so they can be used in other SPARQL queries
+  - Read the manual for more info: https://www.w3.org/TR/shacl-af/#functions
+
+## Fixed
+- Short versions of uris were sometimes not used in the Validation Report when they should've been
+- Checking results of some tests was being skipped! Lucky this wasn't letting through any SHACL errors.
+- Fixed error message when using sh:ignoredProperties on a node that isn't sh:closed issue #58
+
+
+## [0.12.2] - 2020-08-12
+
+## Fixed
+- In a validation report graph, when FocusNode and ValueNode are the same node, and are a blank node, when they get
+copied into the validation report graph they will have the same bnode id as each other.
+- Optimised the algorithm for copying different kinds of rdf nodes into the validation graph.
+
+## Changed
+- When the FocusNode and ValueNode are copied into the validation graph from the data graph, they will try to keep the
+same bnode id they had before, if possible.
+
+
+## [0.12.1.post2] - 2020-07-23
+
+## Fixed
+- A couple of autogenerated sh:message strings were trying to serialize from dataGraph rather than shapeGraph
+
+
+## [0.12.1.post1] - 2020-07-22
+
+## Fixed
+- A couple of autogenerated sh:message strings were missing their focusNode element in v0.12.1
+
+
+## [0.12.1] - 2020-07-22
+
+## Added
+- All SHACL Core constraints now have their own autogenerated sh:message.
+  - This is used as a fallback when your Shape does not provide its own sh:message
+  - See the new sh:resultMessage entries in the Validation Report output
+  - These are hopefully more human-readable than the other fields of the Validation Report results
+
+- Added a copy of the implementation of the new 'Memory2' rdflib triplestore backend.
+  - This when using Python 3.6 or above, this is faster than the default 'IOMemory' store by:
+    - 10.3% when benchmarking validation with no inferencing
+    - 17% when benchmarking validation with rdfs inferencing
+    - 19.5% when benchmarking validation with rdfs+owlrl inferencing
+
+## Changed
+- PySHACL is now categorised as **Production/Stable**.
+  - This marks a level of maturity in PySHACL we are happy to no longer consider a beta
+  - A v1.0.0 might be coming soon, but its just a version number, doesn't mean anything special
+- Changed default rdflib triplestore backend to 'Memory2' as above.
+- Tiny optimisations in the way sh:message items are added to a validation report graph.
+
+## Fixed
+- Regression since v0.11.0, sh:value and sh:focusNode from the datagraph were not included in the validation report
+  graph if the datagraph was of type rdflib.ConjunctiveGraph or rdflib.Dataset.
+
+
+## [0.12.0] - 2020-07-10
+
+### Removed
+- Python 3.5 support is removed. PySHACL now requires Python 3.6 or above.
+  - Routine tests are run using Python 3.6.11, 3.7.8, and 3.8.2.
+  - Python 3.9 might work but is not yet supported.
+
+### Added
+- Python 3.6-compatible type hinting is added throughout the codebase
+- MyPy library is used to run type checking during testing process
+- Flake8 linting is added to enforce PEP8
+- isort is added to enforce imports linting
+- Black is added to keep formatting consistent across releases
+
+### Changed
+- PySHACL is no longer a setuptools-based project with a `setup.py` and `requirements.txt` file.
+- PySHACL is now a PEP518 & PEP517 project, it uses `pyproject.toml` and `poetry` to manage
+dependencies, build and install.
+- For best compatibility when installing from PyPI with `pip`, upgrade to pip v18.1.0 or above.
+  - If you're on Ubuntu 16.04 or 18.04, you will need to run `sudo pip3 install --upgrade pip`
+- Editor Line Length for PySHACL code is now set to 119 as opposed to 79 chars.
+
+
+
+## [0.11.6.post1] - 2020-07-09
+
+### Added
+- New feature to CLI tool
+  - `-V` shows the PySHACL version
+- Run module directly
+  - You can get access to the same CLI tool if you install the module and run it using `python3 -m pyshacl`
+  - See `python3 -m pyshacl --help` for more details
+
+### Deprecated
+#### Announcement
+- **This is the final version with Python v3.5 support**
+  - Versions 0.12.0 and above will have newer package management and dependency management, and will
+  require Python v3.6+.
+
+
+## [0.11.6] - 2020-07-09
+
+### Fixed
+- Fixed a bug present since `v0.11.0`. If the data graph has multiple named graphs, and an extra ontology mixin source
+used and that also has multiple named graphs, then only the first graph in the mixins source was added to the datagraph.
+  - Now all named graphs from the mixin source are mixed into all named graphs of the datagraph, as originally intended.
+  - Fixed one unit test which had been intermittently failing
+- Cleaned up the behaviour around performing patch to Boolean Literal parsing on rdflib 5.0.0
+
+
 ## [0.11.5] - 2020-03-28
 
 ### Fixed
@@ -11,11 +236,6 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - Changed to a new more predictable literal comparison routine for minInclusive, minExclusive,
     maxInclusive, and maxExclusive. This removes the need for one monkey-patch in rdflib 4.2.2 and works around
     the `TOTAL_ORDER_CASTERS` special cases in rdflib `5.0.0`.
-
-### Announcement
-- **This is the final version with Python v3.5 support**
-  - Versions 0.12.0 and above will have newer package management and dependency management, and will
-  require Python v3.6+.
 
 
 ## [0.11.4] - 2020-01-31
@@ -504,12 +724,26 @@ just leaves the files open. Now it is up to the command-line client to close the
 - 10+ tests are passing.
 
 
-## 0.1.0a1.dev20180904 - 2018-09-04
+## [0.1.0a4.dev20180906] - 2018-09-04
 ### Added
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.11.5...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.14.2...HEAD
+[0.14.2]: https://github.com/RDFLib/pySHACL/compare/v0.14.1...v0.14.2
+[0.14.1]: https://github.com/RDFLib/pySHACL/compare/v0.14.0...v0.14.1
+[0.14.0]: https://github.com/RDFLib/pySHACL/compare/v0.13.3...v0.14.0
+[0.13.3]: https://github.com/RDFLib/pySHACL/compare/v0.13.2...v0.13.3
+[0.13.2]: https://github.com/RDFLib/pySHACL/compare/v0.13.1...v0.13.2
+[0.13.1]: https://github.com/RDFLib/pySHACL/compare/v0.13.0...v0.13.1
+[0.13.0]: https://github.com/RDFLib/pySHACL/compare/v0.12.2...v0.13.0
+[0.12.2]: https://github.com/RDFLib/pySHACL/compare/v0.12.1.post2...v0.12.2
+[0.12.1.post2]: https://github.com/RDFLib/pySHACL/compare/v0.12.1.post1...v0.12.1.post2
+[0.12.1.post1]: https://github.com/RDFLib/pySHACL/compare/v0.12.1...v0.12.1.post1
+[0.12.1]: https://github.com/RDFLib/pySHACL/compare/v0.12.0...v0.12.1
+[0.12.0]: https://github.com/RDFLib/pySHACL/compare/v0.11.6.post1...v0.12.0
+[0.11.6.post1]: https://github.com/RDFLib/pySHACL/compare/v0.11.6...v0.11.6.post1
+[0.11.6]: https://github.com/RDFLib/pySHACL/compare/v0.11.5...v0.11.6
 [0.11.5]: https://github.com/RDFLib/pySHACL/compare/v0.11.4...v0.11.5
 [0.11.4]: https://github.com/RDFLib/pySHACL/compare/v0.11.3.post1...v0.11.4
 [0.11.3.post1]: https://github.com/RDFLib/pySHACL/compare/v0.11.3...v0.11.3.post1
@@ -550,4 +784,3 @@ just leaves the files open. Now it is up to the command-line client to close the
 [0.1.0a4.dev20180906]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a3.dev20180906...v0.1.0a4.dev20180906
 [0.1.0a3.dev20180906]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a2.dev20180906...v0.1.0a3.dev20180906
 [0.1.0a2.dev20180906]: https://github.com/RDFLib/pySHACL/compare/v0.1.0a1.dev20180904...v0.1.0a2.dev20180906
-

@@ -2,11 +2,18 @@
 """
 https://www.w3.org/TR/shacl/#core-components-range
 """
+
+from typing import Dict, List
+
 import rdflib
+
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
+from pyshacl.pytypes import GraphLike
+from pyshacl.rdfutil import stringify_node
 from pyshacl.rdfutil.compare import compare_literal
+
 
 SH_MinExclusiveConstraintComponent = SH.term('MinExclusiveConstraintComponent')
 SH_MinInclusiveConstraintComponent = SH.term('MinInclusiveConstraintComponent')
@@ -32,7 +39,8 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
         if len(min_vals) < 1:
             raise ConstraintLoadError(
                 "MinExclusiveConstraintComponent must have at least one sh:minExclusive predicate.",
-                "https://www.w3.org/TR/shacl/#MinExclusiveConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MinExclusiveConstraintComponent",
+            )
         self.min_vals = min_vals
 
     @classmethod
@@ -47,11 +55,19 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MinExclusiveConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
-        """
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        if len(self.min_vals) < 2:
+            m = "Value is not > {}".format(stringify_node(self.shape.sg.graph, self.min_vals[0]))
+        else:
+            rules = ", ".join(stringify_node(self.shape.sg.graph, c) for c in self.min_vals)
+            m = "Value is not > in ({})".format(rules)
+        return [rdflib.Literal(m)]
 
-        :type focus_value_nodes: dict
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+        """
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
@@ -90,13 +106,13 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
                         except (TypeError, NotImplementedError):
                             flag = False
                 else:
-                    raise ReportableRuntimeError(
-                        "Not sure how to compare anything else.")
+                    raise ReportableRuntimeError("Not sure how to compare anything else.")
                 if not flag:
                     non_conformant = True
                     rept = self.make_v_result(target_graph, f, value_node=v)
                     reports.append(rept)
         return non_conformant, reports
+
 
 class MinInclusiveConstraintComponent(ConstraintComponent):
     """
@@ -112,7 +128,8 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
         if len(min_vals) < 1:
             raise ConstraintLoadError(
                 "MinInclusiveConstraintComponent must have at least one sh:minInclusive predicate.",
-                "https://www.w3.org/TR/shacl/#MinInclusiveConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MinInclusiveConstraintComponent",
+            )
         self.min_vals = min_vals
 
     @classmethod
@@ -127,11 +144,19 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MinInclusiveConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
-        """
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        if len(self.min_vals) < 2:
+            m = "Value is not >= {}".format(stringify_node(self.shape.sg.graph, self.min_vals[0]))
+        else:
+            rules = ", ".join(stringify_node(self.shape.sg.graph, c) for c in self.min_vals)
+            m = "Value is not >= in ({})".format(rules)
+        return [rdflib.Literal(m)]
 
-        :type focus_value_nodes: dict
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+        """
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
@@ -170,8 +195,7 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
                         except (TypeError, NotImplementedError):
                             flag = False
                 else:
-                    raise ReportableRuntimeError(
-                        "Not sure how to compare anything else.")
+                    raise ReportableRuntimeError("Not sure how to compare anything else.")
                 if not flag:
                     non_conformant = True
                     rept = self.make_v_result(target_graph, f, value_node=v)
@@ -193,7 +217,8 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
         if len(max_vals) < 1:
             raise ConstraintLoadError(
                 "MaxExclusiveConstraintComponent must have at least one sh:minExclusive predicate.",
-                "https://www.w3.org/TR/shacl/#MaxExclusiveConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MaxExclusiveConstraintComponent",
+            )
         self.max_vals = max_vals
 
     @classmethod
@@ -208,11 +233,19 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MaxExclusiveConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
-        """
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        if len(self.max_vals) < 2:
+            m = "Value is not < {}".format(stringify_node(self.shape.sg.graph, self.max_vals[0]))
+        else:
+            rules = ", ".join(stringify_node(self.shape.sg.graph, c) for c in self.max_vals)
+            m = "Value is not < in ({})".format(rules)
+        return [rdflib.Literal(m)]
 
-        :type focus_value_nodes: dict
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+        """
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
@@ -251,8 +284,7 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
                         except (TypeError, NotImplementedError):
                             flag = False
                 else:
-                    raise ReportableRuntimeError(
-                        "Not sure how to compare anything else.")
+                    raise ReportableRuntimeError("Not sure how to compare anything else.")
                 if not flag:
                     non_conformant = True
                     rept = self.make_v_result(target_graph, f, value_node=v)
@@ -274,7 +306,8 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
         if len(max_vals) < 1:
             raise ConstraintLoadError(
                 "MaxInclusiveConstraintComponent must have at least one sh:minInclusive predicate.",
-                "https://www.w3.org/TR/shacl/#MaxInclusiveConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MaxInclusiveConstraintComponent",
+            )
         self.max_vals = max_vals
 
     @classmethod
@@ -289,11 +322,19 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MaxInclusiveConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
-        """
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        if len(self.max_vals) < 2:
+            m = "Value is not <= {}".format(stringify_node(self.shape.sg.graph, self.max_vals[0]))
+        else:
+            rules = ", ".join(stringify_node(self.shape.sg.graph, c) for c in self.max_vals)
+            m = "Value is not <= in ({})".format(rules)
+        return [rdflib.Literal(m)]
 
-        :type focus_value_nodes: dict
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+        """
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         reports = []
         non_conformant = False
@@ -332,8 +373,7 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
                         except (TypeError, NotImplementedError):
                             flag = False
                 else:
-                    raise ReportableRuntimeError(
-                        "Not sure how to compare anything else.")
+                    raise ReportableRuntimeError("Not sure how to compare anything else.")
                 if not flag:
                     non_conformant = True
                     rept = self.make_v_result(target_graph, f, value_node=v)

@@ -3,9 +3,13 @@
 # pySHACL
 A Python validator for SHACL.
 
-[![PyPI version](https://badge.fury.io/py/pyshacl.svg)](https://badge.fury.io/py/pyshacl)  ![](https://img.shields.io/badge/coverage-86%25-yellowgreen.svg)
+[![Build Status](https://travis-ci.org/RDFLib/pySHACL.svg?branch=master)](https://travis-ci.org/RDFLib/pySHACL) [![Coverage Status](https://coveralls.io/repos/github/RDFLib/pySHACL/badge.svg?branch=master)](https://coveralls.io/github/RDFLib/pySHACL?branch=master) [![PyPI version](https://badge.fury.io/py/pyshacl.svg)](https://badge.fury.io/py/pyshacl) [![Code Style Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-This is a pure Python module which allows for the validation of [RDF](https://www.w3.org/2001/sw/wiki/RDF) graphs against Shapes Constraint Language ([SHACL](https://www.w3.org/TR/shacl/)) graphs. This module uses the [rdflib](https://github.com/RDFLib/rdflib) Python library for working with RDF and is dependent on the [OWL-RL](https://github.com/RDFLib/OWL-RL) Python module for [OWL2 RL Profile](https://www.w3.org/TR/owl2-overview/#ref-owl-2-profiles)\-based expansion of data graphs.
+
+
+[![DOI](https://zenodo.org/badge/147505799.svg)](https://zenodo.org/badge/latestdoi/147505799) [![Downloads](https://pepy.tech/badge/pyshacl)](https://pepy.tech/project/pyshacl) [![Downloads](https://pepy.tech/badge/pyshacl/month)](https://pepy.tech/project/pyshacl/month) [![Downloads](https://pepy.tech/badge/pyshacl/week)](https://pepy.tech/project/pyshacl/week)
+
+This is a pure Python module which allows for the validation of [RDF](https://www.w3.org/2001/sw/wiki/RDF) graphs against Shapes Constraint Language ([SHACL](https://www.w3.org/TR/shacl/)) graphs. This module uses the [rdflib](https://github.com/RDFLib/rdflib) Python library for working with RDF and is dependent on the [OWL-RL](https://github.com/RDFLib/OWL-RL) Python module for [OWL2 RL Profile](https://www.w3.org/TR/owl2-overview/#ref-owl-2-profiles) based expansion of data graphs.
 
 This module is developed to adhere to the SHACL Recommendation:
 > Holger Knublauch; Dimitris Kontokostas. *Shapes Constraint Language (SHACL)*. 20 July 2017. W3C Recommendation. URL: <https://www.w3.org/TR/shacl/> ED: <https://w3c.github.io/data-shapes/shacl/>
@@ -18,10 +22,11 @@ $ pip3 install pyshacl
 
 Or in a python virtualenv _(these example commandline instructions are for a Linux/Unix based OS)_
 ```bash
-$ python3 -m virtualenv --python=python3 --no-site-packages shaclvenv
-$ source ./shaclvenv/bin/activate
+$ python3 -m virtualenv --python=python3 --no-site-packages .venv
+$ source ./.venv/bin/activate
 $ pip3 install pyshacl
 ```
+
 To exit the virtual enviornment:
 ```bash
 $ deactivate
@@ -31,7 +36,7 @@ $ deactivate
 For command line use:
 _(these example commandline instructions are for a Linux/Unix based OS)_
 ```bash
-pyshacl -s /path/to/shapesGraph.ttl -m -i rdfs -a -f human /path/to/dataGraph.ttl
+$ pyshacl -s /path/to/shapesGraph.ttl -m -i rdfs -a -j -f human /path/to/dataGraph.ttl
 ```
 Where
  - `-s` is an (optional) path to the shapes graph to use
@@ -40,6 +45,7 @@ Where
  - `-f` is the ValidationReport output format (`human` = human-readable validation report)
  - `-m` enable the meta-shacl feature
  - `-a` enable SHACL Advanced Features
+ - `-j` enable SHACL-JS Features (if `pyhsacl[js]` is installed)
 
 System exit codes are:
 `0` = DataGraph is Conformant
@@ -49,11 +55,13 @@ System exit codes are:
 
 Full CLI Usage options:
 ```bash
+$ pyshacl -h
+$ python3 -m pyshacl -h
 usage: pyshacl [-h] [-s [SHACL]] [-e [ONT]] [-i {none,rdfs,owlrl,both}] [-m]
-               [--imports] [--abort] [-a] [-d] [-f {human,turtle,xml,json-ld,nt,n3}]
+               [--imports] [--abort] [-a] [-j] [-d] [-f {human,turtle,xml,json-ld,nt,n3}]
                [-df {auto,turtle,xml,json-ld,nt,n3}]
                [-sf {auto,turtle,xml,json-ld,nt,n3}]
-               [-ef {auto,turtle,xml,json-ld,nt,n3}] [-o [OUTPUT]]
+               [-ef {auto,turtle,xml,json-ld,nt,n3}] [-V] [-o [OUTPUT]]
                DataGraph
 
 Run the pySHACL validator from the command line.
@@ -77,8 +85,9 @@ optional arguments:
   --imports             Allow import of sub-graphs defined in statements with
                         owl:imports.
   -a, --advanced        Enable support for SHACL Advanced Features.
+  -j, --js              Enable support for SHACL-JS Features.
   --abort               Abort on first error.
-  -d, --debug           Output additional runtime messages, including violations that didn't
+  -d, --debug           Output additional runtime messages, including violations that didn\'t
                         lead to non-conformance.
   -f {human,turtle,xml,json-ld,nt,n3}, --format {human,turtle,xml,json-ld,nt,n3}
                         Choose an output format. Default is "human".
@@ -91,39 +100,25 @@ optional arguments:
   -ef {auto,turtle,xml,json-ld,nt,n3}, --ont-file-format {auto,turtle,xml,json-ld,nt,n3}
                         Explicitly state the RDF File format of the extra
                         ontology file. Default="auto".
+  -V, --version         Print the PySHACL version and exit.
   -o [OUTPUT], --output [OUTPUT]
                         Send output to a file (defaults to stdout).
 ```
 
-## Windows CLI
-
-[Pyinstaller](https://www.pyinstaller.org/) can be
-[used](https://pyinstaller.readthedocs.io/en/stable/usage.html) to create an
-executable for Windows that has the same characteristics as the Linux/Mac
-CLI program.
-The necessary ``.spec`` file is already included in ``pyshacl/pyshacl-cli.spec``.
-The ``pyshacl-cli.spec`` PyInstaller spec file creates a ``.exe`` for the
-pySHACL Command Line utility. See above for the pySHACL command line util usage instructions.
-
-See [the PyInstaller installation guide](https://pyinstaller.readthedocs.io/en/stable/installation.html#installing-in-windows) for info on how to install PyInstaller for Windows.
-
-Once you have pyinstaller, use pyinstaller to generate the ``pyshacl.exe`` CLI file like so:
-```
-    $ cd src/pyshacl
-    $ pyinstaller pyshacl-cli.spec
-```
-This will output ``pyshacl.exe`` in the ``dist`` directory in ``src/pyshacl``.
-
-You can now run the pySHACL Command Line utility via ``pyshacl.exe``.
-See above for the pySHACL command line util usage instructions.
-
-
 ## Python Module Use
 For basic use of this module, you can just call the `validate` function of the `pyshacl` module like this:
 
-```
+```python
 from pyshacl import validate
-r = validate(data_graph, shacl_graph=sg, ont_graph=og, inference='rdfs', abort_on_error=False, meta_shacl=False, debug=False)
+r = validate(data_graph,
+      shacl_graph=sg,
+      ont_graph=og,
+      inference='rdfs',
+      abort_on_error=False,
+      meta_shacl=False,
+      advanced=False,
+      js=False,
+      debug=False)
 conforms, results_graph, results_text = r
 ```
 
@@ -135,10 +130,11 @@ Where:
 Options are 'rdfs', 'owlrl', 'both', or 'none'. The default is 'none'.
 * `abort_on_error` (optional) a Python `bool` value to indicate whether or not the program should abort after encountering a validation error or to continue. Default is to continue.
 * `meta_shacl` (optional) a Python `bool` value to indicate whether or not the program should enable the Meta-SHACL feature. Default is False.
+* `advanced`: (optional) a Python `bool` value to enable SHACL Advanced Features
+* `js`: (optional) a Python `bool` value to enable SHACL-JS Features (if `pyshacl[js]` is installed)
 * `debug` (optional) a Python `bool` value to indicate whether or not the program should emit debugging output text, including violations that didn't lead to non-conformance overall. So when debug is True don't judge conformance by absense of violation messages. Default is False.
 
 Some other optional keyword variables available available on the `validate` function:
-* `advanced`: Enable SHACL Advanced Features
 * `data_graph_format`: Override the format detection for the given data graph source file.
 * `shacl_graph_format`: Override the format detection for the given shacl graph source file.
 * `ont_graph_format`: Override the format detection for the given extra ontology graph source file.
@@ -149,9 +145,19 @@ Some other optional keyword variables available available on the `validate` func
 
 Return value:
 * a three-component `tuple` containing:
-  * `conforms` a `bool`, indicating whether or not the `data_graph` conforms to the `shacl_graph`
-  * `results_graph` an rdflib `Graph` object built according to the SHACL specification's [Validation Report](https://www.w3.org/TR/shacl/#validation-report) structure
-  * `results_text` python string representing a verbose textual representation of the [Validation Report](https://www.w3.org/TR/shacl/#validation-report)
+  * `conforms`: a `bool`, indicating whether or not the `data_graph` conforms to the `shacl_graph`
+  * `results_graph`: a `Graph` object built according to the SHACL specification's [Validation Report](https://www.w3.org/TR/shacl/#validation-report) structure
+  * `results_text`: python string representing a verbose textual representation of the [Validation Report](https://www.w3.org/TR/shacl/#validation-report)
+
+
+## Python Module Call
+
+You can get an equivalent of the Command Line Tool using the Python3 executable by doing:
+
+```bash
+$ python3 -m pyshacl
+```
+
 
 ## Errors
 Under certain circumstances pySHACL can produce a `Validation Failure`. This is a formal error defined by the SHACL specification and is required to be produced as a result of specific conditions within the SHACL graph.
@@ -169,8 +175,36 @@ caught in a `try ... except` block.
 In the case of `ShapeLoadError` and `ConstraintLoadError`, see the `str()` string representation of the exception instance for the error message along with a link to the relevant section in the SHACL spec document.
 
 
+## Windows CLI
+
+[Pyinstaller](https://www.pyinstaller.org/) can be
+[used](https://pyinstaller.readthedocs.io/en/stable/usage.html) to create an
+executable for Windows that has the same characteristics as the Linux/Mac
+CLI program.
+The necessary ``.spec`` file is already included in ``pyshacl/pyshacl-cli.spec``.
+The ``pyshacl-cli.spec`` PyInstaller spec file creates a ``.exe`` for the
+pySHACL Command Line utility. See above for the pySHACL command line util usage instructions.
+
+See [the PyInstaller installation guide](https://pyinstaller.readthedocs.io/en/stable/installation.html#installing-in-windows) for info on how to install PyInstaller for Windows.
+
+Once you have pyinstaller, use pyinstaller to generate the ``pyshacl.exe`` CLI file like so:
+```bash powershell
+$ cd src/pyshacl
+$ pyinstaller pyshacl-cli.spec
+```
+This will output ``pyshacl.exe`` in the ``dist`` directory in ``src/pyshacl``.
+
+You can now run the pySHACL Command Line utility via ``pyshacl.exe``.
+See above for the pySHACL command line util usage instructions.
+
+
 ## Compatibility
-PySHACL is a Python3 library. For best compatibility use Python v3.5 or greater. This library _**does not work**_ on Python v2.7.x or below.
+PySHACL is a Python3 library. For best compatibility use Python v3.6 or greater. Python3 v3.5 or below is _**not supported**_ and this library _**does not work**_ on Python v2.7.x or below.
+
+PySHACL is now a PEP518 & PEP517 project, it uses `pyproject.toml` and `poetry` to manage dependencies, build and install.
+
+For best compatibility when installing from PyPI with `pip`, upgrade to pip v18.1.0 or above.
+  - If you're on Ubuntu 16.04 or 18.04, you will need to run `sudo pip3 install --upgrade pip` to get the newer version.
 
 
 ## Features
@@ -192,6 +226,9 @@ This repository is licensed under Apache License, Version 2.0. See the [LICENSE 
 ## Contributors
 See the [CONTRIBUTORS file](https://github.com/RDFLib/pySHACL/blob/master/CONTRIBUTORS.md).
 
+
+## Citation
+DOI: [10.5281/zenodo.4750841](https://doi.org/10.5281/zenodo.4750841)
 
 ## Contacts
 Project Lead:

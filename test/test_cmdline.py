@@ -1,12 +1,27 @@
 # -*- coding: utf-8 -*-
 #
-import sys
-import platform
 import os
-from os import path
+import platform
 import subprocess
+import sys
 
+from os import getenv, path
+from sys import stderr
+
+
+print(os.environ, file=stderr)
+PATH = getenv("PATH", "")
+PP = getenv('PYTHONPATH', "")
 here_dir = path.abspath(path.dirname(__file__))
+ENV_VARS = {"PATH": PATH, "PYTHONPATH": ':'.join((here_dir, PP))}
+PH = getenv('PYTHONHOME', "")
+if PH:
+    ENV_VARS['PYTHONHOME'] = PH
+VE = getenv('VIRTUAL_ENV', "")
+if VE:
+    ENV_VARS['VIRTUAL_ENV'] = VE
+    virtual_bin = path.join(VE, "bin")
+    ENV_VARS['PATH'] = ':'.join((virtual_bin, PATH))
 abs_resources_dir = path.join(here_dir, 'resources')
 cmdline_files_dir = path.join(abs_resources_dir, 'cmdline_tests')
 
@@ -17,6 +32,12 @@ if path.exists(check_resources) and path.isdir(check_resources):
 else:
     in_test_dir = False
 
+if in_test_dir:
+    lib_dir = os.path.abspath(os.path.join(here_dir, os.pardir))
+    ENV_VARS["PYTHONPATH"] = ':'.join((lib_dir, PP))
+
+it = ENV_VARS["PYTHONPATH"].split(":")
+print(it, file=stderr, flush=True)
 scr_dir = "scripts-{}.{}".format(sys.version_info[0], sys.version_info[1])
 if in_test_dir:
     scr_dir = path.join('..', scr_dir)
@@ -53,6 +74,7 @@ elif has_cli_script:
 else:
     pyshacl_command = ["pyshacl"]
 
+
 def test_cmdline():
     if not hasattr(subprocess, 'run'):
         print("Subprocess.run() not available, skip this test")
@@ -70,18 +92,14 @@ def test_cmdline():
     shacl_file = path.join(cmdline_files_dir, 's1.ttl')
     ont_file = path.join(cmdline_files_dir, 'o1.ttl')
     cmd = pyshacl_command
-    args = [
-        graph_file,
-        '-s', shacl_file,
-        '-i', 'rdfs',
-        '-e', ont_file
-    ]
-    res = subprocess.run(cmd+args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    args = [graph_file, '-s', shacl_file, '-i', 'rdfs', '-e', ont_file]
+    res = subprocess.run(cmd + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=ENV_VARS)
     print("result = {}".format(res.returncode))
     print(res.stdout.decode('utf-8'))
     print(res.stderr.decode('utf-8'))
     assert res.returncode == 0
     return True
+
 
 def test_cmdline_fail():
     if not hasattr(subprocess, 'run'):
@@ -100,18 +118,14 @@ def test_cmdline_fail():
     shacl_file = path.join(cmdline_files_dir, 's1.ttl')
     ont_file = path.join(cmdline_files_dir, 'o1.ttl')
     cmd = pyshacl_command
-    args = [
-        graph_file,
-        '-s', shacl_file,
-        '-i', 'rdfs',
-        '-e', ont_file
-    ]
-    res = subprocess.run(cmd+args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    args = [graph_file, '-s', shacl_file, '-i', 'rdfs', '-e', ont_file]
+    res = subprocess.run(cmd + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=ENV_VARS)
     print("result = {}".format(res.returncode))
     print(res.stdout.decode('utf-8'))
     print(res.stderr.decode('utf-8'))
     assert res.returncode == 1
     return True
+
 
 def test_cmdline_web():
     if not hasattr(subprocess, 'run'):
@@ -136,20 +150,49 @@ def test_cmdline_web():
     shacl_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/s1.ttl"
     ont_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/o1.ttl"
     cmd = pyshacl_command
-    args = [
-        graph_file,
-        '-s', shacl_file,
-        '-i', 'rdfs',
-        '-e', ont_file
-    ]
-    res = subprocess.run(cmd+args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    args = [graph_file, '-s', shacl_file, '-i', 'rdfs', '-e', ont_file]
+    res = subprocess.run(cmd + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=ENV_VARS)
     print("result = {}".format(res.returncode))
     print(res.stdout.decode('utf-8'))
     print(res.stderr.decode('utf-8'))
     assert res.returncode == 0
     return True
 
+
+def test_cmdline_jsonld():
+    if not hasattr(subprocess, 'run'):
+        print("Subprocess.run() not available, skip this test")
+        assert True
+        return
+    if platform.system() == "Windows":
+        print("Commandline tests cannot run on Windows.")
+        assert True
+        return True
+    if os.environ.get("PYBUILD_NAME", None) is not None:
+        print("We don't have access to scripts dir during pybuild process.")
+        assert True
+        return True
+    DEB_BUILD_ARCH = os.environ.get('DEB_BUILD_ARCH', None)
+    DEB_HOST_ARCH = os.environ.get('DEB_HOST_ARCH', None)
+    if DEB_BUILD_ARCH is not None or DEB_HOST_ARCH is not None:
+        print("Cannot run web requests in debhelper tests.")
+        assert True
+        return True
+    graph_file = path.join(cmdline_files_dir, 'd1.jsonld')
+    shacl_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/s1.ttl"
+    ont_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/o1.ttl"
+    cmd = pyshacl_command
+    args = [graph_file, '-df', 'json-ld', '-s', shacl_file, '-i', 'rdfs', '-e', ont_file]
+    res = subprocess.run(cmd + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=ENV_VARS)
+    print("result = {}".format(res.returncode))
+    print(res.stdout.decode('utf-8'))
+    print(res.stderr.decode('utf-8'))
+    assert res.returncode == 0
+    return True
+
+
 if __name__ == "__main__":
     test_cmdline()
     test_cmdline_fail()
     test_cmdline_web()
+    test_cmdline_jsonld()

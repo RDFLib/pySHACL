@@ -1,0 +1,164 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "pyshacl"
+version = "0.14.3"
+# Don't forget to change the version number in __init__.py along with this one
+description = "Python SHACL Validator"
+license = "Apache-2.0"
+authors = [
+    "Ashley Sommer <Ashley.Sommer@csiro.au>"
+]
+readme = "README.md"
+repository = "https://github.com/RDFLib/pySHACL"
+homepage = "https://github.com/RDFLib/pySHACL"
+keywords = ["Linked Data", "Semantic Web", "RDF", "Python", "SHACL", "Shapes", "Schema", "Validate"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Topic :: Utilities",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Operating System :: OS Independent"
+]
+packages = [
+    { include = "pyshacl" },
+    { include = "examples", format = "sdist" },
+    { include = "benchmarks", format = "sdist" },
+    { include = "test", format = "sdist" }
+]
+
+include = [
+    { path = "pyshacl/assets/*.ttl", format = "sdist" },
+    { path = "hooks/*", format = "sdist" },
+    { path = "MANIFEST.in", format = "sdist" },
+    { path = "pyproject.toml", format = "sdist" },
+    { path = "poetry.lock", format = "sdist" },
+    { path = "Makefile", format = "sdist" },
+	"*.md",
+	"*.txt",
+    "pyshacl/assets/*.pickle",
+    "pyshacl/*.spec"
+]
+
+
+[tool.poetry.dependencies]
+python = "^3.6"  # Compatible python versions must be declared here
+rdflib = "^5.0.0"
+rdflib-jsonld = "^0.5.0"
+owlrl = "^5.2.1"
+pyduktape2 = {version="^0.4.1", python=">=3.6", optional=true}
+flake8 = {version="^3.8.0", python=">=3.6", optional=true}
+isort = {version="^5.7.0", python=">=3.6", optional=true}
+black = {version=">=20.8b1,<=21", python=">=3.6", optional=true}
+
+[tool.poetry.dev-dependencies]
+coverage = "^4.5"
+pytest = "^5.0"
+pytest-cov = "^2.8.1"
+flake8 = {version="^3.8.0", python=">=3.6", optional=true}
+isort = {version="^5.7.0", python=">=3.6", optional=true}
+black = {version=">=20.8b1,<=21", python=">=3.6", optional=true}
+mypy = {version="^0.800", python=">=3.6", optional=true}
+
+
+[tool.poetry.extras]
+js = ["pyduktape2"]
+dev-lint = ["isort", "black", "flake8"]
+dev-type-checking = ["mypy"]
+
+[tool.poetry.scripts]
+pyshacl = "pyshacl.cli:main"
+
+[tool.dephell.main]
+from = {format = "poetry", path = "pyproject.toml"}
+to = {format = "setuppy", path = "setup.py"}
+
+[tool.black]
+line-length = "119"
+skip-string-normalization = true
+target-version = ['py36']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.pytest_cache
+    | \.tox
+    | \.venv
+    | _build
+    | htmlcov
+    | benchmarks
+    | examples
+    | pyshacl.egg-info
+    | buck-out
+    | build
+    | dist
+    | venv
+  )/
+)
+'''
+
+[tool.isort]
+atomic = true
+default_section = "THIRDPARTY"
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+known_first_party = "pyshacl"
+known_third_party = ["pytest"]
+line_length = 119
+lines_after_imports = 2
+lines_between_types = 1
+multi_line_output = 3
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+isolated_build = true
+skipsdist = true
+envlist = py36, py37, py38, py39, lint, type-checking
+
+[testenv]
+deps =
+    poetry>=1.1.0
+    py36: coveralls
+passenv = TRAVIS TRAVIS_JOB_ID TRAVIS_BRANCH TRAVIS_BUILD_DIR
+skip_install = true
+allowlist_externals = python3, ls, pwd, env
+commands_pre =
+    poetry install -vv -n --no-root --extras "js"
+commands =
+    - poetry show
+    poetry run pytest --cov=pyshacl test/
+    - poetry run coverage combine --append
+    poetry run coverage report -m
+    poetry run coverage html -i
+    py36: - coveralls
+
+[testenv:lint]
+commands_pre =
+    poetry install -vv -n --no-root --extras "dev-lint"
+commands =
+    - poetry show
+    poetry run flake8 pyshacl
+    poetry run isort --check-only pyshacl
+    poetry run black --check --verbose --config ./pyproject.toml pyshacl
+
+[testenv:type-checking]
+commands_pre =
+    poetry install -vv -n --no-root --extras "dev-type-checking"
+    poetry run pip3 install "mypy>=0.800"
+commands =
+    - poetry show
+    poetry run python3 -m mypy --ignore-missing-imports pyshacl
+
+"""

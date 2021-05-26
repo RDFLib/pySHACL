@@ -2,12 +2,17 @@
 """
 https://www.w3.org/TR/shacl/#core-components-count
 """
-import rdflib
-from rdflib.term import Literal
+from typing import Dict, List
+
 from rdflib.namespace import XSD
+from rdflib.term import Literal
+
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError
+from pyshacl.pytypes import GraphLike
+from pyshacl.rdfutil import stringify_node
+
 
 XSD_integer = XSD.term('integer')
 SH_minCount = SH.term('minCount')
@@ -32,25 +37,29 @@ class MinCountConstraintComponent(ConstraintComponent):
         if len(min_count) < 1:
             raise ConstraintLoadError(
                 "MinCountConstraintComponent must have at least one sh:minCount predicate.",
-                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent",
+            )
         if len(min_count) > 1:
             raise ConstraintLoadError(
                 "MinCountConstraintComponent must have at most one sh:minCount predicate.",
-                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent",
+            )
         if not shape.is_property_shape:
             raise ConstraintLoadError(
                 "MinCountConstraintComponent can only be present on a PropertyShape, not a NodeShape.",
-                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent",
+            )
         self.min_count = min_count[0]
-        if not (isinstance(self.min_count, Literal) and
-                self.min_count.datatype == XSD_integer):
+        if not (isinstance(self.min_count, Literal) and self.min_count.datatype == XSD_integer):
             raise ConstraintLoadError(
                 "MinCountConstraintComponent sh:minCount must be a literal with datatype xsd:integer.",
-                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent",
+            )
         if int(self.min_count.value) < 0:
             raise ConstraintLoadError(
                 "MinCountConstraintComponent sh:minCount must be an integer >= 0.",
-                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MinCountConstraintComponent",
+            )
 
     @classmethod
     def constraint_parameters(cls):
@@ -64,11 +73,22 @@ class MinCountConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MinCountConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
-        """
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+        p = self.shape.path()
+        if p:
+            p = stringify_node(self.shape.sg.graph, p)
+            m = "Less than {} values on {}->{}".format(
+                str(self.min_count.value), stringify_node(datagraph, focus_node), p
+            )
+        else:
+            m = "Less than {} values on {}".format(str(self.min_count.value), stringify_node(datagraph, focus_node))
+        return [Literal(m)]
 
-        :type focus_value_nodes: dict
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+        """
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         min_count = int(self.min_count.value)
         if min_count == 0:
@@ -78,8 +98,7 @@ class MinCountConstraintComponent(ConstraintComponent):
         non_conformant = False
 
         for f, value_nodes in focus_value_nodes.items():
-            flag = len(value_nodes) >= min_count
-            if not flag:
+            if not len(value_nodes) >= min_count:
                 non_conformant = True
                 rept = self.make_v_result(target_graph, f)
                 reports.append(rept)
@@ -100,25 +119,29 @@ class MaxCountConstraintComponent(ConstraintComponent):
         if len(max_count) < 1:
             raise ConstraintLoadError(
                 "MaxCountConstraintComponent must have at least one sh:maxCount predicate.",
-                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent",
+            )
         if len(max_count) > 1:
             raise ConstraintLoadError(
                 "MaxCountConstraintComponent must have at most one sh:maxCount predicate.",
-                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent",
+            )
         if not shape.is_property_shape:
             raise ConstraintLoadError(
                 "MaxCountConstraintComponent can only be present on a PropertyShape, not a NodeShape.",
-                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent",
+            )
         self.max_count = max_count[0]
-        if not (isinstance(self.max_count, Literal) and
-                self.max_count.datatype == XSD_integer):
+        if not (isinstance(self.max_count, Literal) and self.max_count.datatype == XSD_integer):
             raise ConstraintLoadError(
                 "MaxCountConstraintComponent sh:maxCount must be a literal with datatype xsd:integer.",
-                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent",
+            )
         if int(self.max_count.value) < 0:
             raise ConstraintLoadError(
                 "MaxCountConstraintComponent sh:maxCount must be an integer >= 0.",
-                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent")
+                "https://www.w3.org/TR/shacl/#MaxCountConstraintComponent",
+            )
 
     @classmethod
     def constraint_parameters(cls):
@@ -132,21 +155,30 @@ class MaxCountConstraintComponent(ConstraintComponent):
     def shacl_constraint_class(cls):
         return SH_MaxCountConstraintComponent
 
-    def evaluate(self, target_graph, focus_value_nodes, _evaluation_path):
-        """
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+        p = self.shape.path()
+        if p:
+            p = stringify_node(self.shape.sg.graph, p)
+            m = "More than {} values on {}->{}".format(
+                str(self.max_count.value), stringify_node(datagraph, focus_node), p
+            )
+        else:
+            m = "More than {} values on {}".format(str(self.max_count.value), stringify_node(datagraph, focus_node))
+        return [Literal(m)]
 
-        :type focus_value_nodes: dict
+    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+        """
         :type target_graph: rdflib.Graph
+        :type focus_value_nodes: dict
+        :type _evaluation_path: list
         """
         max_count = int(self.max_count.value)
         reports = []
         non_conformant = False
 
         for f, value_nodes in focus_value_nodes.items():
-            flag = len(value_nodes) <= max_count
-            if not flag:
+            if not len(value_nodes) <= max_count:
                 non_conformant = True
                 rept = self.make_v_result(target_graph, f)
                 reports.append(rept)
         return (not non_conformant), reports
-

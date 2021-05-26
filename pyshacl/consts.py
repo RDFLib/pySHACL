@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-import rdflib
-
+from rdflib import OWL, RDF, RDFS
 from rdflib.namespace import Namespace
-from rdflib import RDFS, RDF, OWL
+
 
 SH = Namespace('http://www.w3.org/ns/shacl#')
 
@@ -27,11 +26,16 @@ SH_Literal = SH.term('Literal')
 SH_BlankNodeOrIRI = SH.term('BlankNodeOrIRI')
 SH_BlankNodeORLiteral = SH.term('BlankNodeOrLiteral')
 SH_IRIOrLiteral = SH.term('IRIOrLiteral')
+SH_ConstraintComponent = SH.term('ConstraintComponent')
+SH_SHACLFunction = SH.term('SHACLFunction')
 SH_SPARQLFunction = SH.term('SPARQLFunction')
 SH_SPARQLRule = SH.term('SPARQLRule')
 SH_TripleRule = SH.term('TripleRule')
 SH_SPARQLTarget = SH.term('SPARQLTarget')
 SH_SPARQLTargetType = SH.term('SPARQLTargetType')
+SH_JSTarget = SH.term('JSTarget')
+SH_JSTargetType = SH.term('JSTargetType')
+SH_JSFunction = SH.term('JSFunction')
 
 # predicates
 RDF_type = RDF.term('type')
@@ -41,6 +45,7 @@ RDF_object = RDF.term('object')
 RDF_predicate = RDF.term('predicate')
 RDF_subject = RDF.term('subject')
 RDFS_subClassOf = RDFS.term('subClassOf')
+RDFS_comment = RDFS.term('comment')
 SH_path = SH.term('path')
 SH_deactivated = SH.term('deactivated')
 SH_message = SH.term('message')
@@ -80,6 +85,16 @@ SH_subject = SH.term('subject')
 SH_predicate = SH.term('predicate')
 SH_object = SH.term('object')
 SH_parameter = SH.term('parameter')
+SH_ask = SH.term('ask')
 SH_select = SH.term('select')
 SH_this = SH.term('this')
-
+SH_filterShape = SH.term('filterShape')
+SH_nodes = SH.term('nodes')
+SH_union = SH.term('union')
+SH_intersection = SH.term('intersection')
+SH_datatype = SH.term('datatype')
+SH_nodeKind = SH.term('nodeKind')
+SH_optional = SH.term('optional')
+SH_js = SH.term('js')
+SH_jsFunctionName = SH.term('jsFunctionName')
+SH_jsLibrary = SH.term('jsLibrary')
