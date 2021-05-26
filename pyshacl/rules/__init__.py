@@ -3,7 +3,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type, Union
 
 from pyshacl.consts import RDF_type, SH_rule, SH_SPARQLRule, SH_TripleRule
-from pyshacl.errors import RuleLoadError
+from pyshacl.errors import ReportableRuntimeError, RuleLoadError
 from pyshacl.pytypes import GraphLike
 from pyshacl.rules.sparql import SPARQLRule
 from pyshacl.rules.triple import TripleRule
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from .shacl_rule import SHACLRule
 
 
-def gather_rules(shacl_graph: 'ShapesGraph') -> Dict['Shape', List['SHACLRule']]:
+def gather_rules(shacl_graph: 'ShapesGraph', iterate_rules=False) -> Dict['Shape', List['SHACLRule']]:
     """
 
     :param shacl_graph:
@@ -63,7 +63,7 @@ def gather_rules(shacl_graph: 'ShapesGraph') -> Dict['Shape', List['SHACLRule']]
                 "https://www.w3.org/TR/shacl-af/#rules-syntax",
             )
         if obj in triple_rule_nodes:
-            rule: SHACLRule = TripleRule(shape, obj)
+            rule: SHACLRule = TripleRule(shape, obj, iterate=iterate_rules)
         elif obj in sparql_rule_nodes:
             rule = SPARQLRule(shape, obj)
         elif use_JSRule and callable(use_JSRule) and obj in js_rule_nodes:
@@ -77,13 +77,29 @@ def gather_rules(shacl_graph: 'ShapesGraph') -> Dict['Shape', List['SHACLRule']]
     return ret_rules
 
 
-def apply_rules(shapes_rules: Dict, data_graph: GraphLike):
+def apply_rules(shapes_rules: Dict, data_graph: GraphLike, iterate=False) -> int:
     # short the shapes dict by shapes sh:order before execution
     sorted_shapes_rules: List[Tuple[Any, Any]] = sorted(shapes_rules.items(), key=lambda x: x[0].order)
+    total_modified = 0
     for shape, rules in sorted_shapes_rules:
         # sort the rules by the sh:order before execution
         rules = sorted(rules, key=lambda x: x.order)
-        for r in rules:
-            if r.deactivated:
-                continue
-            r.apply(data_graph)
+        iterate_limit = 100
+        while True:
+            if iterate_limit < 1:
+                raise ReportableRuntimeError("SHACL Shape Rule iteration exceeded iteration limit of 100.")
+            iterate_limit -= 1
+            this_modified = 0
+            for r in rules:
+                if r.deactivated:
+                    continue
+                n_modified = r.apply(data_graph)
+                this_modified += n_modified
+            if this_modified > 0:
+                total_modified += this_modified
+                if iterate:
+                    continue
+                else:
+                    break
+            break
+    return total_modified

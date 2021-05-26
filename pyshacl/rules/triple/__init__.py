@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 class TripleRule(SHACLRule):
     __slots__ = ("s", "p", "o")
 
-    def __init__(self, shape: 'Shape', rule_node: 'rdflib.term.Identifier'):
+    def __init__(self, shape: 'Shape', rule_node: 'rdflib.term.Identifier', **kwargs):
         """
 
         :param shape:
@@ -39,7 +39,7 @@ class TripleRule(SHACLRule):
         :param rule_node:
         :type rule_node: rdflib.term.Identifier
         """
-        super(TripleRule, self).__init__(shape, rule_node)
+        super(TripleRule, self).__init__(shape, rule_node, **kwargs)
         my_subject_nodes = set(self.shape.sg.objects(self.node, SH_subject))
         if len(my_subject_nodes) < 1:
             raise RuntimeError("No sh:subject")
@@ -183,13 +183,36 @@ class TripleRule(SHACLRule):
         else:
             raise NotImplementedError("Unsupported expression s, p, or o, in SHACL TripleRule")
 
-    def apply(self, data_graph):
+    def apply(self, data_graph: 'GraphLike') -> int:
         focus_nodes = self.shape.focus_nodes(data_graph)  # uses target nodes to find focus nodes
         applicable_nodes = self.filter_conditions(focus_nodes, data_graph)
-        for a in applicable_nodes:
-            s_set = self.get_nodes_from_node_expression(self.s, a, data_graph)
-            p_set = self.get_nodes_from_node_expression(self.p, a, data_graph)
-            o_set = self.get_nodes_from_node_expression(self.o, a, data_graph)
-            new_triples = itertools.product(s_set, p_set, o_set)
-            for i in iter(new_triples):
-                data_graph.add(i)
+        all_added = 0
+        iterate_limit = 100
+        while True:
+            if iterate_limit < 1:
+                raise ReportableRuntimeError("sh:rule iteration exceeded iteration limit of 100.")
+            iterate_limit -= 1
+            added = 0
+            to_add = []
+            for a in applicable_nodes:
+                s_set = self.get_nodes_from_node_expression(self.s, a, data_graph)
+                p_set = self.get_nodes_from_node_expression(self.p, a, data_graph)
+                o_set = self.get_nodes_from_node_expression(self.o, a, data_graph)
+                new_triples = itertools.product(s_set, p_set, o_set)
+                this_added = False
+                for i in iter(new_triples):
+                    if not this_added and i not in data_graph:
+                        this_added = True
+                    to_add.append(i)
+                if this_added:
+                    added += 1
+            if added > 0:
+                for i in to_add:
+                    data_graph.add(i)
+                all_added += added
+                if self.iterate:
+                    continue  # Jump up to iterate
+                else:
+                    break  # Don't iterate
+            break
+        return all_added

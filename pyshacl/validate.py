@@ -69,6 +69,7 @@ class Validator(object):
         options_dict.setdefault('inference', 'none')
         options_dict.setdefault('inplace', False)
         options_dict.setdefault('use_js', False)
+        options_dict.setdefault('iterate_rules', False)
         options_dict.setdefault('abort_on_error', False)
         if 'logger' not in options_dict:
             options_dict['logger'] = logging.getLogger(__name__)
@@ -221,10 +222,13 @@ class Validator(object):
             self._target_graph = the_target_graph
 
         shapes = self.shacl_graph.shapes  # This property getter triggers shapes harvest.
-
+        iterate_rules = self.options.get("iterate_rules", False)
         if self.options['advanced']:
             target_types = gather_target_types(self.shacl_graph)
-            advanced = {'functions': gather_functions(self.shacl_graph), 'rules': gather_rules(self.shacl_graph)}
+            advanced = {
+                'functions': gather_functions(self.shacl_graph),
+                'rules': gather_rules(self.shacl_graph, iterate_rules=iterate_rules),
+            }
             for s in shapes:
                 s.set_advanced(True)
             apply_target_types(target_types)
@@ -245,7 +249,7 @@ class Validator(object):
         for g in named_graphs:
             if advanced:
                 apply_functions(advanced['functions'], g)
-                apply_rules(advanced['rules'], g)
+                apply_rules(advanced['rules'], g, iterate=iterate_rules)
             for s in shapes:
                 _is_conform, _reports = s.validate(g)
                 non_conformant = non_conformant or (not _is_conform)
@@ -372,6 +376,7 @@ def validate(
         )
         rdflib_bool_unpatch()
     use_js = kwargs.pop('js', None)
+    iterate_rules = kwargs.pop('iterate_rules', False)
     validator = None
     try:
         validator = Validator(
@@ -383,6 +388,7 @@ def validate(
                 'inplace': inplace,
                 'abort_on_error': abort_on_error,
                 'advanced': advanced,
+                'iterate_rules': iterate_rules,
                 'use_js': use_js,
                 'logger': log,
             },
