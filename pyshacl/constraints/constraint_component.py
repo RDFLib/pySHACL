@@ -4,6 +4,7 @@
 https://www.w3.org/TR/shacl/#core-components-value-type
 """
 import abc
+import re
 import typing
 
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple
@@ -117,8 +118,8 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         constraint_component=None,
         source_constraint=None,
         extra_messages: Optional[Iterable] = None,
+        bound_vars=None,
     ):
-
         """
         :param datagraph:
         :type datagraph: rdflib.Graph | rdflib.ConjunctiveGraph | rdflib.Dataset
@@ -131,6 +132,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         :param messages:
         :type messages: List[str]
         :param result_path:
+        :param bound_vars:
         :param constraint_component:
         :param source_constraint:
         :param extra_messages:
@@ -171,12 +173,18 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
                 if m in messages:
                     continue
                 if isinstance(m, Literal):
-                    desc += "\tMessage: {}\n".format(str(m.value))
+                    msg = str(m.value)
+                    if bound_vars is not None:
+                        msg = self._format_sparql_based_result_message(msg, bound_vars)
+                    desc += "\tMessage: {}\n".format(msg)
                 else:  # pragma: no cover
                     desc += "\tMessage: {}\n".format(str(m))
         for m in messages:
             if isinstance(m, Literal):
-                desc += "\tMessage: {}\n".format(str(m.value))
+                msg = str(m.value)
+                if bound_vars is not None:
+                    msg = self._format_sparql_based_result_message(msg, bound_vars)
+                desc += "\tMessage: {}\n".format(msg)
             else:  # pragma: no cover
                 desc += "\tMessage: {}\n".format(str(m))
         return desc
@@ -190,6 +198,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         constraint_component=None,
         source_constraint=None,
         extra_messages: Optional[Iterable] = None,
+        bound_vars=None,
     ):
         """
         :param datagraph:
@@ -199,6 +208,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         :param value_node:
         :type value_node: rdflib.term.Identifier | None
         :param result_path:
+        :param bound_vars:
         :param constraint_component:
         :param source_constraint:
         :param extra_messages:
@@ -228,10 +238,20 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
             for m in iter(extra_messages):
                 if m in messages:
                     continue
+                if isinstance(m, Literal):
+                    msg = str(m.value)
+                    if bound_vars is not None:
+                        msg = self._format_sparql_based_result_message(msg, bound_vars)
+                        m = Literal(msg)
                 r_triples.append((r_node, SH_resultMessage, m))
         elif not messages:
             messages = self.make_generic_messages(datagraph, focus_node, value_node) or messages
         for m in messages:
+            if isinstance(m, Literal):
+                msg = str(m.value)
+                if bound_vars is not None:
+                    msg = self._format_sparql_based_result_message(msg, bound_vars)
+                    m = Literal(msg)
             r_triples.append((r_node, SH_resultMessage, m))
         desc = self.make_v_result_description(
             datagraph,
@@ -243,9 +263,18 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
             constraint_component=constraint_component,
             source_constraint=source_constraint,
             extra_messages=extra_messages,
+            bound_vars=bound_vars,
         )
         self.shape.logger.debug(desc)
         return desc, r_node, r_triples
+
+    def _format_sparql_based_result_message(self, msg, bound_vars):
+        if bound_vars is None:
+            return msg
+        msg = re.sub('{[?$]this}', str(bound_vars[0]), msg)
+        msg = re.sub('{[?$]path}', str(bound_vars[1]), msg)
+        msg = re.sub('{[?$]value}', str(bound_vars[2]), msg)
+        return msg
 
 
 SH_nodeValidator = SH.term('nodeValidator')
