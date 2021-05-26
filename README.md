@@ -230,7 +230,7 @@ See the [CONTRIBUTORS file](https://github.com/RDFLib/pySHACL/blob/master/CONTRI
 
 
 ## Citation
-DOI: [10.5281/zenodo.4750841](https://doi.org/10.5281/zenodo.4750841)
+DOI: [10.5281/zenodo.4750840](https://doi.org/10.5281/zenodo.4750840) (For all versions/latest version)
 
 ## Contacts
 Project Lead:
