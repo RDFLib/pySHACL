@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [0.14.4] - 2021-05-26
+
+## Added
+- Added an iterate_rules option, that causes SHACL Rules to run repeatedly until reaching a steady state. (Closes #76)
+  - Works with SPARQLRules, TripleRules, and JSRules.
+- Variables {$this}, {$path}, and {$value} will be populated in the sh:message of a SPARQL Constraint. (Closes #30)
+
 ## [0.14.3] - 2021-02-20
 
 ## Changed
@@ -729,7 +736,9 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.14.2...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.14.4...HEAD
+[0.14.4]: https://github.com/RDFLib/pySHACL/compare/v0.14.3...v0.14.4
+[0.14.3]: https://github.com/RDFLib/pySHACL/compare/v0.14.2...v0.14.3
 [0.14.2]: https://github.com/RDFLib/pySHACL/compare/v0.14.1...v0.14.2
 [0.14.1]: https://github.com/RDFLib/pySHACL/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/RDFLib/pySHACL/compare/v0.13.3...v0.14.0

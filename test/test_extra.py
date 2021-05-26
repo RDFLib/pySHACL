@@ -430,6 +430,50 @@ def test_owl_imports_fail():
     print(string)
     assert not conforms
 
+def test_sparql_message_subst():
+    df = '''@prefix ex: <http://datashapes.org/sh/tests/#> .
+    @prefix owl: <http://www.w3.org/2002/07/owl#> .
+    @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+    @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+    @prefix sh: <http://www.w3.org/ns/shacl#> .
+    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+    ex:ValidResource1
+      rdf:type rdfs:Resource ;
+    .
+    ex:InvalidResource1
+      rdf:type rdfs:Resource ;
+      rdfs:label "Invalid resource 1" ;
+    .
+    ex:InvalidResource2
+      rdf:type rdfs:Resource ;
+      rdfs:label "Invalid label 1" ;
+      rdfs:label "Invalid label 2" ;
+    .
+    ex:TestShape
+      rdf:type sh:NodeShape ;
+      rdfs:label "Test shape" ;
+      sh:sparql ex:TestShape-sparql ;
+      sh:targetNode ex:InvalidResource1 ;
+      sh:targetNode ex:InvalidResource2 ;
+      sh:targetNode ex:ValidResource1 ;
+    .
+    ex:TestShape-sparql
+      sh:message "{$this} cannot have a {$path} of {$value}" ;
+      sh:prefixes <http://datashapes.org/sh/tests/sparql/node/sparql-001.test> ;
+      sh:select """
+        SELECT $this ?path ?value
+        WHERE {
+            $this ?path ?value .
+            FILTER (?path = <http://www.w3.org/2000/01/rdf-schema#label>) .
+        }""" ;
+    .'''
+    res = validate(df, data_graph_format='turtle', inference=None, debug=True,)
+    conforms, graph, s = res
+    assert "#InvalidResource1 cannot have a http://www.w3.org/2000/01/rdf-schema#label of Invalid resource 1" in s
+    assert "#InvalidResource2 cannot have a http://www.w3.org/2000/01/rdf-schema#label of Invalid label 1" in s
+    assert "#InvalidResource2 cannot have a http://www.w3.org/2000/01/rdf-schema#label of Invalid label 2" in s
+    assert not conforms
 
 if __name__ == "__main__":
     test_validate_with_ontology()
@@ -444,3 +488,5 @@ if __name__ == "__main__":
     test_serialize_report_graph()
     test_owl_imports()
     test_owl_imports_fail()
+    test_sparql_message_subst()
+

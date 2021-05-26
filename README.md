@@ -86,6 +86,7 @@ optional arguments:
                         owl:imports.
   -a, --advanced        Enable support for SHACL Advanced Features.
   -j, --js              Enable support for SHACL-JS Features.
+  -it, --iterate-rules  Interate SHACL Rules until steady state is found (only available in Advanced Mode)
   --abort               Abort on first error.
   -d, --debug           Output additional runtime messages, including violations that didn\'t
                         lead to non-conformance.
@@ -138,6 +139,7 @@ Some other optional keyword variables available available on the `validate` func
 * `data_graph_format`: Override the format detection for the given data graph source file.
 * `shacl_graph_format`: Override the format detection for the given shacl graph source file.
 * `ont_graph_format`: Override the format detection for the given extra ontology graph source file.
+* `iterate_rules`: Interate SHACL Rules until steady state is found (only works with advanced mode).
 * `do_owl_imports`: Enable the feature to allow the import of subgraphs using `owl:imports` for the shapes graph and the ontology graph. Note, you explicitly cannot use this on the target data graph.
 * `serialize_report_graph`: Convert the report results_graph into a serialised representation (for example, 'turtle')
 * `check_dash_result`: Check the validation result against the given expected DASH test suite result.

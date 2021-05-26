@@ -54,6 +54,7 @@ parser.add_argument(
     'Shapes Graph before before validating the Data Graph.',
 )
 parser.add_argument(
+    '-im',
     '--imports',
     dest='imports',
     action='store_true',
@@ -77,6 +78,7 @@ parser.add_argument(
     help='Enable features from the SHACL-JS Specification.',
 )
 parser.add_argument(
+    '-it',
     '--iterate-rules',
     dest='iterate_rules',
     action='store_true',
