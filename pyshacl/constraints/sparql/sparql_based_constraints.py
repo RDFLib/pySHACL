@@ -137,8 +137,8 @@ class SPARQLBasedConstraint(ConstraintComponent):
                     if v is None:
                         v = result_val
                     rept = self.make_v_result(
-                        target_graph, t or f, value_node=v, result_path=p,
-                        bound_vars=(t, p, v), **rept_kwargs)
+                        target_graph, t or f, value_node=v, result_path=p, bound_vars=(t, p, v), **rept_kwargs
+                    )
                 else:
                     rept = self.make_v_result(target_graph, f, value_node=v, **rept_kwargs)
                 reports.append(rept)
