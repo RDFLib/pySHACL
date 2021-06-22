@@ -148,7 +148,7 @@ class AndConstraintComponent(ConstraintComponent):
         and_list = " , ".join(
             stringify_node(self.shape.sg.graph, a_c) for a in self.and_list for a_c in self.shape.sg.graph.items(a)
         )
-        m = "Node {} does not conforms to all shapes in {}".format(stringify_node(datagraph, value_node), and_list)
+        m = "Node {} does not conform to all shapes in {}".format(stringify_node(datagraph, value_node), and_list)
         return [rdflib.Literal(m)]
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
