@@ -7,7 +7,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [0.14.5] - 2021-07-07
 
 ## Added
-- Allow-Warnings is finally available. (Closes #34)
+- Allow-Warnings is finally available. (Closes #64)
   - Setting this option puts PySHACL into a non-standard operation mode, where Shapes marked with severity of sh:Warning or sh:Info will not cause result to be invalid.
   - Despite the name, it allows both sh:Info and sh:Warning.
   - Try it with `allow_warnings=True` on `validate()` or `-w` in the CLI tool.
