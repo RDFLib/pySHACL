@@ -85,7 +85,15 @@ parser.add_argument(
     default=False,
     help="Run Shape's SHACL Rules iteratively until the data_graph reaches a steady state.",
 )
-parser.add_argument('--abort', dest='abort', action='store_true', default=False, help='Abort on first error.')
+parser.add_argument('--abort', dest='abort', action='store_true', default=False, help='Abort on first invalid data.')
+parser.add_argument(
+    '-w',
+    '--allow-warnings',
+    dest='allow_warnings',
+    action='store_true',
+    default=False,
+    help='Shapes marked with severity of Warning or Info will not cause result to be invalid.',
+)
 parser.add_argument(
     '-d', '--debug', dest='debug', action='store_true', default=False, help='Output additional runtime messages.'
 )
@@ -166,7 +174,9 @@ def main():
         else:
             validator_kwargs['iterate_rules'] = True
     if args.abort:
-        validator_kwargs['abort_on_error'] = True
+        validator_kwargs['abort_on_first'] = True
+    if args.allow_warnings:
+        validator_kwargs['allow_warnings'] = True
     if args.shacl_file_format:
         f = args.shacl_file_format
         if f != "auto":

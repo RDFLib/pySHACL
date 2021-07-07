@@ -115,7 +115,8 @@ r = validate(data_graph,
       shacl_graph=sg,
       ont_graph=og,
       inference='rdfs',
-      abort_on_error=False,
+      abort_on_first=False,
+      allow_warnings=False,
       meta_shacl=False,
       advanced=False,
       js=False,
@@ -129,13 +130,14 @@ Where:
 * `ont_graph` is an rdflib `Graph` object or file path or Web URL a graph containing extra ontological information, or None if not required.
 * `inference` is a Python string value to indicate whether or not to perform OWL inferencing expansion of the `data_graph` before validation.
 Options are 'rdfs', 'owlrl', 'both', or 'none'. The default is 'none'.
-* `abort_on_error` (optional) a Python `bool` value to indicate whether or not the program should abort after encountering a validation error or to continue. Default is to continue.
-* `meta_shacl` (optional) a Python `bool` value to indicate whether or not the program should enable the Meta-SHACL feature. Default is False.
-* `advanced`: (optional) a Python `bool` value to enable SHACL Advanced Features
-* `js`: (optional) a Python `bool` value to enable SHACL-JS Features (if `pyshacl[js]` is installed)
-* `debug` (optional) a Python `bool` value to indicate whether or not the program should emit debugging output text, including violations that didn't lead to non-conformance overall. So when debug is True don't judge conformance by absense of violation messages. Default is False.
+* `abort_on_first` (optional) `bool` value to indicate whether or not the program should abort after encountering the first validation failure or to continue. Default is to continue.
+* `allow_warnings` (optional) `bool` value, Shapes marked with severity of Warning or Info will not cause result to be invalid. 
+* `meta_shacl` (optional) `bool` value to indicate whether or not the program should enable the Meta-SHACL feature. Default is False.
+* `advanced`: (optional) `bool` value to enable SHACL Advanced Features
+* `js`: (optional) `bool` value to enable SHACL-JS Features (if `pyshacl[js]` is installed)
+* `debug` (optional) `bool` value to indicate whether or not the program should emit debugging output text, including violations that didn't lead to non-conformance overall. So when debug is True don't judge conformance by absense of violation messages. Default is False.
 
-Some other optional keyword variables available available on the `validate` function:
+Some other optional keyword variables available on the `validate` function:
 * `data_graph_format`: Override the format detection for the given data graph source file.
 * `shacl_graph_format`: Override the format detection for the given shacl graph source file.
 * `ont_graph_format`: Override the format detection for the given extra ontology graph source file.

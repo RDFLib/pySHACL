@@ -70,7 +70,8 @@ class Validator(object):
         options_dict.setdefault('inplace', False)
         options_dict.setdefault('use_js', False)
         options_dict.setdefault('iterate_rules', False)
-        options_dict.setdefault('abort_on_error', False)
+        options_dict.setdefault('abort_on_first', False)
+        options_dict.setdefault('allow_warnings', False)
         if 'logger' not in options_dict:
             options_dict['logger'] = logging.getLogger(__name__)
 
@@ -244,18 +245,27 @@ class Validator(object):
         else:
             named_graphs = [the_target_graph]
         reports = []
+        abort_on_first: bool = bool(self.options.get("abort_on_first", False))
+        allow_warnings: bool = bool(self.options.get("allow_warnings", False))
         non_conformant = False
-
+        aborted = False
         for g in named_graphs:
             if advanced:
                 apply_functions(advanced['functions'], g)
                 apply_rules(advanced['rules'], g, iterate=iterate_rules)
-            for s in shapes:
-                _is_conform, _reports = s.validate(g)
-                non_conformant = non_conformant or (not _is_conform)
-                reports.extend(_reports)
-            if advanced:
-                unapply_functions(advanced['functions'], g)
+            try:
+                for s in shapes:
+                    _is_conform, _reports = s.validate(g, abort_on_first=abort_on_first, allow_warnings=allow_warnings)
+                    non_conformant = non_conformant or (not _is_conform)
+                    reports.extend(_reports)
+                    if abort_on_first and non_conformant:
+                        aborted = True
+                        break
+                if aborted:
+                    break
+            finally:
+                if advanced:
+                    unapply_functions(advanced['functions'], g)
         v_report, v_text = self.create_validation_report(self.shacl_graph, not non_conformant, reports)
         return (not non_conformant), v_report, v_text
 
@@ -320,7 +330,8 @@ def validate(
     advanced: Optional[bool] = False,
     inference: Optional[str] = None,
     inplace: Optional[bool] = False,
-    abort_on_error: Optional[bool] = False,
+    abort_on_first: Optional[bool] = False,
+    allow_warnings: Optional[bool] = False,
     **kwargs,
 ):
     """
@@ -339,8 +350,10 @@ def validate(
     :type inference: str | None
     :param inplace: If this is enabled, do not clone the datagraph, manipulate it inplace
     :type inplace: bool
-    :param abort_on_error:
-    :type abort_on_error: bool | None
+    :param abort_on_first: Stop evaluating constraints after first violation is found
+    :type abort_on_first: bool | None
+    :param allow_warnings: Shapes marked with severity of sh:Warning or sh:Info will not cause result to be invalid.
+    :type allow_warnings: bool | None
     :param kwargs:
     :return:
     """
@@ -377,6 +390,10 @@ def validate(
         rdflib_bool_unpatch()
     use_js = kwargs.pop('js', None)
     iterate_rules = kwargs.pop('iterate_rules', False)
+    if "abort_on_error" in kwargs:
+        log.warning("Usage of abort_on_error is deprecated. Use abort_on_first instead.")
+        ae = kwargs.pop("abort_on_error")
+        abort_on_first = bool(abort_on_first) or bool(ae)
     validator = None
     try:
         validator = Validator(
@@ -386,7 +403,8 @@ def validate(
             options={
                 'inference': inference,
                 'inplace': inplace,
-                'abort_on_error': abort_on_error,
+                'abort_on_first': abort_on_first,
+                'allow_warnings': allow_warnings,
                 'advanced': advanced,
                 'iterate_rules': iterate_rules,
                 'use_js': use_js,

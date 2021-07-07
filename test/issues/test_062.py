@@ -109,7 +109,7 @@ def test_062():
     ont_fp = BytesIO(ont_data)
     try:
         conforms, g, s = validate(data_fp, shacl_graph=shacl_fp, ont_graph=ont_fp, data_graph_format="json-ld",
-                                  shacl_graph_format="turtle", ont_graph_format="turtle", abort_on_error=False,
+                                  shacl_graph_format="turtle", ont_graph_format="turtle", abort_on_first=False,
                                   meta_shacl=False, debug=True, advanced=True)
     except Exception as e:
         print(e)

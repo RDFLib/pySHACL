@@ -40,7 +40,7 @@ def schema_org():
     shaclGraph = rdflib.Dataset()
     shaclGraph.parse(data=shacl, format='ttl')
 
-    report = validate(dataGraph, shacl_graph=shaclGraph, abort_on_error=False, inference='both', meta_shacl=False, debug=False, advanced=True, do_owl_imports=True)
+    report = validate(dataGraph, shacl_graph=shaclGraph, abort_on_first=False, inference='both', meta_shacl=False, debug=False, advanced=True, do_owl_imports=True)
 
     print(report[2])
 

@@ -32,7 +32,7 @@ def test_058():
     shaclGraph = rdflib.Graph().parse(data=shaclData, format='ttl')
     exc = None
     try:
-        conforms, g, s = validate(dataGraph, shacl_graph=shaclGraph, abort_on_error=False, meta_shacl=False, debug=False, advanced=True)
+        conforms, g, s = validate(dataGraph, shacl_graph=shaclGraph, abort_on_first=False, meta_shacl=False, debug=False, advanced=True)
     except Exception as e:
         assert isinstance(e, ConstraintLoadError)
         exc = e

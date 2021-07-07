@@ -4,12 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [0.14.5] - 2021-07-07
+
+## Added
+- Allow-Warnings is finally available. (Closes #34)
+  - Setting this option puts PySHACL into a non-standard operation mode, where Shapes marked with severity of sh:Warning or sh:Info will not cause result to be invalid.
+  - Despite the name, it allows both sh:Info and sh:Warning.
+  - Try it with `allow_warnings=True` on `validate()` or `-w` in the CLI tool.
+
+## Fixed
+- Fixed Abort Mode. (Fixes #75)
+  - This optional mode allows the validator to exit early, on the first time your data fails to validate against a Constraint.
+  - Name changed from `abort_on_error` to `abort_on_first`
+  - Try it out with `abort_on_first=True` on `validate()` or `--abort` in the CLI tool.
+
+
 ## [0.14.4] - 2021-05-26
 
 ## Added
 - Added an iterate_rules option, that causes SHACL Rules to run repeatedly until reaching a steady state. (Closes #76)
   - Works with SPARQLRules, TripleRules, and JSRules.
 - Variables {$this}, {$path}, and {$value} will be populated in the sh:message of a SPARQL Constraint. (Closes #30)
+
 
 ## [0.14.3] - 2021-02-20
 
@@ -736,7 +752,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.14.4...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.14.5...HEAD
+[0.14.5]: https://github.com/RDFLib/pySHACL/compare/v0.14.4...v0.14.5
 [0.14.4]: https://github.com/RDFLib/pySHACL/compare/v0.14.3...v0.14.4
 [0.14.3]: https://github.com/RDFLib/pySHACL/compare/v0.14.2...v0.14.3
 [0.14.2]: https://github.com/RDFLib/pySHACL/compare/v0.14.1...v0.14.2
