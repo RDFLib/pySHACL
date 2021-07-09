@@ -33,7 +33,7 @@ parser.add_argument(
     dest='ont',
     action='store',
     nargs='?',
-    help='A file path or URL to a docucument containing extra ontological information to mix into ' 'the data graph.',
+    help='A file path or URL to a document containing extra ontological information to mix into ' 'the data graph.',
 )
 parser.add_argument(
     '-i',
