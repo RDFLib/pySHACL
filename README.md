@@ -74,7 +74,7 @@ optional arguments:
   -s [SHACL], --shacl [SHACL]
                         A file containing the SHACL Shapes Graph.
   -e [ONT], --ont-graph [ONT]
-                        A file path or URL to a docucument containing extra
+                        A file path or URL to a document containing extra
                         ontological information to mix into the data graph.
   -i {none,rdfs,owlrl,both}, --inference {none,rdfs,owlrl,both}
                         Choose a type of inferencing to run against the Data
