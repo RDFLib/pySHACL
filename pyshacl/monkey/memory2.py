@@ -109,7 +109,7 @@ class Memory2(Store):
             self.__all_contexts.remove(context)
 
     def triples(self, triple_pattern, context=None):
-        """A generator over all the triples matching """
+        """A generator over all the triples matching"""
         req_ctx = self.__ctx_to_str(context)
         subject, predicate, object_ = triple_pattern
 

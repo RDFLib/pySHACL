@@ -42,6 +42,10 @@ class PropertyConstraintComponent(ConstraintComponent):
     For each value node v: A failure MUST be produced if the validation of v as focus node against the property shape $property produces a failure. Otherwise, the validation results are the results of validating v as focus node against the property shape $property.
     """
 
+    shacl_constraint_component = SH_PropertyConstraintComponent
+    shape_expecting = True
+    list_taking = False
+
     def __init__(self, shape):
         super(PropertyConstraintComponent, self).__init__(shape)
         property_shapes = list(self.shape.objects(SH_property))
@@ -59,10 +63,6 @@ class PropertyConstraintComponent(ConstraintComponent):
     @classmethod
     def constraint_name(cls):
         return "PropertyConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        return SH_PropertyConstraintComponent
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         raise NotImplementedError("A Property Constraint Component should not be able to generate its own message.")
@@ -89,7 +89,7 @@ class PropertyConstraintComponent(ConstraintComponent):
                 return _non_conformant, _reports
             if not prop_shape or not prop_shape.is_property_shape:
                 raise ReportableRuntimeError(
-                    "Shape pointed to by sh:property does not exist " "or is not a well-formed SHACL PropertyShape."
+                    "Shape pointed to by sh:property does not exist or is not a well-formed SHACL PropertyShape."
                 )
 
             for f, value_nodes in focus_value_nodes.items():
@@ -115,6 +115,10 @@ class NodeConstraintComponent(ConstraintComponent):
     For each value node v: A failure MUST be produced if the conformance checking of v against $node produces a failure. Otherwise, if v does not conform to $node, there is a validation result with v as sh:value.
     """
 
+    shacl_constraint_component = SH_NodeConstraintComponent
+    shape_expecting = True
+    list_taking = False
+
     def __init__(self, shape):
         super(NodeConstraintComponent, self).__init__(shape)
         node_shapes = list(self.shape.objects(SH_node))
@@ -132,10 +136,6 @@ class NodeConstraintComponent(ConstraintComponent):
     @classmethod
     def constraint_name(cls):
         return "NodeConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        return SH_NodeConstraintComponent
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.node_shapes) < 2:
@@ -167,7 +167,7 @@ class NodeConstraintComponent(ConstraintComponent):
                 return _non_conformant, _reports
             if not node_shape or node_shape.is_property_shape:
                 raise ReportableRuntimeError(
-                    "Shape pointed to by sh:node does not exist or " "is not a well-formed SHACL NodeShape."
+                    "Shape pointed to by sh:node does not exist or is not a well-formed SHACL NodeShape."
                 )
             for f, value_nodes in focus_value_nodes.items():
                 for v in value_nodes:
@@ -196,6 +196,10 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
     Textual Definition for qualifiedMaxCount:
     Let C be as defined for sh:qualifiedMinCount above. A failure MUST be produced if any of the said conformance checks produces a failure. Otherwise, there is a validation result if C is greater than $qualifiedMaxCount. The constraint component for sh:qualifiedMaxCount is sh:QualifiedMaxCountConstraintComponent.
     """
+
+    shacl_constraint_component = NotImplemented
+    shape_expecting = True
+    list_taking = False
 
     def __init__(self, shape):
         super(QualifiedValueShapeConstraintComponent, self).__init__(shape)
@@ -261,14 +265,6 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "QualifiedValueShapeConstraintComponent"
 
-    @classmethod
-    def shacl_constraint_class(cls):
-        raise NotImplementedError(
-            "QualifiedValueShapeConstraintComponent must be either "
-            "QualifiedMinCountConstraintComponent or "
-            "QualifiedMaxCountConstraintComponent"
-        )
-
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         # TODO:
         #  Implement default message for QualifiedValueConstraint (seems messy)
@@ -279,7 +275,7 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
 
         :type focus_value_nodes: dict
         :type target_graph: rdflib.Graph
-        :type _evaluation_path list
+        :type _evaluation_path: List
         """
         reports = []
         non_conformant = False
@@ -296,7 +292,7 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
                 return _non_conformant, _reports
             if not other_shape:
                 raise ReportableRuntimeError(
-                    "Shape pointed to by sh:property does not " "exist or is not a well-formed SHACL Shape."
+                    "Shape pointed to by sh:property does not exist or is not a well-formed SHACL Shape."
                 )
             if self.is_disjoint:
                 # Textual Definition of Sibling Shapes:

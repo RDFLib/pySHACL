@@ -33,6 +33,8 @@ class EqualsConstraintComponent(ConstraintComponent):
     For each value node that does not exist as a value of the property $equals at the focus node, there is a validation result with the value node as sh:value. For each value of the property $equals at the focus node that is not one of the value nodes, there is a validation result with the value as sh:value.
     """
 
+    shacl_constraint_component = SH_EqualsConstraintComponent
+
     def __init__(self, shape):
         super(EqualsConstraintComponent, self).__init__(shape)
         property_compare_set = set(self.shape.objects(SH_equals))
@@ -50,10 +52,6 @@ class EqualsConstraintComponent(ConstraintComponent):
     @classmethod
     def constraint_name(cls):
         return "EqualsConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        return SH_EqualsConstraintComponent
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
 
@@ -115,6 +113,8 @@ class DisjointConstraintComponent(ConstraintComponent):
     For each value node that also exists as a value of the property $disjoint at the focus node, there is a validation result with the value node as sh:value.
     """
 
+    shacl_constraint_component = SH_DisjointConstraintComponent
+
     def __init__(self, shape):
         super(DisjointConstraintComponent, self).__init__(shape)
         property_compare_set = set(self.shape.objects(SH_disjoint))
@@ -132,10 +132,6 @@ class DisjointConstraintComponent(ConstraintComponent):
     @classmethod
     def constraint_name(cls):
         return "DisjointConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        return SH_DisjointConstraintComponent
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.property_compare_set) < 2:
@@ -193,6 +189,8 @@ class LessThanConstraintComponent(ConstraintComponent):
     For each pair of value nodes and the values of the property $lessThan at the given focus node where the first value is not less than the second value (based on SPARQL's < operator) or where the two values cannot be compared, there is a validation result with the value node as sh:value.
     """
 
+    shacl_constraint_component = SH_LessThanConstraintComponent
+
     def __init__(self, shape):
         super(LessThanConstraintComponent, self).__init__(shape)
         property_compare_set = set(self.shape.objects(SH_lessThan))
@@ -215,10 +213,6 @@ class LessThanConstraintComponent(ConstraintComponent):
     @classmethod
     def constraint_name(cls):
         return "LessThanConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        return SH_LessThanConstraintComponent
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.property_compare_set) < 2:
@@ -300,6 +294,8 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
     For each pair of value nodes and the values of the property $lessThanOrEquals at the given focus node where the first value is not less than or equal to the second value (based on SPARQL's <= operator) or where the two values cannot be compared, there is a validation result with the value node as sh:value.
     """
 
+    shacl_constraint_component = SH_LessThanOrEqualsConstraintComponent
+
     def __init__(self, shape):
         super(LessThanOrEqualsConstraintComponent, self).__init__(shape)
         property_compare_set = set(self.shape.objects(SH_lessThanOrEquals))
@@ -322,10 +318,6 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
     @classmethod
     def constraint_name(cls):
         return "LessThanOrEqualsConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        return SH_LessThanOrEqualsConstraintComponent
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.property_compare_set) < 2:

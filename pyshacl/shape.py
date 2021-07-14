@@ -46,6 +46,7 @@ from .pytypes import GraphLike
 
 
 if TYPE_CHECKING:
+    from pyshacl.constraints import ConstraintComponent
     from pyshacl.shapes_graph import ShapesGraph
 
 module = sys.modules[__name__]
@@ -571,7 +572,7 @@ class Shape(object):
         run_count = 0
         _evaluation_path.append(self)
         constraint_components = [constraint_map[p] for p in iter(parameters)]
-        for constraint_component in constraint_components:
+        for constraint_component in constraint_components:  # type: Type[ConstraintComponent]
             if constraint_component in done_constraints:
                 continue
             try:

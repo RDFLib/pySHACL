@@ -59,6 +59,9 @@ class JSConstraintImpl(JSExecutable):
 
 
 class JSConstraint(ConstraintComponent):
+
+    shacl_constraint_component = SH_JSConstraint
+
     def __init__(self, shape: 'Shape'):
         super(JSConstraint, self).__init__(shape)
         js_decls = list(self.shape.objects(SH_js))
@@ -76,10 +79,6 @@ class JSConstraint(ConstraintComponent):
     @classmethod
     def constraint_name(cls):
         return "JSConstraint"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        return SH_JSConstraint
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
         return [Literal("Javascript Function generated constraint validation reports.")]

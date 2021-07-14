@@ -79,7 +79,7 @@ class SHACLFunction(object):
 
     def execute(self, g, *args):
         raise NotImplementedError(
-            "SHACLFunction cannot be executed by itself. " "It needs to be a SPARQLFunction or something similar."
+            "SHACLFunction cannot be executed by itself. It needs to be a SPARQLFunction or something similar."
         )
 
 

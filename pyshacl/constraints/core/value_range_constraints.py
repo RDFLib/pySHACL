@@ -33,6 +33,8 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
     For each value node v where the SPARQL expression $minExclusive < v does not return true, there is a validation result with v as sh:value.
     """
 
+    shacl_constraint_component = SH_MinExclusiveConstraintComponent
+
     def __init__(self, shape):
         super(MinExclusiveConstraintComponent, self).__init__(shape)
         min_vals = list(self.shape.objects(SH_minExclusive))
@@ -50,10 +52,6 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
     @classmethod
     def constraint_name(cls):
         return "MinExclusiveConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        return SH_MinExclusiveConstraintComponent
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.min_vals) < 2:
@@ -122,6 +120,8 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
     For each value node v where the SPARQL expression $minInclusive <= v does not return true, there is a validation result with v as sh:value.
     """
 
+    shacl_constraint_component = SH_MinInclusiveConstraintComponent
+
     def __init__(self, shape):
         super(MinInclusiveConstraintComponent, self).__init__(shape)
         min_vals = list(self.shape.objects(SH_minInclusive))
@@ -139,10 +139,6 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
     @classmethod
     def constraint_name(cls):
         return "MinInclusiveConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        return SH_MinInclusiveConstraintComponent
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.min_vals) < 2:
@@ -211,6 +207,8 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
     For each value node v where the SPARQL expression $maxExclusive > v does not return true, there is a validation result with v as sh:value.
     """
 
+    shacl_constraint_component = SH_MaxExclusiveConstraintComponent
+
     def __init__(self, shape):
         super(MaxExclusiveConstraintComponent, self).__init__(shape)
         max_vals = list(self.shape.objects(SH_maxExclusive))
@@ -228,10 +226,6 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
     @classmethod
     def constraint_name(cls):
         return "MaxExclusiveConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        return SH_MaxExclusiveConstraintComponent
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.max_vals) < 2:
@@ -300,6 +294,8 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
     For each value node v where the SPARQL expression $maxInclusive >= v does not return true, there is a validation result with v as sh:value.
     """
 
+    shacl_constraint_component = SH_MaxInclusiveConstraintComponent
+
     def __init__(self, shape):
         super(MaxInclusiveConstraintComponent, self).__init__(shape)
         max_vals = list(self.shape.objects(SH_maxInclusive))
@@ -317,10 +313,6 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
     @classmethod
     def constraint_name(cls):
         return "MaxInclusiveConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        return SH_MaxInclusiveConstraintComponent
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.max_vals) < 2:

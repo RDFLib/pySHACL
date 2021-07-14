@@ -33,6 +33,8 @@ class StringBasedConstraintBase(ConstraintComponent):
     https://www.w3.org/TR/shacl/#core-components-string
     """
 
+    shacl_constraint_component = NotImplemented
+
     def __init__(self, shape):
         super(StringBasedConstraintBase, self).__init__(shape)
         self.string_rules = []
@@ -44,10 +46,6 @@ class StringBasedConstraintBase(ConstraintComponent):
 
     @classmethod
     def constraint_name(cls):
-        raise NotImplementedError()
-
-    @classmethod
-    def shacl_constraint_class(cls):
         raise NotImplementedError()
 
     @classmethod
@@ -90,6 +88,8 @@ class MinLengthConstraintComponent(StringBasedConstraintBase):
     For each value node v where the length (as defined by the SPARQL STRLEN function) of the string representation of v (as defined by the SPARQL str function) is less than $minLength, or where v is a blank node, there is a validation result with v as sh:value.
     """
 
+    shacl_constraint_component = SH_MinLengthConstraintComponent
+
     def __init__(self, shape):
         super(MinLengthConstraintComponent, self).__init__(shape)
         self.allow_multi_rules = False
@@ -113,10 +113,6 @@ class MinLengthConstraintComponent(StringBasedConstraintBase):
     @classmethod
     def constraint_name(cls):
         return "MinLengthConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        return SH_MinLengthConstraintComponent
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         m = "String length not >= {}".format(stringify_node(datagraph, self.string_rules[0]))
@@ -156,6 +152,8 @@ class MaxLengthConstraintComponent(StringBasedConstraintBase):
     For each value node v where the length (as defined by the SPARQL STRLEN function) of the string representation of v (as defined by the SPARQL str function) is greater than $maxLength, or where v is a blank node, there is a validation result with v as sh:value.
     """
 
+    shacl_constraint_component = SH_MaxLengthConstraintComponent
+
     def __init__(self, shape):
         super(MaxLengthConstraintComponent, self).__init__(shape)
         self.allow_multi_rules = False
@@ -179,10 +177,6 @@ class MaxLengthConstraintComponent(StringBasedConstraintBase):
     @classmethod
     def constraint_name(cls):
         return "MaxLengthConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        return SH_MaxLengthConstraintComponent
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         m = "String length not <= {}".format(stringify_node(datagraph, self.string_rules[0]))
@@ -220,6 +214,8 @@ class PatternConstraintComponent(StringBasedConstraintBase):
     For each value node v: A failure MUST be produced if the validation of v as focus node against the property shape $property produces a failure. Otherwise, the validation results are the results of validating v as focus node against the property shape $property.
     """
 
+    shacl_constraint_component = SH_PatternConstraintComponent
+
     def __init__(self, shape):
         super(PatternConstraintComponent, self).__init__(shape)
         patterns_found = list(self.shape.objects(SH_pattern))
@@ -249,10 +245,6 @@ class PatternConstraintComponent(StringBasedConstraintBase):
     @classmethod
     def constraint_name(cls):
         return "PatternConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        return SH_PatternConstraintComponent
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.string_rules) < 2:
@@ -304,6 +296,10 @@ class LanguageInConstraintComponent(StringBasedConstraintBase):
     For each value node that is either not a literal or that does not have a language tag matching any of the basic language ranges that are the members of $languageIn following the filtering schema defined by the SPARQL langMatches function, there is a validation result with the value node as sh:value.
     """
 
+    shacl_constraint_component = SH_LanguageInConstraintComponent
+    shape_expecting = False
+    list_taking = True
+
     def __init__(self, shape):
         super(LanguageInConstraintComponent, self).__init__(shape)
         self.allow_multi_rules = False
@@ -327,10 +323,6 @@ class LanguageInConstraintComponent(StringBasedConstraintBase):
     @classmethod
     def constraint_name(cls):
         return "LanguageInConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        return SH_LanguageInConstraintComponent
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         m = "String language is not in {}".format(stringify_node(datagraph, self.string_rules[0]))
@@ -389,6 +381,8 @@ class UniqueLangConstraintComponent(StringBasedConstraintBase):
     If $uniqueLang is true then for each non-empty language tag that is used by at least two value nodes, there is a validation result.
     """
 
+    shacl_constraint_component = SH_UniqueLangConstraintComponent
+
     def __init__(self, shape):
         super(UniqueLangConstraintComponent, self).__init__(shape)
         self.allow_multi_rules = False
@@ -423,10 +417,6 @@ class UniqueLangConstraintComponent(StringBasedConstraintBase):
     @classmethod
     def constraint_name(cls):
         return "UniqueLangConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        return SH_UniqueLangConstraintComponent
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         return [rdflib.Literal("More than one String shares the same Language")]

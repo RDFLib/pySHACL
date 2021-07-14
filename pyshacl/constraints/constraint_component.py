@@ -51,6 +51,14 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
     All Constraint Components must inherit from this class.
     """
 
+    # True if constraint component is defined as "shape-expecting"
+    shape_expecting = False
+
+    # True if constraint component is defined as "list-taking"
+    list_taking = False
+
+    shacl_constraint_component = NotImplemented
+
     def __init__(self, shape: 'Shape'):
         """
 
@@ -67,11 +75,6 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
     @classmethod
     @abc.abstractmethod
     def constraint_name(cls):
-        raise NotImplementedError()  # pragma: no cover
-
-    @classmethod
-    @abc.abstractmethod
-    def shacl_constraint_class(cls):
         raise NotImplementedError()  # pragma: no cover
 
     @abc.abstractmethod
@@ -140,7 +143,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         :return:
         """
         sg = self.shape.sg.graph
-        constraint_component = constraint_component or self.shacl_constraint_class()
+        constraint_component = constraint_component or self.shacl_constraint_component
         constraint_name = self.constraint_name()
         if severity == SH_Violation:
             severity_desc = "Constraint Violation"
@@ -215,7 +218,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         :type extra_messages: collections.abc.Iterable | None
         :return:
         """
-        constraint_component = constraint_component or self.shacl_constraint_class()
+        constraint_component = constraint_component or self.shacl_constraint_component
         severity = self.shape.severity
         sg = self.shape.sg.graph
         r_triples = list()

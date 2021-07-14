@@ -25,6 +25,9 @@ SH_SPARQLAskValidator = SH.term('SPARQLAskValidator')
 
 
 class BoundShapeValidatorComponent(ConstraintComponent):
+
+    shacl_constraint_component = SH_ConstraintComponent
+
     def __init__(self, constraint, shape: 'Shape', validator):
         """
         Create a new custom constraint, by applying a ConstraintComponent and a Validator to a Shape
@@ -54,11 +57,6 @@ class BoundShapeValidatorComponent(ConstraintComponent):
     @classmethod
     def constraint_name(cls):
         return "ConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        # TODO:coverage: this is never used for this constraint?
-        return SH_ConstraintComponent
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         return [rdflib.Literal("Parameterised SHACL Query generated constraint validation reports.")]

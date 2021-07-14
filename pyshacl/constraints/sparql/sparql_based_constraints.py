@@ -24,6 +24,8 @@ class SPARQLBasedConstraint(ConstraintComponent):
     https://www.w3.org/TR/shacl/#sparql-constraints
     """
 
+    shacl_constraint_component = SH_SPARQLConstraintComponent
+
     def __init__(self, shape):
         super(SPARQLBasedConstraint, self).__init__(shape)
         sg = self.shape.sg.graph
@@ -86,10 +88,6 @@ class SPARQLBasedConstraint(ConstraintComponent):
     @classmethod
     def constraint_name(cls):
         return "SPARQLConstraintComponent"
-
-    @classmethod
-    def shacl_constraint_class(cls):
-        return SH_SPARQLConstraintComponent
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """

@@ -105,7 +105,7 @@ class Validator(object):
             if isinstance(e, ReportableRuntimeError):
                 raise e
             raise ReportableRuntimeError(
-                "Error during creation of OWL-RL Deductive Closure\n" "{}".format(str(e.args[0]))
+                "Error during creation of OWL-RL Deductive Closure\n{}".format(str(e.args[0]))
             )
         if isinstance(target_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
             named_graphs = [
@@ -121,7 +121,7 @@ class Validator(object):
                 inferencer.expand(g)
         except Exception as e:  # pragma: no cover
             logger.error("Error while running OWL-RL Deductive Closure")
-            raise ReportableRuntimeError("Error while running OWL-RL Deductive Closure\n" "{}".format(str(e.args[0])))
+            raise ReportableRuntimeError("Error while running OWL-RL Deductive Closure\n{}".format(str(e.args[0])))
 
     @classmethod
     def create_validation_report(cls, sg, conforms: bool, results: List[Tuple]):
@@ -177,9 +177,9 @@ class Validator(object):
         self.inplace = options['inplace']
         if not isinstance(data_graph, rdflib.Graph):
             raise RuntimeError("data_graph must be a rdflib Graph object")
-        self.data_graph = data_graph
+        self.data_graph = data_graph  # type: GraphLike
         self._target_graph = None
-        self.ont_graph = ont_graph
+        self.ont_graph = ont_graph  # type: Optional[GraphLike]
         self.data_graph_is_multigraph = isinstance(self.data_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph))
         if self.ont_graph is not None and isinstance(self.ont_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
             self.ont_graph.default_union = True
@@ -187,7 +187,7 @@ class Validator(object):
         if shacl_graph is None:
             shacl_graph = clone_graph(data_graph, identifier='shacl')
         assert isinstance(shacl_graph, rdflib.Graph), "shacl_graph must be a rdflib Graph object"
-        self.shacl_graph = ShapesGraph(shacl_graph, self.logger)
+        self.shacl_graph = ShapesGraph(shacl_graph, self.logger)  # type: ShapesGraph
 
         if options['use_js']:
             is_js_installed = check_extra_installed('js')
