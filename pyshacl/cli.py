@@ -33,7 +33,7 @@ parser.add_argument(
     dest='ont',
     action='store',
     nargs='?',
-    help='A file path or URL to a docucument containing extra ontological information to mix into ' 'the data graph.',
+    help='A file path or URL to a document containing extra ontological information to mix into ' 'the data graph.',
 )
 parser.add_argument(
     '-i',
@@ -212,7 +212,7 @@ def main():
         import traceback
 
         traceback.print_tb(re.__traceback__)
-        sys.stderr.write("\n\nValidator encountered a Runtime Error. Please report this to the PySHACL issue tracker.")
+        sys.stderr.write("\n\nValidator encountered a Runtime Error. Please report this to the PySHACL issue tracker.\n")
         sys.exit(2)
 
     if args.format == 'human':
