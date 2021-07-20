@@ -19,8 +19,8 @@ if typing.TYPE_CHECKING:
     from ..shapes_graph import ShapesGraph
 
 
-SH_returnType = SH.term('returnType')
-SH_optional = SH.term('optional')
+SH_returnType = SH.returnType
+SH_optional = SH.optional
 
 
 class SHACLFunction(object):

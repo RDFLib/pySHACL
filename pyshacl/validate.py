@@ -586,11 +586,11 @@ def compare_inferencing_reports(data_graph: GraphLike, expected_graph: GraphLike
 
 def check_dash_result(validator: Validator, report_graph: GraphLike, expected_result_graph: GraphLike):
     DASH = rdflib.namespace.Namespace('http://datashapes.org/dash#')
-    DASH_GraphValidationTestCase = DASH.term('GraphValidationTestCase')
-    DASH_InferencingTestCase = DASH.term('InferencingTestCase')
-    DASH_FunctionTestCase = DASH.term('FunctionTestCase')
-    DASH_expectedResult = DASH.term('expectedResult')
-    DASH_expression = DASH.term('expression')
+    DASH_GraphValidationTestCase = DASH.GraphValidationTestCase
+    DASH_InferencingTestCase = DASH.InferencingTestCase
+    DASH_FunctionTestCase = DASH.FunctionTestCase
+    DASH_expectedResult = DASH.expectedResult
+    DASH_expression = DASH.expression
     was_default_union = None
     if isinstance(expected_result_graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
         was_default_union = expected_result_graph.default_union

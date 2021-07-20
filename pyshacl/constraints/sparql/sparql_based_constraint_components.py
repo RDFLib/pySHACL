@@ -20,8 +20,8 @@ if typing.TYPE_CHECKING:
     from pyshacl.shapes_graph import ShapesGraph
 
 
-SH_SPARQLSelectValidator = SH.term('SPARQLSelectValidator')
-SH_SPARQLAskValidator = SH.term('SPARQLAskValidator')
+SH_SPARQLSelectValidator = SH.SPARQLSelectValidator
+SH_SPARQLAskValidator = SH.SPARQLAskValidator
 
 
 class BoundShapeValidatorComponent(ConstraintComponent):

@@ -7,7 +7,7 @@ from pyshacl.consts import SH_condition, SH_deactivated, SH_order
 from pyshacl.errors import RuleLoadError
 
 
-RDF_first = RDF.term('first')
+RDF_first = RDF.first
 
 
 class SHACLRuleCondition(object):

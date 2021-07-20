@@ -15,17 +15,17 @@ from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
 
 
-SH_PatternConstraintComponent = SH.term('PatternConstraintComponent')
-SH_MinLengthConstraintComponent = SH.term('MinLengthConstraintComponent')
-SH_MaxLengthConstraintComponent = SH.term('MaxLengthConstraintComponent')
-SH_LanguageInConstraintComponent = SH.term('LanguageInConstraintComponent')
-SH_UniqueLangConstraintComponent = SH.term('UniqueLangConstraintComponent')
-SH_pattern = SH.term('pattern')
-SH_flags = SH.term('flags')
-SH_minLength = SH.term('minLength')
-SH_maxLength = SH.term('maxLength')
-SH_languageIn = SH.term('languageIn')
-SH_uniqueLang = SH.term('uniqueLang')
+SH_PatternConstraintComponent = SH.PatternConstraintComponent
+SH_MinLengthConstraintComponent = SH.MinLengthConstraintComponent
+SH_MaxLengthConstraintComponent = SH.MaxLengthConstraintComponent
+SH_LanguageInConstraintComponent = SH.LanguageInConstraintComponent
+SH_UniqueLangConstraintComponent = SH.UniqueLangConstraintComponent
+SH_pattern = SH.pattern
+SH_flags = SH.flags
+SH_minLength = SH.minLength
+SH_maxLength = SH.maxLength
+SH_languageIn = SH.languageIn
+SH_uniqueLang = SH.uniqueLang
 
 
 class StringBasedConstraintBase(ConstraintComponent):

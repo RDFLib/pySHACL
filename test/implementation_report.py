@@ -15,9 +15,9 @@ from test.helpers import load_manifest, flatten_manifests
 
 EARL = Namespace("http://www.w3.org/ns/earl#")
 DOAP = Namespace("http://usefulinc.com/ns/doap#")
-PASSED = EARL.term('passed')
-FAILED = EARL.term('failed')
-PARTIAL = EARL.term('partial')
+PASSED = EARL.passed
+FAILED = EARL.failed
+PARTIAL = EARL.partial
 
 
 TEST_PREFIX = "urn:x-shacl-test:"

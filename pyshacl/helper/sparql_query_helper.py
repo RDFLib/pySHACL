@@ -24,7 +24,7 @@ from ..consts import (
 from ..errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
 
 
-SH_declare = SH.term('declare')
+SH_declare = SH.declare
 invalid_parameter_names = {'this', 'shapesGraph', 'currentShape', 'path', 'PATH', 'value'}
 
 

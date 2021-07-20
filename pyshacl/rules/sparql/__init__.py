@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from pyshacl.pytypes import GraphLike
     from pyshacl.shape import Shape
 
-XSD_string = XSD.term('string')
+XSD_string = XSD.string
 
 
 class SPARQLRule(SHACLRule):
