@@ -18,7 +18,7 @@ from pyshacl.rdfutil import stringify_node
 SH_InConstraintComponent = SH.InConstraintComponent
 SH_ClosedConstraintComponent = SH.ClosedConstraintComponent
 SH_HasValueConstraintComponent = SH.HasValueConstraintComponent
-SH_in = SH.in
+SH_in = SH["in"]
 SH_closed = SH.closed
 SH_ignoredProperties = SH.ignoredProperties
 SH_hasValue = SH.hasValue

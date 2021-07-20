@@ -14,9 +14,9 @@ from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
 
 
-SH_not = SH.not
-SH_and = SH.and
-SH_or = SH.or
+SH_not = SH["not"]
+SH_and = SH["and"]
+SH_or = SH["or"]
 SH_xone = SH.xone
 
 SH_NotConstraintComponent = SH.NotConstraintComponent

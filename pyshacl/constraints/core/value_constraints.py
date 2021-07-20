@@ -38,7 +38,7 @@ XSD_date = XSD.date
 XSD_time = XSD.time
 XSD_dateTime = XSD.dateTime
 
-SH_class = SH.class
+SH_class = SH["class"]
 SH_ClassConstraintComponent = SH.ClassConstraintComponent
 SH_DatatypeConstraintComponent = SH.DatatypeConstraintComponent
 SH_NodeKindConstraintComponent = SH.NodeKindConstraintComponent
