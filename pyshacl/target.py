@@ -14,12 +14,12 @@ from .pytypes import GraphLike
 if typing.TYPE_CHECKING:
     from .shapes_graph import ShapesGraph
 
-SH_labelTempalate = SH.term('labelTemplate')
-SH_Target = SH.term('Target')
-SH_TargetType = SH.term('TargetType')
-SH_JSTarget = SH.term('JSTarget')
-SH_JSTargetType = SH.term('JSTargetType')
-SH_SPARQLTarget = SH.term('SPARQLTarget')
+SH_labelTempalate = SH.labelTemplate
+SH_Target = SH.Target
+SH_TargetType = SH.TargetType
+SH_JSTarget = SH.JSTarget
+SH_JSTargetType = SH.JSTargetType
+SH_SPARQLTarget = SH.SPARQLTarget
 
 
 class SHACLTargetType(object):

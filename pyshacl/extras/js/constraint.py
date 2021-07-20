@@ -19,8 +19,8 @@ if typing.TYPE_CHECKING:
     from pyshacl.shapes_graph import ShapesGraph
 
 
-SH_JSConstraint = SH.term('JSConstraint')
-SH_JSConstraintComponent = SH.term('JSConstraintComponent')
+SH_JSConstraint = SH.JSConstraint
+SH_JSConstraintComponent = SH.JSConstraintComponent
 
 
 class JSConstraintImpl(JSExecutable):

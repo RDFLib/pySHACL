@@ -20,17 +20,17 @@ from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
 
 
-SH_PropertyConstraintComponent = SH.term('PropertyConstraintComponent')
-SH_NodeConstraintComponent = SH.term('NodeConstraintComponent')
+SH_PropertyConstraintComponent = SH.PropertyConstraintComponent
+SH_NodeConstraintComponent = SH.NodeConstraintComponent
 
-SH_QualifiedValueCountConstraintComponent = SH.term('QualifiedValueConstraintComponent')
-SH_QualifiedMaxCountConstraintComponent = SH.term('QualifiedMaxCountConstraintComponent')
-SH_QualifiedMinCountConstraintComponent = SH.term('QualifiedMinCountConstraintComponent')
+SH_QualifiedValueCountConstraintComponent = SH.QualifiedValueConstraintComponent
+SH_QualifiedMaxCountConstraintComponent = SH.QualifiedMaxCountConstraintComponent
+SH_QualifiedMinCountConstraintComponent = SH.QualifiedMinCountConstraintComponent
 
-SH_qualifiedValueShape = SH.term('qualifiedValueShape')
-SH_qualifiedValueShapesDisjoint = SH.term('qualifiedValueShapesDisjoint')
-SH_qualifiedMinCount = SH.term('qualifiedMinCount')
-SH_qualifiedMaxCount = SH.term('qualifiedMaxCount')
+SH_qualifiedValueShape = SH.qualifiedValueShape
+SH_qualifiedValueShapesDisjoint = SH.qualifiedValueShapesDisjoint
+SH_qualifiedMinCount = SH.qualifiedMinCount
+SH_qualifiedMaxCount = SH.qualifiedMaxCount
 
 
 class PropertyConstraintComponent(ConstraintComponent):

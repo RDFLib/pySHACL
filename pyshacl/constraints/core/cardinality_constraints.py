@@ -14,12 +14,12 @@ from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
 
 
-XSD_integer = XSD.term('integer')
-SH_minCount = SH.term('minCount')
-SH_maxCount = SH.term('maxCount')
+XSD_integer = XSD.integer
+SH_minCount = SH.minCount
+SH_maxCount = SH.maxCount
 
-SH_MinCountConstraintComponent = SH.term('MinCountConstraintComponent')
-SH_MaxCountConstraintComponent = SH.term('MaxCountConstraintComponent')
+SH_MinCountConstraintComponent = SH.MinCountConstraintComponent
+SH_MaxCountConstraintComponent = SH.MaxCountConstraintComponent
 
 
 class MinCountConstraintComponent(ConstraintComponent):

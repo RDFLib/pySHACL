@@ -29,19 +29,19 @@ from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
 
 
-RDF_langString = RDF.term('langString')
-XSD_string = XSD.term('string')
-XSD_integer = XSD.term('integer')
-XSD_float = XSD.term('float')
-XSD_boolean = XSD.term('boolean')
-XSD_date = XSD.term('date')
-XSD_time = XSD.term('time')
-XSD_dateTime = XSD.term('dateTime')
+RDF_langString = RDF.langString
+XSD_string = XSD.string
+XSD_integer = XSD.integer
+XSD_float = XSD.float
+XSD_boolean = XSD.boolean
+XSD_date = XSD.date
+XSD_time = XSD.time
+XSD_dateTime = XSD.dateTime
 
-SH_class = SH.term('class')
-SH_ClassConstraintComponent = SH.term('ClassConstraintComponent')
-SH_DatatypeConstraintComponent = SH.term('DatatypeConstraintComponent')
-SH_NodeKindConstraintComponent = SH.term('NodeKindConstraintComponent')
+SH_class = SH.class
+SH_ClassConstraintComponent = SH.ClassConstraintComponent
+SH_DatatypeConstraintComponent = SH.DatatypeConstraintComponent
+SH_NodeKindConstraintComponent = SH.NodeKindConstraintComponent
 
 
 class ClassConstraintComponent(ConstraintComponent):

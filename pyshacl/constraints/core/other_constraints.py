@@ -15,13 +15,13 @@ from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
 
 
-SH_InConstraintComponent = SH.term('InConstraintComponent')
-SH_ClosedConstraintComponent = SH.term('ClosedConstraintComponent')
-SH_HasValueConstraintComponent = SH.term('HasValueConstraintComponent')
-SH_in = SH.term('in')
-SH_closed = SH.term('closed')
-SH_ignoredProperties = SH.term('ignoredProperties')
-SH_hasValue = SH.term('hasValue')
+SH_InConstraintComponent = SH.InConstraintComponent
+SH_ClosedConstraintComponent = SH.ClosedConstraintComponent
+SH_HasValueConstraintComponent = SH.HasValueConstraintComponent
+SH_in = SH.in
+SH_closed = SH.closed
+SH_ignoredProperties = SH.ignoredProperties
+SH_hasValue = SH.hasValue
 
 
 class InConstraintComponent(ConstraintComponent):
@@ -98,7 +98,7 @@ class ClosedConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_ClosedConstraintComponent
 
-    ALWAYS_IGNORE = {(RDF_type, RDFS.term('Resource'))}
+    ALWAYS_IGNORE = {(RDF_type, RDFS.Resource)}
 
     def __init__(self, shape):
         super(ClosedConstraintComponent, self).__init__(shape)

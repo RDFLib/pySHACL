@@ -14,7 +14,7 @@ if typing.TYPE_CHECKING:
     from pyshacl.shape import Shape
     from pyshacl.shapes_graph import ShapesGraph
 
-SH_JSRule = SH.term('JSRule')
+SH_JSRule = SH.JSRule
 
 
 class JSRule(SHACLRule):

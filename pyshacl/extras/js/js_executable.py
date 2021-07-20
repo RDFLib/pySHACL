@@ -15,7 +15,7 @@ from .context import SHACLJSContext
 if typing.TYPE_CHECKING:
     from pyshacl.shapes_graph import ShapesGraph
 
-SH_jsLibraryURL = SH.term('jsLibraryURL')
+SH_jsLibraryURL = SH.jsLibraryURL
 
 
 class JSExecutable(object):

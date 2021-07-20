@@ -15,14 +15,14 @@ from pyshacl.rdfutil import stringify_node
 from pyshacl.rdfutil.compare import compare_literal
 
 
-SH_MinExclusiveConstraintComponent = SH.term('MinExclusiveConstraintComponent')
-SH_MinInclusiveConstraintComponent = SH.term('MinInclusiveConstraintComponent')
-SH_minExclusive = SH.term('minExclusive')
-SH_minInclusive = SH.term('minInclusive')
-SH_MaxExclusiveConstraintComponent = SH.term('MaxExclusiveConstraintComponent')
-SH_MaxInclusiveConstraintComponent = SH.term('MaxInclusiveConstraintComponent')
-SH_maxExclusive = SH.term('maxExclusive')
-SH_maxInclusive = SH.term('maxInclusive')
+SH_MinExclusiveConstraintComponent = SH.MinExclusiveConstraintComponent
+SH_MinInclusiveConstraintComponent = SH.MinInclusiveConstraintComponent
+SH_minExclusive = SH.minExclusive
+SH_minInclusive = SH.minInclusive
+SH_MaxExclusiveConstraintComponent = SH.MaxExclusiveConstraintComponent
+SH_MaxInclusiveConstraintComponent = SH.MaxInclusiveConstraintComponent
+SH_maxExclusive = SH.maxExclusive
+SH_maxInclusive = SH.maxInclusive
 
 
 class MinExclusiveConstraintComponent(ConstraintComponent):

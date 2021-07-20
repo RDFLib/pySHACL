@@ -13,15 +13,15 @@ from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
 
 
-SH_equals = SH.term('equals')
-SH_disjoint = SH.term('disjoint')
-SH_lessThan = SH.term('lessThan')
-SH_lessThanOrEquals = SH.term('lessThanOrEquals')
+SH_equals = SH.equals
+SH_disjoint = SH.disjoint
+SH_lessThan = SH.lessThan
+SH_lessThanOrEquals = SH.lessThanOrEquals
 
-SH_EqualsConstraintComponent = SH.term('EqualsConstraintComponent')
-SH_DisjointConstraintComponent = SH.term('DisjointConstraintComponent')
-SH_LessThanConstraintComponent = SH.term('LessThanConstraintComponent')
-SH_LessThanOrEqualsConstraintComponent = SH.term('LessThanOrEqualsConstraintComponent')
+SH_EqualsConstraintComponent = SH.EqualsConstraintComponent
+SH_DisjointConstraintComponent = SH.DisjointConstraintComponent
+SH_LessThanConstraintComponent = SH.LessThanConstraintComponent
+SH_LessThanOrEqualsConstraintComponent = SH.LessThanOrEqualsConstraintComponent
 
 
 class EqualsConstraintComponent(ConstraintComponent):

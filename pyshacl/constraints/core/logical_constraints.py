@@ -14,15 +14,15 @@ from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
 
 
-SH_not = SH.term('not')
-SH_and = SH.term('and')
-SH_or = SH.term('or')
-SH_xone = SH.term('xone')
+SH_not = SH.not
+SH_and = SH.and
+SH_or = SH.or
+SH_xone = SH.xone
 
-SH_NotConstraintComponent = SH.term('NotConstraintComponent')
-SH_AndConstraintComponent = SH.term('AndConstraintComponent')
-SH_OrConstraintComponent = SH.term('OrConstraintComponent')
-SH_XoneConstraintComponent = SH.term('XoneConstraintComponent')
+SH_NotConstraintComponent = SH.NotConstraintComponent
+SH_AndConstraintComponent = SH.AndConstraintComponent
+SH_OrConstraintComponent = SH.OrConstraintComponent
+SH_XoneConstraintComponent = SH.XoneConstraintComponent
 
 
 class NotConstraintComponent(ConstraintComponent):

@@ -280,13 +280,13 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         return msg
 
 
-SH_nodeValidator = SH.term('nodeValidator')
-SH_propertyValidator = SH.term('propertyValidator')
-SH_validator = SH.term('validator')
-SH_optional = SH.term('optional')
-SH_SPARQLSelectValidator = SH.term('SPARQLSelectValidator')
-SH_SPARQLAskValidator = SH.term('SPARQLAskValidator')
-SH_JSValidator = SH.term('JSValidator')
+SH_nodeValidator = SH.nodeValidator
+SH_propertyValidator = SH.propertyValidator
+SH_validator = SH.validator
+SH_optional = SH.optional
+SH_SPARQLSelectValidator = SH.SPARQLSelectValidator
+SH_SPARQLAskValidator = SH.SPARQLAskValidator
+SH_JSValidator = SH.JSValidator
 
 
 class CustomConstraintComponentFactory(object):

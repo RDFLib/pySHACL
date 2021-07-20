@@ -3,6 +3,6 @@
 from rdflib import RDF, RDFS, Namespace
 
 
-RDFS_Resource = RDFS.term('Resource')
-RDF_first = RDF.term('first')
+RDFS_Resource = RDFS.Resource
+RDF_first = RDF.first
 SH = Namespace('http://www.w3.org/ns/shacl#')
