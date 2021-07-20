@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
-from rdflib import OWL, RDF, RDFS
 from rdflib.namespace import Namespace
 
 
-SH = Namespace('http://www.w3.org/ns/shacl#')
+RDF_PFX = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+RDFS_PFX = 'http://www.w3.org/2000/01/rdf-schema#'
+OWL_PFX = 'http://www.w3.org/2002/07/owl#'
+SH_PFX = 'http://www.w3.org/ns/shacl#'
+RDF = Namespace(RDF_PFX)
+RDFS = Namespace(RDFS_PFX)
+OWL = Namespace(OWL_PFX)
+SH = Namespace(SH_PFX)
 
 # Classes
 RDF_Property = RDF.Property

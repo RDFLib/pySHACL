@@ -6,9 +6,13 @@ import re
 
 import rdflib
 
-from rdflib import RDF, XSD
+from rdflib import XSD
 
 from ..consts import (
+    OWL_PFX,
+    RDF,
+    RDF_PFX,
+    RDFS_PFX,
     SH,
     OWL_Ontology,
     RDF_type,
@@ -53,9 +57,9 @@ class SPARQLQueryHelper(object):
         self.param_bind_map = {}
         self.bound_messages = set()
         self.prefixes = {
-            'rdf': rdflib.namespace.RDF.uri,
-            'rdfs': rdflib.namespace.RDFS.uri,
-            'owl': str(rdflib.namespace.OWL),
+            'rdf': RDF_PFX,
+            'rdfs': RDFS_PFX,
+            'owl': OWL_PFX,
         }
         if shape:
             self.shape = shape

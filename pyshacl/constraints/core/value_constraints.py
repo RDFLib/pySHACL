@@ -7,11 +7,12 @@ from typing import Dict, List
 
 import rdflib
 
-from rdflib.namespace import RDF, XSD
+from rdflib.namespace import XSD
 from rdflib.term import Literal
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import (
+    RDF,
     SH,
     SH_IRI,
     RDF_type,

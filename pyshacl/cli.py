@@ -212,7 +212,9 @@ def main():
         import traceback
 
         traceback.print_tb(re.__traceback__)
-        sys.stderr.write("\n\nValidator encountered a Runtime Error. Please report this to the PySHACL issue tracker.\n")
+        sys.stderr.write(
+            "\n\nValidator encountered a Runtime Error. Please report this to the PySHACL issue tracker.\n"
+        )
         sys.exit(2)
 
     if args.format == 'human':

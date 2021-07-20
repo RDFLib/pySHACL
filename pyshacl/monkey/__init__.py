@@ -10,6 +10,7 @@ from rdflib import plugin, store
 RDFLIB_VERSION = LooseVersion(rdflib.__version__)
 RDFLIB_421 = LooseVersion("4.2.1")
 RDFLIB_500 = LooseVersion("5.0.0")
+RDFLIB_600 = LooseVersion("6.0.0")
 
 
 def rdflib_bool_patch():
@@ -58,6 +59,8 @@ def apply_patches():
     if RDFLIB_421 >= RDFLIB_VERSION:
         rdflib_term_ge_le_patch()
     if RDFLIB_421 <= RDFLIB_VERSION:
-        plugin.register("default", store.Store, "pyshacl.monkey.memory2", "Memory2")
         plugin.register("Memory2", store.Store, "pyshacl.monkey.memory2", "Memory2")
+    if RDFLIB_421 <= RDFLIB_VERSION < RDFLIB_600:
+        # RDFLib 6.0.0+ comes with its own Memory2 store (called "Memory") by default
+        plugin.register("default", store.Store, "pyshacl.monkey.memory2", "Memory2")
     return True

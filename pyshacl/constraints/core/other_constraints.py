@@ -6,10 +6,8 @@ from typing import Dict, List
 
 import rdflib
 
-from rdflib.namespace import RDFS
-
 from pyshacl.constraints.constraint_component import ConstraintComponent
-from pyshacl.consts import SH, RDF_type, SH_property
+from pyshacl.consts import RDFS, SH, RDF_type, SH_property
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
 from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
