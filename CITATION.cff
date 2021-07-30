@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use PySHACL in a publication, please cite it as below."
+authors:
+- family-names: "Sommer"
+  given-names: "Ashley"
+  orcid: "https://orcid.org/0000-0003-0590-0131"
+- family-names: "Car"
+  given-names: "Nicholas"
+  orcid: "http://orcid.org/0000-0002-8742-7730"
+title: "pySHACL"
+version: 0.15.0
+doi: 10.5281/zenodo.4750840
+license: Apache-2.0
+date-released: 2021-07-20
+url: "https://github.com/RDFLib/pySHACL"
