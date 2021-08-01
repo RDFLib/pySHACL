@@ -113,10 +113,7 @@ class ClassConstraintComponent(ConstraintComponent):
                         if ctype == class_rule:
                             found = True
                             break
-                        # Note, this only ones _one_ level of subclass traversing.
-                        # For more levels, the whole target graph should be put through
-                        # a RDFS reasoning engine.
-                        subclasses = target_graph.objects(ctype, RDFS_subClassOf)
+                        subclasses = target_graph.transitive_objects(ctype, RDFS_subClassOf)
                         if class_rule in iter(subclasses):
                             found = True
                             break
