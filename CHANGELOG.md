@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [0.16.0] - 2021-08-19
+
+### Changed
+- `sh:class` Constraint now applies transitively.
+  - This means it will follow `rdfs:subClassOf` relationships right to the top of the hierarchy.
+  - Be careful with this, could lead to recursion or infinite loops!
+  - This requires a big version number bump because it's technically a breaking change.
+  - Fixes #87, thanks `@gtfierro`
+
 ## [0.15.0] - 2021-07-20
 
 ### Fixed
@@ -763,7 +772,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/RDFLib/pySHACL/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/RDFLib/pySHACL/compare/v0.14.5...v0.15.0
 [0.14.5]: https://github.com/RDFLib/pySHACL/compare/v0.14.4...v0.14.5
 [0.14.4]: https://github.com/RDFLib/pySHACL/compare/v0.14.3...v0.14.4

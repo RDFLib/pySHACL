@@ -175,7 +175,24 @@ class Shape(object):
             name = next(iter(self.name))
         except Exception:
             name = str(self.node)
-        return "<Shape {}>".format(name)
+        if self.is_property_shape:
+            kind = "PropertyShape"
+        else:
+            kind = "NodeShape"
+        return "<{} {}>".format(kind, name)
+
+    def __repr__(self):
+        if self.is_property_shape:
+            p = "True"
+        else:
+            p = "False"
+        names = list(self.name)
+        if len(names):
+            return "<Shape {} p={} node={}>".format(",".join(names), p, str(self.node))
+        else:
+            return "<Shape p={} node={}>".format(p, str(self.node))
+        #return super(Shape, self).__repr__()
+
 
     @property
     def description(self):
@@ -571,6 +588,7 @@ class Shape(object):
         done_constraints = set()
         run_count = 0
         _evaluation_path.append(self)
+        #print(_evaluation_path)
         constraint_components = [constraint_map[p] for p in iter(parameters)]
         for constraint_component in constraint_components:  # type: Type[ConstraintComponent]
             if constraint_component in done_constraints:
@@ -614,4 +632,5 @@ class Shape(object):
             non_conformant = non_conformant or (not _is_conform)
             reports.extend(_r)
             run_count += 1
+        #print(_evaluation_path, "Passes" if not non_conformant else "Fails")
         return (not non_conformant), reports
