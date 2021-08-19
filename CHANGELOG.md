@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [0.16.1] - 2021-08-20
+
+### Added
+- [ExpressionConstraintComponent](https://www.w3.org/TR/shacl-af/#ExpressionConstraintComponent) is implemented!
+  - Use your previously defined SHACL Functions to express complex constraints
+  - Added DASH-tests for ExpressionConstraintComponent
+  - Added advanced tests for ExpressionConstraintComponent, SHACLRules, and SHACLFunctions.
+- New Advanced features example, showcasing ExpressionConstraint and others features
+
+### Changed
+- Allow sh:message to be attached to an expression block, without breaking its functionality
+- A SHACL Function within a SHACL Expression now must be a list-valued property.
+- Refactored node-expression and path-expression methods to be common and reusable code
+- Re-black and isort all source files
+
+
 ## [0.16.0] - 2021-08-19
 
 ### Changed
@@ -772,7 +788,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.16.1...HEAD
+[0.16.1]: https://github.com/RDFLib/pySHACL/compare/v0.16.0...v0.16.1
 [0.16.0]: https://github.com/RDFLib/pySHACL/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/RDFLib/pySHACL/compare/v0.14.5...v0.15.0
 [0.14.5]: https://github.com/RDFLib/pySHACL/compare/v0.14.4...v0.14.5

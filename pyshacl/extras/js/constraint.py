@@ -33,8 +33,7 @@ class JSConstraintImpl(JSExecutable):
         for m in msgs_iter:
             if not isinstance(m, Literal):
                 raise ConstraintLoadError(
-                    "JSConstraint sh:message must be a RDF Literal.",
-                    "https://www.w3.org/TR/shacl-js/#js-constraints",
+                    "JSConstraint sh:message must be a RDF Literal.", "https://www.w3.org/TR/shacl-js/#js-constraints",
                 )
             if not isinstance(m.value, str):
                 raise ConstraintLoadError(

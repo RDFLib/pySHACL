@@ -43,14 +43,12 @@ def gather_rules(shacl_graph: 'ShapesGraph', iterate_rules=False) -> Dict['Shape
     overlaps = triple_rule_nodes.intersection(js_rule_nodes)
     if len(overlaps) > 0:
         raise RuleLoadError(
-            "A SHACL Rule cannot be both a TripleRule and a JSRule.",
-            "https://www.w3.org/TR/shacl-af/#rules-syntax",
+            "A SHACL Rule cannot be both a TripleRule and a JSRule.", "https://www.w3.org/TR/shacl-af/#rules-syntax",
         )
     overlaps = sparql_rule_nodes.intersection(js_rule_nodes)
     if len(overlaps) > 0:
         raise RuleLoadError(
-            "A SHACL Rule cannot be both a SPARQLRule and a JSRule.",
-            "https://www.w3.org/TR/shacl-af/#rules-syntax",
+            "A SHACL Rule cannot be both a SPARQLRule and a JSRule.", "https://www.w3.org/TR/shacl-af/#rules-syntax",
         )
     used_rules = shacl_graph.subject_objects(SH_rule)
     ret_rules = defaultdict(list)

@@ -148,7 +148,7 @@
 ### [Expression Constraints][AFExpression]
 | Path                               |  Link 	              |      Status      	|  Comments	|
 |:----------                         |:------:	              |:-------------:	    |:------:   |
-| `sh:ExpressionConstraintComponent` | [▶][AFExpression]      | ![status-missing]	|           |
+| `sh:ExpressionConstraintComponent` | [▶][AFExpression]      | ![status-complete] 	|           |
 
 ### [SHACL Rules](https://www.w3.org/TR/shacl-af/#rules)
 | Parameter               |  Link 	              |      Status      	|  Comments	|

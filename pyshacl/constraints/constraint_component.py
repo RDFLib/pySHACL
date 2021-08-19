@@ -9,8 +9,6 @@ import typing
 
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple
 
-import rdflib
-
 from rdflib import BNode, Literal, URIRef
 
 from pyshacl.consts import (
@@ -39,6 +37,8 @@ from pyshacl.rdfutil import stringify_node
 
 
 if TYPE_CHECKING:
+    from rdflib.term import Identifier
+
     from pyshacl.shape import Shape
     from pyshacl.shapes_graph import ShapesGraph
 
@@ -113,9 +113,9 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
     def make_v_result_description(
         self,
         datagraph: GraphLike,
-        focus_node: 'rdflib.term.Identifier',
+        focus_node: 'Identifier',
         severity: URIRef,
-        value_node: Optional['rdflib.term.Identifier'],
+        value_node: Optional['Identifier'],
         messages: List[str],
         result_path=None,
         constraint_component=None,
@@ -195,11 +195,11 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
     def make_v_result(
         self,
         datagraph: GraphLike,
-        focus_node: 'rdflib.term.Identifier',
-        value_node: Optional['rdflib.term.Identifier'] = None,
-        result_path=None,
-        constraint_component=None,
-        source_constraint=None,
+        focus_node: 'Identifier',
+        value_node: Optional['Identifier'] = None,
+        result_path: Optional['Identifier'] = None,
+        constraint_component: Optional['Identifier'] = None,
+        source_constraint: Optional['Identifier'] = None,
         extra_messages: Optional[Iterable] = None,
         bound_vars=None,
     ):
@@ -207,15 +207,16 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         :param datagraph:
         :type datagraph: rdflib.Graph | rdflib.ConjunctiveGraph | rdflib.Dataset
         :param focus_node:
-        :type focus_node: rdflib.term.Identifier
+        :type focus_node: Identifier
         :param value_node:
-        :type value_node: rdflib.term.Identifier | None
+        :type value_node: Identifier | None
         :param result_path:
-        :param bound_vars:
+        :type result_path: Identifier | None
         :param constraint_component:
         :param source_constraint:
         :param extra_messages:
         :type extra_messages: collections.abc.Iterable | None
+        :param bound_vars:
         :return:
         """
         constraint_component = constraint_component or self.shacl_constraint_component
@@ -228,13 +229,13 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         r_triples.append((r_node, SH_sourceShape, (sg, self.shape.node)))
         r_triples.append((r_node, SH_resultSeverity, severity))
         r_triples.append((r_node, SH_focusNode, (datagraph or sg, focus_node)))
-        if value_node:
+        if value_node is not None:
             r_triples.append((r_node, SH_value, (datagraph, value_node)))
         if result_path is None and self.shape.is_property_shape:
             result_path = self.shape.path()
-        if result_path:
+        if result_path is not None:
             r_triples.append((r_node, SH_resultPath, (sg, result_path)))
-        if source_constraint:
+        if source_constraint is not None:
             r_triples.append((r_node, SH_sourceConstraint, (sg, source_constraint)))
         messages = list(self.shape.message)
         if extra_messages:
