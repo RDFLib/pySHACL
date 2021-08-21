@@ -28,7 +28,6 @@ ex:Shape a sh:NodeShape ;
 
 def test_079():
     shape_g = rdflib.Graph().parse(data=shapes_data, format='turtle')
-    print(shape_g.serialize(format="turtle").decode())
     data_g = rdflib.Graph().parse(data="""
     @prefix ex: <https://example.com#> .
 
