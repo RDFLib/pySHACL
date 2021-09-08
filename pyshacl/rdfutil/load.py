@@ -18,13 +18,6 @@ ConjunctiveLike = Union[rdflib.ConjunctiveGraph, rdflib.Dataset]
 GraphLike = Union[ConjunctiveLike, rdflib.Graph]
 
 
-try:
-    import rdflib_jsonld  # noqa: F401
-
-    has_json_ld = True
-except ImportError:
-    has_json_ld = False
-
 is_windows = platform.system() == "Windows"
 
 
@@ -244,8 +237,6 @@ def load_from_source(
                 source.close()
             source = new_bytes
             source_was_open = False
-        if (rdf_format == "json-ld" or rdf_format == "json") and not has_json_ld:
-            raise RuntimeError("Cannot load a JSON-LD file if rdflib_jsonld is not installed.")
         if rdf_format == 'turtle' or rdf_format == 'n3':
             # SHACL Shapes files and Data files can have extra RDF Metadata in the
             # Top header block, including #BaseURI and #Prefix.

@@ -54,7 +54,7 @@ include = [
 
 [tool.poetry.dependencies]
 python = "^3.6.2"  # Compatible python versions must be declared here
-rdflib = ">=5.0.0,<7"
+rdflib = ">=6.0.0,<7"
 owlrl = "^5.2.1"
 rdflib-jsonld = ">=0.4.0,<0.6"
 pyduktape2 = {version="^0.4.1", python=">=3.6", optional=true}

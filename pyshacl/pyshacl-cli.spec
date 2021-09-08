@@ -19,7 +19,6 @@ a = Analysis(
                 'rdflib.plugins',
                 'rdflib',
                 'urllib3',
-                'rdflib_jsonld',
                 'win32com.gen_py',
                 'pkg_resources.py2_warn'
             ],

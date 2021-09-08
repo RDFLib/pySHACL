@@ -11,17 +11,8 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 import owlrl
 import rdflib
 
-from rdflib.util import from_n3
-
-from .extras import check_extra_installed
-from .pytypes import GraphLike
-from .target import apply_target_types, gather_target_types
-
-
-if owlrl.json_ld_available:
-    import rdflib_jsonld  # noqa: F401
-
 from rdflib import BNode, Literal, URIRef
+from rdflib.util import from_n3
 
 from .consts import (
     RDF_object,
@@ -35,9 +26,11 @@ from .consts import (
     SH_ValidationReport,
 )
 from .errors import ReportableRuntimeError, ValidationFailure
+from .extras import check_extra_installed
 from .functions import apply_functions, gather_functions, unapply_functions
 from .inference import CustomRDFSOWLRLSemantics, CustomRDFSSemantics
 from .monkey import apply_patches, rdflib_bool_patch, rdflib_bool_unpatch
+from .pytypes import GraphLike
 from .rdfutil import (
     clone_blank_node,
     clone_graph,
@@ -51,6 +44,7 @@ from .rdfutil import (
 from .rdfutil.load import add_baked_in
 from .rules import apply_rules, gather_rules
 from .shapes_graph import ShapesGraph
+from .target import apply_target_types, gather_target_types
 
 
 log_handler = logging.StreamHandler(stderr)
