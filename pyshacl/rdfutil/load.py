@@ -22,7 +22,7 @@ try:
     import rdflib_jsonld  # noqa: F401
 
     has_json_ld = True
-except IndexError:
+except ImportError:
     has_json_ld = False
 
 is_windows = platform.system() == "Windows"

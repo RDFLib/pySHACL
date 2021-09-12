@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [0.16.2] - 2021-09-13
+
+## Notice
+This is the **last version of PySHACL to support RDFLib 5.0.0**, subsequent releases of PySHACL will depend on RDFLib v6.0.0.
+As a direct result of that, this is also the **last version of PySHACL to support Python v3.6**.
+
+### Changed
+- Pinned JSON-ld dep to <6.0 to avoid the tombstone release (so not to force rdflib 6.0)
+- Updated minimum Black version to 21.8b0 to fix a black bug
+- Re-black and isort all source files
+
+### Fixed
+- Fixed detection of import error when loading json-ld module in RDF loader
+- Fixed Black bug with new version of black
+
+
 ## [0.16.1] - 2021-08-20
 
 ### Added
@@ -788,7 +804,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.16.1...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.16.2...HEAD
+[0.16.2]: https://github.com/RDFLib/pySHACL/compare/v0.16.1...v0.16.2
 [0.16.1]: https://github.com/RDFLib/pySHACL/compare/v0.16.0...v0.16.1
 [0.16.0]: https://github.com/RDFLib/pySHACL/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/RDFLib/pySHACL/compare/v0.14.5...v0.15.0
