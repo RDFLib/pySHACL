@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyshacl"
-version = "0.16.2"
+version = "0.16.2.post1"
 # Don't forget to change the version number in __init__.py and CITATION.cff along with this one
 description = "Python SHACL Validator"
 license = "Apache-2.0"
@@ -55,8 +55,8 @@ include = [
 [tool.poetry.dependencies]
 python = "^3.6.2"  # Compatible python versions must be declared here
 rdflib = ">=5.0.0,<7"
-owlrl = "^5.2.1"
-rdflib-jsonld = ">=0.4.0,<0.6"
+owlrl = "^5.2.3"
+rdflib-jsonld = { version=">=0.4.0,<0.6", optional=true}
 pyduktape2 = {version="^0.4.1", python=">=3.6", optional=true}
 flake8 = {version="^3.8.0", python=">=3.6", optional=true}
 isort = {version="^5.7.0", python=">=3.6", optional=true}

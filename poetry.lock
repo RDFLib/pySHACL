@@ -191,15 +191,14 @@ python-versions = "*"
 
 [[package]]
 name = "owlrl"
-version = "5.2.1"
+version = "5.2.3"
 description = "OWL-RL and RDFS based RDF Closure inferencing for Python"
 category = "main"
 optional = false
 python-versions = "*"
 
 [package.dependencies]
-rdflib = ">=4.2.2"
-rdflib-jsonld = ">=0.4.0"
+rdflib = ">=5.0.0"
 
 [[package]]
 name = "packaging"
@@ -351,7 +350,7 @@ name = "rdflib-jsonld"
 version = "0.5.0"
 description = "rdflib extension adding JSON-LD parser and serializer"
 category = "main"
-optional = false
+optional = true
 python-versions = "*"
 
 [package.dependencies]
@@ -425,7 +424,7 @@ js = ["pyduktape2"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"  # Compatible python versions must be declared here
-content-hash = "57dd3d742a888de134e8706b57b3aca278430e50c410d4d13d0a9f68e953c3bb"
+content-hash = "b469c4d898def3269e60cc8e8f7c64014e7f4d73743e477d177b9ac9ad3184d1"
 
 [metadata.files]
 atomicwrites = [
@@ -580,8 +579,8 @@ mypy-extensions = [
     {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
 ]
 owlrl = [
-    {file = "owlrl-5.2.1-py3-none-any.whl", hash = "sha256:2ad753f5ba6d1fe2d88bf36f427df31553f2eaa0283692e3cd06cab20ac8aec3"},
-    {file = "owlrl-5.2.1.tar.gz", hash = "sha256:efdebe76cf9ad148f316a9ae92e898e12b3b3690bd90218c898a2b676955b266"},
+    {file = "owlrl-5.2.3-py3-none-any.whl", hash = "sha256:0514239bfbf72fa67f3e5813a40bcc5bd88fd16093d9f76b45a0d4c84ee1c5e2"},
+    {file = "owlrl-5.2.3.tar.gz", hash = "sha256:b1891d75b2c2fb0db9e1504a9b12dab738ed89236414c51393d1030597004342"},
 ]
 packaging = [
     {file = "packaging-21.0-py3-none-any.whl", hash = "sha256:c86254f9220d55e31cc94d69bade760f0847da8000def4dfe1c6b872fd14ff14"},
