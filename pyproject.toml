@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyshacl"
-version = "0.16.2.post1"
+version = "0.17.0"
 # Don't forget to change the version number in __init__.py and CITATION.cff along with this one
 description = "Python SHACL Validator"
 license = "Apache-2.0"
@@ -24,7 +24,6 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -53,23 +52,23 @@ include = [
 
 
 [tool.poetry.dependencies]
-python = "^3.6.2"  # Compatible python versions must be declared here
+python = "^3.7.0"  # Compatible python versions must be declared here
 rdflib = ">=6.0.0,<7"
 owlrl = "^5.2.3"
 rdflib-jsonld = { version=">=0.4.0,<0.6", optional=true}
-pyduktape2 = {version="^0.4.1", python=">=3.6", optional=true}
-flake8 = {version="^3.8.0", python=">=3.6", optional=true}
-isort = {version="^5.7.0", python=">=3.6", optional=true}
-black = {version="21.8b0", python=">=3.6", optional=true}
+pyduktape2 = {version="^0.4.1", optional=true}
+flake8 = {version="^3.8.0", optional=true}
+isort = {version="^5.7.0", optional=true}
+black = {version="21.8b0", optional=true}
 
 [tool.poetry.dev-dependencies]
 coverage = "^4.5"
 pytest = "^5.0"
 pytest-cov = "^2.8.1"
-flake8 = {version="^3.8.0", python=">=3.6", optional=true}
-isort = {version="^5.7.0", python=">=3.6", optional=true}
-black = {version="21.8b0", python=">=3.6", optional=true}
-mypy = {version="^0.800", python=">=3.6", optional=true}
+flake8 = {version="^3.8.0", optional=true}
+isort = {version="^5.7.0", optional=true}
+black = {version="21.8b0", optional=true}
+mypy = {version="^0.800", optional=true}
 
 
 [tool.poetry.extras]
@@ -88,7 +87,7 @@ to = {format = "setuppy", path = "setup.py"}
 required-version = "21.8b0"
 line-length = "119"
 skip-string-normalization = true
-target-version = ['py36']
+target-version = ['py37']
 include = '\.pyi?$'
 exclude = '''
 (

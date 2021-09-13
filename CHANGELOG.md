@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [0.17.0] - 2021-09-13
+
+## Notice
+This version of PySHACL **requires RDFLib 6.0.0_**. 
+As a direct result of that, this version of PySHACL **also requires Python v3.7**.
+
+### Changed
+- Upped RDFLib min version to 6.0.0 in order to get built-in json-ld
+- Upped OWL-RL to min version 5.2.3 in order to remove json-ld dependency
+- Made min python version v3.7
+- Change black config to use python 3.7 compat code
+- Re-black and isort all source files
+
+
 ## [0.16.2] - 2021-09-13
 
 ## Notice
@@ -804,7 +818,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.16.2...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/RDFLib/pySHACL/compare/v0.16.2...v0.17.0
 [0.16.2]: https://github.com/RDFLib/pySHACL/compare/v0.16.1...v0.16.2
 [0.16.1]: https://github.com/RDFLib/pySHACL/compare/v0.16.0...v0.16.1
 [0.16.0]: https://github.com/RDFLib/pySHACL/compare/v0.15.0...v0.16.0
