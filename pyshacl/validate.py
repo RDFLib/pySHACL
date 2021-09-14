@@ -8,7 +8,6 @@ from os import path
 from sys import stderr
 from typing import Dict, List, Optional, Set, Tuple, Union
 
-import owlrl
 import rdflib
 
 from rdflib import BNode, Literal, URIRef
@@ -28,7 +27,6 @@ from .consts import (
 from .errors import ReportableRuntimeError, ValidationFailure
 from .extras import check_extra_installed
 from .functions import apply_functions, gather_functions, unapply_functions
-from .inference import CustomRDFSOWLRLSemantics, CustomRDFSSemantics
 from .monkey import apply_patches, rdflib_bool_patch, rdflib_bool_unpatch
 from .pytypes import GraphLike
 from .rdfutil import (
@@ -83,6 +81,11 @@ class Validator(object):
         :return:
         :rtype: NoneType
         """
+        # Lazy import owlrl
+        import owlrl
+
+        from .inference import CustomRDFSOWLRLSemantics, CustomRDFSSemantics
+
         if logger is None:
             logger = logging.getLogger(__name__)
         try:

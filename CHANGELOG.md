@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [0.17.0.post1] - 2021-09-15
+
+## Notice
+This version of PySHACL **requires RDFLib 6.0.0_**. 
+As a direct result of that, this version of PySHACL **also requires Python v3.7**.
+
+### Changed
+- Lazy-load OWL-RL module to avoid owl-rl import warnings when not required
+
+
 ## [0.17.0] - 2021-09-13
 
 ## Notice
@@ -818,7 +828,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.17.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.17.0.post1...HEAD
+[0.17.0.post1]: https://github.com/RDFLib/pySHACL/compare/v0.17.0...v0.17.0.post1
 [0.17.0]: https://github.com/RDFLib/pySHACL/compare/v0.16.2...v0.17.0
 [0.16.2]: https://github.com/RDFLib/pySHACL/compare/v0.16.1...v0.16.2
 [0.16.1]: https://github.com/RDFLib/pySHACL/compare/v0.16.0...v0.16.1
