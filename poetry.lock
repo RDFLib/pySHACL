@@ -409,11 +409,12 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 dev-lint = ["isort", "black", "flake8"]
 dev-type-checking = []
 js = ["pyduktape2"]
+jsonld = ["rdflib-jsonld"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.0"  # Compatible python versions must be declared here
-content-hash = "da19f20a96a893a991bd7ee421acdb31ae270431ce9580796fcf3e126f655e64"
+content-hash = "5bf14955f590c9a669d7423a337be3ceb41f901de145d48b5e400fee9ab2fd79"
 
 [metadata.files]
 atomicwrites = [
