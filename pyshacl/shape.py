@@ -340,7 +340,7 @@ class Shape(object):
         for tc in target_classes:
             s = data_graph.subjects(RDF_type, tc)
             found_target_instances.update(s)
-            subc = data_graph.subjects(RDFS_subClassOf, tc)
+            subc = data_graph.transitive_subjects(RDFS_subClassOf, tc)
             for subclass in iter(subc):
                 if subclass == tc:
                     continue
