@@ -161,7 +161,7 @@ def test_validate_with_ontology_fail2():
                    ont_graph=ontology_file_text, ont_graph_format="turtle",
                    inference=None, debug=True)
     conforms, graph, string = res
-    assert conforms
+    assert not conforms
 
 def test_metashacl_pass():
     res = validate(data_file_text, shacl_graph=shacl_file_text,
