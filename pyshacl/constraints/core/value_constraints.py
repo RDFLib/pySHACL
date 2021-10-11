@@ -13,6 +13,7 @@ from rdflib.term import Literal
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import (
     RDF,
+    RDFS,
     SH,
     SH_IRI,
     RDF_type,
@@ -31,6 +32,8 @@ from pyshacl.rdfutil import stringify_node
 
 
 RDF_langString = RDF.langString
+RDFS_Datatype = RDFS.Datatype
+RDFS_Literal = RDFS.Literal
 XSD_string = XSD.string
 XSD_integer = XSD.integer
 XSD_float = XSD.float
@@ -179,6 +182,14 @@ class DatatypeConstraintComponent(ConstraintComponent):
                     lang = v.language
                     if datatype == dtype_rule:
                         matches = self._assert_actual_datatype(v, dtype_rule)
+                    elif dtype_rule == RDFS_Literal:
+                        # Special case. All literals are instance of RDFS.Literal
+                        # and all literals have datatype of RDFS.Literal
+                        matches = True
+                    elif dtype_rule == RDFS_Datatype and datatype:
+                        # Special case. All literals with a datatype are instances of RDFS.Datatype
+                        # and all literals with datatype have datatype of RDFS.Datatype
+                        matches = True
                     elif datatype is None and lang is None and dtype_rule == XSD_string:
                         matches = self._assert_actual_datatype(v, dtype_rule)
                     elif dtype_rule == RDF_langString and lang:
