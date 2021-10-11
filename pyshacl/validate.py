@@ -281,6 +281,10 @@ def assign_baked_in():
     add_baked_in("http://www.w3.org/ns/shacl-shacl", shacl_shacl_file)
     add_baked_in("https://www.w3.org/ns/shacl-shacl", shacl_shacl_file)
     add_baked_in("http://www.w3.org/ns/shacl-shacl.ttl", shacl_shacl_file)
+    schema_file = path.join(HERE, "assets", "schema.pickle")
+    add_baked_in("http://datashapes.org/schema", schema_file)
+    add_baked_in("https://datashapes.org/schema", schema_file)
+    add_baked_in("http://datashapes.org/schema.ttl", schema_file)
 
 
 def with_metashacl_shacl_graph_cache(f):
@@ -372,19 +376,23 @@ def validate(
     do_owl_imports = kwargs.pop('do_owl_imports', False)
     data_graph_format = kwargs.pop('data_graph_format', None)
     # force no owl imports on data_graph
-    data_graph = load_from_source(data_graph, rdf_format=data_graph_format, multigraph=True, do_owl_imports=False)
+    loaded_dg = load_from_source(data_graph, rdf_format=data_graph_format, multigraph=True, do_owl_imports=False)
     ont_graph_format = kwargs.pop('ont_graph_format', None)
     if ont_graph is not None:
-        ont_graph = load_from_source(
+        loaded_og = load_from_source(
             ont_graph, rdf_format=ont_graph_format, multigraph=True, do_owl_imports=do_owl_imports
         )
+    else:
+        loaded_og = None
     shacl_graph_format = kwargs.pop('shacl_graph_format', None)
     if shacl_graph is not None:
         rdflib_bool_patch()
-        shacl_graph = load_from_source(
+        loaded_sg = load_from_source(
             shacl_graph, rdf_format=shacl_graph_format, multigraph=True, do_owl_imports=do_owl_imports
         )
         rdflib_bool_unpatch()
+    else:
+        loaded_sg = None
     use_js = kwargs.pop('js', None)
     iterate_rules = kwargs.pop('iterate_rules', False)
     if "abort_on_error" in kwargs:
@@ -394,9 +402,9 @@ def validate(
     validator = None
     try:
         validator = Validator(
-            data_graph,
-            shacl_graph=shacl_graph,
-            ont_graph=ont_graph,
+            loaded_dg,
+            shacl_graph=loaded_sg,
+            ont_graph=loaded_og,
             options={
                 'inference': inference,
                 'inplace': inplace,
@@ -414,13 +422,13 @@ def validate(
         report_graph = e
         report_text = "Validation Failure - {}".format(e.message)
     if do_check_dash_result and validator is not None:
-        passes = check_dash_result(validator, report_graph, shacl_graph or data_graph)
+        passes = check_dash_result(validator, report_graph, loaded_sg or loaded_dg)
         return passes, report_graph, report_text
     if do_check_sht_result:
         (sht_graph, sht_result_node) = kwargs.pop('sht_validate', (False, None))
         if not sht_result_node:
             raise RuntimeError("Cannot check SHT result if SHT graph and result node are not given.")
-        passes = check_sht_result(report_graph, sht_graph or shacl_graph or data_graph, sht_result_node)
+        passes = check_sht_result(report_graph, sht_graph or loaded_sg or loaded_dg, sht_result_node)
         return passes, report_graph, report_text
     do_serialize_report_graph = kwargs.pop('serialize_report_graph', False)
     if do_serialize_report_graph and isinstance(report_graph, rdflib.Graph):
