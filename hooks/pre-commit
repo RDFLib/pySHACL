@@ -42,10 +42,10 @@ EOF
 fi
 
 if [ -n "$VIRTUAL_ENV" ]; then
-    echo "Trying to avtivate venv at $VIRTUAL_ENV"
+    echo "Trying to activate venv at $VIRTUAL_ENV"
     . "$VIRTUAL_ENV"/bin/activate
 else
-    echo "Trying to avtivate venv at ./.venv"
+    echo "Trying to activate venv at ./.venv"
     . ./.venv/bin/activate
 fi
 
