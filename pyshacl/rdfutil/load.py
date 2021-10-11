@@ -3,7 +3,7 @@
 import pickle
 import platform
 
-from io import BytesIO, IOBase, UnsupportedOperation
+from io import BufferedIOBase, BytesIO, TextIOBase, UnsupportedOperation
 from pathlib import Path
 from typing import BinaryIO, List, Optional, Union
 from urllib import request
@@ -47,13 +47,16 @@ def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
         else:
             return g, None
 
+    # Ask for everything we know about
     headers = {'Accept': 'text/turtle, application/rdf+xml, application/ld+json, application/n-triples, text/plain'}
+    known_format = None
+
     r = request.Request(url, headers=headers)
     resp = request.urlopen(r)
     code = resp.getcode()
     if not (200 <= code <= 210):
         raise RuntimeError("Cannot pull RDF URL from the web: {}, code: {}".format(url, str(code)))
-    known_format = None
+
     content_type = resp.headers.get('Content-Type', None)
     if content_type:
         if content_type.startswith("text/turtle"):
@@ -70,7 +73,7 @@ def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
 
 
 def load_from_source(
-    source: Union[GraphLike, BinaryIO, Union[str, bytes]],
+    source: Union[GraphLike, BufferedIOBase, TextIOBase, BinaryIO, Union[str, bytes]],
     g: Optional[GraphLike] = None,
     rdf_format: Optional[str] = None,
     multigraph: bool = False,
@@ -81,7 +84,7 @@ def load_from_source(
 
     :param source:
     :param g:
-    :type g: rdflib.Graph
+    :type g: rdflib.Graph | None
     :param rdf_format:
     :type rdf_format: str
     :param multigraph:
@@ -93,10 +96,11 @@ def load_from_source(
     :return:
     """
     source_is_graph = False
-    source_is_open = False
-    source_was_open = False
-    source_is_file = False
-    source_is_bytes = False
+    open_source: Optional[Union[BufferedIOBase, BinaryIO]] = None
+    source_was_open: bool = False
+    source_as_file: Optional[Union[BufferedIOBase, BinaryIO]] = None
+    source_as_filename: Optional[str] = None
+    source_as_bytes: Optional[bytes] = None
     filename = None
     public_id = None
     uri_prefix = None
@@ -107,27 +111,33 @@ def load_from_source(
             g = source
         else:
             raise RuntimeError("Cannot pass in both target=rdflib.Graph/Dataset and g=graph.")
-    elif isinstance(source, IOBase):
-        source_is_file = True
-        if hasattr(source, 'closed'):
-            source_is_open = not bool(source.closed)
-            source_was_open = source_is_open
-        else:
-            # Assume it is open now and it was open when we started.
-            source_is_open = True
-            source_was_open = True
+    elif isinstance(source, (BufferedIOBase, TextIOBase)):
         if hasattr(source, 'name'):
             filename = source.name  # type: ignore
             public_id = Path(filename).resolve().as_uri() + "#"
+        if isinstance(source, TextIOBase):
+            buf = getattr(source, "buffer")  # type: BufferedIOBase
+            source_as_file = source = buf
+        else:
+            source_as_file = source
+        if hasattr(source, 'closed'):
+            if not bool(source.closed):
+                open_source = source
+                source_was_open = True
+        else:
+            # Assume it is open now and it was open when we started.
+            open_source = source
+            source_was_open = True
+
     elif isinstance(source, str):
         if is_windows and source.startswith('file:///'):
             public_id = source
-            source_is_file = True
             filename = source[8:]
+            source_as_filename = filename
         elif not is_windows and source.startswith('file://'):
             public_id = source
-            source_is_file = True
             filename = source[7:]
+            source_as_filename = filename
         elif source.startswith('http:') or source.startswith('https:'):
             public_id = source
             try:
@@ -142,17 +152,17 @@ def load_from_source(
                 source_is_graph = True
             else:
                 filename = resp.geturl()
-                source = resp.fp
+                fp = resp.fp  # type: BufferedIOBase
                 source_was_open = False
-                source_is_open = True
+                source = open_source = fp
         else:
             first_char = source[0]
             if is_windows and (first_char == '\\' or (len(source) > 3 and source[1:3] == ":\\")):
-                source_is_file = True
                 filename = source
+                source_as_filename = filename
             elif first_char == '/' or source[0:3] == "./":
-                source_is_file = True
                 filename = source
+                source_as_filename = filename
             elif (
                 first_char == '#'
                 or first_char == '@'
@@ -162,17 +172,17 @@ def load_from_source(
                 or first_char == '['
             ):
                 # Contains some JSON or XML or Turtle stuff
-                source_is_file = False
+                source_as_file = None
+                source_as_filename = None
             elif len(source) < 140:
-                source_is_file = True
                 filename = source
+                source_as_filename = filename
         # TODO: Do we still need this? Not sure why this was added, but works better without it
         #  if public_id and not public_id.endswith('#'):
         #     public_id = "{}#".format(public_id)
-        if not source_is_file and not source_is_open and isinstance(source, str):
+        if not source_as_file and not source_as_filename and not open_source and isinstance(source, str):
             # source is raw RDF data.
-            source = source.encode('utf-8')
-            source_is_bytes = True
+            source_as_bytes = source = source.encode('utf-8')
     elif isinstance(source, bytes):
         if source.startswith(b'file:') or source.startswith(b'http:') or source.startswith(b'https:'):
             raise ValueError("file:// and http:// strings should be given as str, not bytes.")
@@ -186,22 +196,25 @@ def load_from_source(
             or first_char_b == b'['
         ):
             # Contains some JSON or XML or Turtle stuff
-            source_is_file = False
+            source_as_file = None
+            source_as_filename = None
         elif len(source) < 140:
             filename = source.decode('utf-8')
-            source_is_file = True
-        if not source_is_file and not source_is_open:
-            source_is_bytes = True
+            source_as_filename = filename
+        if not source_as_file and not source_as_filename and not open_source:
+            source_as_bytes = source
     else:
         raise ValueError("Cannot determine the format of the input graph")
     if g is None:
         if source_is_graph:
-            g = source
+            target_g: Union[rdflib.Graph, rdflib.ConjunctiveGraph, rdflib.Dataset] = source  # type: ignore
         else:
-            g = rdflib.Dataset() if multigraph else rdflib.Graph()
+            target_g = rdflib.Dataset() if multigraph else rdflib.Graph()
     else:
         if not isinstance(g, (rdflib.Graph, rdflib.Dataset, rdflib.ConjunctiveGraph)):
-            raise RuntimeError("Passing in g must be a Graph.")
+            raise RuntimeError("Passing in 'g' must be a rdflib Graph or Dataset.")
+        target_g = g
+
     if filename:
         if filename.endswith('.ttl'):
             rdf_format = rdf_format or 'turtle'
@@ -217,33 +230,44 @@ def load_from_source(
             rdf_format = rdf_format or 'trig'
         elif filename.endswith('.xml') or filename.endswith('.rdf'):
             rdf_format = rdf_format or 'xml'
-    if source_is_file and filename is not None and not source_is_open:
+    if source_as_filename and filename is not None and not open_source:
         filename = str(Path(filename).resolve())
         if not public_id:
             public_id = Path(filename).as_uri() + "#"
         source = open(filename, mode='rb')
-        source_is_open = True
-    if not source_is_open and source_is_bytes:
-        source = BytesIO(source)
-        source_is_open = True
-    if source_is_open:
+        open_source = source
+    if not open_source and source_as_bytes:
+        source = BytesIO(source_as_bytes)  # type: ignore
+        open_source = source
+    if open_source:
+        _source = open_source
         # Check if we can seek
         try:
-            source.seek(0)
+            _source.seek(0)  # type: ignore
         except (AttributeError, UnsupportedOperation):
             # Read it all into memory
-            new_bytes = BytesIO(source.read())
+            new_bytes = BytesIO(_source.read())
             if not source_was_open:
-                source.close()
-            source = new_bytes
+                _source.close()
+            source = _source = new_bytes
             source_was_open = False
+        if rdf_format is None:
+            line = _source.readline().lstrip()
+            if len(line) > 15:
+                line = line[:15]
+            line = line.lower()
+            if line.startswith(b"<!doctype html") or line.startswith(b"<html"):
+                raise RuntimeError("Attempted to load a HTML document as RDF.")
+            if line.startswith(b"<?xml") or line.startswith(b"<xml") or line.startswith(b"<rdf:"):
+                rdf_format = "xml"
         if rdf_format == 'turtle' or rdf_format == 'n3':
             # SHACL Shapes files and Data files can have extra RDF Metadata in the
             # Top header block, including #BaseURI and #Prefix.
             # The @base line is not read here, but it is parsed in the n3 parser
+            _source.seek(0)
             while True:
                 try:
-                    line = source.readline()
+                    line = _source.readline()
                     assert line is not None and len(line) > 0
                 except AssertionError:
                     break
@@ -277,44 +301,44 @@ def load_from_source(
                     wordval = wordval[1:]
                 if len(wordval) < 1:
                     continue
-                wordval = wordval.decode('utf-8')
+                wordval_str = wordval.decode('utf-8')
                 if keyword == b"baseuri":
-                    public_id = wordval
+                    public_id = wordval_str
                 elif keyword == b"prefix":
-                    uri_prefix = wordval
+                    uri_prefix = wordval_str
             try:
-                # The only way we can get here is if we were able to see before
-                source.seek(0)
+                # The only way we can get here is if we were able to seek before
+                _source.seek(0)
             except (AttributeError, UnsupportedOperation):
                 raise RuntimeError("Seek failed while pre-parsing Turtle File.")
             except ValueError:
                 raise RuntimeError("File closed while pre-parsing Turtle File.")
-        g.parse(source=source, format=rdf_format, publicID=public_id)
+        target_g.parse(source=_source, format=rdf_format, publicID=public_id)
         # If the target was open to begin with, leave it open.
         if not source_was_open:
-            source.close()
-        elif hasattr(source, 'seek'):
+            _source.close()
+        elif hasattr(_source, 'seek'):
             try:
-                source.seek(0)
+                _source.seek(0)
             except (AttributeError, UnsupportedOperation):
                 pass
             except ValueError:
                 # The parser closed our file!
                 pass
         source_is_graph = True
-    elif source_is_graph and (g != source):
+    elif source_is_graph and (target_g != source):
         # clone source into g
-        if isinstance(g, (rdflib.Dataset, rdflib.ConjunctiveGraph)) and isinstance(
+        if isinstance(target_g, (rdflib.Dataset, rdflib.ConjunctiveGraph)) and isinstance(
             source, (rdflib.Dataset, rdflib.ConjunctiveGraph)
         ):
-            clone_dataset(source, g)
-        elif isinstance(g, rdflib.Graph) and isinstance(source, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+            clone_dataset(source, target_g)
+        elif isinstance(target_g, rdflib.Graph) and isinstance(source, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
             raise RuntimeError("Cannot load a Dataset source into a Graph target.")
-        elif isinstance(g, (rdflib.Dataset, rdflib.ConjunctiveGraph)) and isinstance(source, rdflib.Graph):
-            target = rdflib.Graph(store=g.store, identifier=public_id)
+        elif isinstance(target_g, (rdflib.Dataset, rdflib.ConjunctiveGraph)) and isinstance(source, rdflib.Graph):
+            target = rdflib.Graph(store=target_g.store, identifier=public_id)
             clone_graph(source, target)
-        elif isinstance(g, rdflib.Graph) and isinstance(source, rdflib.Graph):
-            clone_graph(source, g)
+        elif isinstance(target_g, rdflib.Graph) and isinstance(source, rdflib.Graph):
+            clone_graph(source, target_g)
         else:
             raise RuntimeError("Cannot merge source graph into target graph.")
 
@@ -327,32 +351,32 @@ def load_from_source(
                 # Don't reassign blank prefix, when importing subgraph
                 pass
             else:
-                has_named_prefix = g.store.namespace(uri_prefix)
+                has_named_prefix = target_g.store.namespace(uri_prefix)
                 if not has_named_prefix:
-                    g.namespace_manager.bind(uri_prefix, public_id)
+                    target_g.namespace_manager.bind(uri_prefix, public_id)
         elif not is_imported_graph:
-            existing_blank_prefix = g.store.namespace('')
+            existing_blank_prefix = target_g.store.namespace('')
             if not existing_blank_prefix:
-                g.namespace_manager.bind('', public_id)
+                target_g.namespace_manager.bind('', public_id)
     if do_owl_imports:
         if isinstance(do_owl_imports, int):
             if do_owl_imports > 3:
-                return g
+                return target_g
         else:
             do_owl_imports = 1
 
         if import_chain is None:
             import_chain = []
         if public_id and (public_id.endswith('#') or public_id.endswith('/')):
-            root_id = rdflib.URIRef(public_id[:-1])
+            root_id: Union[rdflib.URIRef, None] = rdflib.URIRef(public_id[:-1])
         else:
             root_id = rdflib.URIRef(public_id) if public_id else None
         done_imports = 0
         if root_id is not None:
-            if isinstance(g, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
-                gs = list(g.contexts())
+            if isinstance(target_g, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
+                gs = list(target_g.contexts())
             else:
-                gs = [g]
+                gs = [target_g]
             for ng in gs:
                 owl_imports = list(ng.objects(root_id, rdflib.OWL.imports))
                 if len(owl_imports) > 0:
@@ -361,15 +385,19 @@ def load_from_source(
                     if o in import_chain:
                         continue
                     load_from_source(
-                        o, g=g, multigraph=multigraph, do_owl_imports=do_owl_imports + 1, import_chain=import_chain
+                        o,
+                        g=target_g,
+                        multigraph=multigraph,
+                        do_owl_imports=do_owl_imports + 1,
+                        import_chain=import_chain,
                     )
                     done_imports += 1
         if done_imports < 1 and public_id is not None and root_id != public_id:
             public_id_uri = rdflib.URIRef(public_id)
-            if isinstance(g, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
-                gs = list(g.contexts())
+            if isinstance(target_g, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
+                gs = list(target_g.contexts())
             else:
-                gs = [g]
+                gs = [target_g]
             for ng in gs:
                 owl_imports = list(ng.objects(public_id_uri, rdflib.OWL.imports))
                 if len(owl_imports) > 0:
@@ -378,14 +406,18 @@ def load_from_source(
                     if o in import_chain:
                         continue
                     load_from_source(
-                        o, g=g, multigraph=multigraph, do_owl_imports=do_owl_imports + 1, import_chain=import_chain
+                        o,
+                        g=target_g,
+                        multigraph=multigraph,
+                        do_owl_imports=do_owl_imports + 1,
+                        import_chain=import_chain,
                     )
                     done_imports += 1
         if done_imports < 1:
-            if isinstance(g, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
-                gs = list(g.contexts())
+            if isinstance(target_g, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
+                gs = list(target_g.contexts())
             else:
-                gs = [g]
+                gs = [target_g]
             for ng in gs:
                 ontologies = ng.subjects(rdflib.RDF.type, rdflib.OWL.Ontology)
                 for ont in ontologies:
@@ -400,7 +432,11 @@ def load_from_source(
                         if o in import_chain:
                             continue
                         load_from_source(
-                            o, g=g, multigraph=multigraph, do_owl_imports=do_owl_imports + 1, import_chain=import_chain
+                            o,
+                            g=target_g,
+                            multigraph=multigraph,
+                            do_owl_imports=do_owl_imports + 1,
+                            import_chain=import_chain,
                         )
                         done_imports += 1
-    return g
+    return target_g

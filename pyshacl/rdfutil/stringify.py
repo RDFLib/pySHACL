@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 from functools import wraps
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import rdflib
 
@@ -131,7 +131,7 @@ def find_node_named_graph(dataset, node):
 def stringify_node(
     graph: rdflib.Graph,
     node: rdflib.term.Identifier,
-    ns_manager: Optional[NamespaceManager] = None,
+    ns_manager: Optional[Union[NamespaceManager, rdflib.Graph]] = None,
     recursion: int = 0,
 ):
     if ns_manager is None:
@@ -139,6 +139,8 @@ def stringify_node(
     if isinstance(ns_manager, rdflib.Graph):
         # json-ld loader can set namespace_manager to the conjunctive graph itself.
         ns_manager = ns_manager.namespace_manager
+    if ns_manager is None or isinstance(ns_manager, rdflib.Graph):
+        raise RuntimeError("Cannot stringify node, no namespaces known.")
     ns_manager.bind("sh", SH, override=False, replace=False)
     if isinstance(node, rdflib.Literal):
         return stringify_literal(graph, node, ns_manager=ns_manager)

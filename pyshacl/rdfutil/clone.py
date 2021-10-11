@@ -80,9 +80,11 @@ def mix_datasets(
     base_named_graphs = list(base_ds.contexts())
     if target_ds is None:
         target_ds = rdflib.Dataset(default_union=default_union)
+    elif isinstance(target_ds, rdflib.ConjunctiveGraph):
+        raise RuntimeError("Cannot mix new graphs into a ConjunctiveGraph, use Dataset instead.")
     elif target_ds == "inplace":
         pass  # do nothing here
-    elif not isinstance(target_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+    elif not isinstance(target_ds, rdflib.Dataset):
         raise RuntimeError("Cannot mix datasets if target_ds passed in is not a Dataset itself.")
     if isinstance(extra_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
         mixin_graphs = list(extra_ds.contexts())
@@ -126,7 +128,9 @@ def mix_graphs(base_graph: GraphLike, extra_graph: GraphLike, target_graph: Opti
     :return: The cloned graph with mixed in triples from extra_graph
     :rtype: rdflib.Graph
     """
-    if isinstance(base_graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
+    if isinstance(base_graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)) and isinstance(
+        target_graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)
+    ):
         return mix_datasets(base_graph, extra_graph, target_ds=target_graph)
     if target_graph is None:
         g = clone_graph(base_graph, target_graph=None, identifier=base_graph.identifier)

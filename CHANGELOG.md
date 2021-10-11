@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
+## [Unreleased]
+
+- Nothing yet
+
+
+## [0.17.1] - 2021-10-11
+
+## Fixes
+- Handle transitive subclasses when evaluating sh:targetClass - @gtfierro
+  - Fixes #96
+- Improve detection of RDF/XML files when loading unknown content
+  - Fixes #98
+- Imported type stubs and resolved ALL MyPy issues! (this was a big effort)
+- Logic fixes in the dataset loader (thanks to inconsistencies exposed by MyPy)
+
+## Changed
+- Add special cases to sh:dataclass constraint, when the given shape uses rdfs:Literal or rdfs:Dataclass as the dataclass to match on
+  - Fixes #71
+
+## Added
+- Add datashapes.org/schema as a built-in graph
+  - Fixes #98
+- Added ability to pass a TextIO or TextIOWrapper object into the dataset loader
+
 ## [0.17.0.post1] - 2021-09-15
 
 ## Notice
@@ -828,7 +852,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.17.0.post1...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.17.1...HEAD
+[0.17.1]: https://github.com/RDFLib/pySHACL/compare/v0.17.0.post1...v0.17.1
 [0.17.0.post1]: https://github.com/RDFLib/pySHACL/compare/v0.17.0...v0.17.0.post1
 [0.17.0]: https://github.com/RDFLib/pySHACL/compare/v0.16.2...v0.17.0
 [0.16.2]: https://github.com/RDFLib/pySHACL/compare/v0.16.1...v0.16.2
