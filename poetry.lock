@@ -160,7 +160,7 @@ python-versions = ">=3.5"
 name = "mypy"
 version = "0.800"
 description = "Optional static typing for Python"
-category = "dev"
+category = "main"
 optional = true
 python-versions = ">=3.5"
 
@@ -235,6 +235,21 @@ importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
 
 [package.extras]
 dev = ["pre-commit", "tox"]
+
+[[package]]
+name = "prettytable"
+version = "2.2.1"
+description = "A simple Python library for easily displaying tabular data in a visually appealing ASCII table format"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
+wcwidth = "*"
+
+[package.extras]
+tests = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "py"
@@ -381,7 +396,7 @@ python-versions = "*"
 name = "types-setuptools"
 version = "57.4.0"
 description = "Typing stubs for setuptools"
-category = "dev"
+category = "main"
 optional = true
 python-versions = "*"
 
@@ -397,7 +412,7 @@ python-versions = "*"
 name = "wcwidth"
 version = "0.2.5"
 description = "Measures the displayed width of unicode strings in a terminal"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -415,14 +430,14 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 
 [extras]
 dev-lint = ["isort", "black", "flake8"]
-dev-type-checking = []
+dev-type-checking = ["mypy", "types-setuptools"]
 js = ["pyduktape2"]
 jsonld = ["rdflib-jsonld"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.0"  # Compatible python versions must be declared here
-content-hash = "77a0cbd9785ec0d0cd6a51bcec4eb379de29ad57e0e8183e2eb58f5d820b6433"
+content-hash = "f7f9ba102a958cb971e042d39563b116b527238174efd0017c1db028512567d1"
 
 [metadata.files]
 atomicwrites = [
@@ -591,6 +606,10 @@ platformdirs = [
 pluggy = [
     {file = "pluggy-0.13.1-py2.py3-none-any.whl", hash = "sha256:966c145cd83c96502c3c3868f50408687b38434af77734af1e9ca461a4081d2d"},
     {file = "pluggy-0.13.1.tar.gz", hash = "sha256:15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0"},
+]
+prettytable = [
+    {file = "prettytable-2.2.1-py3-none-any.whl", hash = "sha256:09fb2c7f93e4f93e0235f05ae199ac3f16da3a251b2cfa1c7108b34ede298fa3"},
+    {file = "prettytable-2.2.1.tar.gz", hash = "sha256:6d465005573a5c058d4ca343449a5b28c21252b86afcdfa168cdc6a440f0b24c"},
 ]
 py = [
     {file = "py-1.10.0-py2.py3-none-any.whl", hash = "sha256:3b80836aa6d1feeaa108e046da6423ab8f6ceda6468545ae8d02d9d58d18818a"},

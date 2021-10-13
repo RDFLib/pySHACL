@@ -127,6 +127,18 @@ def test_cmdline_fail():
     return True
 
 
+def test_cmdline_table():
+    graph_file = path.join(cmdline_files_dir, 'd1.ttl')
+    shacl_file = path.join(cmdline_files_dir, 's1.ttl')
+    args = [graph_file, '-s', shacl_file, '-f', 'table']
+    res = subprocess.run(pyshacl_command + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=ENV_VARS)
+    output_table = res.stdout.decode('utf-8')
+    assert "+-----+-----------+------------------------------+" \
+           "--------------------------------+--------------------------+" \
+           "--------------------------------+----------------------------+" in output_table
+    assert "| 1   | Violation | http://example.com/ex#Human1 | Value does not have class exOn" in output_table
+
+
 def test_cmdline_web():
     if not hasattr(subprocess, 'run'):
         print("Subprocess.run() not available, skip this test")
@@ -194,5 +206,6 @@ def test_cmdline_jsonld():
 if __name__ == "__main__":
     test_cmdline()
     test_cmdline_fail()
+    test_cmdline_table()
     test_cmdline_web()
     test_cmdline_jsonld()
