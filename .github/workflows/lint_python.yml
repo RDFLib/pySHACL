@@ -8,7 +8,7 @@ jobs:
       - uses: actions/setup-python@v2
       - run: pip install --upgrade pip wheel
       - run: pip install bandit black codespell flake8 isort mypy pytest pyupgrade safety
-      - run: bandit --recursive  --skip B101,B301,B310,B403,B404,B603 .
+      - run: bandit --recursive --skip B101,B301,B310,B403,B404,B603 .
       - run: black --check . || true
       - run: codespell --ignore-words-list=datas --skip="*.ttl" || true
       - run: flake8 --ignore=E101,E203,E226,E231,E241,E265,E302,E303,E305,F401,F541,W191,W291,W293,W391,W503
