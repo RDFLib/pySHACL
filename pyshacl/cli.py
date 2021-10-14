@@ -254,7 +254,7 @@ def main():
                     r[SH.resultMessage],
                     r[SH.sourceConstraintComponent],
                     r[SH.sourceShape],
-                    r[SH.value],
+                    r[SH.value] if r.get(SH.value) is not None else '-',
                 ])
                 t2.add_row(['', '', '', '', '', '', ''])
             args.output.write(str(t2))
