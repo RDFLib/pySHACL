@@ -133,10 +133,10 @@ def test_cmdline_table():
     args = [graph_file, '-s', shacl_file, '-f', 'table']
     res = subprocess.run(pyshacl_command + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=ENV_VARS)
     output_table = res.stdout.decode('utf-8')
-    assert "+-----+-----------+------------------------------+" \
-           "--------------------------------+--------------------------+" \
-           "--------------------------------+----------------------------+" in output_table
-    assert "| 1   | Violation | http://example.com/ex#Human1 | Value does not have class exOn" in output_table
+    assert "+-----+-----------+---------------------------+---------------------------+" \
+           "---------------------------+--------------------------+---------------------------+" \
+           "---------------------------+" in output_table
+    assert "| 1   | Violation | http://example.com/ex#Hum | http://example.com/exOnt# " in output_table
 
 
 def test_cmdline_web():

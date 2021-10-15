@@ -240,23 +240,24 @@ def main():
 
         if not is_conform:
             t2 = PrettyTable()
-            t2.field_names = ['No.', 'Severity', 'Focus Node', 'Message', 'Component', 'Shape', 'Value']
+            t2.field_names = ['No.', 'Severity', 'Focus Node', 'Result Path', 'Message', 'Component', 'Shape', 'Value']
             t2.align = "l"
 
             for i, o in enumerate(v_graph.objects(None, SH.result)):
                 r = {}
                 for o2 in v_graph.predicate_objects(o):
-                    r[o2[0]] = str(col_widther(o2[1].replace(f'{SH}', ''), 30))  # max col width 30 chars
+                    r[o2[0]] = str(col_widther(o2[1].replace(f'{SH}', ''), 25))  # max col width 30 chars
                 t2.add_row([
                     i+1,
                     r[SH.resultSeverity],
                     r[SH.focusNode],
+                    r[SH.resultPath] if r.get(SH.resultPath) is not None else '-',
                     r[SH.resultMessage],
                     r[SH.sourceConstraintComponent],
                     r[SH.sourceShape],
-                    r[SH.value],
+                    r[SH.value] if r.get(SH.value) is not None else '-',
                 ])
-                t2.add_row(['', '', '', '', '', '', ''])
+                t2.add_row(['', '', '', '', '', '', '', ''])
             args.output.write(str(t2))
     else:
         if isinstance(v_graph, bytes):
