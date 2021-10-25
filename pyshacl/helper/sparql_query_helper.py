@@ -38,9 +38,9 @@ class SPARQLQueryHelper(object):
     bind_path_regex = re.compile(r"([\s{}()])[\$\?]PATH", flags=re.M)
     bind_sg_regex = re.compile(r"([\s{}()])[\$\?]shapesGraph", flags=re.M)
     bind_cs_regex = re.compile(r"([\s{}()])[\$\?]currentShape", flags=re.M)
-    has_minus_regex = re.compile(r"[^\?\$]MINUS[\s\{]", flags=re.M | re.I)
-    has_values_regex = re.compile(r"[^\?\$]VALUES[\s\{]", flags=re.M | re.I)
-    has_service_regex = re.compile(r"[^\?\$]SERVICE[\s\<]", flags=re.M | re.I)
+    has_minus_regex = re.compile(r"^(?:[^#]*|M)(?!#)#?[^\?\$\#]M?INUS[\s\{]", flags=re.M | re.I)
+    has_values_regex = re.compile(r"^(?:[^#]*|V)(?!#)#?[^\?\$\#]V?ALUES[\s\{]", flags=re.M | re.I)
+    has_service_regex = re.compile(r"^(?:[^#]*|S)(?!#)#?[^\?\$\#]S?ERVICE[\s\<]", flags=re.M | re.I)
     has_nested_select_regex = re.compile(
         r"SELECT[\s\(\)\$\?\a-z]*\{[^\}]*SELECT\s+((?:(?:[\?\$]\w+\s+)|(?:\*\s+))+)", flags=re.M | re.I
     )
@@ -323,12 +323,18 @@ class SPARQLQueryHelper(object):
                     # these are optional:
                     if p == "shapesGraph" or p == "currentShape":
                         continue
-                    raise ValidationFailure(
-                        "All potentially pre-bound variables must be selected from a nested SELECT query.\n"
-                        "Potentially pre-bound variables for this query are: {}.".format(
-                            ", ".join(potentially_prebound_variables)
+                    elif p == "this":
+                        raise ValidationFailure(
+                            "All potentially pre-bound variables must be selected from a nested SELECT query.\n"
+                            "Don't forget to include variable `$this` in your SELECT arguments."
                         )
-                    )
+                    else:
+                        raise ValidationFailure(
+                            "All potentially pre-bound variables must be selected from a nested SELECT query.\n"
+                            "Potentially pre-bound variables for this query are: {}.".format(
+                                ", ".join(potentially_prebound_variables)
+                            )
+                        )
         has_as_var = self.has_as_var_regex.search(sparql_text)
         if has_as_var:
             var_name = has_as_var.group(1)

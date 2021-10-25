@@ -25,11 +25,9 @@ matrix:
       python: 3.9
       name: "Python 3.9 Type checks"
     - env: TOX_ENV=lint
-      python: 3.6
-      name: "Python 3.7 Linter checks"
-    - env: TOX_ENV=py37,type-checking,lint DEPLOY=true
       python: 3.7
-      name: "Aggregate or all above, and deploy"
+      name: "Python 3.7 Linter checks"
+
 
 install:
   - pip3 install --upgrade pip "poetry>=1.1.0" tox

@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyshacl"
-version = "0.17.1"
+version = "0.17.2"
 # Don't forget to change the version number in __init__.py and CITATION.cff along with this one
 description = "Python SHACL Validator"
 license = "Apache-2.0"
@@ -137,24 +137,40 @@ legacy_tox_ini = """
 [tox]
 isolated_build = true
 skipsdist = true
-envlist = py36, py37, py38, py39, lint, type-checking
+envlist = py37, py38, py39, lint, type-checking
+toxworkdir={env:TOX_WORK_DIR:.tox}
 
 [testenv]
 deps =
     poetry>=1.1.6
     py36: coveralls
-passenv = TRAVIS TRAVIS_JOB_ID TRAVIS_BRANCH TRAVIS_BUILD_DIR
+passenv = TRAVIS TRAVIS_JOB_ID TRAVIS_BRANCH TRAVIS_BUILD_DIR DRONE_BUILD_NUMBER DRONE_STAGE_NAME DRONE_STAGE_KIND DRONE_REPO_NAME DRONE_SOURCE_BRANCH COVERALLS_SERVICE_NAME COVERALLS_REPO_TOKEN DRONE_COMMIT_AUTHOR_NAME DRONE_COMMIT_AUTHOR_EMAIL DRONE_COMMIT HAS_COVERALLS
 skip_install = true
 allowlist_externals = python3, ls, pwd, env
+setenv =
+    COVERALLS_SERVICE_NUMBER ={env:DRONE_BUILD_NUMBER:0}
+    COVERALLS_SERVICE_JOB_ID = {env:DRONE_STAGE_NAME:stage}
+    COVERALLS_SERVICE_JOB_NUMBER = {env:DRONE_BUILD_NUMBER:0}
+    COVERALLS_FLAG_NAME = {env:DRONE_STAGE_KIND:build}
+    COVERALLS_GIT_REPO = {env:DRONE_REPO_NAME:RDFLib/pySHACL}
+    COVERALLS_GIT_BRANCH = {env:DRONE_SOURCE_BRANCH:master}
+    CI_BRANCH = {env:DRONE_SOURCE_BRANCH:master}
+    GIT_BRANCH = {env:DRONE_SOURCE_BRANCH:master}
+    GIT_AUTHOR_NAME = {env:DRONE_COMMIT_AUTHOR_NAME:nobody}
+    GIT_AUTHOR_EMAIL = {env:DRONE_COMMIT_AUTHOR_EMAIL:nobody@example.com}
+    GIT_ID = {env:DRONE_COMMIT:0}
+
 commands_pre =
     poetry install -vv -n --no-root --extras "js"
+    py37: poetry run pip3 install coveralls
+
 commands =
     - poetry show
     poetry run pytest --cov=pyshacl test/
     - poetry run coverage combine --append
     poetry run coverage report -m
     poetry run coverage html -i
-    py36: - coveralls
+    py37: - coveralls
 
 [testenv:lint]
 commands_pre =
