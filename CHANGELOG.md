@@ -8,6 +8,17 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Nothing yet
 
+## [0.17.2] - 2021-10-25
+
+## Fixes
+- SPARQL queries with words "values", "minus", or "service" in its comments no longer incorrectly throw an exception.
+
+## Changed
+- Switched from Travis to Drone for CI testing
+
+## Added
+- New Table output type for commandline tool. Thanks @nicholascar
+
 
 ## [0.17.1] - 2021-10-11
 
@@ -852,7 +863,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.17.1...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.17.2...HEAD
+[0.17.2]: https://github.com/RDFLib/pySHACL/compare/v0.17.1...v0.17.2
 [0.17.1]: https://github.com/RDFLib/pySHACL/compare/v0.17.0.post1...v0.17.1
 [0.17.0.post1]: https://github.com/RDFLib/pySHACL/compare/v0.17.0...v0.17.0.post1
 [0.17.0]: https://github.com/RDFLib/pySHACL/compare/v0.16.2...v0.17.0

@@ -3,9 +3,7 @@
 # pySHACL
 A Python validator for SHACL.
 
-[![Build Status](https://travis-ci.org/RDFLib/pySHACL.svg?branch=master)](https://travis-ci.org/RDFLib/pySHACL) [![Coverage Status](https://coveralls.io/repos/github/RDFLib/pySHACL/badge.svg?branch=master)](https://coveralls.io/github/RDFLib/pySHACL?branch=master) [![PyPI version](https://badge.fury.io/py/pyshacl.svg)](https://badge.fury.io/py/pyshacl) [![Code Style Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-
-
+[![Build Status](https://drone.rdflib.ashs.dev/api/badges/RDFLib/pySHACL/status.svg)](https://drone.rdflib.ashs.dev/RDFLib/pySHACL)
 
 [![DOI](https://zenodo.org/badge/147505799.svg)](https://zenodo.org/badge/latestdoi/147505799) [![Downloads](https://pepy.tech/badge/pyshacl)](https://pepy.tech/project/pyshacl) [![Downloads](https://pepy.tech/badge/pyshacl/month)](https://pepy.tech/project/pyshacl/month) [![Downloads](https://pepy.tech/badge/pyshacl/week)](https://pepy.tech/project/pyshacl/week)
 
