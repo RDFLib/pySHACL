@@ -78,8 +78,7 @@ optional arguments:
                         Choose a type of inferencing to run against the Data
                         Graph before validating.
   -m, --metashacl       Validate the SHACL Shapes graph against the shacl-
-                        shacl Shapes Graph before before validating the Data
-                        Graph.
+                        shacl Shapes Graph before validating the Data Graph.
   --imports             Allow import of sub-graphs defined in statements with
                         owl:imports.
   -a, --advanced        Enable support for SHACL Advanced Features.
