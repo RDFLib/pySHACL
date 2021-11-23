@@ -12,6 +12,13 @@ This is a pure Python module which allows for the validation of [RDF](https://ww
 This module is developed to adhere to the SHACL Recommendation:
 > Holger Knublauch; Dimitris Kontokostas. *Shapes Constraint Language (SHACL)*. 20 July 2017. W3C Recommendation. URL: <https://www.w3.org/TR/shacl/> ED: <https://w3c.github.io/data-shapes/shacl/>
 
+# Community for Help and Support
+The SHACL community has a discord server for discussion of topics around SHACL and the SHACL specification.
+
+[Use this invitation link: https://discord.gg/RTbGfJqdKB to join the server](https://discord.gg/RTbGfJqdKB)
+
+There is a \#pyshacl channel in which discussion around this python library can held, and you can ask for general pyshacl help too.
+
 ## Installation
 Install with PIP (Using the Python3 pip installer `pip3`)
 ```bash
