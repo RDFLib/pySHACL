@@ -53,8 +53,7 @@ parser.add_argument(
     dest='metashacl',
     action='store_true',
     default=False,
-    help='Validate the SHACL Shapes graph against the shacl-shacl '
-    'Shapes Graph before before validating the Data Graph.',
+    help='Validate the SHACL Shapes graph against the shacl-shacl Shapes Graph before validating the Data Graph.',
 )
 parser.add_argument(
     '-im',
