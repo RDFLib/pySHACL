@@ -2,7 +2,7 @@
 #
 import sys
 
-from typing import TYPE_CHECKING, Set, Sequence, Union
+from typing import TYPE_CHECKING, Dict, Sequence, Union
 
 from pyshacl.consts import (
     RDF_type,
@@ -64,7 +64,7 @@ def gather_functions(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLFunctio
         scl_nodes.remove(n)
         js_nodes.add(n)
 
-    all_fns: dict[RDFNode, Union['SHACLFunction', 'SPARQLFunction', 'JSFunction']] = {}
+    all_fns: Dict[RDFNode, Union['SHACLFunction', 'SPARQLFunction', 'JSFunction']] = {}
     if spq_nodes:
         SPQ = getattr(module, 'SPARQLFunction', None)
         if not SPQ:
