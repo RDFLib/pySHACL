@@ -2,7 +2,7 @@
 #
 import sys
 
-from typing import TYPE_CHECKING, List, Sequence, Union
+from typing import TYPE_CHECKING, Dict, Sequence, Union
 
 from pyshacl.consts import (
     RDF_type,
@@ -14,7 +14,7 @@ from pyshacl.consts import (
     SH_SHACLFunction,
     SH_SPARQLFunction,
 )
-from pyshacl.pytypes import GraphLike
+from pyshacl.pytypes import GraphLike, RDFNode
 
 
 if TYPE_CHECKING:
@@ -64,7 +64,7 @@ def gather_functions(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLFunctio
         scl_nodes.remove(n)
         js_nodes.add(n)
 
-    all_fns: List[Union['SHACLFunction', 'SPARQLFunction', 'JSFunction']] = []
+    all_fns: Dict[RDFNode, Union['SHACLFunction', 'SPARQLFunction', 'JSFunction']] = {}
     if spq_nodes:
         SPQ = getattr(module, 'SPARQLFunction', None)
         if not SPQ:
@@ -74,7 +74,7 @@ def gather_functions(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLFunctio
             setattr(module, 'SPARQLFunction', SPARQLFunction)
             SPQ = SPARQLFunction
         for n in spq_nodes:
-            all_fns.append(SPQ(n, shacl_graph))
+            all_fns[n] = SPQ(n, shacl_graph)
     if scl_nodes:
         SCL = getattr(module, 'SHACLFunction', None)
         if not SCL:
@@ -84,7 +84,7 @@ def gather_functions(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLFunctio
             setattr(module, 'SHACLFunction', SHACLFunction)
             SCL = SHACLFunction
         for n in scl_nodes:
-            all_fns.append(SCL(n, shacl_graph))
+            all_fns[n] = SCL(n, shacl_graph)
     if use_JSFunction and js_nodes:
         JSF = getattr(module, 'JSFunction', None)
         if not JSF:
@@ -94,8 +94,8 @@ def gather_functions(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLFunctio
             setattr(module, 'JSFunction', JSFunction)
             JSF = JSFunction
         for n in js_nodes:
-            all_fns.append(JSF(n, shacl_graph))
-    return all_fns
+            all_fns[n] = JSF(n, shacl_graph)
+    return list(all_fns.values())
 
 
 def apply_functions(fns: Sequence, data_graph: GraphLike):
