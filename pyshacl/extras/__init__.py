@@ -17,7 +17,6 @@ dev_mode = False
 
 @lru_cache()
 def check_extra_installed(extra_name: str):
-    print(os.environ)
     if dev_mode:
         return True
     check_name = "pyshacl[" + extra_name + "]"
