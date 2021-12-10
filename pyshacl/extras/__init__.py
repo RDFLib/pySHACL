@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 #
-import os
-
 from functools import lru_cache
 from warnings import warn
 
