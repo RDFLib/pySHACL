@@ -30,7 +30,7 @@ steps:
       path: /tmp/.tox
   commands:
   - pip3 install --upgrade tox
-  - tox -e lint
+  - tox -e type-checking
 - name: lint
   image: python:3.7
   environment:
@@ -74,7 +74,7 @@ steps:
       path: /tmp/.tox
   commands:
   - pip3 install --upgrade tox
-  - tox -e lint
+  - tox -e type-checking
 - name: lint
   image: python:3.8
   environment:
@@ -85,6 +85,15 @@ steps:
   commands:
   - pip3 install --upgrade tox
   - tox -e lint
+- name: security
+  image: snyk/snyk:python-3.8
+  environment:
+    SNYK_TOKEN:
+      from_secret: snyk_token
+    PROJECT_PATH: /drone/src
+  commands:
+  - snyk --org=ashleysommer test
+  - snyk code --org=ashleysommer test
 
 volumes:
 - name: tox_cache
@@ -118,7 +127,7 @@ steps:
       path: /tmp/.tox
   commands:
   - pip3 install --upgrade tox
-  - tox -e lint
+  - tox -e type-checking
 - name: lint
   image: python:3.9
   environment:
