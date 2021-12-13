@@ -8,6 +8,18 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Nothing yet
 
+
+## [0.17.3] - 2021-12-13
+
+## Fixes
+- Don't crash when a SHACL function is registered more than once (eg, if a function is both SPARQLFunction and JSFunction), fixes \#108, thanks Gabe Fierro
+- Fixed typo in CLI help output, thanks Alex Nelson
+- Don't print env vars when importing JS module, thanks MPolitze
+- Fix typo preventing OWL-RL >=6.0 to be used with pySHACL, Fixes #111
+
+## Added
+- Add Snyk checks to CI/CD pipeline
+
 ## [0.17.2] - 2021-10-25
 
 ## Fixes
