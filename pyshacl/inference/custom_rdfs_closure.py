@@ -1,15 +1,28 @@
 # -*- coding: utf-8 -*-
 try:
     from owlrl import OWL
-except ImportError:
-    from rdflib.namespace import OWL
 
-from owlrl.OWLRL import OWLRL_Semantics
+    if isinstance(OWL, str):
+        raise ImportError(OWL)
+except ImportError:
+    try:
+        from rdflib.namespace import OWL
+    except ImportError:
+        from pyshacl.consts import OWL
+
+
 try:
     from owlrl import RDFS
-except ImportError:
-    from rdflib.namespace import RDFS
 
+    if isinstance(RDFS, str):
+        raise ImportError(RDFS)
+except ImportError:
+    try:
+        from rdflib.namespace import RDFS
+    except ImportError:
+        from pyshacl.consts import RDFS
+
+from owlrl.OWLRL import OWLRL_Semantics
 from owlrl.RDFSClosure import RDFS_Semantics as OrigRDFSSemantics
 
 

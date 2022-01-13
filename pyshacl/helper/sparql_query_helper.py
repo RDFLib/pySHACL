@@ -144,7 +144,10 @@ class SPARQLQueryHelper(object):
 
         for prefixes_val in iter(prefixes_vals):
             pfx_declares = set(sg.objects(prefixes_val, SH_declare))
-            all_declares = global_declares.union(pfx_declares)
+            if pfx_declares and prefixes_val in onts:
+                all_declares = pfx_declares.union(ng_declares)
+            else:
+                all_declares = global_declares.union(pfx_declares)
             for dec in iter(all_declares):
                 if isinstance(dec, rdflib.Literal):
                     raise ConstraintLoadError(

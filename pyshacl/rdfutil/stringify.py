@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 #
 from functools import wraps
-from typing import List, Optional, Union
+from typing import Iterator, List, Optional, Union, cast
 
 import rdflib
 
 from rdflib.namespace import NamespaceManager
 
-from .consts import SH, RDF_first
+from .consts import SH, RDF_first, RDFNode
 
 
 def with_dict_cache(f):
@@ -54,7 +54,7 @@ def stringify_blank_node(
         # item_texts.sort()  ## Don't sort, to preserve list order
         return "( {} )".format(" ".join(item_texts))
 
-    predicates = list(graph.predicates(bnode))
+    predicates: List[RDFNode] = list(cast(Iterator[RDFNode], graph.predicates(bnode)))
     if len(predicates) < 1:
         return "[ ]"
     if RDF_first in predicates:
@@ -62,7 +62,7 @@ def stringify_blank_node(
     p_string_map = {}
     for p in predicates:
         p_string = p.n3(namespace_manager=ns_manager)
-        objs = list(graph.objects(bnode, p))
+        objs: List[RDFNode] = list(cast(Iterator[RDFNode], graph.objects(bnode, p)))
         if len(objs) < 1:
             continue
         o_texts = []
@@ -79,8 +79,8 @@ def stringify_blank_node(
         g = ["{} {}".format(p, o) for p, o in sorted(p_string_map.items())]
         blank_string = " ; ".join(g)
     else:
-        p, o = next(iter(p_string_map.items()))
-        blank_string = "{} {}".format(p, o)
+        _p, _o = next(iter(p_string_map.items()))
+        blank_string = "{} {}".format(_p, _o)
     blank_string = "[ {} ]".format(blank_string)
     stringify_blank_node.dict_cache[stringed_cache_key] = blank_string
     return blank_string
@@ -130,7 +130,7 @@ def find_node_named_graph(dataset, node):
 
 def stringify_node(
     graph: rdflib.Graph,
-    node: rdflib.term.Identifier,
+    node: RDFNode,
     ns_manager: Optional[Union[NamespaceManager, rdflib.Graph]] = None,
     recursion: int = 0,
 ):

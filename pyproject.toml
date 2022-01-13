@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyshacl"
-version = "0.17.3"
+version = "0.18.0"
 # Don't forget to change the version number in __init__.py and CITATION.cff along with this one
 description = "Python SHACL Validator"
 license = "Apache-2.0"
@@ -27,6 +27,7 @@ classifiers = [
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Operating System :: OS Independent"
 ]
@@ -51,11 +52,10 @@ include = [
     { path = "pyshacl/*.spec" }
 ]
 
-
 [tool.poetry.dependencies]
-python = "^3.7.0,<3.10"  # Compatible python versions must be declared here
-rdflib = ">=6.0.0,<7"
-owlrl = ">=5.2.3,<7"
+python = "^3.7.0"  # Compatible python versions must be declared here
+rdflib = ">=6.1.1,<8"
+owlrl = ">=6.0.2,<7"
 prettytable = "^2.2.1"
 rdflib-jsonld = { version=">=0.4.0,<0.6", optional=true}
 pyduktape2 = {version="^0.4.1", optional=true}
@@ -65,17 +65,15 @@ black = {version="21.9b0", optional=true}
 mypy = {version="^0.800", optional=true}
 types-setuptools = {version="*", optional=true}
 
-
 [tool.poetry.dev-dependencies]
-coverage = "^4.5"
-pytest = "^5.0"
+coverage = ">6,<7,!=6.0.*,!=6.1,!=6.1.1"
+pytest = "^6.0"
 pytest-cov = "^2.8.1"
 flake8 = {version="^3.8.0", optional=true}
 isort = {version="^5.7.0", optional=true}
 black = {version="21.9b0", optional=true}
 mypy = {version="^0.800", optional=true}
 types-setuptools = {version="*", optional=true}
-
 
 [tool.poetry.extras]
 jsonld = ["rdflib-jsonld"]
@@ -133,18 +131,23 @@ lines_after_imports = 2
 lines_between_types = 1
 multi_line_output = 3
 
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = [
+    "test",
+]
+
 [tool.tox]
 legacy_tox_ini = """
 [tox]
 isolated_build = true
 skipsdist = true
-envlist = py37, py38, py39, lint, type-checking
+envlist = py37, py38, py39, py310, lint, type-checking
 toxworkdir={env:TOX_WORK_DIR:.tox}
 
 [testenv]
 deps =
-    poetry>=1.1.6
-    py36: coveralls
+    poetry>=1.1.11
 passenv = TRAVIS TRAVIS_JOB_ID TRAVIS_BRANCH TRAVIS_BUILD_DIR DRONE_BUILD_NUMBER DRONE_STAGE_NAME DRONE_STAGE_KIND DRONE_REPO_NAME DRONE_SOURCE_BRANCH COVERALLS_SERVICE_NAME COVERALLS_REPO_TOKEN DRONE_COMMIT_AUTHOR_NAME DRONE_COMMIT_AUTHOR_EMAIL DRONE_COMMIT HAS_COVERALLS
 skip_install = true
 allowlist_externals = python3, ls, pwd, env
@@ -162,8 +165,10 @@ setenv =
     GIT_ID = {env:DRONE_COMMIT:0}
 
 commands_pre =
+    py39: poetry run pip3 install -U "pip>=21.0"
+    py310: poetry run pip3 install -U "pip>=21.3"
     poetry install -vv -n --no-root --extras "js"
-    py37: poetry run pip3 install coveralls
+    py37: poetry run pip3 install "coveralls>=3.3.1"
 
 commands =
     - poetry show
@@ -175,6 +180,7 @@ commands =
 
 [testenv:lint]
 commands_pre =
+    python --version
     poetry install -vv -n --no-root --extras "dev-lint"
 commands =
     - poetry show
@@ -184,6 +190,7 @@ commands =
 
 [testenv:type-checking]
 commands_pre =
+    python --version
     poetry install -vv -n --no-root --extras "dev-type-checking"
     poetry run pip3 install "mypy>=0.800" "types-setuptools"
 commands =

@@ -6,7 +6,7 @@ import sys
 from functools import wraps
 from os import path
 from sys import stderr
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Set, Tuple, Union, cast
 
 import rdflib
 
@@ -470,13 +470,13 @@ def clean_validation_reports(actual_graph, actual_report, expected_graph, expect
 
 
 def compare_validation_reports(report_graph: GraphLike, expected_graph: GraphLike, expected_result):
-    expected_conforms = expected_graph.objects(expected_result, SH_conforms)
-    expected_conforms = set(expected_conforms)
+    expected_conforms_i = expected_graph.objects(expected_result, SH_conforms)
+    expected_conforms = set(cast(Iterator[Literal], expected_conforms_i))
     if len(expected_conforms) < 1:  # pragma: no cover
         raise ReportableRuntimeError(
             "Cannot check the expected result, the given expectedResult does not have an sh:conforms."
         )
-    expected_conforms = next(iter(expected_conforms))
+    expected_conform = next(iter(expected_conforms))
     expected_result_nodes = expected_graph.objects(expected_result, SH_result)
     expected_result_nodes = set(expected_result_nodes)
     expected_result_node_count = len(expected_result_nodes)
@@ -492,22 +492,21 @@ def compare_validation_reports(report_graph: GraphLike, expected_graph: GraphLik
     eq = compare_blank_node(report_graph, validation_report, expected_graph, expected_result)
     if eq != 0:
         return False
-    report_conforms = report_graph.objects(validation_report, SH_conforms)
-    report_conforms = set(report_conforms)
+    report_conforms_i = report_graph.objects(validation_report, SH_conforms)
+    report_conforms = set(cast(Iterator[Literal], report_conforms_i))
     if len(report_conforms) < 1:  # pragma: no cover
         raise ReportableRuntimeError(
             "Cannot check the validation report, the report graph does not have an sh:conforms."
         )
-    report_conforms = next(iter(report_conforms))
+    report_conform = next(iter(report_conforms))
 
-    if bool(expected_conforms.value) != bool(report_conforms.value):
+    if bool(expected_conform.value) != bool(report_conform.value):
         # TODO:coverage: write a test for this
         log.error("Expected Result Conforms value is different from Validation Report's Conforms value.")
         return False
 
-    report_result_nodes = report_graph.objects(validation_report, SH_result)
-    report_result_nodes = set(report_result_nodes)
-    report_result_node_count = len(report_result_nodes)
+    report_result_nodes_i = report_graph.objects(validation_report, SH_result)
+    report_result_node_count = len(set(report_result_nodes_i))
 
     if expected_result_node_count != report_result_node_count:
         # TODO:coverage: write a test for this
@@ -522,24 +521,24 @@ def compare_validation_reports(report_graph: GraphLike, expected_graph: GraphLik
 def compare_inferencing_reports(data_graph: GraphLike, expected_graph: GraphLike, expected_results: Union[List, Set]):
     all_good = True
     for expected_result in expected_results:
-        expected_object = set(expected_graph.objects(expected_result, RDF_object))
-        if len(expected_object) < 1:
+        expected_objects = set(expected_graph.objects(expected_result, RDF_object))
+        if len(expected_objects) < 1:
             raise ReportableRuntimeError(
                 "Cannot check the expected result, the given expectedResult does not have an rdf:object."
             )
-        expected_object = next(iter(expected_object))
-        expected_subject = set(expected_graph.objects(expected_result, RDF_subject))
-        if len(expected_subject) < 1:
+        expected_object = next(iter(expected_objects))
+        expected_subjects = set(expected_graph.objects(expected_result, RDF_subject))
+        if len(expected_subjects) < 1:
             raise ReportableRuntimeError(
                 "Cannot check the expected result, the given expectedResult does not have an rdf:subject."
             )
-        expected_subject = next(iter(expected_subject))
-        expected_predicate = set(expected_graph.objects(expected_result, RDF_predicate))
-        if len(expected_predicate) < 1:
+        expected_subject = next(iter(expected_subjects))
+        expected_predicates = set(expected_graph.objects(expected_result, RDF_predicate))
+        if len(expected_predicates) < 1:
             raise ReportableRuntimeError(
                 "Cannot check the expected result, the given expectedResult does not have an rdf:predicate."
             )
-        expected_predicate = next(iter(expected_predicate))
+        expected_predicate = next(iter(expected_predicates))
         if isinstance(expected_object, Literal):
             found_objs = set(data_graph.objects(expected_subject, expected_predicate))
             if len(found_objs) < 1:
@@ -655,8 +654,8 @@ def check_dash_result(validator: Validator, report_graph: GraphLike, expected_re
                 raise ReportableRuntimeError(
                     "Cannot check the expected result, the given FunctionTestCase does not have an expression."
                 )
-            expression = next(iter(expressions))
-            expression = str(expression).strip()
+            expression_node = next(iter(expressions))
+            expression = str(expression_node).strip()
             parts = [e.strip() for e in expression.split("(", 1)]
             if len(parts) < 1:
                 expression = parts[0]

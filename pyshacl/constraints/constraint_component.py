@@ -37,8 +37,7 @@ from pyshacl.rdfutil import stringify_node
 
 
 if TYPE_CHECKING:
-    from rdflib.term import Identifier
-
+    from pyshacl.pytypes import RDFNode
     from pyshacl.shape import Shape
     from pyshacl.shapes_graph import ShapesGraph
 
@@ -113,9 +112,9 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
     def make_v_result_description(
         self,
         datagraph: GraphLike,
-        focus_node: 'Identifier',
+        focus_node: 'RDFNode',
         severity: URIRef,
-        value_node: Optional['Identifier'],
+        value_node: Optional['RDFNode'],
         messages: List[str],
         result_path=None,
         constraint_component=None,
@@ -127,7 +126,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         :param datagraph:
         :type datagraph: rdflib.Graph | rdflib.ConjunctiveGraph | rdflib.Dataset
         :param focus_node:
-        :type focus_node: rdflib.term.Identifier
+        :type focus_node: RDFNode
         :param severity:
         :type value_node: rdflib.URIRef
         :param value_node:
@@ -195,11 +194,11 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
     def make_v_result(
         self,
         datagraph: GraphLike,
-        focus_node: 'Identifier',
-        value_node: Optional['Identifier'] = None,
-        result_path: Optional['Identifier'] = None,
-        constraint_component: Optional['Identifier'] = None,
-        source_constraint: Optional['Identifier'] = None,
+        focus_node: 'RDFNode',
+        value_node: Optional['RDFNode'] = None,
+        result_path: Optional['RDFNode'] = None,
+        constraint_component: Optional['RDFNode'] = None,
+        source_constraint: Optional['RDFNode'] = None,
         extra_messages: Optional[Iterable] = None,
         bound_vars=None,
     ):
@@ -207,11 +206,11 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         :param datagraph:
         :type datagraph: rdflib.Graph | rdflib.ConjunctiveGraph | rdflib.Dataset
         :param focus_node:
-        :type focus_node: Identifier
+        :type focus_node: RDFNode
         :param value_node:
-        :type value_node: Identifier | None
+        :type value_node: RDFNode | None
         :param result_path:
-        :type result_path: Identifier | None
+        :type result_path: RDFNode | None
         :param constraint_component:
         :param source_constraint:
         :param extra_messages:

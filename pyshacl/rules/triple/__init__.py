@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import itertools
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Tuple, cast
 
 import rdflib
 
@@ -12,6 +12,8 @@ from pyshacl.rules.shacl_rule import SHACLRule
 
 
 if TYPE_CHECKING:
+    from rdflib.term import Node
+
     from pyshacl.pytypes import GraphLike
     from pyshacl.shape import Shape
 
@@ -74,7 +76,7 @@ class TripleRule(SHACLRule):
                     added += 1
             if added > 0:
                 for i in to_add:
-                    data_graph.add(i)
+                    data_graph.add(cast(Tuple['Node', 'Node', 'Node'], i))
                 all_added += added
                 if self.iterate:
                     continue  # Jump up to iterate

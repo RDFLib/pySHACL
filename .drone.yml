@@ -7,7 +7,7 @@ platform:
   arch: amd64
 
 steps:
-- name: test
+- name: test-3-7
   image: python:3.7
   environment:
     TOX_WORK_DIR: /tmp/.tox
@@ -21,26 +21,6 @@ steps:
   commands:
   - pip3 install --upgrade tox
   - tox -e py37
-- name: type-checking
-  image: python:3.7
-  environment:
-    TOX_WORK_DIR: /tmp/.tox
-  volumes:
-    - name: tox_cache
-      path: /tmp/.tox
-  commands:
-  - pip3 install --upgrade tox
-  - tox -e type-checking
-- name: lint
-  image: python:3.7
-  environment:
-    TOX_WORK_DIR: /tmp/.tox
-  volumes:
-    - name: tox_cache
-      path: /tmp/.tox
-  commands:
-  - pip3 install --upgrade tox
-  - tox -e lint
 
 volumes:
 - name: tox_cache
@@ -55,7 +35,7 @@ platform:
   arch: amd64
 
 steps:
-- name: test
+- name: test-3-8
   image: python:3.8
   environment:
     TOX_WORK_DIR: /tmp/.tox
@@ -65,7 +45,7 @@ steps:
   commands:
   - pip3 install --upgrade tox
   - tox -e py38
-- name: type-checking
+- name: type-checking-3-8
   image: python:3.8
   environment:
     TOX_WORK_DIR: /tmp/.tox
@@ -75,7 +55,7 @@ steps:
   commands:
   - pip3 install --upgrade tox
   - tox -e type-checking
-- name: lint
+- name: lint-3-8
   image: python:3.8
   environment:
     TOX_WORK_DIR: /tmp/.tox
@@ -108,7 +88,7 @@ platform:
   arch: amd64
 
 steps:
-- name: test
+- name: test-3-9
   image: python:3.9
   environment:
     TOX_WORK_DIR: /tmp/.tox
@@ -116,10 +96,32 @@ steps:
     - name: tox_cache
       path: /tmp/.tox
   commands:
+  - pip3 install -U "pip>=21.0"
   - pip3 install --upgrade tox
   - tox -e py39
-- name: type-checking
-  image: python:3.9
+
+---
+kind: pipeline
+name: python-3-10
+type: docker
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: test-3-10
+  image: python:3.10
+  environment:
+    TOX_WORK_DIR: /tmp/.tox
+  volumes:
+    - name: tox_cache
+      path: /tmp/.tox
+  commands:
+  - pip3 install -U "pip>=21.3"
+  - pip3 install --upgrade tox
+  - tox -e py310
+- name: type-checking-3-10
+  image: python:3.10
   environment:
     TOX_WORK_DIR: /tmp/.tox
   volumes:
@@ -128,8 +130,8 @@ steps:
   commands:
   - pip3 install --upgrade tox
   - tox -e type-checking
-- name: lint
-  image: python:3.9
+- name: lint-3-10
+  image: python:3.10
   environment:
     TOX_WORK_DIR: /tmp/.tox
   volumes:

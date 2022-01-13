@@ -8,8 +8,8 @@ authors:
   given-names: "Nicholas"
   orcid: "http://orcid.org/0000-0002-8742-7730"
 title: "pySHACL"
-version: 0.17.3
+version: 0.18.0
 doi: 10.5281/zenodo.4750840
 license: Apache-2.0
-date-released: 2021-10-11
+date-released: 2022-01-13
 url: "https://github.com/RDFLib/pySHACL"

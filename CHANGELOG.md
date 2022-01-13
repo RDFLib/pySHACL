@@ -8,33 +8,46 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Nothing yet
 
+## [0.18.0] - 2022-01-13
+
+## Added
+- Added Python 3.10 support (when using RDFLib v6.1.1 or greater)
+- Added more type hinting, to conform to the new type hinting added by RDFLib 6.1.1
+
+## Changed
+- Subtle correction in the way `sh:prefixs` works with `sh:declare` on the given named ontology.
+- Bumped some min versions of libraries, to gain compatibility with Python 3.10
+
+## Fixed
+- Fixed test for issue #76
+- Fixed #76 again (after fixed test)
 
 ## [0.17.3] - 2021-12-13
 
-## Fixes
+### Fixed
 - Don't crash when a SHACL function is registered more than once (eg, if a function is both SPARQLFunction and JSFunction), fixes \#108, thanks Gabe Fierro
 - Fixed typo in CLI help output, thanks Alex Nelson
 - Don't print env vars when importing JS module, thanks MPolitze
 - Fix typo preventing OWL-RL >=6.0 to be used with pySHACL, Fixes #111
 
-## Added
+### Added
 - Add Snyk checks to CI/CD pipeline
 
 ## [0.17.2] - 2021-10-25
 
-## Fixes
+### Fixed
 - SPARQL queries with words "values", "minus", or "service" in its comments no longer incorrectly throw an exception.
 
-## Changed
+### Changed
 - Switched from Travis to Drone for CI testing
 
-## Added
+### Added
 - New Table output type for commandline tool. Thanks @nicholascar
 
 
 ## [0.17.1] - 2021-10-11
 
-## Fixes
+### Fixed
 - Handle transitive subclasses when evaluating sh:targetClass - @gtfierro
   - Fixes #96
 - Improve detection of RDF/XML files when loading unknown content
@@ -42,11 +55,11 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - Imported type stubs and resolved ALL MyPy issues! (this was a big effort)
 - Logic fixes in the dataset loader (thanks to inconsistencies exposed by MyPy)
 
-## Changed
+### Changed
 - Add special cases to sh:dataclass constraint, when the given shape uses rdfs:Literal or rdfs:Dataclass as the dataclass to match on
   - Fixes #71
 
-## Added
+### Added
 - Add datashapes.org/schema as a built-in graph
   - Fixes #98
 - Added ability to pass a TextIO or TextIOWrapper object into the dataset loader
@@ -875,7 +888,9 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.17.2...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.18.0...HEAD
+[0.18.0]: https://github.com/RDFLib/pySHACL/compare/v0.17.3...v0.18.0
+[0.17.3]: https://github.com/RDFLib/pySHACL/compare/v0.17.2...v0.17.3
 [0.17.2]: https://github.com/RDFLib/pySHACL/compare/v0.17.1...v0.17.2
 [0.17.1]: https://github.com/RDFLib/pySHACL/compare/v0.17.0.post1...v0.17.1
 [0.17.0.post1]: https://github.com/RDFLib/pySHACL/compare/v0.17.0...v0.17.0.post1
