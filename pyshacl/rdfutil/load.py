@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 #
+import os
 import pickle
 import platform
+import sys
 
 from io import BufferedIOBase, BytesIO, TextIOBase, UnsupportedOperation
 from pathlib import Path
@@ -130,6 +132,8 @@ def load_from_source(
             source_was_open = True
 
     elif isinstance(source, str):
+        pid = os.getpid()
+        fd0 = "/proc/{}/fd/0".format(str(pid))
         if is_windows and source.startswith('file:///'):
             public_id = source
             filename = source[8:]
@@ -177,6 +181,18 @@ def load_from_source(
             elif len(source) < 140:
                 filename = source
                 source_as_filename = filename
+        if source_as_filename and filename:
+            if filename == "stdin" or filename == "/dev/stdin" or filename == "-" or filename == fd0:
+                source = source_as_file = open_source = sys.stdin.buffer
+                source_was_open = True
+            else:
+                try:
+                    filename = os.readlink(filename)
+                    if filename == fd0 or filename == "/dev/stdin":
+                        source = source_as_file = open_source = sys.stdin.buffer
+                        source_was_open = True
+                except OSError:
+                    pass
         # TODO: Do we still need this? Not sure why this was added, but works better without it
         #  if public_id and not public_id.endswith('#'):
         #     public_id = "{}#".format(public_id)
@@ -234,11 +250,9 @@ def load_from_source(
         filename = str(Path(filename).resolve())
         if not public_id:
             public_id = Path(filename).as_uri() + "#"
-        source = open(filename, mode='rb')
-        open_source = source
+        source = open_source = open(filename, mode='rb')
     if not open_source and source_as_bytes:
-        source = BytesIO(source_as_bytes)  # type: ignore
-        open_source = source
+        source = open_source = BytesIO(source_as_bytes)  # type: ignore
     if open_source:
         _source = open_source
         # Check if we can seek
@@ -260,11 +274,18 @@ def load_from_source(
                 raise RuntimeError("Attempted to load a HTML document as RDF.")
             if line.startswith(b"<?xml") or line.startswith(b"<xml") or line.startswith(b"<rdf:"):
                 rdf_format = "xml"
+            if line.startswith(b"@base ") or line.startswith(b"@prefix ") or line.startswith(b"PREFIX "):
+                rdf_format = "turtle"
+            try:
+                _source.seek(0)
+            except (AttributeError, UnsupportedOperation):
+                raise RuntimeError("Seek failed while identifying file type.")
+            except ValueError:
+                raise RuntimeError("File closed while identifying file type.")
         if rdf_format == 'turtle' or rdf_format == 'n3':
             # SHACL Shapes files and Data files can have extra RDF Metadata in the
             # Top header block, including #BaseURI and #Prefix.
             # The @base line is not read here, but it is parsed in the n3 parser
-            _source.seek(0)
             while True:
                 try:
                     line = _source.readline()
@@ -307,7 +328,6 @@ def load_from_source(
                 elif keyword == b"prefix":
                     uri_prefix = wordval_str
             try:
-                # The only way we can get here is if we were able to seek before
                 _source.seek(0)
             except (AttributeError, UnsupportedOperation):
                 raise RuntimeError("Seek failed while pre-parsing Turtle File.")

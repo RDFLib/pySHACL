@@ -8,17 +8,25 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 - Nothing yet
 
+## [0.18.1] - 2022-01-22
+
+### Added
+- Added the ability to pipe in SHACL file or ONT file via stdin on Linux or MacOS
+
+### Fixed
+- Fixed an issue where the filetype detection routine in the RDF loader would fail to reset the file back to the start.
+
 ## [0.18.0] - 2022-01-13
 
-## Added
+### Added
 - Added Python 3.10 support (when using RDFLib v6.1.1 or greater)
 - Added more type hinting, to conform to the new type hinting added by RDFLib 6.1.1
 
-## Changed
+### Changed
 - Subtle correction in the way `sh:prefixs` works with `sh:declare` on the given named ontology.
 - Bumped some min versions of libraries, to gain compatibility with Python 3.10
 
-## Fixed
+### Fixed
 - Fixed test for issue #76
 - Fixed #76 again (after fixed test)
 
@@ -888,7 +896,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.18.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.18.1...HEAD
+[0.18.1]: https://github.com/RDFLib/pySHACL/compare/v0.18.0...v0.18.1
 [0.18.0]: https://github.com/RDFLib/pySHACL/compare/v0.17.3...v0.18.0
 [0.17.3]: https://github.com/RDFLib/pySHACL/compare/v0.17.2...v0.17.3
 [0.17.2]: https://github.com/RDFLib/pySHACL/compare/v0.17.1...v0.17.2
