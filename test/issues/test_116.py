@@ -41,14 +41,13 @@ ex:ThingWithAStringProperty
 	a owl:Class ;
 	a sh:NodeShape ;
 	sh:property [
-		sh:datatype xsd:string ;
-		%s
+		sh:datatype %s ;
 		sh:path ex:someString ;
 	] .
 '''
 
-shacl_file_with_nodekind = shacl_file_base % "sh:nodeKind sh:Literal ;"
-shacl_file_without_nodekind = shacl_file_base % ""
+shacl_file_with_plain_literal = shacl_file_base % "rdf:PlainLiteral"
+shacl_file_with_string = shacl_file_base % "xsd:string"
 
 data_file_base = """
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -62,11 +61,11 @@ kb:someIndividual
 	a ex:ThingWithAStringProperty ;
 """
 
-data_file_PASS1 = data_file_base + """	ex:someString "A string with a language"@en ."""
-data_file_PASS2 = data_file_base + """	ex:someString "A string without a language" ."""
+data_file_plain_literal = data_file_base + """	ex:someString "A string with a language"@en ."""
+data_file_string = data_file_base + """	ex:someString "A string without a language" ."""
 
 
-def _test_116_template(shacl_file_text, data_file_text):
+def _test_116_template(shacl_file_text: str, data_file_text: str, should_conform: bool) -> None:
     data = rdflib.Graph()
     data.parse(data=data_file_text, format="turtle")
     res = validate(
@@ -77,27 +76,27 @@ def _test_116_template(shacl_file_text, data_file_text):
         debug=True,
     )
     conforms, graph, string = res
-    assert conforms
+    assert should_conform == conforms
 
 
-def test_116_positive1():
-    _test_116_template(shacl_file_without_nodekind, data_file_PASS1)
+def test_116_1():
+    _test_116_template(shacl_file_with_string, data_file_plain_literal, False)
 
 
-def test_116_positive2():
-    _test_116_template(shacl_file_without_nodekind, data_file_PASS2)
+def test_116_2():
+    _test_116_template(shacl_file_with_string, data_file_string, True)
 
 
-def test_116_positive3():
-    _test_116_template(shacl_file_with_nodekind, data_file_PASS1)
+def test_116_3():
+    _test_116_template(shacl_file_with_plain_literal, data_file_plain_literal, True)
 
 
-def test_116_positive4():
-    _test_116_template(shacl_file_with_nodekind, data_file_PASS2)
+def test_116_4():
+    _test_116_template(shacl_file_with_plain_literal, data_file_string, True)
 
 
 if __name__ == "__main__":
-    test_116_positive1()
-    test_116_positive2()
-    test_116_positive3()
-    test_116_positive4()
+    test_116_1()
+    test_116_2()
+    test_116_3()
+    test_116_4()
