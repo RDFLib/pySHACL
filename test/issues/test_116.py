@@ -46,7 +46,7 @@ ex:ThingWithAStringProperty
 	] .
 '''
 
-shacl_file_with_plain_literal = shacl_file_base % "rdf:PlainLiteral"
+shacl_file_with_plain_literal = shacl_file_base % "rdf:langString"
 shacl_file_with_string = shacl_file_base % "xsd:string"
 
 data_file_base = """
