@@ -92,7 +92,7 @@ def test_116_3():
 
 
 def test_116_4():
-    _test_116_template(shacl_file_with_plain_literal, data_file_string, True)
+    _test_116_template(shacl_file_with_plain_literal, data_file_string, False)
 
 
 if __name__ == "__main__":
