@@ -89,6 +89,13 @@ parser.add_argument(
 )
 parser.add_argument('--abort', dest='abort', action='store_true', default=False, help='Abort on first invalid data.')
 parser.add_argument(
+    '--allow-infos',
+    dest='allow_infos',
+    action='store_true',
+    default=False,
+    help='Shapes marked with severity of Info will not cause result to be invalid.',
+)
+parser.add_argument(
     '-w',
     '--allow-warnings',
     dest='allow_warnings',
@@ -177,6 +184,8 @@ def main():
             validator_kwargs['iterate_rules'] = True
     if args.abort:
         validator_kwargs['abort_on_first'] = True
+    if args.allow_infos:
+        validator_kwargs['allow_infos'] = True
     if args.allow_warnings:
         validator_kwargs['allow_warnings'] = True
     if args.shacl_file_format:

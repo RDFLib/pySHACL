@@ -63,6 +63,7 @@ class Validator(object):
         options_dict.setdefault('use_js', False)
         options_dict.setdefault('iterate_rules', False)
         options_dict.setdefault('abort_on_first', False)
+        options_dict.setdefault('allow_infos', False)
         options_dict.setdefault('allow_warnings', False)
         if 'logger' not in options_dict:
             options_dict['logger'] = logging.getLogger(__name__)
@@ -243,6 +244,7 @@ class Validator(object):
             named_graphs = [the_target_graph]
         reports = []
         abort_on_first: bool = bool(self.options.get("abort_on_first", False))
+        allow_infos: bool = bool(self.options.get("allow_infos", False))
         allow_warnings: bool = bool(self.options.get("allow_warnings", False))
         non_conformant = False
         aborted = False
@@ -252,7 +254,9 @@ class Validator(object):
                 apply_rules(advanced['rules'], g, iterate=iterate_rules)
             try:
                 for s in shapes:
-                    _is_conform, _reports = s.validate(g, abort_on_first=abort_on_first, allow_warnings=allow_warnings)
+                    _is_conform, _reports = s.validate(
+                        g, abort_on_first=abort_on_first, allow_infos=allow_infos, allow_warnings=allow_warnings
+                    )
                     non_conformant = non_conformant or (not _is_conform)
                     reports.extend(_reports)
                     if abort_on_first and non_conformant:
@@ -332,6 +336,7 @@ def validate(
     inference: Optional[str] = None,
     inplace: Optional[bool] = False,
     abort_on_first: Optional[bool] = False,
+    allow_infos: Optional[bool] = False,
     allow_warnings: Optional[bool] = False,
     **kwargs,
 ):
@@ -353,6 +358,8 @@ def validate(
     :type inplace: bool
     :param abort_on_first: Stop evaluating constraints after first violation is found
     :type abort_on_first: bool | None
+    :param allow_infos: Shapes marked with severity of sh:Info will not cause result to be invalid.
+    :type allow_infos: bool | None
     :param allow_warnings: Shapes marked with severity of sh:Warning or sh:Info will not cause result to be invalid.
     :type allow_warnings: bool | None
     :param kwargs:
@@ -409,6 +416,7 @@ def validate(
                 'inference': inference,
                 'inplace': inplace,
                 'abort_on_first': abort_on_first,
+                'allow_infos': allow_infos,
                 'allow_warnings': allow_warnings,
                 'advanced': advanced,
                 'iterate_rules': iterate_rules,

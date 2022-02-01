@@ -427,6 +427,7 @@ class Shape(object):
             ]
         ] = None,
         abort_on_first: Optional[bool] = False,
+        allow_infos: Optional[bool] = False,
         allow_warnings: Optional[bool] = False,
         _evaluation_path: Optional[List] = None,
     ):
@@ -476,6 +477,11 @@ class Shape(object):
         focus_value_nodes = self.value_nodes(target_graph, focus)
         filter_reports: bool = False
         allow_conform: bool = False
+        if allow_infos:
+            if self.severity == SH_Info:
+                allow_conform = True
+            else:
+                filter_reports = True
         if allow_warnings:
             if self.severity in (SH_Warning, SH_Info):
                 allow_conform = True
