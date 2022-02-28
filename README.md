@@ -63,13 +63,14 @@ Full CLI Usage options:
 $ pyshacl -h
 $ python3 -m pyshacl -h
 usage: pyshacl [-h] [-s [SHACL]] [-e [ONT]] [-i {none,rdfs,owlrl,both}] [-m]
-               [--imports] [--abort] [-a] [-j] [-d] [-f {human,table,turtle,xml,json-ld,nt,n3}]
+               [-im] [-a] [-j] [-it] [--abort] [--allow-infos] [-w] [-d]
+               [-f {human,table,turtle,xml,json-ld,nt,n3}]
                [-df {auto,turtle,xml,json-ld,nt,n3}]
                [-sf {auto,turtle,xml,json-ld,nt,n3}]
                [-ef {auto,turtle,xml,json-ld,nt,n3}] [-V] [-o [OUTPUT]]
                DataGraph
 
-Run the pySHACL validator from the command line.
+PySHACL 0.18.1 command line tool.
 
 positional arguments:
   DataGraph             The file containing the Target Data Graph.
@@ -86,15 +87,20 @@ optional arguments:
                         Graph before validating.
   -m, --metashacl       Validate the SHACL Shapes graph against the shacl-
                         shacl Shapes Graph before validating the Data Graph.
-  --imports             Allow import of sub-graphs defined in statements with
+  -im, --imports        Allow import of sub-graphs defined in statements with
                         owl:imports.
-  -a, --advanced        Enable support for SHACL Advanced Features.
-  -j, --js              Enable support for SHACL-JS Features.
-  -it, --iterate-rules  Interate SHACL Rules until steady state is found (only available in Advanced Mode)
-  --abort               Abort on first error.
-  -d, --debug           Output additional runtime messages, including violations that didn\'t
-                        lead to non-conformance.
-  -f {human,turtle,xml,json-ld,nt,n3}, --format {human,turtle,xml,json-ld,nt,n3}
+  -a, --advanced        Enable features from the SHACL Advanced Features
+                        specification.
+  -j, --js              Enable features from the SHACL-JS Specification.
+  -it, --iterate-rules  Run Shape's SHACL Rules iteratively until the
+                        data_graph reaches a steady state.
+  --abort               Abort on first invalid data.
+  --allow-infos         Shapes marked with severity of Info will not cause
+                        result to be invalid.
+  -w, --allow-warnings  Shapes marked with severity of Warning or Info will
+                        not cause result to be invalid.
+  -d, --debug           Output additional runtime messages.
+  -f {human,table,turtle,xml,json-ld,nt,n3}, --format {human,table,turtle,xml,json-ld,nt,n3}
                         Choose an output format. Default is "human".
   -df {auto,turtle,xml,json-ld,nt,n3}, --data-file-format {auto,turtle,xml,json-ld,nt,n3}
                         Explicitly state the RDF File format of the input
@@ -105,7 +111,7 @@ optional arguments:
   -ef {auto,turtle,xml,json-ld,nt,n3}, --ont-file-format {auto,turtle,xml,json-ld,nt,n3}
                         Explicitly state the RDF File format of the extra
                         ontology file. Default="auto".
-  -V, --version         Print the PySHACL version and exit.
+  -V, --version         Show PySHACL version and exit.
   -o [OUTPUT], --output [OUTPUT]
                         Send output to a file (defaults to stdout).
 ```
