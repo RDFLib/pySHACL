@@ -126,6 +126,7 @@ r = validate(data_graph,
       ont_graph=og,
       inference='rdfs',
       abort_on_first=False,
+      allow_infos=False,
       allow_warnings=False,
       meta_shacl=False,
       advanced=False,
@@ -141,6 +142,7 @@ Where:
 * `inference` is a Python string value to indicate whether or not to perform OWL inferencing expansion of the `data_graph` before validation.
 Options are 'rdfs', 'owlrl', 'both', or 'none'. The default is 'none'.
 * `abort_on_first` (optional) `bool` value to indicate whether or not the program should abort after encountering the first validation failure or to continue. Default is to continue.
+* `allow_infos` (optional) `bool` value, Shapes marked with severity of Info will not cause result to be invalid.
 * `allow_warnings` (optional) `bool` value, Shapes marked with severity of Warning or Info will not cause result to be invalid.
 * `meta_shacl` (optional) `bool` value to indicate whether or not the program should enable the Meta-SHACL feature. Default is False.
 * `advanced`: (optional) `bool` value to enable SHACL Advanced Features
