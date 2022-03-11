@@ -48,16 +48,6 @@ class StringBasedConstraintBase(ConstraintComponent):
     def constraint_name(cls):
         raise NotImplementedError()
 
-    @classmethod
-    def value_node_to_string(cls, v):
-        if isinstance(v, rdflib.Literal):
-            v_string = str(v.value)
-        elif isinstance(v, rdflib.URIRef):
-            v_string = str(v)
-        else:
-            v_string = str(v)
-        return v_string
-
     def _evaluate_string_rule(self, r, target_graph, f_v_dict):
         raise NotImplementedError()
 
@@ -134,8 +124,7 @@ class MinLengthConstraintComponent(StringBasedConstraintBase):
                     # blank nodes cannot pass minLen validation
                     pass
                 else:
-                    v_string = self.value_node_to_string(v)
-                    flag = len(v_string) >= min_len
+                    flag = len(str(v)) >= min_len
                 if not flag:
                     non_conformant = True
                     rept = self.make_v_result(target_graph, f, value_node=v)
@@ -196,8 +185,7 @@ class MaxLengthConstraintComponent(StringBasedConstraintBase):
                     # blank nodes cannot pass minLen validation
                     pass
                 else:
-                    v_string = self.value_node_to_string(v)
-                    flag = len(v_string) <= max_len
+                    flag = len(str(v)) <= max_len
                 if not flag:
                     non_conformant = True
                     rept = self.make_v_result(target_graph, f, value_node=v)
@@ -276,10 +264,9 @@ class PatternConstraintComponent(StringBasedConstraintBase):
                     # blank nodes cannot pass pattern validation
                     pass
                 else:
-                    v_string = self.value_node_to_string(v)
-                    match = re_matcher.match(v_string)
+                    match = re_matcher.match(str(v))
                     if not match:
-                        match = re_matcher.search(v_string)
+                        match = re_matcher.search(str(v))
                 if not match:
                     non_conformant = True
                     rept = self.make_v_result(target_graph, f, value_node=v)
