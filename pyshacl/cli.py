@@ -9,7 +9,13 @@ from prettytable import PrettyTable
 from rdflib.namespace import SH
 
 from pyshacl import __version__, validate
-from pyshacl.errors import ReportableRuntimeError, ValidationFailure
+from pyshacl.errors import (
+    ConstraintLoadError,
+    ReportableRuntimeError,
+    RuleLoadError,
+    ShapeLoadError,
+    ValidationFailure,
+)
 
 
 class ShowVersion(argparse.Action):
@@ -211,6 +217,18 @@ def main():
         args.output.write(str(vf.message))
         args.output.write("\n")
         sys.exit(1)
+    except ShapeLoadError as sle:
+        sys.stderr.write("Validator encountered a Shape Load Error:\n")
+        sys.stderr.write(str(sle))
+        sys.exit(2)
+    except ConstraintLoadError as cle:
+        sys.stderr.write("Validator encountered a Constraint Load Error:\n")
+        sys.stderr.write(str(cle))
+        sys.exit(2)
+    except RuleLoadError as rle:
+        sys.stderr.write("Validator encountered a Rule Load Error:\n")
+        sys.stderr.write(str(rle))
+        sys.exit(2)
     except ReportableRuntimeError as rre:
         sys.stderr.write("Validator encountered a Runtime Error:\n")
         sys.stderr.write(str(rre.message))
