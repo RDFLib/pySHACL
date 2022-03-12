@@ -477,12 +477,16 @@ class Shape(object):
         focus_value_nodes = self.value_nodes(target_graph, focus)
         filter_reports: bool = False
         allow_conform: bool = False
+        allowed_severities: Set[URIRef] = set()
         if allow_infos:
+            allowed_severities.add(SH_Info)
             if self.severity == SH_Info:
                 allow_conform = True
             else:
                 filter_reports = True
         if allow_warnings:
+            allowed_severities.add(SH_Info)
+            allowed_severities.add(SH_Warning)
             if self.severity in (SH_Warning, SH_Info):
                 allow_conform = True
             else:
@@ -516,7 +520,7 @@ class Shape(object):
                     v_str, v_node, v_parts = _r_inner
                     severity_bits = list(filter(lambda p: p[0] == v_node and p[1] == SH_resultSeverity, v_parts))
                     if severity_bits:
-                        all_warn = all_warn and severity_bits[0][2] in (SH_Warning, SH_Info)
+                        all_warn = all_warn and severity_bits[0][2] in allowed_severities
                 non_conformant = not all_warn
             else:
                 non_conformant = non_conformant or (not _is_conform)
