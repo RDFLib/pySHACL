@@ -10,7 +10,6 @@ from rdflib import XSD
 
 from ..consts import (
     OWL_PFX,
-    RDF,
     RDF_PFX,
     RDFS_PFX,
     SH,
