@@ -23,7 +23,7 @@ from pyshacl.consts import (
     SH_zeroOrMorePath,
     SH_zeroOrOnePath,
 )
-from pyshacl.errors import ReportableRuntimeError
+from pyshacl.errors import ReportableRuntimeError, ShapeLoadError
 
 
 if TYPE_CHECKING:
@@ -36,7 +36,10 @@ def value_nodes_from_path(sg, focus, path_val, target_graph, recursion=0):
     if isinstance(path_val, URIRef):
         return set(target_graph.objects(focus, path_val))
     elif isinstance(path_val, Literal):
-        raise ReportableRuntimeError("Values of a property path cannot be a Literal.")
+        raise ShapeLoadError(
+            "Values of a property path cannot be a Literal.",
+            "https://www.w3.org/TR/shacl/#property-paths",
+        )
     # At this point, path_val _must_ be a BNode
     # TODO, the path_val BNode must be value of exactly one sh:path subject in the SG.
     if recursion >= 10:
@@ -128,8 +131,16 @@ def value_nodes_from_path(sg, focus, path_val, target_graph, recursion=0):
         found_nodes = value_nodes_from_path(sg, focus, zero_or_one_path, target_graph, recursion=recursion + 1)
         collection_set.update(found_nodes)
         return collection_set
+    remaining = set(sg.graph.predicate_objects(path_val))
+    if len(remaining) > 0:
+        raise ShapeLoadError(
+            "{} is not a known property for a sh:path. Malformed shape?".format(str(next(iter(remaining))[0])),
+            "https://www.w3.org/TR/shacl/#property-paths",
+        )
 
-    raise NotImplementedError("That path method to get value nodes of property shapes is not yet implemented.")
+    raise ShapeLoadError(
+        "Cannot get any values from sh:path property. Malformed shape?", "https://www.w3.org/TR/shacl/#property-paths"
+    )
 
 
 def nodes_from_node_expression(

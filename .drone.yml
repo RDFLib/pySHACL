@@ -65,15 +65,15 @@ steps:
   commands:
   - pip3 install --upgrade tox
   - tox -e lint
-- name: security
-  image: snyk/snyk:python-3.8
-  environment:
-    SNYK_TOKEN:
-      from_secret: snyk_token
-    PROJECT_PATH: /drone/src
-  commands:
-  - snyk --org=ashleysommer test
-  - snyk code --org=ashleysommer test
+#- name: security
+#  image: snyk/snyk:python-3.8
+#  environment:
+#    SNYK_TOKEN:
+#      from_secret: snyk_token
+#    PROJECT_PATH: /drone/src
+#  commands:
+#  - snyk --org=ashleysommer test
+#  - snyk code --org=ashleysommer test
 
 volumes:
 - name: tox_cache

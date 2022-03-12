@@ -8,12 +8,17 @@ from typing import Dict, List
 
 import rdflib
 
+from rdflib.namespace import XSD
+
 from pyshacl.constraints.constraint_component import ConstraintComponent
-from pyshacl.consts import SH
+from pyshacl.consts import RDF, SH
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
 from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
 
+
+RDF_langString = RDF.langString
+XSD_string = XSD.string
 
 SH_PatternConstraintComponent = SH.PatternConstraintComponent
 SH_MinLengthConstraintComponent = SH.MinLengthConstraintComponent
@@ -47,6 +52,19 @@ class StringBasedConstraintBase(ConstraintComponent):
     @classmethod
     def constraint_name(cls):
         raise NotImplementedError()
+
+    @classmethod
+    def value_node_to_string(cls, v):
+        if isinstance(v, rdflib.Literal):
+            if v.value is not None and (v.datatype in (None, RDF_langString, XSD_string)):
+                v_string = str(v.value)
+            else:
+                v_string = str(v)
+        elif isinstance(v, rdflib.URIRef):
+            v_string = str(v)
+        else:
+            v_string = str(v)
+        return v_string
 
     def _evaluate_string_rule(self, r, target_graph, f_v_dict):
         raise NotImplementedError()

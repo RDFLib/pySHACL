@@ -1,7 +1,22 @@
 # -*- coding: utf-8 -*-
 
 
-class ShapeLoadError(RuntimeError):
+class ReportableRuntimeError(RuntimeError):
+    def __init__(self, message):
+        self.message = message
+
+    @property
+    def args(self):
+        return [self.message]
+
+    def __str__(self):
+        return str(self.message)
+
+    def __repr__(self):
+        return "ReportableRuntimeError: {}".format(self.__str__())
+
+
+class ShapeLoadError(ReportableRuntimeError):
     def __init__(self, message, link):
         self.message = message
         self.link = link
@@ -11,13 +26,13 @@ class ShapeLoadError(RuntimeError):
         return [self.message, self.link]
 
     def __str__(self):
-        return "{}\n{}".format(str(self.message), str(self.link))
+        return "{}\nFor reference, see {}".format(str(self.message), str(self.link))
 
     def __repr__(self):
         return "ShapeLoadError: {}".format(self.__str__())
 
 
-class RuleLoadError(RuntimeError):
+class RuleLoadError(ReportableRuntimeError):
     def __init__(self, message, link):
         self.message = message
         self.link = link
@@ -27,13 +42,13 @@ class RuleLoadError(RuntimeError):
         return [self.message, self.link]
 
     def __str__(self):
-        return "{}\n{}".format(str(self.message), str(self.link))
+        return "{}\nFor reference, see {}".format(str(self.message), str(self.link))
 
     def __repr__(self):
         return "RuleLoadError: {}".format(self.__str__())
 
 
-class ValidationFailure(RuntimeError):
+class ValidationFailure(ReportableRuntimeError):
     """
     https://www.w3.org/TR/shacl/#failures
     Validation and conformance checking can result in a failure. For example, a particular SHACL processor might allow recursive shapes but report a failure if it detects a loop within the data. Failures can also be reported due to resource exhaustion. Failures are signalled through implementation-specific channels.
@@ -64,7 +79,7 @@ class ValidationWarning(RuntimeWarning):
         return [self.message, self.link]
 
     def __str__(self):
-        return "{}\n{}".format(str(self.message), str(self.link))
+        return "{}\nFor reference, see {}".format(str(self.message), str(self.link))
 
     def __repr__(self):
         return "{}: {}".format(str(self.__class__), self.__str__())
@@ -82,7 +97,7 @@ class ShapeRecursionWarning(ValidationWarning):
         super(ShapeRecursionWarning, self).__init__(message, link)
 
 
-class ConstraintLoadError(RuntimeError):
+class ConstraintLoadError(ReportableRuntimeError):
     def __init__(self, message, link):
         self.message = message
         self.link = link
@@ -92,7 +107,7 @@ class ConstraintLoadError(RuntimeError):
         return [self.message, self.link]
 
     def __str__(self):
-        return "{}\n{}".format(str(self.message), str(self.link))
+        return "{}\nFor reference, see {}".format(str(self.message), str(self.link))
 
     def __repr__(self):
         return "ConstraintLoadError: {}".format(self.__str__())
@@ -109,22 +124,7 @@ class ConstraintLoadWarning(RuntimeWarning):
         return [self.message, self.link]
 
     def __str__(self):
-        return "{}\n{}".format(str(self.message), str(self.link))
+        return "{}\nFor reference, see {}".format(str(self.message), str(self.link))
 
     def __repr__(self):
         return "ConstraintLoadWarning: {}".format(self.__str__())
-
-
-class ReportableRuntimeError(RuntimeError):
-    def __init__(self, message):
-        self.message = message
-
-    @property
-    def args(self):
-        return [self.message]
-
-    def __str__(self):
-        return str(self.message)
-
-    def __repr__(self):
-        return "ReportableRuntimeError: {}".format(self.__str__())
