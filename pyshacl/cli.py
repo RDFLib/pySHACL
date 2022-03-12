@@ -90,6 +90,7 @@ parser.add_argument(
 parser.add_argument('--abort', dest='abort', action='store_true', default=False, help='Abort on first invalid data.')
 parser.add_argument(
     '--allow-infos',
+    '--allow-info',
     dest='allow_infos',
     action='store_true',
     default=False,
@@ -97,6 +98,7 @@ parser.add_argument(
 )
 parser.add_argument(
     '-w',
+    '--allow-warning',
     '--allow-warnings',
     dest='allow_warnings',
     action='store_true',
