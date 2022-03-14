@@ -95,8 +95,8 @@ parser.add_argument(
 )
 parser.add_argument('--abort', dest='abort', action='store_true', default=False, help='Abort on first invalid data.')
 parser.add_argument(
-    '--allow-infos',
     '--allow-info',
+    '--allow-infos',
     dest='allow_infos',
     action='store_true',
     default=False,
