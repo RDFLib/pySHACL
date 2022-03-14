@@ -130,7 +130,7 @@ data_file_text_XFAIL_types = """
 @prefix exOnt: <http://example.com/exOnt#> .
 @prefix ex: <http://example.com/ex#> .
 
-ex:holder2 a exOnt:NumberHolder ;
+ex:holder1 a exOnt:NumberHolder ;
     rdfs:comment "Each property has an error.  propInteger has a lexical-space error.  Each other has a value-space error."@en ;
     exOnt:propInteger -1 ;
     exOnt:propInteger 0 ;
