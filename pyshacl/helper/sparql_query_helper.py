@@ -10,7 +10,6 @@ from rdflib import XSD
 
 from ..consts import (
     OWL_PFX,
-    RDF,
     RDF_PFX,
     RDFS_PFX,
     SH,
@@ -226,10 +225,10 @@ class SPARQLQueryHelper(object):
         # TODO, the path_val BNode must be value of exactly one sh:path subject in the SG.
         if recursion >= 10:
             raise ReportableRuntimeError("Path traversal depth is too much!")
-        sequence_list = set(sg.objects(path_val, RDF.first))
+        sequence_list = list(sg.graph.items(path_val))
         if len(sequence_list) > 0:
             all_collected = []
-            for s in sg.items(sequence_list):
+            for s in sequence_list:
                 seq1_string = self._shacl_path_to_sparql_path(s, recursion=recursion + 1)
                 all_collected.append(seq1_string)
             if len(all_collected) < 2:
@@ -246,7 +245,7 @@ class SPARQLQueryHelper(object):
         if len(find_alternatives) > 0:
             alternatives_list = next(iter(find_alternatives))
             all_collected = []
-            for a in sg.items(alternatives_list):
+            for a in sg.graph.items(alternatives_list):
                 alt1_string = self._shacl_path_to_sparql_path(a, recursion=recursion + 1)
                 all_collected.append(alt1_string)
             if len(all_collected) < 2:

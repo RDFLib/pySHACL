@@ -131,12 +131,32 @@ class SPARQLBasedConstraint(ConstraintComponent):
                 if isinstance(v, bool) and v is True:
                     rept = self.make_v_result(target_graph, f, value_node=result_val, **rept_kwargs)
                 elif isinstance(v, tuple):
-                    t, p, v = v
-                    if v is None:
-                        v = result_val
-                    rept = self.make_v_result(
-                        target_graph, t or f, value_node=v, result_path=p, bound_vars=(t, p, v), **rept_kwargs
-                    )
+                    if len(v) == 2:
+                        (_, vars_dict) = v
+                        rept = self.make_v_result(
+                            target_graph, f, value_node=result_val, bound_vars=vars_dict, **rept_kwargs
+                        )
+                    elif len(v) == 4:
+                        (t, p, v, vars_dict) = v
+                        if v is None:
+                            v = result_val
+                        rept = self.make_v_result(
+                            target_graph,
+                            t or f,
+                            value_node=v,
+                            result_path=p,
+                            bound_vars=(t, p, v, vars_dict),
+                            **rept_kwargs,
+                        )
+                    else:
+                        # len must equal 3
+                        t, p, v = v
+                        if v is None:
+                            v = result_val
+                        rept = self.make_v_result(
+                            target_graph, t or f, value_node=v, result_path=p, bound_vars=(t, p, v), **rept_kwargs
+                        )
+
                 else:
                     rept = self.make_v_result(target_graph, f, value_node=v, **rept_kwargs)
                 reports.append(rept)
@@ -146,26 +166,24 @@ class SPARQLBasedConstraint(ConstraintComponent):
         results = target_graph.query(query, initBindings=init_binds)
         if not results or len(results.bindings) < 1:
             return []
-        violations = set()
+        violations = []
+        dedup_set = set()
         for r in results:
-            try:
-                p = r['path']
-            except KeyError:
-                p = None
-            try:
-                v = r['value']
-            except KeyError:
-                v = None
-            try:
-                t = r['this']
-            except KeyError:
-                t = None
-            if p or v or t:
-                violations.add((t, p, v))
+            var_dict: Dict = r.asdict()
+            f = var_dict.pop('failure', None)
+            if f is not None:
+                if True in dedup_set:
+                    continue
+                violations.append((True, var_dict))
+                dedup_set.add(True)
             else:
-                try:
-                    _ = r['failure']
-                    violations.add(True)
-                except KeyError:
-                    pass
+                p = var_dict.pop('path', None)
+                v = var_dict.pop('value', None)
+                t = var_dict.pop('this', None)
+                if (p is not None) or (v is not None) or (t is not None):
+                    if (t, p, v) in dedup_set:
+                        continue
+                    violations.append((t, p, v, var_dict))
+                    dedup_set.add((t, p, v))
+
         return violations

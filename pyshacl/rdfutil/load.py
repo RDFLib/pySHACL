@@ -164,7 +164,7 @@ def load_from_source(
             if is_windows and (first_char == '\\' or (len(source) > 3 and source[1:3] == ":\\")):
                 filename = source
                 source_as_filename = filename
-            elif first_char == '/' or source[0:3] == "./":
+            elif first_char == '/' or (len(source) > 2 and source[0:2] == "./"):
                 filename = source
                 source_as_filename = filename
             elif (
@@ -175,7 +175,11 @@ def load_from_source(
                 or first_char == '{'
                 or first_char == '['
             ):
-                # Contains some JSON or XML or Turtle stuff
+                # Contains some JSON or XML or Turtle chars, it's not a path
+                source_as_file = None
+                source_as_filename = None
+            elif len(source) >= 32 and '\n' in source[:32]:
+                # Contains a new line near the start of the file, can't be a path
                 source_as_file = None
                 source_as_filename = None
             elif len(source) < 140:

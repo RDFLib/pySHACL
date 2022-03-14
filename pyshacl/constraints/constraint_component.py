@@ -274,9 +274,26 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
     def _format_sparql_based_result_message(self, msg, bound_vars):
         if bound_vars is None:
             return msg
-        msg = re.sub('{[?$]this}', str(bound_vars[0]), msg)
-        msg = re.sub('{[?$]path}', str(bound_vars[1]), msg)
-        msg = re.sub('{[?$]value}', str(bound_vars[2]), msg)
+        fdict = {}
+        if isinstance(bound_vars, (tuple, list)):
+            if len(bound_vars) == 4:
+                fdict.update(bound_vars[3])
+                bound_vars = bound_vars[:3]
+            if len(bound_vars) == 3:
+                if bound_vars[0] is not None:
+                    fdict['this'] = bound_vars[0]
+                if bound_vars[1] is not None:
+                    fdict['path'] = bound_vars[1]
+                if bound_vars[2] is not None:
+                    fdict['value'] = bound_vars[2]
+
+        elif isinstance(bound_vars, dict):
+            fdict.update(bound_vars)
+        else:
+            return msg
+        for (var, val) in fdict.items():
+            substring = "{{[?$]{}}}".format(var)
+            msg = re.sub(substring, str(val), msg)
         return msg
 
 

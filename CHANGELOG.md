@@ -5,8 +5,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
 ## [Unreleased]
+### Nothing yet
 
-- Nothing yet
+## [0.19.0] - 2022-03-22
+
+### Note, while this is a normal 0.x release, it also acts as the v1.0 release candidate.
+That means, if no glaring bugs or issues are found in this release after two weeks, this version will be re-released as 
+PySHACL v1.0.
+
+### In this release:
+
+### Fixed
+- Fixed a long-standing oversight where ShapeLoadErrors and ConstraintLoadErrors were not reported correctly when running PySHACL in CLI mode.
+  - Sorry about that. Thanks lots of people for reporting this over the last year. I wish I fixed it sooner.
+- Fixed a long-standing bug where using `$PATH` in a sh:sparql query on a PropertyShape would not work correctly.
+  - Fixes #124, Thanks @Martijn-Y-ai
+- Fixed a long-standing bug, that allows PySHACL to more reliably determine if graph source is a file path, or a graph string.
+  - Fixes #132, Thanks @Zezombye
+- Fixed an issue where `sh:pattern` could not be applied to a Literal that was not an `xsd:string` or URI.
+  - Fixes #133, Thanks @nicholascar
+- Fixed the outdated/incorrect reported when a PropertyShape's `sh:path` value gets an unknown path type.
+  - Fixes #129, Thanks @edmondchuc  
+
+### Added
+- New `--allow-infos` option in CLI mode and Python Module mode.
+  - This is like `--allow-warnings` except it only allows violations with severity of `sh:Info`.
+  - (`--allow-warnings` continues to allow both `sh:Warning` and `sh:Info` as it used to.)
+  - Fixes #126, Thanks @ajnelson-nist
+- SPARQL-based Constraints can now substitute arbitrary bound SPARQL variables into their sh:message
+  - Fixes #120
+
+### Changed
+- `--allow-infos` and `--allow-warnings` can now also be enabled with `--allow-info` and `--allow-warning` respectively.
+- Removed Snyk check on CI/CD pipeline, because there is an RDFLib issue blocking Snyk on PySHACL from passing.
 
 ## [0.18.1] - 2022-01-22
 
@@ -896,7 +927,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.18.1...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/RDFLib/pySHACL/compare/v0.18.1...v0.19.0
 [0.18.1]: https://github.com/RDFLib/pySHACL/compare/v0.18.0...v0.18.1
 [0.18.0]: https://github.com/RDFLib/pySHACL/compare/v0.17.3...v0.18.0
 [0.17.3]: https://github.com/RDFLib/pySHACL/compare/v0.17.2...v0.17.3

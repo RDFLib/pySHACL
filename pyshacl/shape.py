@@ -477,13 +477,14 @@ class Shape(object):
         focus_value_nodes = self.value_nodes(target_graph, focus)
         filter_reports: bool = False
         allow_conform: bool = False
+        allowed_severities: Set[URIRef] = set()
         if allow_infos:
-            if self.severity == SH_Info:
-                allow_conform = True
-            else:
-                filter_reports = True
+            allowed_severities.add(SH_Info)
         if allow_warnings:
-            if self.severity in (SH_Warning, SH_Info):
+            allowed_severities.add(SH_Info)
+            allowed_severities.add(SH_Warning)
+        if allow_infos or allow_warnings:
+            if self.severity in allowed_severities:
                 allow_conform = True
             else:
                 filter_reports = True
@@ -507,20 +508,19 @@ class Shape(object):
                 raise e
             _e_p = _evaluation_path[:]
             _e_p.append(c)
-            _is_conform, _r = c.evaluate(target_graph, focus_value_nodes, _e_p)
+            _is_conform, _reports = c.evaluate(target_graph, focus_value_nodes, _e_p)
             if _is_conform or allow_conform:
                 ...
             elif filter_reports:
-                all_warn = True
-                for _r_inner in _r:
-                    v_str, v_node, v_parts = _r_inner
+                all_allow = True
+                for (v_str, v_node, v_parts) in _reports:
                     severity_bits = list(filter(lambda p: p[0] == v_node and p[1] == SH_resultSeverity, v_parts))
                     if severity_bits:
-                        all_warn = all_warn and severity_bits[0][2] in (SH_Warning, SH_Info)
-                non_conformant = not all_warn
+                        all_allow = all_allow and (severity_bits[0][2] in allowed_severities)
+                non_conformant = non_conformant or (not all_allow)
             else:
                 non_conformant = non_conformant or (not _is_conform)
-            reports.extend(_r)
+            reports.extend(_reports)
             run_count += 1
             done_constraints.add(constraint_component)
             if non_conformant and abort_on_first:
