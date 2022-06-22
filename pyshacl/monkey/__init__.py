@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from packaging.version import Version
-
 import rdflib
 
+from packaging.version import Version
 from rdflib import plugin, store
 
 
