@@ -57,6 +57,7 @@ python = "^3.7.0"  # Compatible python versions must be declared here
 rdflib = ">=6.1.1,<8"
 owlrl = ">=6.0.2,<7"
 prettytable = "^2.2.1"
+packaging = ">=21.3"
 rdflib-jsonld = { version=">=0.4.0,<0.6", optional=true}
 pyduktape2 = {version="^0.4.1", optional=true}
 flake8 = {version="^3.8.0", optional=true}

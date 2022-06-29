@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from distutils.version import LooseVersion
-
 import rdflib
 
+from packaging.version import Version
 from rdflib import plugin, store
 
 
-RDFLIB_VERSION = LooseVersion(rdflib.__version__)
-RDFLIB_421 = LooseVersion("4.2.1")
-RDFLIB_500 = LooseVersion("5.0.0")
-RDFLIB_600 = LooseVersion("6.0.0")
-RDFLIB_602 = LooseVersion("6.0.2")
+RDFLIB_VERSION = Version(rdflib.__version__)
+RDFLIB_421 = Version("4.2.1")
+RDFLIB_500 = Version("5.0.0")
+RDFLIB_600 = Version("6.0.0")
+RDFLIB_602 = Version("6.0.2")
 
 
 def rdflib_bool_patch():
