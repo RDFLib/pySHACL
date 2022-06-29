@@ -326,7 +326,7 @@ class Shape(object):
         :return:
         """
         # 'unified' takes into account any class structure defined in the
-        # shape graph for the purposes of finding target classes
+        # shape graph for the purposes of finding instances of the target class
         unified = data_graph + self.sg.graph
         (target_nodes, target_classes, implicit_classes, target_objects_of, target_subjects_of) = self.target()
         if self._advanced:
