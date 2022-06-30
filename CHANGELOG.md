@@ -7,11 +7,33 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]
 ### Nothing yet
 
-## [0.19.0] - 2022-03-22
+## [0.19.1] - 2022-06-30
 
 ### Note, while this is a normal 0.x release, it also acts as the v1.0 release candidate.
 That means, if no glaring bugs or issues are found in this release after two weeks, this version will be re-released as 
 PySHACL v1.0.
+
+### In this release:
+
+### Fixed
+- CLI Output Table formatting crashed when report graph did not contain a resultMessage
+  - Fixes #145
+- Executing advanced-mode triples rules can sometimes skip the graph clone step, and incorrectly emits new triples directly into the input data-graph
+  - Discovered when investigating #148
+
+### Changed
+- Executing advanced triples rules no longer incorrectly emits new triples directly into the input data-graph
+  - This _may_ been seen as a breaking change, if your workflow relied on this incorrect behaviour.
+  - If you _really_ the rules engine to emit new triples into your input data graph, use the `inplace` validator option.
+- Updated built-in `schema.ttl` file to newer version that doesn't have UTF-8 encoding issues
+
+### Added
+- Official Dockerfile is now included in the repository
+  - Thanks @KonradHoeffner; Fixes #135
+  - Published to dockerhub at [ashleysommer/pyshacl](https://hub.docker.com/repository/docker/ashleysommer/pyshacl)
+  - `docker pull docker.io/ashleysommer/pyshacl:latest`
+
+## [0.19.0] - 2022-03-22
 
 ### In this release:
 
@@ -24,7 +46,7 @@ PySHACL v1.0.
   - Fixes #132, Thanks @Zezombye
 - Fixed an issue where `sh:pattern` could not be applied to a Literal that was not an `xsd:string` or URI.
   - Fixes #133, Thanks @nicholascar
-- Fixed the outdated/incorrect reported when a PropertyShape's `sh:path` value gets an unknown path type.
+- Fixed the outdated/incorrect error reported when a PropertyShape's `sh:path` value gets an unknown path type.
   - Fixes #129, Thanks @edmondchuc  
 
 ### Added
@@ -927,7 +949,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.19.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.19.1...HEAD
+[0.19.1]: https://github.com/RDFLib/pySHACL/compare/v0.19.0...v0.19.1
 [0.19.0]: https://github.com/RDFLib/pySHACL/compare/v0.18.1...v0.19.0
 [0.18.1]: https://github.com/RDFLib/pySHACL/compare/v0.18.0...v0.18.1
 [0.18.0]: https://github.com/RDFLib/pySHACL/compare/v0.17.3...v0.18.0

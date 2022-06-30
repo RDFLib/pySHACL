@@ -1,11 +1,11 @@
 [build-system]
-requires = ["poetry-core>=1.0.7"]
+requires = ["poetry-core>=1.0.8"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyshacl"
-version = "0.19.0"
-# Don't forget to change the version number in __init__.py and CITATION.cff along with this one
+version = "0.19.1"
+# Don't forget to change the version number in __init__.py, Dockerfile, and CITATION.cff along with this one
 description = "Python SHACL Validator"
 license = "Apache-2.0"
 authors = [
@@ -62,7 +62,7 @@ rdflib-jsonld = { version=">=0.4.0,<0.6", optional=true}
 pyduktape2 = {version="^0.4.1", optional=true}
 flake8 = {version="^3.8.0", optional=true}
 isort = {version="^5.7.0", optional=true}
-black = {version="21.9b0", optional=true}
+black = {version="22.6.0", optional=true}
 mypy = {version="^0.800", optional=true}
 types-setuptools = {version="*", optional=true}
 
@@ -72,7 +72,7 @@ pytest = "^6.0"
 pytest-cov = "^2.8.1"
 flake8 = {version="^3.8.0", optional=true}
 isort = {version="^5.7.0", optional=true}
-black = {version="21.9b0", optional=true}
+black = {version="22.6.0", optional=true}
 mypy = {version="^0.800", optional=true}
 types-setuptools = {version="*", optional=true}
 
@@ -90,7 +90,7 @@ from = {format = "poetry", path = "pyproject.toml"}
 to = {format = "setuppy", path = "setup.py"}
 
 [tool.black]
-required-version = "21.9b0"
+required-version = "22.6.0"
 line-length = "119"
 skip-string-normalization = true
 target-version = ['py37']
@@ -148,10 +148,10 @@ toxworkdir={env:TOX_WORK_DIR:.tox}
 
 [testenv]
 deps =
-    poetry>=1.1.11
+    poetry>=1.1.13
 passenv = TRAVIS TRAVIS_JOB_ID TRAVIS_BRANCH TRAVIS_BUILD_DIR DRONE_BUILD_NUMBER DRONE_STAGE_NAME DRONE_STAGE_KIND DRONE_REPO_NAME DRONE_SOURCE_BRANCH COVERALLS_SERVICE_NAME COVERALLS_REPO_TOKEN DRONE_COMMIT_AUTHOR_NAME DRONE_COMMIT_AUTHOR_EMAIL DRONE_COMMIT HAS_COVERALLS
 skip_install = true
-allowlist_externals = python3, ls, pwd, env
+allowlist_externals = python3, ls, pwd, env, poetry
 setenv =
     COVERALLS_SERVICE_NUMBER ={env:DRONE_BUILD_NUMBER:0}
     COVERALLS_SERVICE_JOB_ID = {env:DRONE_STAGE_NAME:stage}

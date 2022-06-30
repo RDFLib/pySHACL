@@ -216,8 +216,16 @@ class Validator(object):
             if inference_option and not self.pre_inferenced and str(inference_option) != "none":
                 if not has_cloned and not self.inplace:
                     the_target_graph = clone_graph(the_target_graph)
+                    has_cloned = True
                 self._run_pre_inference(the_target_graph, inference_option, self.logger)
                 self.pre_inferenced = True
+            if not has_cloned and not self.inplace and self.options['advanced']:
+                # We still need to clone in advanced mode, because of triple rules
+                the_target_graph = clone_graph(the_target_graph)
+                has_cloned = True
+            if not has_cloned and not self.inplace:
+                # No inferencing, no ont_graph, and no advanced mode, now implies inplace mode
+                self.inplace = True
             self._target_graph = the_target_graph
 
         shapes = self.shacl_graph.shapes  # This property getter triggers shapes harvest.

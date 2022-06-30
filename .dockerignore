@@ -4,6 +4,7 @@
 /htmlcov
 /build
 /_build
+/hooks
 /.idea
 /.git
 /.mypy_cache
