@@ -1,0 +1,5 @@
+[virtualenvs]
+create = true
+in-project = true
+system-site-packages = false
+prefer-active-python = true

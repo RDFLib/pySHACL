@@ -494,16 +494,16 @@ def compare_validation_reports(report_graph: GraphLike, expected_graph: GraphLik
         )
     expected_conform = next(iter(expected_conforms))
     expected_result_nodes = expected_graph.objects(expected_result, SH_result)
-    expected_result_nodes = set(expected_result_nodes)
-    expected_result_node_count = len(expected_result_nodes)
+    expected_result_nodes_set = set(expected_result_nodes)
+    expected_result_node_count = len(expected_result_nodes_set)
 
     validation_reports = report_graph.subjects(RDF_type, SH_ValidationReport)
-    validation_reports = set(validation_reports)
-    if len(validation_reports) < 1:  # pragma: no cover
+    validation_reports_set = set(validation_reports)
+    if len(validation_reports_set) < 1:  # pragma: no cover
         raise ReportableRuntimeError(
             "Cannot check the validation report, the report graph does not contain a ValidationReport"
         )
-    validation_report = next(iter(validation_reports))
+    validation_report = next(iter(validation_reports_set))
     clean_validation_reports(report_graph, validation_report, expected_graph, expected_result)
     eq = compare_blank_node(report_graph, validation_report, expected_graph, expected_result)
     if eq != 0:
@@ -616,55 +616,55 @@ def check_dash_result(validator: Validator, report_graph: GraphLike, expected_re
         was_default_union = expected_result_graph.default_union
         expected_result_graph.default_union = True  # Force default-union to make all of this a bit easier
     gv_test_cases = expected_result_graph.subjects(RDF_type, DASH_GraphValidationTestCase)
-    gv_test_cases = set(gv_test_cases)
+    gv_test_cases_set = set(gv_test_cases)
     inf_test_cases = expected_result_graph.subjects(RDF_type, DASH_InferencingTestCase)
-    inf_test_cases = set(inf_test_cases)
+    inf_test_cases_set = set(inf_test_cases)
     fn_test_cases = expected_result_graph.subjects(RDF_type, DASH_FunctionTestCase)
-    fn_test_cases = set(fn_test_cases)
-    if len(gv_test_cases) > 0:
-        test_case = next(iter(gv_test_cases))
+    fn_test_cases_set = set(fn_test_cases)
+    if len(gv_test_cases_set) > 0:
+        test_case = next(iter(gv_test_cases_set))
         expected_results = expected_result_graph.objects(test_case, DASH_expectedResult)
-        expected_results = set(expected_results)
-        if len(expected_results) < 1:  # pragma: no cover
+        expected_results_set = set(expected_results)
+        if len(expected_results_set) < 1:  # pragma: no cover
             raise ReportableRuntimeError(
                 "Cannot check the expected result, the given GraphValidationTestCase does not have an expectedResult."
             )
-        expected_result = next(iter(expected_results))
+        expected_result = next(iter(expected_results_set))
         gv_res: Union[bool, None] = compare_validation_reports(report_graph, expected_result_graph, expected_result)
     else:
         gv_res = None
-    if len(inf_test_cases) > 0:
+    if len(inf_test_cases_set) > 0:
         data_graph = validator.target_graph
         if isinstance(data_graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
             named_graphs = list(data_graph.contexts())
         else:
             named_graphs = [data_graph]
         inf_res: Union[bool, None] = True
-        for test_case in inf_test_cases:
+        for test_case in inf_test_cases_set:
             expected_results = expected_result_graph.objects(test_case, DASH_expectedResult)
-            expected_results = set(expected_results)
-            if len(expected_results) < 1:  # pragma: no cover
+            expected_results_set = set(expected_results)
+            if len(expected_results_set) < 1:  # pragma: no cover
                 raise ReportableRuntimeError(
                     "Cannot check the expected result, the given InferencingTestCase does not have an expectedResult."
                 )
             found = False
             for g in named_graphs:
-                found = found or compare_inferencing_reports(g, expected_result_graph, expected_results)
+                found = found or compare_inferencing_reports(g, expected_result_graph, expected_results_set)
             inf_res = inf_res and found
     else:
         inf_res = None
-    if len(fn_test_cases) > 0:
+    if len(fn_test_cases_set) > 0:
         data_graph = validator.target_graph
         fns = gather_functions(validator.shacl_graph)
         apply_functions(fns, data_graph)
         fn_res: Union[bool, None] = True
-        for test_case in fn_test_cases:
-            expected_results = set(expected_result_graph.objects(test_case, DASH_expectedResult))
-            if len(expected_results) < 1:  # pragma: no cover
+        for test_case in fn_test_cases_set:
+            expected_results_set = set(expected_result_graph.objects(test_case, DASH_expectedResult))
+            if len(expected_results_set) < 1:  # pragma: no cover
                 raise ReportableRuntimeError(
                     "Cannot check the expected result, the given FunctionTestCase does not have an expectedResult."
                 )
-            expected_result = next(iter(expected_results))
+            expected_result = next(iter(expected_results_set))
             expressions = set(expected_result_graph.objects(test_case, DASH_expression))
             if len(expressions) < 1:
                 raise ReportableRuntimeError(

@@ -2,7 +2,8 @@
 #
 from typing import Union
 
-from rdflib import RDF, RDFS, BNode, ConjunctiveGraph, Dataset, Graph, Literal, Namespace, URIRef
+from rdflib import RDF, RDFS, ConjunctiveGraph, Dataset, Graph, Namespace
+from rdflib.term import Node
 
 
 RDFS_Resource = RDFS.Resource
@@ -11,4 +12,4 @@ SH = Namespace('http://www.w3.org/ns/shacl#')
 
 ConjunctiveLike = Union[ConjunctiveGraph, Dataset]
 GraphLike = Union[ConjunctiveLike, Graph]
-RDFNode = Union[URIRef, Literal, BNode]
+RDFNode = Node

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 from functools import wraps
-from typing import Iterator, List, Optional, Union, cast
+from typing import Iterator, List, Optional, Tuple, Union, cast
 
 import rdflib
 
@@ -61,7 +61,10 @@ def stringify_blank_node(
         return stringify_list(bnode)
     p_string_map = {}
     for p in predicates:
-        p_string = p.n3(namespace_manager=ns_manager)
+        if isinstance(p, (rdflib.Literal, rdflib.BNode, rdflib.URIRef)):
+            p_string = p.n3(namespace_manager=ns_manager)
+        else:
+            p_string = str(p)
         objs: List[RDFNode] = list(cast(Iterator[RDFNode], graph.objects(bnode, p)))
         if len(objs) < 1:
             continue
@@ -101,7 +104,10 @@ def stringify_literal(graph: rdflib.Graph, node: rdflib.Literal, ns_manager: Opt
     else:
         lang_string = ""
     if node.datatype:
-        datatype_uri = stringify_node(graph, node.datatype, ns_manager=ns_manager)
+        if isinstance(node.datatype, (rdflib.URIRef, rdflib.Literal)):
+            datatype_uri = stringify_node(graph, node.datatype, ns_manager=ns_manager)
+        else:
+            datatype_uri = str(node.datatype)
         datatype_string = ", datatype={}".format(datatype_uri)
     else:
         datatype_string = ""
@@ -161,9 +167,13 @@ def stringify_node(
 def stringify_graph(graph: rdflib.Graph):
     string_builder = ""
     for t in iter(graph):
-        node_string = stringify_node(graph, t, ns_manager=graph.namespace_manager)
-        string_builder += node_string
-        string_builder += "\n"
+        n1, n2, n3 = t  # type: Tuple[rdflib.term.Node, rdflib.term.Node, rdflib.term.Node]
+        node_string = stringify_node(graph, n1, ns_manager=graph.namespace_manager)
+        string_builder += node_string + ", "
+        node_string = stringify_node(graph, n2, ns_manager=graph.namespace_manager)
+        string_builder += node_string + ", "
+        node_string = stringify_node(graph, n3, ns_manager=graph.namespace_manager)
+        string_builder += node_string + "\n"
     return string_builder
 
 

@@ -7,11 +7,42 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]
 ### Nothing yet
 
-## [0.19.1] - 2022-06-30
+## [0.20.0] - 2022-09-08
 
 ### Note, while this is a normal 0.x release, it also acts as the v1.0 release candidate.
 That means, if no glaring bugs or issues are found in this release after two weeks, this version will be re-released as 
 PySHACL v1.0.
+
+### In this release:
+
+### Fixed
+- Ill-typed/Ill-formed literals now fail the DataType test, as expected
+  - Requires RDFLib v6.2.0+
+  - Fixes #140 (and possibly fixes #151)
+  - Unskipped one of the remaining skipped shacl-test-suite SHT tests (`datatype-ill-formed_ttl.ttl`) 
+- Fixed detection of recursion to be more lenient of deliberately recursive (but not infinitely recursive) shapes.
+  - Fixes #154
+- MetaShacl works again now with RDFLib >= v6.2.0
+  - Fixes #153
+- Fixed typing issues affecting interoperability of new version of RDFLib and PySHACL.
+
+### Changed
+
+- RDFLib v6.2.0 or greater is now _required_ to run PySHACL
+  - This new version of RDFLib implements the ill-typed Literals feature, that helps with `sh:datatype` constraint validation.
+  - Removing support for older versions of RDFLib allows PySHACL to implement new features, and have less unnecessary code
+- Bumped to using new Poetry v1.2.0 (or newest poetry-core v1.1.0)
+  - Changed pytest-cov and coverage tests to be optional dependencies for dev
+- Bumped version of Black to 22.8.0, and re-blacked all files
+- Removed old monkey patches, no longer needed for the latest version of RDFLib
+- Removed bundled "Memory2" store, now using the default "Memory" from RDFLib
+  - Regenerated bundled pickled triplestores, to use Memory instead of Memory2
+- Updated official dockerfile with newest version of PySHACL and RDFLib
+  - Published to dockerhub at [ashleysommer/pyshacl](https://hub.docker.com/repository/docker/ashleysommer/pyshacl)
+  - `docker pull docker.io/ashleysommer/pyshacl:latest`
+
+
+## [0.19.1] - 2022-06-30
 
 ### In this release:
 
@@ -949,7 +980,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.19.1...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.20.0...HEAD
+[0.20.0]: https://github.com/RDFLib/pySHACL/compare/v0.19.1...v0.20.0
 [0.19.1]: https://github.com/RDFLib/pySHACL/compare/v0.19.0...v0.19.1
 [0.19.0]: https://github.com/RDFLib/pySHACL/compare/v0.18.1...v0.19.0
 [0.18.1]: https://github.com/RDFLib/pySHACL/compare/v0.18.0...v0.18.1
