@@ -20,7 +20,7 @@ _PASS and _XFAIL name portions on tests in this script denote whether the input 
 
 from typing import Set, Tuple
 
-from rdflib import Graph, Literal, Namespace, RDF, SH, XSD
+from rdflib import Graph, Literal, Namespace, RDF, SH, URIRef, XSD
 from pyshacl import validate
 
 EX_ONT = Namespace("http://example.com/exOnt#")
