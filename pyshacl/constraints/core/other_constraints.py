@@ -2,14 +2,14 @@
 """
 https://www.w3.org/TR/shacl/#core-components-others
 """
-from typing import Dict, List
+from typing import Dict, List, cast
 
 import rdflib
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import RDFS, SH, RDF_type, SH_property
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
-from pyshacl.pytypes import GraphLike
+from pyshacl.pytypes import GraphLike, RDFNode
 from pyshacl.rdfutil import stringify_node
 
 
@@ -180,7 +180,9 @@ class ClosedConstraintComponent(ConstraintComponent):
                     elif p in working_paths:
                         continue
                     non_conformant = True
-                    rept = self.make_v_result(target_graph, f, value_node=o, result_path=p)
+                    o_node = cast(RDFNode, o)
+                    p_node = cast(RDFNode, p)
+                    rept = self.make_v_result(target_graph, f, value_node=o_node, result_path=p_node)
                     reports.append(rept)
         return (not non_conformant), reports
 

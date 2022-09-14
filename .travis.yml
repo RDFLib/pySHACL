@@ -15,6 +15,9 @@ matrix:
     - env: TOX_ENV=py39
       python: 3.9
       name: "Python 3.9"
+    - env: TOX_ENV=py310
+      python: 3.10
+      name: "Python 3.10"
     - env: TOX_ENV=type-checking
       python: 3.7
       name: "Python 3.7 Type checks"
@@ -24,6 +27,9 @@ matrix:
     - env: TOX_ENV=type-checking
       python: 3.9
       name: "Python 3.9 Type checks"
+    - env: TOX_ENV=type-checking
+      python: 3.10
+      name: "Python 3.10 Type checks"
     - env: TOX_ENV=lint
       python: 3.7
       name: "Python 3.7 Linter checks"

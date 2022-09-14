@@ -450,7 +450,7 @@ class Shape(object):
             raise ReportableRuntimeError("Evaluation path too deep!\n{}".format(path_str))
         # Lazy import here to avoid an import loop
         CONSTRAINT_PARAMETERS, PARAMETER_MAP = getattr(module, 'CONSTRAINT_PARAMS', (None, None))
-        if not CONSTRAINT_PARAMETERS:
+        if not CONSTRAINT_PARAMETERS or not PARAMETER_MAP:
             from .constraints import ALL_CONSTRAINT_PARAMETERS, CONSTRAINT_PARAMETERS_MAP
 
             setattr(module, 'CONSTRAINT_PARAMS', (ALL_CONSTRAINT_PARAMETERS, CONSTRAINT_PARAMETERS_MAP))

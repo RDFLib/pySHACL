@@ -38,7 +38,7 @@ class StringBasedConstraintBase(ConstraintComponent):
     https://www.w3.org/TR/shacl/#core-components-string
     """
 
-    shacl_constraint_component = NotImplemented
+    shacl_constraint_component = rdflib.URIRef("urn:notimplemented")
 
     def __init__(self, shape):
         super(StringBasedConstraintBase, self).__init__(shape)

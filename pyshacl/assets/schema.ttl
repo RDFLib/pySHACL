@@ -211,14 +211,14 @@ schema:Accommodation-numberOfFullBathrooms
   a sh:PropertyShape ;
   sh:path schema:numberOfFullBathrooms ;
   sh:datatype xsd:float ;
-  sh:description "Number of full bathrooms - The total number of full and Â¾ bathrooms in an [[Accommodation]]. This corresponds to the [BathroomsFull field in RESO](https://ddwiki.reso.org/display/DDW17/BathroomsFull+Field)."^^rdf:HTML ;
+  sh:description "Number of full bathrooms - The total number of full and ¾ bathrooms in an [[Accommodation]]. This corresponds to the [BathroomsFull field in RESO](https://ddwiki.reso.org/display/DDW17/BathroomsFull+Field)."^^rdf:HTML ;
   sh:name "numberOfFullBathrooms" ;
 .
 schema:Accommodation-numberOfPartialBathrooms
   a sh:PropertyShape ;
   sh:path schema:numberOfPartialBathrooms ;
   sh:datatype xsd:float ;
-  sh:description "Number of partial bathrooms - The total number of half and Â¼ bathrooms in an [[Accommodation]]. This corresponds to the [BathroomsPartial field in RESO](https://ddwiki.reso.org/display/DDW17/BathroomsPartial+Field). "^^rdf:HTML ;
+  sh:description "Number of partial bathrooms - The total number of half and ¼ bathrooms in an [[Accommodation]]. This corresponds to the [BathroomsPartial field in RESO](https://ddwiki.reso.org/display/DDW17/BathroomsPartial+Field). "^^rdf:HTML ;
   sh:name "numberOfPartialBathrooms" ;
 .
 schema:Accommodation-numberOfRooms
@@ -275,7 +275,7 @@ schema:AccountingService
   a rdfs:Class ;
   a sh:NodeShape ;
   rdfs:comment """Accountancy business.\\n\\nAs a [[LocalBusiness]] it can be described as a [[provider]] of one or more [[Service]]\\(s).
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Accounting service" ;
   rdfs:subClassOf schema:FinancialService ;
 .
@@ -496,7 +496,7 @@ schema:ActionAccessSpecification-eligibleRegion
   a sh:PropertyShape ;
   sh:path schema:eligibleRegion ;
   sh:description """The ISO 3166-1 (ISO 3166-1 alpha-2) or ISO 3166-2 code, the place, or the GeoShape for the geo-political region(s) for which the offer or delivery charge specification is valid.\\n\\nSee also [[ineligibleRegion]].
-    """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "eligibleRegion" ;
   sh:or (
       [
@@ -521,7 +521,7 @@ schema:ActionAccessSpecification-ineligibleRegion
   a sh:PropertyShape ;
   sh:path schema:ineligibleRegion ;
   sh:description """The ISO 3166-1 (ISO 3166-1 alpha-2) or ISO 3166-2 code, the place, or the GeoShape for the geo-political region(s) for which the offer or delivery charge specification is not valid, e.g. a region where the transaction is not allowed.\\n\\nSee also [[eligibleRegion]].
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "ineligibleRegion" ;
   sh:or (
       [
@@ -668,7 +668,7 @@ schema:AggregateOffer-offers
   a sh:PropertyShape ;
   sh:path schema:offers ;
   sh:description """An offer to provide this item&#x2014;for example, an offer to sell a product, rent the DVD of a movie, perform a service, or give away tickets to an event. Use [[businessFunction]] to indicate the kind of transaction offered, i.e. sell, lease, etc. This property can also be used to describe a [[Demand]]. While this property is listed as expected on a number of common types, it can be used in others. In that case, using a second type, such as Product or a subtype of Product, can clarify the nature of the offer.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "offers" ;
   sh:or (
       [
@@ -1349,7 +1349,7 @@ The *speakable* property can be repeated an arbitrary number of times, with thre
 
 For more sophisticated markup of speakable sections beyond simple ID references, either CSS selectors or XPath expressions to pick out document section(s) as speakable. For this
 we define a supporting type, [[SpeakableSpecification]]  which is defined to be a possible value of the *speakable* property.
-         """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "speakable" ;
   sh:or (
       [
@@ -2183,7 +2183,7 @@ schema:BreadcrumbList
   a rdfs:Class ;
   a sh:NodeShape ;
   rdfs:comment """A BreadcrumbList is an ItemList consisting of a chain of linked Web pages, typically described using at least their URL and their name, and typically ending with the current page.\\n\\nThe [[position]] property is used to reconstruct the order of the items in a BreadcrumbList The convention is that a breadcrumb list has an [[itemListOrder]] of [[ItemListOrderAscending]] (lower values listed first), and that the first items in this list correspond to the \"top\" or beginning of the breadcrumb trail, e.g. with a site or section homepage. The specific values of 'position' are not assigned meaning for a BreadcrumbList, but they should be integers, e.g. beginning with '1' for the first item in the list.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Breadcrumb list" ;
   rdfs:subClassOf schema:ItemList ;
 .
@@ -2628,7 +2628,8 @@ schema:BusinessEntityType
   a rdfs:Class ;
   a sh:NodeShape ;
   schema:source <http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#source_GoodRelationsClass> ;
-  rdfs:comment """A business entity type is a conceptual entity representing the legal form, the size, the main line of business, the position in the value chain, or any combination thereof, of an organization or business person.\\n\\nCommonly used values:\\n\\n* http://purl.org/goodrelations/v1#Business\\n* http://purl.org/goodrelations/v1#Enduser\\n* http://purl.org/goodrelations/v1#PublicInstitution\\n* http://purl.org/goodrelations/v1#Reseller"""^^rdf:HTML ;
+  rdfs:comment """A business entity type is a conceptual entity representing the legal form, the size, the main line of business, the position in the value chain, or any combination thereof, of an organization or business person.\\n\\nCommonly used values:\\n\\n* http://purl.org/goodrelations/v1#Business\\n* http://purl.org/goodrelations/v1#Enduser\\n* http://purl.org/goodrelations/v1#PublicInstitution\\n* http://purl.org/goodrelations/v1#Reseller
+	  """^^rdf:HTML ;
   rdfs:label "Business entity type" ;
   rdfs:subClassOf schema:Enumeration ;
 .
@@ -2644,7 +2645,7 @@ schema:BusinessFunction
   a sh:NodeShape ;
   schema:source <http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#source_GoodRelationsClass> ;
   rdfs:comment """The business function specifies the type of activity or access (i.e., the bundle of rights) offered by the organization or business person through the offer. Typical are sell, rental or lease, maintenance or repair, manufacture / produce, recycle / dispose, engineering / construction, or installation. Proprietary specifications of access rights are also instances of this class.\\n\\nCommonly used values:\\n\\n* http://purl.org/goodrelations/v1#ConstructionInstallation\\n* http://purl.org/goodrelations/v1#Dispose\\n* http://purl.org/goodrelations/v1#LeaseOut\\n* http://purl.org/goodrelations/v1#Maintain\\n* http://purl.org/goodrelations/v1#ProvideService\\n* http://purl.org/goodrelations/v1#Repair\\n* http://purl.org/goodrelations/v1#Sell\\n* http://purl.org/goodrelations/v1#Buy
-        """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Business function" ;
   rdfs:subClassOf schema:Enumeration ;
 .
@@ -2708,7 +2709,7 @@ schema:CDCPMDRecord
   rdfs:comment """A CDCPMDRecord is a data structure representing a record in a CDC tabular data format
       used for hospital data reporting. See [documentation](/docs/cdc-covid.html) for details, and the linked CDC materials for authoritative
       definitions used as the source here.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "CDCPMDRecord" ;
   rdfs:subClassOf schema:StructuredValue ;
   sh:property schema:CDCPMDRecord-cvdCollectionDate ;
@@ -3245,7 +3246,7 @@ schema:Claim
   Beyond [[ClaimReview]], the Claim type can be associated with related creative works - for example a [[ScholarlyArticle]] or [[Question]] might be [[about]] some [[Claim]].
 
   At this time, Schema.org does not define any types of relationship between claims. This is a natural area for future exploration.
-  """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Claim" ;
   rdfs:subClassOf schema:CreativeWork ;
   sh:property schema:Claim-appearance ;
@@ -3501,11 +3502,11 @@ schema:ComicIssue
   a sh:NodeShape ;
   schema:isPartOf <http://bib.schema.org> ;
   rdfs:comment """Individual comic issues are serially published as
-    part of a larger series. For the sake of consistency, even one-shot issues
-    belong to a series comprised of a single issue. All comic issues can be
-    uniquely identified by: the combination of the name and volume number of the
-    series to which the issue belongs; the issue number; and the variant
-    description of the issue (if any)."""^^rdf:HTML ;
+	part of a larger series. For the sake of consistency, even one-shot issues
+	belong to a series comprised of a single issue. All comic issues can be
+	uniquely identified by: the combination of the name and volume number of the
+	series to which the issue belongs; the issue number; and the variant
+	description of the issue (if any)."""^^rdf:HTML ;
   rdfs:label "Comic issue" ;
   rdfs:subClassOf schema:PublicationIssue ;
   sh:property schema:ComicIssue-artist ;
@@ -3520,8 +3521,8 @@ schema:ComicIssue-artist
   sh:path schema:artist ;
   sh:class schema:Person ;
   sh:description """The primary artist for a work
-    in a medium other than pencils or digital line art--for example, if the
-    primary artwork is done in watercolors or digital paints."""^^rdf:HTML ;
+	in a medium other than pencils or digital line art--for example, if the
+	primary artwork is done in watercolors or digital paints."""^^rdf:HTML ;
   sh:name "artist" ;
 .
 schema:ComicIssue-colorist
@@ -3557,8 +3558,8 @@ schema:ComicIssue-variantCover
   sh:path schema:variantCover ;
   sh:datatype xsd:string ;
   sh:description """A description of the variant cover
-    for the issue, if the issue is a variant printing. For example, \"Bryan Hitch
-    Variant Cover\" or \"2nd Printing Variant\"."""^^rdf:HTML ;
+	for the issue, if the issue is a variant printing. For example, \"Bryan Hitch
+	Variant Cover\" or \"2nd Printing Variant\"."""^^rdf:HTML ;
   sh:name "variantCover" ;
 .
 schema:ComicSeries
@@ -3566,8 +3567,8 @@ schema:ComicSeries
   a sh:NodeShape ;
   schema:isPartOf <http://bib.schema.org> ;
   rdfs:comment """A sequential publication of comic stories under a
-    unifying title, for example \"The Amazing Spider-Man\" or \"Groo the
-    Wanderer\"."""^^rdf:HTML ;
+	unifying title, for example \"The Amazing Spider-Man\" or \"Groo the
+	Wanderer\"."""^^rdf:HTML ;
   rdfs:label "Comic series" ;
   rdfs:subClassOf schema:Periodical ;
 .
@@ -3576,8 +3577,8 @@ schema:ComicStory
   a sh:NodeShape ;
   schema:isPartOf <http://bib.schema.org> ;
   rdfs:comment """The term \"story\" is any indivisible, re-printable
-    unit of a comic, including the interior stories, covers, and backmatter. Most
-    comics have at least two stories: a cover (ComicCoverArt) and an interior story."""^^rdf:HTML ;
+	unit of a comic, including the interior stories, covers, and backmatter. Most
+	comics have at least two stories: a cover (ComicCoverArt) and an interior story."""^^rdf:HTML ;
   rdfs:label "Comic story" ;
   rdfs:subClassOf schema:CreativeWork ;
   sh:property schema:ComicStory-artist ;
@@ -3591,8 +3592,8 @@ schema:ComicStory-artist
   sh:path schema:artist ;
   sh:class schema:Person ;
   sh:description """The primary artist for a work
-    in a medium other than pencils or digital line art--for example, if the
-    primary artwork is done in watercolors or digital paints."""^^rdf:HTML ;
+	in a medium other than pencils or digital line art--for example, if the
+	primary artwork is done in watercolors or digital paints."""^^rdf:HTML ;
   sh:name "artist" ;
 .
 schema:ComicStory-colorist
@@ -4250,7 +4251,7 @@ schema:CovidTestingFacility
       disease is available. If the facility is being made available from an established [[Pharmacy]], [[Hotel]], or other
       non-medical organization, multiple types can be listed. This makes it easier to re-use existing schema.org information
       about that place e.g. contact info, address, opening hours. Note that in an emergency, such information may not always be reliable.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Covid testing facility" ;
   rdfs:subClassOf schema:MedicalClinic ;
 .
@@ -4396,7 +4397,7 @@ schema:CreativeWork-accessMode
   sh:path schema:accessMode ;
   sh:datatype xsd:string ;
   sh:description """The human sensory perceptual system or cognitive faculty through which a person may process or perceive information. Expected values include: auditory, tactile, textual, visual, colorDependent, chartOnVisual, chemOnVisual, diagramOnVisual, mathOnVisual, musicOnVisual, textOnVisual.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "accessMode" ;
 .
 schema:CreativeWork-accessModeSufficient
@@ -4404,7 +4405,7 @@ schema:CreativeWork-accessModeSufficient
   sh:path schema:accessModeSufficient ;
   sh:class schema:ItemList ;
   sh:description """A list of single or combined accessModes that are sufficient to understand all the intellectual content of a resource. Expected values include:  auditory, tactile, textual, visual.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "accessModeSufficient" ;
 .
 schema:CreativeWork-accessibilityAPI
@@ -5084,7 +5085,7 @@ schema:CreativeWork-maintainer
   a sh:PropertyShape ;
   sh:path schema:maintainer ;
   sh:description """A maintainer of a [[Dataset]], software package ([[SoftwareApplication]]), or other [[Project]]. A maintainer is a [[Person]] or [[Organization]] that manages contributions to, and/or publication of, some (typically complex) artifact. It is common for distributions of software and data to be based on \"upstream\" sources. When [[maintainer]] is applied to a specific version of something e.g. a particular version or packaging of a [[Dataset]], it is always  possible that the upstream source has a different maintainer. The [[isBasedOn]] property can be used to indicate such relationships between datasets to make the different maintenance roles clear. Similarly in the case of software, a package may have dedicated maintainers working on integration into software distributions such as Ubuntu, as well as upstream maintainers of the underlying work.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "maintainer" ;
   sh:or (
       [
@@ -5137,7 +5138,7 @@ schema:CreativeWork-offers
   a sh:PropertyShape ;
   sh:path schema:offers ;
   sh:description """An offer to provide this item&#x2014;for example, an offer to sell a product, rent the DVD of a movie, perform a service, or give away tickets to an event. Use [[businessFunction]] to indicate the kind of transaction offered, i.e. sell, lease, etc. This property can also be used to describe a [[Demand]]. While this property is listed as expected on a number of common types, it can be used in others. In that case, using a second type, such as Product or a subtype of Product, can clarify the nature of the offer.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "offers" ;
   sh:or (
       [
@@ -5461,7 +5462,7 @@ schema:CreativeWork-translationOfWork
   a sh:PropertyShape ;
   sh:path schema:translationOfWork ;
   sh:class schema:CreativeWork ;
-  sh:description "The work that this work has been translated from. e.g. ç‰©ç§èµ·æº is a translationOf â€œOn the Origin of Speciesâ€"^^rdf:HTML ;
+  sh:description "The work that this work has been translated from. e.g. 物种起源 is a translationOf “On the Origin of Species”"^^rdf:HTML ;
   sh:name "translationOfWork" ;
 .
 schema:CreativeWork-translator
@@ -5540,7 +5541,7 @@ schema:CreativeWork-workTranslation
   a sh:PropertyShape ;
   sh:path schema:workTranslation ;
   sh:class schema:CreativeWork ;
-  sh:description "A work that is a translation of the content of this work. e.g. è¥¿éŠè¨˜ has an English workTranslation â€œJourney to the Westâ€,a German workTranslation â€œMonkeys Pilgerfahrtâ€ and a Vietnamese  translation TÃ¢y du kÃ½ bÃ¬nh kháº£o."^^rdf:HTML ;
+  sh:description "A work that is a translation of the content of this work. e.g. 西遊記 has an English workTranslation “Journey to the West”,a German workTranslation “Monkeys Pilgerfahrt” and a Vietnamese  translation Tây du ký bình khảo."^^rdf:HTML ;
   sh:name "workTranslation" ;
 .
 schema:CreativeWorkSeason
@@ -5662,7 +5663,8 @@ schema:CreativeWorkSeason-trailer
 schema:CreativeWorkSeries
   a rdfs:Class ;
   a sh:NodeShape ;
-  rdfs:comment """A CreativeWorkSeries in schema.org is a group of related items, typically but not necessarily of the same kind. CreativeWorkSeries are usually organized into some order, often chronological. Unlike [[ItemList]] which is a general purpose data structure for lists of things, the emphasis with CreativeWorkSeries is on published materials (written e.g. books and periodicals, or media such as tv, radio and games).\\n\\nSpecific subtypes are available for describing [[TVSeries]], [[RadioSeries]], [[MovieSeries]], [[BookSeries]], [[Periodical]] and [[VideoGameSeries]]. In each case, the [[hasPart]] / [[isPartOf]] properties can be used to relate the CreativeWorkSeries to its parts. The general CreativeWorkSeries type serves largely just to organize these more specific and practical subtypes.\\n\\nIt is common for properties applicable to an item from the series to be usefully applied to the containing group. Schema.org attempts to anticipate some of these cases, but publishers should be free to apply properties of the series parts to the series as a whole wherever they seem appropriate."""^^rdf:HTML ;
+  rdfs:comment """A CreativeWorkSeries in schema.org is a group of related items, typically but not necessarily of the same kind. CreativeWorkSeries are usually organized into some order, often chronological. Unlike [[ItemList]] which is a general purpose data structure for lists of things, the emphasis with CreativeWorkSeries is on published materials (written e.g. books and periodicals, or media such as tv, radio and games).\\n\\nSpecific subtypes are available for describing [[TVSeries]], [[RadioSeries]], [[MovieSeries]], [[BookSeries]], [[Periodical]] and [[VideoGameSeries]]. In each case, the [[hasPart]] / [[isPartOf]] properties can be used to relate the CreativeWorkSeries to its parts. The general CreativeWorkSeries type serves largely just to organize these more specific and practical subtypes.\\n\\nIt is common for properties applicable to an item from the series to be usefully applied to the containing group. Schema.org attempts to anticipate some of these cases, but publishers should be free to apply properties of the series parts to the series as a whole wherever they seem appropriate.
+	  """^^rdf:HTML ;
   rdfs:label "Creative work series" ;
   rdfs:subClassOf schema:CreativeWork ;
   rdfs:subClassOf schema:Series ;
@@ -5711,7 +5713,7 @@ schema:CreditCard
   schema:source <http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#FIBO> ;
   schema:source <http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#source_GoodRelationsClass> ;
   rdfs:comment """A card payment method of a particular brand or name.  Used to mark up a particular payment method and/or the financial product/service that supplies the card account.\\n\\nCommonly used values:\\n\\n* http://purl.org/goodrelations/v1#AmericanExpress\\n* http://purl.org/goodrelations/v1#DinersClub\\n* http://purl.org/goodrelations/v1#Discover\\n* http://purl.org/goodrelations/v1#JCB\\n* http://purl.org/goodrelations/v1#MasterCard\\n* http://purl.org/goodrelations/v1#VISA
-       """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Credit card" ;
   rdfs:subClassOf schema:LoanOrCredit ;
   rdfs:subClassOf schema:PaymentCard ;
@@ -5839,7 +5841,7 @@ For example, if [[variableMeasured]] is: molecule concentration, [[measurementTe
 If the [[variableMeasured]] is \"depression rating\", the [[measurementTechnique]] could be \"Zung Scale\" or \"HAM-D\" or \"Beck Depression Inventory\".
 
 If there are several [[variableMeasured]] properties recorded for some given data object, use a [[PropertyValue]] for each [[variableMeasured]] and attach the corresponding [[measurementTechnique]].
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "measurementTechnique" ;
   sh:or (
       [
@@ -5871,7 +5873,7 @@ For example, if [[variableMeasured]] is: molecule concentration, [[measurementTe
 If the [[variableMeasured]] is \"depression rating\", the [[measurementTechnique]] could be \"Zung Scale\" or \"HAM-D\" or \"Beck Depression Inventory\".
 
 If there are several [[variableMeasured]] properties recorded for some given data object, use a [[PropertyValue]] for each [[variableMeasured]] and attach the corresponding [[measurementTechnique]].
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "measurementTechnique" ;
   sh:or (
       [
@@ -5964,7 +5966,7 @@ schema:DataFeedItem-item
   a sh:PropertyShape ;
   sh:path schema:item ;
   sh:class schema:Thing ;
-  sh:description "An entity represented by an entry in a list or data feed (e.g. an 'artist' in a list of 'artists')â€™."^^rdf:HTML ;
+  sh:description "An entity represented by an entry in a list or data feed (e.g. an 'artist' in a list of 'artists')’."^^rdf:HTML ;
   sh:name "item" ;
 .
 schema:DataType
@@ -6047,7 +6049,7 @@ For example, if [[variableMeasured]] is: molecule concentration, [[measurementTe
 If the [[variableMeasured]] is \"depression rating\", the [[measurementTechnique]] could be \"Zung Scale\" or \"HAM-D\" or \"Beck Depression Inventory\".
 
 If there are several [[variableMeasured]] properties recorded for some given data object, use a [[PropertyValue]] for each [[variableMeasured]] and attach the corresponding [[measurementTechnique]].
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "measurementTechnique" ;
   sh:or (
       [
@@ -6170,7 +6172,7 @@ schema:DayOfWeek
   rdfs:comment """The day of the week, e.g. used to specify to which day the opening hours of an OpeningHoursSpecification refer.
 
 Originally, URLs from [GoodRelations](http://purl.org/goodrelations/v1) were used (for [[Monday]], [[Tuesday]], [[Wednesday]], [[Thursday]], [[Friday]], [[Saturday]], [[Sunday]] plus a special entry for [[PublicHolidays]]); these have now been integrated directly into schema.org.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Day of week" ;
   rdfs:subClassOf schema:Enumeration ;
 .
@@ -6200,7 +6202,7 @@ For an [[ImageObject]] to be 'missing context': Presenting unaltered images in a
 
 For an [[ImageObject]] with embedded text to be 'missing context': An unaltered image presented in an inaccurate manner to misrepresent the image and mislead the viewer. For example, a common tactic is using an unaltered image but saying it came from a different time or place. (An 'original' image with inaccurate text would generally fall in this category.)
 
-For an [[AudioObject]] to be 'missing context': Unaltered audio presented in an inaccurate manner that misrepresents it. For example, using incorrect dates or locations, or sharing brief clips from a longer recording to mislead viewers. (Audio rated â€œoriginalâ€ can also be missing context.)
+For an [[AudioObject]] to be 'missing context': Unaltered audio presented in an inaccurate manner that misrepresents it. For example, using incorrect dates or locations, or sharing brief clips from a longer recording to mislead viewers. (Audio rated “original” can also be missing context.)
 """ ;
   rdfs:label "Decontextualized content" ;
 .
@@ -6388,7 +6390,7 @@ schema:DeliveryChargeSpecification-eligibleRegion
   a sh:PropertyShape ;
   sh:path schema:eligibleRegion ;
   sh:description """The ISO 3166-1 (ISO 3166-1 alpha-2) or ISO 3166-2 code, the place, or the GeoShape for the geo-political region(s) for which the offer or delivery charge specification is valid.\\n\\nSee also [[ineligibleRegion]].
-    """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "eligibleRegion" ;
   sh:or (
       [
@@ -6406,7 +6408,7 @@ schema:DeliveryChargeSpecification-ineligibleRegion
   a sh:PropertyShape ;
   sh:path schema:ineligibleRegion ;
   sh:description """The ISO 3166-1 (ISO 3166-1 alpha-2) or ISO 3166-2 code, the place, or the GeoShape for the geo-political region(s) for which the offer or delivery charge specification is not valid, e.g. a region where the transaction is not allowed.\\n\\nSee also [[eligibleRegion]].
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "ineligibleRegion" ;
   sh:or (
       [
@@ -6464,7 +6466,7 @@ schema:DeliveryMethod
   a sh:NodeShape ;
   schema:source <http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#source_GoodRelationsClass> ;
   rdfs:comment """A delivery method is a standardized procedure for transferring the product or service to the destination of fulfillment chosen by the customer. Delivery methods are characterized by the means of transportation used, and by the organization or group that is the contracting party for the sending organization or person.\\n\\nCommonly used values:\\n\\n* http://purl.org/goodrelations/v1#DeliveryModeDirectDownload\\n* http://purl.org/goodrelations/v1#DeliveryModeFreight\\n* http://purl.org/goodrelations/v1#DeliveryModeMail\\n* http://purl.org/goodrelations/v1#DeliveryModeOwnFleet\\n* http://purl.org/goodrelations/v1#DeliveryModePickUp\\n* http://purl.org/goodrelations/v1#DHL\\n* http://purl.org/goodrelations/v1#FederalExpress\\n* http://purl.org/goodrelations/v1#UPS
-        """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Delivery method" ;
   rdfs:subClassOf schema:Enumeration ;
 .
@@ -6685,7 +6687,7 @@ schema:Demand-eligibleRegion
   a sh:PropertyShape ;
   sh:path schema:eligibleRegion ;
   sh:description """The ISO 3166-1 (ISO 3166-1 alpha-2) or ISO 3166-2 code, the place, or the GeoShape for the geo-political region(s) for which the offer or delivery charge specification is valid.\\n\\nSee also [[ineligibleRegion]].
-    """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "eligibleRegion" ;
   sh:or (
       [
@@ -6711,7 +6713,7 @@ schema:Demand-gtin
   sh:path schema:gtin ;
   sh:datatype xsd:string ;
   sh:description """A Global Trade Item Number ([GTIN](https://www.gs1.org/standards/id-keys/gtin)). GTINs identify trade items, including products and services, using numeric identification codes. The [[gtin]] property generalizes the earlier [[gtin8]], [[gtin12]], [[gtin13]], and [[gtin14]] properties. The GS1 [digital link specifications](https://www.gs1.org/standards/Digital-Link/) express GTINs as URLs. A correct [[gtin]] value should be a valid GTIN, which means that it should be an all-numeric string of either 8, 12, 13 or 14 digits, or a \"GS1 Digital Link\" URL based on such a string. The numeric component should also have a [valid GS1 check digit](https://www.gs1.org/services/check-digit-calculator) and meet the other rules for valid GTINs. See also [GS1's GTIN Summary](http://www.gs1.org/barcodes/technical/idkeys/gtin) and [Wikipedia](https://en.wikipedia.org/wiki/Global_Trade_Item_Number) for more details. Left-padding of the gtin values is not required or encouraged.
-   """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "gtin" ;
 .
 schema:Demand-gtin12
@@ -6753,7 +6755,7 @@ schema:Demand-ineligibleRegion
   a sh:PropertyShape ;
   sh:path schema:ineligibleRegion ;
   sh:description """The ISO 3166-1 (ISO 3166-1 alpha-2) or ISO 3166-2 code, the place, or the GeoShape for the geo-political region(s) for which the offer or delivery charge specification is not valid, e.g. a region where the transaction is not allowed.\\n\\nSee also [[eligibleRegion]].
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "ineligibleRegion" ;
   sh:or (
       [
@@ -8104,7 +8106,7 @@ schema:EducationalOccupationalCredential-competencyRequired
 schema:EducationalOccupationalCredential-credentialCategory
   a sh:PropertyShape ;
   sh:path schema:credentialCategory ;
-  sh:description "The category or type of credential being described, for example \"degreeâ€, â€œcertificateâ€, â€œbadgeâ€, or more specific term."^^rdf:HTML ;
+  sh:description "The category or type of credential being described, for example \"degree”, “certificate”, “badge”, or more specific term."^^rdf:HTML ;
   sh:name "credentialCategory" ;
   sh:or (
       [
@@ -8333,7 +8335,7 @@ schema:EducationalOccupationalProgram-offers
   a sh:PropertyShape ;
   sh:path schema:offers ;
   sh:description """An offer to provide this item&#x2014;for example, an offer to sell a product, rent the DVD of a movie, perform a service, or give away tickets to an event. Use [[businessFunction]] to indicate the kind of transaction offered, i.e. sell, lease, etc. This property can also be used to describe a [[Demand]]. While this property is listed as expected on a number of common types, it can be used in others. In that case, using a second type, such as Product or a subtype of Product, can clarify the nature of the offer.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "offers" ;
   sh:or (
       [
@@ -8854,7 +8856,7 @@ schema:EntryPoint-urlTemplate
 schema:Enumeration
   a rdfs:Class ;
   a sh:NodeShape ;
-  rdfs:comment "Lists or enumerationsâ€”for example, a list of cuisines or music genres, etc."^^rdf:HTML ;
+  rdfs:comment "Lists or enumerations—for example, a list of cuisines or music genres, etc."^^rdf:HTML ;
   rdfs:label "Enumeration" ;
   rdfs:subClassOf schema:Intangible ;
   sh:property schema:Enumeration-supersededBy ;
@@ -9264,7 +9266,7 @@ schema:Event-offers
   a sh:PropertyShape ;
   sh:path schema:offers ;
   sh:description """An offer to provide this item&#x2014;for example, an offer to sell a product, rent the DVD of a movie, perform a service, or give away tickets to an event. Use [[businessFunction]] to indicate the kind of transaction offered, i.e. sell, lease, etc. This property can also be used to describe a [[Demand]]. While this property is listed as expected on a number of common types, it can be used in others. In that case, using a second type, such as Product or a subtype of Product, can clarify the nature of the offer.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "offers" ;
   sh:or (
       [
@@ -9489,7 +9491,7 @@ EventSeries has been defined as a kind of Event to make it easy for publishers t
 worrying about which kinds of series are really event-like enough to call an Event. In general an EventSeries
 may seem more Event-like when the period of time is compact and when aspects such as location are fixed, but
 it may also sometimes prove useful to describe a longer-term series as an Event.
-   """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Event series" ;
   rdfs:subClassOf schema:Event ;
   rdfs:subClassOf schema:Series ;
@@ -10301,14 +10303,14 @@ schema:FloorPlan-numberOfFullBathrooms
   a sh:PropertyShape ;
   sh:path schema:numberOfFullBathrooms ;
   sh:datatype xsd:float ;
-  sh:description "Number of full bathrooms - The total number of full and Â¾ bathrooms in an [[Accommodation]]. This corresponds to the [BathroomsFull field in RESO](https://ddwiki.reso.org/display/DDW17/BathroomsFull+Field)."^^rdf:HTML ;
+  sh:description "Number of full bathrooms - The total number of full and ¾ bathrooms in an [[Accommodation]]. This corresponds to the [BathroomsFull field in RESO](https://ddwiki.reso.org/display/DDW17/BathroomsFull+Field)."^^rdf:HTML ;
   sh:name "numberOfFullBathrooms" ;
 .
 schema:FloorPlan-numberOfPartialBathrooms
   a sh:PropertyShape ;
   sh:path schema:numberOfPartialBathrooms ;
   sh:datatype xsd:float ;
-  sh:description "Number of partial bathrooms - The total number of half and Â¼ bathrooms in an [[Accommodation]]. This corresponds to the [BathroomsPartial field in RESO](https://ddwiki.reso.org/display/DDW17/BathroomsPartial+Field). "^^rdf:HTML ;
+  sh:description "Number of partial bathrooms - The total number of half and ¼ bathrooms in an [[Accommodation]]. This corresponds to the [BathroomsPartial field in RESO](https://ddwiki.reso.org/display/DDW17/BathroomsPartial+Field). "^^rdf:HTML ;
   sh:name "numberOfPartialBathrooms" ;
 .
 schema:FloorPlan-numberOfRooms
@@ -10549,7 +10551,7 @@ schema:FundingAgency
     A funding agency is not always required for grant funding, e.g. philanthropic giving, corporate sponsorship etc.
 
 Examples of funding agencies include ERC, REA, NIH, Bill and Melinda Gates Foundation...
-    """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Funding agency" ;
   rdfs:subClassOf schema:Project ;
 .
@@ -10739,7 +10741,7 @@ schema:GeoCircle
   rdfs:comment """A GeoCircle is a GeoShape representing a circular geographic area. As it is a GeoShape
           it provides the simple textual property 'circle', but also allows the combination of postalCode alongside geoRadius.
           The center of the circle can be indicated via the 'geoMidpoint' property, or more approximately using 'address', 'postalCode'.
-       """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Geo circle" ;
   rdfs:subClassOf schema:GeoShape ;
   sh:property schema:GeoCircle-geoMidpoint ;
@@ -11241,7 +11243,7 @@ schema:Grant
 Grants support  activities directed towards some agreed collective goals, often but not always organized as [[Project]]s. Long-lived projects are sometimes sponsored by a variety of grants over time, but it is also common for a project to be associated with a single grant.
 
 The amount of a [[Grant]] is represented using [[amount]] as a [[MonetaryAmount]].
-    """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Grant" ;
   rdfs:subClassOf schema:Intangible ;
   sh:property schema:Grant-fundedItem ;
@@ -11596,7 +11598,7 @@ schema:HealthTopicContent
   schema:isPartOf <http://pending.schema.org> ;
   schema:source <https://github.com/schemaorg/schemaorg/issues/2374> ;
   rdfs:comment """[[HealthTopicContent]] is [[WebContent]] that is about some aspect of a health topic, e.g. a condition, its symptoms or treatments. Such content may be comprised of several parts or sections and use different types of media. Multiple instances of [[WebContent]] (and hence [[HealthTopicContent]]) can be related using [[hasPart]] / [[isPartOf]] where there is some kind of content hierarchy, and their content described with [[about]] and [[mentions]] e.g. building upon the existing [[MedicalCondition]] vocabulary.
-  """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Health topic content" ;
   rdfs:subClassOf schema:WebContent ;
   sh:property schema:HealthTopicContent-hasHealthAspect ;
@@ -13674,7 +13676,7 @@ schema:Legislation-legislationTransposes
 schema:Legislation-legislationType
   a sh:PropertyShape ;
   sh:path schema:legislationType ;
-  sh:description "The type of the legislation. Examples of values are \"law\", \"act\", \"directive\", \"decree\", \"regulation\", \"statutory instrument\", \"loi organique\", \"rÃ¨glement grand-ducal\", etc., depending on the country."^^rdf:HTML ;
+  sh:description "The type of the legislation. Examples of values are \"law\", \"act\", \"directive\", \"decree\", \"regulation\", \"statutory instrument\", \"loi organique\", \"règlement grand-ducal\", etc., depending on the country."^^rdf:HTML ;
   sh:name "legislationType" ;
   sh:or (
       [
@@ -13837,7 +13839,7 @@ schema:ListItem-item
   a sh:PropertyShape ;
   sh:path schema:item ;
   sh:class schema:Thing ;
-  sh:description "An entity represented by an entry in a list or data feed (e.g. an 'artist' in a list of 'artists')â€™."^^rdf:HTML ;
+  sh:description "An entity represented by an entry in a list or data feed (e.g. an 'artist' in a list of 'artists')’."^^rdf:HTML ;
   sh:name "item" ;
 .
 schema:ListItem-nextItem
@@ -14674,7 +14676,7 @@ schema:MediaObject-ineligibleRegion
   a sh:PropertyShape ;
   sh:path schema:ineligibleRegion ;
   sh:description """The ISO 3166-1 (ISO 3166-1 alpha-2) or ISO 3166-2 code, the place, or the GeoShape for the geo-political region(s) for which the offer or delivery charge specification is not valid, e.g. a region where the transaction is not allowed.\\n\\nSee also [[eligibleRegion]].
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "ineligibleRegion" ;
   sh:or (
       [
@@ -15945,7 +15947,7 @@ schema:MenuItem-offers
   a sh:PropertyShape ;
   sh:path schema:offers ;
   sh:description """An offer to provide this item&#x2014;for example, an offer to sell a product, rent the DVD of a movie, perform a service, or give away tickets to an event. Use [[businessFunction]] to indicate the kind of transaction offered, i.e. sell, lease, etc. This property can also be used to describe a [[Demand]]. While this property is listed as expected on a number of common types, it can be used in others. In that case, using a second type, such as Product or a subtype of Product, can clarify the nature of the offer.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "offers" ;
   sh:or (
       [
@@ -16295,7 +16297,7 @@ schema:MonetaryAmount
   a rdfs:Class ;
   a sh:NodeShape ;
   schema:source <http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#FIBO> ;
-  rdfs:comment "A monetary value or range. This type can be used to describe an amount of money such as $50 USD, or a range as in describing a bank account being suitable for a balance between Â£1,000 and Â£1,000,000 GBP, or the value of a salary, etc. It is recommended to use [[PriceSpecification]] Types to describe the price of an Offer, Invoice, etc."^^rdf:HTML ;
+  rdfs:comment "A monetary value or range. This type can be used to describe an amount of money such as $50 USD, or a range as in describing a bank account being suitable for a balance between £1,000 and £1,000,000 GBP, or the value of a salary, etc. It is recommended to use [[PriceSpecification]] Types to describe the price of an Offer, Invoice, etc."^^rdf:HTML ;
   rdfs:label "Monetary amount" ;
   rdfs:subClassOf schema:StructuredValue ;
   sh:property schema:MonetaryAmount-currency ;
@@ -16459,7 +16461,7 @@ schema:MoneyTransfer-amount
 schema:MoneyTransfer-beneficiaryBank
   a sh:PropertyShape ;
   sh:path schema:beneficiaryBank ;
-  sh:description "A bank or bankâ€™s branch, financial institution or international financial institution operating the beneficiaryâ€™s bank account or releasing funds for the beneficiary."^^rdf:HTML ;
+  sh:description "A bank or bank’s branch, financial institution or international financial institution operating the beneficiary’s bank account or releasing funds for the beneficiary."^^rdf:HTML ;
   sh:name "beneficiaryBank" ;
   sh:or (
       [
@@ -17431,7 +17433,7 @@ schema:NewsArticle-dateline
 Structured representations of dateline-related information can also be expressed more explicitly using [[locationCreated]] (which represents where a work was created e.g. where a news report was written).  For location depicted or described in the content, use [[contentLocation]].
 
 Dateline summaries are oriented more towards human readers than towards automated processing, and can vary substantially. Some examples: \"BEIRUT, Lebanon, June 2.\", \"Paris, France\", \"December 19, 2017 11:43AM Reporting from Washington\", \"Beijing/Moscow\", \"QUEZON CITY, Philippines\".
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "dateline" ;
 .
 schema:NewsArticle-printColumn
@@ -17486,7 +17488,7 @@ schema:NewsMediaOrganization
 schema:NewsMediaOrganization-actionableFeedbackPolicy
   a sh:PropertyShape ;
   sh:path schema:actionableFeedbackPolicy ;
-  sh:description "For a [[NewsMediaOrganization]] or other news-related [[Organization]], a statement about public engagement activities (for news media, the newsroomâ€™s), including involving the public - digitally or otherwise -- in coverage decisions, reporting and activities after publication."^^rdf:HTML ;
+  sh:description "For a [[NewsMediaOrganization]] or other news-related [[Organization]], a statement about public engagement activities (for news media, the newsroom’s), including involving the public - digitally or otherwise -- in coverage decisions, reporting and activities after publication."^^rdf:HTML ;
   sh:name "actionableFeedbackPolicy" ;
   sh:or (
       [
@@ -17500,7 +17502,7 @@ schema:NewsMediaOrganization-actionableFeedbackPolicy
 schema:NewsMediaOrganization-correctionsPolicy
   a sh:PropertyShape ;
   sh:path schema:correctionsPolicy ;
-  sh:description "For an [[Organization]] (e.g. [[NewsMediaOrganization]]), a statement describing (in news media, the newsroomâ€™s) disclosure and correction policy for errors."^^rdf:HTML ;
+  sh:description "For an [[Organization]] (e.g. [[NewsMediaOrganization]]), a statement describing (in news media, the newsroom’s) disclosure and correction policy for errors."^^rdf:HTML ;
   sh:name "correctionsPolicy" ;
   sh:or (
       [
@@ -17514,7 +17516,7 @@ schema:NewsMediaOrganization-correctionsPolicy
 schema:NewsMediaOrganization-diversityPolicy
   a sh:PropertyShape ;
   sh:path schema:diversityPolicy ;
-  sh:description "Statement on diversity policy by an [[Organization]] e.g. a [[NewsMediaOrganization]]. For a [[NewsMediaOrganization]], a statement describing the newsroomâ€™s diversity policy on both staffing and sources, typically providing staffing data."^^rdf:HTML ;
+  sh:description "Statement on diversity policy by an [[Organization]] e.g. a [[NewsMediaOrganization]]. For a [[NewsMediaOrganization]], a statement describing the newsroom’s diversity policy on both staffing and sources, typically providing staffing data."^^rdf:HTML ;
   sh:name "diversityPolicy" ;
   sh:or (
       [
@@ -17669,7 +17671,7 @@ schema:Nonprofit501a
   a schema:USNonprofitType ;
   schema:isPartOf <http://pending.schema.org> ;
   schema:source <https://github.com/schemaorg/schemaorg/issues/2543> ;
-  rdfs:comment "Nonprofit501a: Non-profit type referring to Farmersâ€™ Cooperative Associations." ;
+  rdfs:comment "Nonprofit501a: Non-profit type referring to Farmers’ Cooperative Associations." ;
   rdfs:label "Nonprofit501a" ;
 .
 schema:Nonprofit501c1
@@ -18105,7 +18107,7 @@ schema:Observation
   schema:source <https://github.com/schemaorg/schemaorg/issues/2291> ;
   rdfs:comment """Instances of the class [[Observation]] are used to specify observations about an entity (which may or may not be an instance of a [[StatisticalPopulation]]), at a particular time. The principal properties of an [[Observation]] are [[observedNode]], [[measuredProperty]], [[measuredValue]] (or [[median]], etc.) and [[observationDate]] ([[measuredProperty]] properties can, but need not always, be W3C RDF Data Cube \"measure properties\", as in the [lifeExpectancy example](https://www.w3.org/TR/vocab-data-cube/#dsd-example)).
 See also [[StatisticalPopulation]], and the [data and datasets](/docs/data-and-datasets.html) overview for more details.
-  """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Observation" ;
   rdfs:subClassOf schema:Intangible ;
   sh:property schema:Observation-marginOfError ;
@@ -18322,7 +18324,7 @@ schema:Offer
   a rdfs:Class ;
   a sh:NodeShape ;
   schema:source <http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#source_GoodRelationsTerms> ;
-  rdfs:comment "An offer to transfer some rights to an item or to provide a service â€” for example, an offer to sell tickets to an event, to rent the DVD of a movie, to stream a TV show over the internet, to repair a motorcycle, or to loan a book.\\n\\nNote: As the [[businessFunction]] property, which identifies the form of offer (e.g. sell, lease, repair, dispose), defaults to http://purl.org/goodrelations/v1#Sell; an Offer without a defined businessFunction value can be assumed to be an offer to sell.\\n\\nFor [GTIN](http://www.gs1.org/barcodes/technical/idkeys/gtin)-related fields, see [Check Digit calculator](http://www.gs1.org/barcodes/support/check_digit_calculator) and [validation guide](http://www.gs1us.org/resources/standards/gtin-validation-guide) from [GS1](http://www.gs1.org/)."^^rdf:HTML ;
+  rdfs:comment "An offer to transfer some rights to an item or to provide a service — for example, an offer to sell tickets to an event, to rent the DVD of a movie, to stream a TV show over the internet, to repair a motorcycle, or to loan a book.\\n\\nNote: As the [[businessFunction]] property, which identifies the form of offer (e.g. sell, lease, repair, dispose), defaults to http://purl.org/goodrelations/v1#Sell; an Offer without a defined businessFunction value can be assumed to be an offer to sell.\\n\\nFor [GTIN](http://www.gs1.org/barcodes/technical/idkeys/gtin)-related fields, see [Check Digit calculator](http://www.gs1.org/barcodes/support/check_digit_calculator) and [validation guide](http://www.gs1us.org/resources/standards/gtin-validation-guide) from [GS1](http://www.gs1.org/)."^^rdf:HTML ;
   rdfs:label "Offer" ;
   rdfs:subClassOf schema:Intangible ;
   sh:property schema:Offer-acceptedPaymentMethod ;
@@ -18540,7 +18542,7 @@ schema:Offer-eligibleRegion
   a sh:PropertyShape ;
   sh:path schema:eligibleRegion ;
   sh:description """The ISO 3166-1 (ISO 3166-1 alpha-2) or ISO 3166-2 code, the place, or the GeoShape for the geo-political region(s) for which the offer or delivery charge specification is valid.\\n\\nSee also [[ineligibleRegion]].
-    """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "eligibleRegion" ;
   sh:or (
       [
@@ -18566,7 +18568,7 @@ schema:Offer-gtin
   sh:path schema:gtin ;
   sh:datatype xsd:string ;
   sh:description """A Global Trade Item Number ([GTIN](https://www.gs1.org/standards/id-keys/gtin)). GTINs identify trade items, including products and services, using numeric identification codes. The [[gtin]] property generalizes the earlier [[gtin8]], [[gtin12]], [[gtin13]], and [[gtin14]] properties. The GS1 [digital link specifications](https://www.gs1.org/standards/Digital-Link/) express GTINs as URLs. A correct [[gtin]] value should be a valid GTIN, which means that it should be an all-numeric string of either 8, 12, 13 or 14 digits, or a \"GS1 Digital Link\" URL based on such a string. The numeric component should also have a [valid GS1 check digit](https://www.gs1.org/services/check-digit-calculator) and meet the other rules for valid GTINs. See also [GS1's GTIN Summary](http://www.gs1.org/barcodes/technical/idkeys/gtin) and [Wikipedia](https://en.wikipedia.org/wiki/Global_Trade_Item_Number) for more details. Left-padding of the gtin values is not required or encouraged.
-   """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "gtin" ;
 .
 schema:Offer-gtin12
@@ -18615,7 +18617,7 @@ schema:Offer-ineligibleRegion
   a sh:PropertyShape ;
   sh:path schema:ineligibleRegion ;
   sh:description """The ISO 3166-1 (ISO 3166-1 alpha-2) or ISO 3166-2 code, the place, or the GeoShape for the geo-political region(s) for which the offer or delivery charge specification is not valid, e.g. a region where the transaction is not allowed.\\n\\nSee also [[eligibleRegion]].
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "ineligibleRegion" ;
   sh:or (
       [
@@ -18711,7 +18713,7 @@ schema:Offer-price
   a sh:PropertyShape ;
   sh:path schema:price ;
   sh:description """The offer price of a product, or of a price component when attached to PriceSpecification and its subtypes.\\n\\nUsage guidelines:\\n\\n* Use the [[priceCurrency]] property (with standard formats: [ISO 4217 currency format](http://en.wikipedia.org/wiki/ISO_4217) e.g. \"USD\"; [Ticker symbol](https://en.wikipedia.org/wiki/List_of_cryptocurrencies) for cryptocurrencies e.g. \"BTC\"; well known names for [Local Exchange Tradings Systems](https://en.wikipedia.org/wiki/Local_exchange_trading_system) (LETS) and other currency types e.g. \"Ithaca HOUR\") instead of including [ambiguous symbols](http://en.wikipedia.org/wiki/Dollar_sign#Currencies_that_use_the_dollar_or_peso_sign) such as '$' in the value.\\n* Use '.' (Unicode 'FULL STOP' (U+002E)) rather than ',' to indicate a decimal point. Avoid using these symbols as a readability separator.\\n* Note that both [RDFa](http://www.w3.org/TR/xhtml-rdfa-primer/#using-the-content-attribute) and Microdata syntax allow the use of a \"content=\" attribute for publishing simple machine-readable values alongside more human-friendly formatting.\\n* Use values from 0123456789 (Unicode 'DIGIT ZERO' (U+0030) to 'DIGIT NINE' (U+0039)) rather than superficially similiar Unicode symbols.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "price" ;
   sh:or (
       [
@@ -18842,7 +18844,7 @@ schema:OfferForLease
   rdfs:comment """An [[OfferForLease]] in Schema.org represents an [[Offer]] to lease out something, i.e. an [[Offer]] whose
   [[businessFunction]] is [lease out](http://purl.org/goodrelations/v1#LeaseOut.). See [Good Relations](https://en.wikipedia.org/wiki/GoodRelations) for
   background on the underlying concepts.
-  """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Offer for lease" ;
   rdfs:subClassOf schema:Offer ;
 .
@@ -18854,7 +18856,7 @@ schema:OfferForPurchase
   rdfs:comment """An [[OfferForPurchase]] in Schema.org represents an [[Offer]] to sell something, i.e. an [[Offer]] whose
   [[businessFunction]] is [sell](http://purl.org/goodrelations/v1#Sell.). See [Good Relations](https://en.wikipedia.org/wiki/GoodRelations) for
   background on the underlying concepts.
-  """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Offer for purchase" ;
   rdfs:subClassOf schema:Offer ;
 .
@@ -19033,7 +19035,7 @@ schema:OpeningHoursSpecification
   schema:source <http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#source_GoodRelationsClass> ;
   rdfs:comment """A structured value providing information about the opening hours of a place or a certain service inside a place.\\n\\n
 The place is __open__ if the [[opens]] property is specified, and __closed__ otherwise.\\n\\nIf the value for the [[closes]] property is less than the value for the [[opens]] property then the hour range is assumed to span over the next day.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Opening hours specification" ;
   rdfs:subClassOf schema:StructuredValue ;
   sh:property schema:OpeningHoursSpecification-closes ;
@@ -19551,7 +19553,7 @@ schema:Organization
 schema:Organization-actionableFeedbackPolicy
   a sh:PropertyShape ;
   sh:path schema:actionableFeedbackPolicy ;
-  sh:description "For a [[NewsMediaOrganization]] or other news-related [[Organization]], a statement about public engagement activities (for news media, the newsroomâ€™s), including involving the public - digitally or otherwise -- in coverage decisions, reporting and activities after publication."^^rdf:HTML ;
+  sh:description "For a [[NewsMediaOrganization]] or other news-related [[Organization]], a statement about public engagement activities (for news media, the newsroom’s), including involving the public - digitally or otherwise -- in coverage decisions, reporting and activities after publication."^^rdf:HTML ;
   sh:name "actionableFeedbackPolicy" ;
   sh:or (
       [
@@ -19655,7 +19657,7 @@ schema:Organization-contactPoints
 schema:Organization-correctionsPolicy
   a sh:PropertyShape ;
   sh:path schema:correctionsPolicy ;
-  sh:description "For an [[Organization]] (e.g. [[NewsMediaOrganization]]), a statement describing (in news media, the newsroomâ€™s) disclosure and correction policy for errors."^^rdf:HTML ;
+  sh:description "For an [[Organization]] (e.g. [[NewsMediaOrganization]]), a statement describing (in news media, the newsroom’s) disclosure and correction policy for errors."^^rdf:HTML ;
   sh:name "correctionsPolicy" ;
   sh:or (
       [
@@ -19683,7 +19685,7 @@ schema:Organization-dissolutionDate
 schema:Organization-diversityPolicy
   a sh:PropertyShape ;
   sh:path schema:diversityPolicy ;
-  sh:description "Statement on diversity policy by an [[Organization]] e.g. a [[NewsMediaOrganization]]. For a [[NewsMediaOrganization]], a statement describing the newsroomâ€™s diversity policy on both staffing and sources, typically providing staffing data."^^rdf:HTML ;
+  sh:description "Statement on diversity policy by an [[Organization]] e.g. a [[NewsMediaOrganization]]. For a [[NewsMediaOrganization]], a statement describing the newsroom’s diversity policy on both staffing and sources, typically providing staffing data."^^rdf:HTML ;
   sh:name "diversityPolicy" ;
   sh:or (
       [
@@ -20477,7 +20479,7 @@ schema:ParcelService
   a schema:DeliveryMethod ;
   schema:source <http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#source_GoodRelationsClass> ;
   rdfs:comment """A private parcel service as the delivery mode available for a certain offer.\\n\\nCommonly used values:\\n\\n* http://purl.org/goodrelations/v1#DHL\\n* http://purl.org/goodrelations/v1#FederalExpress\\n* http://purl.org/goodrelations/v1#UPS
-      """ ;
+""" ;
   rdfs:label "Parcel service" ;
 .
 schema:ParentAudience
@@ -20739,7 +20741,7 @@ schema:PaymentMethod
   a sh:NodeShape ;
   schema:source <http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#source_GoodRelationsClass> ;
   rdfs:comment """A payment method is a standardized procedure for transferring the monetary amount for a purchase. Payment methods are characterized by the legal and technical structures used, and by the organization or group carrying out the transaction.\\n\\nCommonly used values:\\n\\n* http://purl.org/goodrelations/v1#ByBankTransferInAdvance\\n* http://purl.org/goodrelations/v1#ByInvoice\\n* http://purl.org/goodrelations/v1#Cash\\n* http://purl.org/goodrelations/v1#CheckInAdvance\\n* http://purl.org/goodrelations/v1#COD\\n* http://purl.org/goodrelations/v1#DirectDebit\\n* http://purl.org/goodrelations/v1#GoogleCheckout\\n* http://purl.org/goodrelations/v1#PayPal\\n* http://purl.org/goodrelations/v1#PaySwarm
-        """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Payment method" ;
   rdfs:subClassOf schema:Enumeration ;
 .
@@ -21879,7 +21881,7 @@ schema:Place-branchCode
   sh:path schema:branchCode ;
   sh:datatype xsd:string ;
   sh:description """A short textual code (also called \"store code\") that uniquely identifies a place of business. The code is typically assigned by the parentOrganization and used in structured URLs.\\n\\nFor example, in the URL http://www.starbucks.co.uk/store-locator/etc/detail/3047 the code \"3047\" is a branchCode for a particular branch.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "branchCode" ;
 .
 schema:Place-containedIn
@@ -22258,7 +22260,7 @@ schema:Place-specialOpeningHoursSpecification
   sh:path schema:specialOpeningHoursSpecification ;
   sh:class schema:OpeningHoursSpecification ;
   sh:description """The special opening hours of a certain place.\\n\\nUse this to explicitly override general opening hours brought in scope by [[openingHoursSpecification]] or [[openingHours]].
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "specialOpeningHoursSpecification" ;
 .
 schema:Place-telephone
@@ -22653,7 +22655,7 @@ schema:PriceSpecification-price
   a sh:PropertyShape ;
   sh:path schema:price ;
   sh:description """The offer price of a product, or of a price component when attached to PriceSpecification and its subtypes.\\n\\nUsage guidelines:\\n\\n* Use the [[priceCurrency]] property (with standard formats: [ISO 4217 currency format](http://en.wikipedia.org/wiki/ISO_4217) e.g. \"USD\"; [Ticker symbol](https://en.wikipedia.org/wiki/List_of_cryptocurrencies) for cryptocurrencies e.g. \"BTC\"; well known names for [Local Exchange Tradings Systems](https://en.wikipedia.org/wiki/Local_exchange_trading_system) (LETS) and other currency types e.g. \"Ithaca HOUR\") instead of including [ambiguous symbols](http://en.wikipedia.org/wiki/Dollar_sign#Currencies_that_use_the_dollar_or_peso_sign) such as '$' in the value.\\n* Use '.' (Unicode 'FULL STOP' (U+002E)) rather than ',' to indicate a decimal point. Avoid using these symbols as a readability separator.\\n* Note that both [RDFa](http://www.w3.org/TR/xhtml-rdfa-primer/#using-the-content-attribute) and Microdata syntax allow the use of a \"content=\" attribute for publishing simple machine-readable values alongside more human-friendly formatting.\\n* Use values from 0123456789 (Unicode 'DIGIT ZERO' (U+0030) to 'DIGIT NINE' (U+0039)) rather than superficially similiar Unicode symbols.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "price" ;
   sh:or (
       [
@@ -22877,7 +22879,7 @@ schema:Product-gtin
   sh:path schema:gtin ;
   sh:datatype xsd:string ;
   sh:description """A Global Trade Item Number ([GTIN](https://www.gs1.org/standards/id-keys/gtin)). GTINs identify trade items, including products and services, using numeric identification codes. The [[gtin]] property generalizes the earlier [[gtin8]], [[gtin12]], [[gtin13]], and [[gtin14]] properties. The GS1 [digital link specifications](https://www.gs1.org/standards/Digital-Link/) express GTINs as URLs. A correct [[gtin]] value should be a valid GTIN, which means that it should be an all-numeric string of either 8, 12, 13 or 14 digits, or a \"GS1 Digital Link\" URL based on such a string. The numeric component should also have a [valid GS1 check digit](https://www.gs1.org/services/check-digit-calculator) and meet the other rules for valid GTINs. See also [GS1's GTIN Summary](http://www.gs1.org/barcodes/technical/idkeys/gtin) and [Wikipedia](https://en.wikipedia.org/wiki/Global_Trade_Item_Number) for more details. Left-padding of the gtin values is not required or encouraged.
-   """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "gtin" ;
 .
 schema:Product-gtin12
@@ -23090,7 +23092,7 @@ schema:Product-offers
   a sh:PropertyShape ;
   sh:path schema:offers ;
   sh:description """An offer to provide this item&#x2014;for example, an offer to sell a product, rent the DVD of a movie, perform a service, or give away tickets to an event. Use [[businessFunction]] to indicate the kind of transaction offered, i.e. sell, lease, etc. This property can also be used to describe a [[Demand]]. While this property is listed as expected on a number of common types, it can be used in others. In that case, using a second type, such as Product or a subtype of Product, can clarify the nature of the offer.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "offers" ;
   sh:or (
       [
@@ -23486,7 +23488,7 @@ schema:Project
   schema:source <https://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#FundInfoCollab> ;
   rdfs:comment """An enterprise (potentially individual but typically collaborative), planned to achieve a particular aim.
 Use properties from [[Organization]], [[subOrganization]]/[[parentOrganization]] to indicate project sub-structures.
-   """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Project" ;
   rdfs:subClassOf schema:Organization ;
 .
@@ -23521,7 +23523,7 @@ schema:PronounceableText-phoneticText
   a sh:PropertyShape ;
   sh:path schema:phoneticText ;
   sh:datatype xsd:string ;
-  sh:description "Representation of a text [[textValue]] using the specified [[speechToTextMarkup]]. For example the city name of Houston in IPA: /ËˆhjuËstÉ™n/."^^rdf:HTML ;
+  sh:description "Representation of a text [[textValue]] using the specified [[speechToTextMarkup]]. For example the city name of Houston in IPA: /ˈhjuːstən/."^^rdf:HTML ;
   sh:name "phoneticText" ;
 .
 schema:PronounceableText-speechToTextMarkup
@@ -23543,7 +23545,7 @@ schema:PropertyValue
   a sh:NodeShape ;
   schema:source <http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#source_GoodRelationsClass> ;
   rdfs:comment """A property-value pair, e.g. representing a feature of a product or place. Use the 'name' property for the name of the property. If there is an additional human-readable version of the value, put that into the 'description' property.\\n\\n Always use specific schema.org properties when a) they exist and b) you can populate them. Using PropertyValue as a substitute will typically not trigger the same effect as using the original, specific property.
-    """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Property value" ;
   rdfs:subClassOf schema:StructuredValue ;
   sh:property schema:PropertyValue-maxValue ;
@@ -23573,7 +23575,7 @@ For example, if [[variableMeasured]] is: molecule concentration, [[measurementTe
 If the [[variableMeasured]] is \"depression rating\", the [[measurementTechnique]] could be \"Zung Scale\" or \"HAM-D\" or \"Beck Depression Inventory\".
 
 If there are several [[variableMeasured]] properties recorded for some given data object, use a [[PropertyValue]] for each [[variableMeasured]] and attach the corresponding [[measurementTechnique]].
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "measurementTechnique" ;
   sh:or (
       [
@@ -24696,7 +24698,7 @@ schema:RealEstateListing
   schema:source <https://github.com/schemaorg/schemaorg/issues/2348> ;
   rdfs:comment """A [[RealEstateListing]] is a listing that describes one or more real-estate [[Offer]]s (whose [[businessFunction]] is typically to lease out, or to sell).
   The [[RealEstateListing]] type itself represents the overall listing, as manifested in some [[WebPage]].
-  """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Real estate listing" ;
   rdfs:subClassOf schema:WebPage ;
   sh:property schema:RealEstateListing-datePosted ;
@@ -24818,7 +24820,7 @@ schema:Recipe-recipeCategory
   a sh:PropertyShape ;
   sh:path schema:recipeCategory ;
   sh:datatype xsd:string ;
-  sh:description "The category of the recipeâ€”for example, appetizer, entree, etc."^^rdf:HTML ;
+  sh:description "The category of the recipe—for example, appetizer, entree, etc."^^rdf:HTML ;
   sh:name "recipeCategory" ;
 .
 schema:Recipe-recipeCuisine
@@ -25439,7 +25441,7 @@ schema:Resort
   rdfs:comment """A resort is a place used for relaxation or recreation, attracting visitors for holidays or vacations. Resorts are places, towns or sometimes commercial establishment operated by a single company (Source: Wikipedia, the free encyclopedia, see <a href=\"http://en.wikipedia.org/wiki/Resort\">http://en.wikipedia.org/wiki/Resort</a>).
 <br /><br />
 See also the <a href=\"/docs/hotels.html\">dedicated document on the use of schema.org for marking up hotels and other forms of accommodations</a>.
-    """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Resort" ;
   rdfs:subClassOf schema:LodgingBusiness ;
 .
@@ -25803,13 +25805,13 @@ schema:SatireOrParodyContent
   schema:source <https://github.com/schemaorg/schemaorg/issues/2450> ;
   rdfs:comment """Content coded 'satire or content' in a [[MediaReview]], considered in the context of how it was published or shared.
 
-For a [[VideoObject]] to be 'satire or parody content': A video that was created as political or humorous commentary and is presented in that context. (Reshares of satire/parody content that do not include relevant context are more likely to fall under the â€œmissing contextâ€ rating.)
+For a [[VideoObject]] to be 'satire or parody content': A video that was created as political or humorous commentary and is presented in that context. (Reshares of satire/parody content that do not include relevant context are more likely to fall under the “missing context” rating.)
 
-For an [[ImageObject]] to be 'satire or parody content': An image that was created as political or humorous commentary and is presented in that context. (Reshares of satire/parody content that do not include relevant context are more likely to fall under the â€œmissing contextâ€ rating.)
+For an [[ImageObject]] to be 'satire or parody content': An image that was created as political or humorous commentary and is presented in that context. (Reshares of satire/parody content that do not include relevant context are more likely to fall under the “missing context” rating.)
 
-For an [[ImageObject]] with embedded text to be 'satire or parody content': An image that was created as political or humorous commentary and is presented in that context. (Reshares of satire/parody content that do not include relevant context are more likely to fall under the â€œmissing contextâ€ rating.)
+For an [[ImageObject]] with embedded text to be 'satire or parody content': An image that was created as political or humorous commentary and is presented in that context. (Reshares of satire/parody content that do not include relevant context are more likely to fall under the “missing context” rating.)
 
-For an [[AudioObject]] to be 'satire or parody content': Audio that was created as political or humorous commentary and is presented in that context. (Reshares of satire/parody content that do not include relevant context are more likely to fall under the â€œmissing contextâ€ rating.)
+For an [[AudioObject]] to be 'satire or parody content': Audio that was created as political or humorous commentary and is presented in that context. (Reshares of satire/parody content that do not include relevant context are more likely to fall under the “missing context” rating.)
 """ ;
   rdfs:label "Satire or parody content" ;
 .
@@ -26450,7 +26452,7 @@ schema:Service-offers
   a sh:PropertyShape ;
   sh:path schema:offers ;
   sh:description """An offer to provide this item&#x2014;for example, an offer to sell a product, rent the DVD of a movie, perform a service, or give away tickets to an event. Use [[businessFunction]] to indicate the kind of transaction offered, i.e. sell, lease, etc. This property can also be used to describe a [[Demand]]. While this property is listed as expected on a number of common types, it can be used in others. In that case, using a second type, such as Product or a subtype of Product, can clarify the nature of the offer.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "offers" ;
   sh:or (
       [
@@ -27865,7 +27867,7 @@ schema:StatisticalPopulation
   rdfs:comment """A StatisticalPopulation is a set of instances of a certain given type that satisfy some set of constraints. The property [[populationType]] is used to specify the type. Any property that can be used on instances of that type can appear on the statistical population. For example, a [[StatisticalPopulation]] representing all [[Person]]s with a [[homeLocation]] of East Podunk California, would be described by applying the appropriate [[homeLocation]] and [[populationType]] properties to a [[StatisticalPopulation]] item that stands for that set of people.
 The properties [[numConstraints]] and [[constrainingProperty]] are used to specify which of the populations properties are used to specify the population. Note that the sense of \"population\" used here is the general sense of a statistical
 population, and does not imply that the population consists of people. For example, a [[populationType]] of [[Event]] or [[NewsArticle]] could be used. See also [[Observation]], and the [data and datasets](/docs/data-and-datasets.html) overview for more details.
-  """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Statistical population" ;
   rdfs:subClassOf schema:Intangible ;
   sh:property schema:StatisticalPopulation-constrainingProperty ;
@@ -28676,7 +28678,7 @@ schema:Thing-identifier
   a sh:PropertyShape ;
   sh:path schema:identifier ;
   sh:description """The identifier property represents any kind of identifier for any kind of [[Thing]], such as ISBNs, GTIN codes, UUIDs etc. Schema.org provides dedicated properties for representing many of these, either as textual strings or as URL (URI) links. See [background notes](/docs/datamodel.html#identifierBg) for more details.
-        """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "identifier" ;
   sh:or (
       [
@@ -29079,7 +29081,7 @@ schema:TradeAction-price
   a sh:PropertyShape ;
   sh:path schema:price ;
   sh:description """The offer price of a product, or of a price component when attached to PriceSpecification and its subtypes.\\n\\nUsage guidelines:\\n\\n* Use the [[priceCurrency]] property (with standard formats: [ISO 4217 currency format](http://en.wikipedia.org/wiki/ISO_4217) e.g. \"USD\"; [Ticker symbol](https://en.wikipedia.org/wiki/List_of_cryptocurrencies) for cryptocurrencies e.g. \"BTC\"; well known names for [Local Exchange Tradings Systems](https://en.wikipedia.org/wiki/Local_exchange_trading_system) (LETS) and other currency types e.g. \"Ithaca HOUR\") instead of including [ambiguous symbols](http://en.wikipedia.org/wiki/Dollar_sign#Currencies_that_use_the_dollar_or_peso_sign) such as '$' in the value.\\n* Use '.' (Unicode 'FULL STOP' (U+002E)) rather than ',' to indicate a decimal point. Avoid using these symbols as a readability separator.\\n* Note that both [RDFa](http://www.w3.org/TR/xhtml-rdfa-primer/#using-the-content-attribute) and Microdata syntax allow the use of a \"content=\" attribute for publishing simple machine-readable values alongside more human-friendly formatting.\\n* Use values from 0123456789 (Unicode 'DIGIT ZERO' (U+0030) to 'DIGIT NINE' (U+0039)) rather than superficially similiar Unicode symbols.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "price" ;
   sh:or (
       [
@@ -29321,7 +29323,7 @@ schema:Trip-offers
   a sh:PropertyShape ;
   sh:path schema:offers ;
   sh:description """An offer to provide this item&#x2014;for example, an offer to sell a product, rent the DVD of a movie, perform a service, or give away tickets to an event. Use [[businessFunction]] to indicate the kind of transaction offered, i.e. sell, lease, etc. This property can also be used to describe a [[Demand]]. While this property is listed as expected on a number of common types, it can be used in others. In that case, using a second type, such as Product or a subtype of Product, can clarify the nature of the offer.
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "offers" ;
   sh:or (
       [
@@ -30852,8 +30854,8 @@ schema:VisualArtwork-artist
   sh:path schema:artist ;
   sh:class schema:Person ;
   sh:description """The primary artist for a work
-    in a medium other than pencils or digital line art--for example, if the
-    primary artwork is done in watercolors or digital paints."""^^rdf:HTML ;
+	in a medium other than pencils or digital line art--for example, if the
+	primary artwork is done in watercolors or digital paints."""^^rdf:HTML ;
   sh:name "artist" ;
 .
 schema:VisualArtwork-artworkSurface
@@ -31048,7 +31050,7 @@ schema:WarrantyScope
   a sh:NodeShape ;
   schema:source <http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#source_GoodRelationsClass> ;
   rdfs:comment """A range of of services that will be provided to a customer free of charge in case of a defect or malfunction of a product.\\n\\nCommonly used values:\\n\\n* http://purl.org/goodrelations/v1#Labor-BringIn\\n* http://purl.org/goodrelations/v1#PartsAndLabor-BringIn\\n* http://purl.org/goodrelations/v1#PartsAndLabor-PickUp
-      """^^rdf:HTML ;
+"""^^rdf:HTML ;
   rdfs:label "Warranty scope" ;
   rdfs:subClassOf schema:Enumeration ;
 .
@@ -31552,7 +31554,7 @@ The *speakable* property can be repeated an arbitrary number of times, with thre
 
 For more sophisticated markup of speakable sections beyond simple ID references, either CSS selectors or XPath expressions to pick out document section(s) as speakable. For this
 we define a supporting type, [[SpeakableSpecification]]  which is defined to be a possible value of the *speakable* property.
-         """^^rdf:HTML ;
+"""^^rdf:HTML ;
   sh:name "speakable" ;
   sh:or (
       [
