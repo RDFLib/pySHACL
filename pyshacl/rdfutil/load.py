@@ -7,7 +7,7 @@ import sys
 
 from io import BufferedIOBase, BytesIO, TextIOBase, UnsupportedOperation
 from pathlib import Path
-from typing import BinaryIO, List, Optional, Union
+from typing import IO, BinaryIO, List, Optional, Union, cast
 from urllib import request
 from urllib.error import HTTPError
 
@@ -132,9 +132,11 @@ def load_from_source(
             source_was_open = True
 
     elif isinstance(source, str):
-        pid = os.getpid()
-        fd0 = "/proc/{}/fd/0".format(str(pid))
-        if is_windows and source.startswith('file:///'):
+        if source == "stdin" or source == "-" or source == "/dev/stdin":
+            public_id = "/dev/stdin"
+            filename = "/dev/stdin"
+            source_as_filename = filename
+        elif is_windows and source.startswith('file:///'):
             public_id = source
             filename = source[8:]
             source_as_filename = filename
@@ -186,7 +188,9 @@ def load_from_source(
                 filename = source
                 source_as_filename = filename
         if source_as_filename and filename:
-            if filename == "stdin" or filename == "/dev/stdin" or filename == "-" or filename == fd0:
+            pid = os.getpid()
+            fd0 = "/proc/{}/fd/0".format(str(pid))
+            if filename == "/dev/stdin" or filename == fd0:
                 source = source_as_file = open_source = sys.stdin.buffer
                 source_was_open = True
             else:
@@ -271,7 +275,15 @@ def load_from_source(
             source_was_open = False
         if rdf_format is None:
             line = _source.readline().lstrip()
-            if len(line) > 15:
+            line_len = len(line) if line is not None else 0
+            while (
+                (line is not None and line_len == 0)
+                or (line_len == 1 and line[0] == "\n")
+                or (line_len == 2 and line[0:2] == "\r\n")
+            ):
+                line = _source.readline().lstrip()
+                line_len = len(line) if line is not None else 0
+            if line_len > 15:
                 line = line[:15]
             line = line.lower()
             if line.startswith(b"<!doctype html") or line.startswith(b"<html"):
@@ -337,7 +349,7 @@ def load_from_source(
                 raise RuntimeError("Seek failed while pre-parsing Turtle File.")
             except ValueError:
                 raise RuntimeError("File closed while pre-parsing Turtle File.")
-        target_g.parse(source=_source, format=rdf_format, publicID=public_id)
+        target_g.parse(source=cast(IO[bytes], _source), format=rdf_format, publicID=public_id)
         # If the target was open to begin with, leave it open.
         if not source_was_open:
             _source.close()
@@ -404,12 +416,13 @@ def load_from_source(
             for ng in gs:
                 owl_imports = list(ng.objects(root_id, rdflib.OWL.imports))
                 if len(owl_imports) > 0:
-                    import_chain.append(root_id)
-                for o in owl_imports:
-                    if o in import_chain:
+                    import_chain.append(str(root_id))
+                for i in owl_imports:
+                    imp_str = str(i)
+                    if imp_str in import_chain:
                         continue
                     load_from_source(
-                        o,
+                        imp_str,
                         g=target_g,
                         multigraph=multigraph,
                         do_owl_imports=do_owl_imports + 1,
@@ -425,12 +438,13 @@ def load_from_source(
             for ng in gs:
                 owl_imports = list(ng.objects(public_id_uri, rdflib.OWL.imports))
                 if len(owl_imports) > 0:
-                    import_chain.append(public_id_uri)
-                for o in owl_imports:
-                    if o in import_chain:
+                    import_chain.append(str(public_id_uri))
+                for i in owl_imports:
+                    imp_str = str(i)
+                    if imp_str in import_chain:
                         continue
                     load_from_source(
-                        o,
+                        imp_str,
                         g=target_g,
                         multigraph=multigraph,
                         do_owl_imports=do_owl_imports + 1,
@@ -447,16 +461,17 @@ def load_from_source(
                 for ont in ontologies:
                     if ont == root_id or ont == public_id:
                         continue
-                    if ont in import_chain:
+                    ont_str = str(ont)
+                    if ont_str in import_chain:
                         continue
+                    import_chain.append(ont_str)
                     owl_imports = list(ng.objects(ont, rdflib.OWL.imports))
-                    if len(owl_imports) > 0:
-                        import_chain.append(ont)
-                    for o in owl_imports:
-                        if o in import_chain:
+                    for i in owl_imports:
+                        imp_str = str(i)
+                        if imp_str in import_chain:
                             continue
                         load_from_source(
-                            o,
+                            imp_str,
                             g=target_g,
                             multigraph=multigraph,
                             do_owl_imports=do_owl_imports + 1,

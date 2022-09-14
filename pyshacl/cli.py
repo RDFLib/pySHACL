@@ -282,7 +282,7 @@ def main():
                         r[SH.resultSeverity],
                         r[SH.focusNode],
                         r[SH.resultPath] if r.get(SH.resultPath) is not None else '-',
-                        r[SH.resultMessage],
+                        r[SH.resultMessage] if r.get(SH.resultMessage) is not None else '-',
                         r[SH.sourceConstraintComponent],
                         r[SH.sourceShape],
                         r[SH.value] if r.get(SH.value) is not None else '-',

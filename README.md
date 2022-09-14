@@ -215,6 +215,17 @@ This will output ``pyshacl.exe`` in the ``dist`` directory in ``src/pyshacl``.
 You can now run the pySHACL Command Line utility via ``pyshacl.exe``.
 See above for the pySHACL command line util usage instructions.
 
+## Docker
+Pull out the official docker image from Dockerhub:
+`docker pull docker.io/ashleysommer/pyshacl:latest`
+
+Or build the image yourself, from the PySHACL repository with `docker build . -t pyshacl`.
+
+You can now run PySHACL inside a container; but you need to mount the data you want to validate.
+For example, to validate `graph.ttl` against `shacl.ttl`, run :
+```bash
+docker run --rm --mount type=bind,src=`pwd`,dst=/data pyshacl -s /data/shacl.ttl /data/graph.ttl
+```
 
 ## Compatibility
 PySHACL is a Python3 library. For best compatibility use Python v3.7 or greater. Python3 v3.6 or below is _**not supported**_ and this library _**does not work**_ on Python v2.7.x or below.

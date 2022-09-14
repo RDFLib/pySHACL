@@ -30,7 +30,6 @@ tests_found_in_manifests = OrderedDict(sorted(tests_found_in_manifests.items()))
 # There are some tests we know will fail, but we don't want to stop deployment
 # if we hit them. List them here:
 ALLOWABLE_FAILURES = [
-    "/core/property/datatype-ill-formed",
     "/sparql/pre-binding/shapesGraph-001"
 ]
 

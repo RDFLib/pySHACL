@@ -425,7 +425,7 @@ def test_owl_imports_fail():
 
     res = validate(web_d2_ttl, shacl_graph=my_partial_shapes_text, data_graph_format='turtle',
                    shacl_graph_format='turtle', ont_graph=my_partial_ont_text,
-                   ont_graph_format="turtle", inference='both', debug=True, do_owl_imports=True)
+                   ont_graph_format=None, inference='both', debug=True, do_owl_imports=True)
     conforms, graph, string = res
     print(string)
     assert not conforms
