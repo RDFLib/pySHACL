@@ -218,7 +218,7 @@ def test_validate_with_ontology_XFAIL_spaces() -> None:
     # .triples() is used somewhat redundantly instead of using SPARQL, to avoid the possibility of any extra interpretation steps with SPARQL conversion.
     for triple0 in graph.triples((None, RDF.type, SH.ValidationResult)):
         n_validation_result = triple0[0]
-        for triple1 in graph.triples((n_validation_result, SH.path, None)):
+        for triple1 in graph.triples((n_validation_result, SH.resultPath, None)):
             n_path = triple1[2]
             for triple2 in graph.triples((n_validation_result, SH.value, None)):
                 l_value: Literal = triple2[2]
