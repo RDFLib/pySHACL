@@ -162,7 +162,6 @@ ex:holder2 a exOnt:NumberHolder ;
 
 
 def test_validate_with_ontology_XFAIL_lexical_space() -> None:
-    # TODO A runtime error is raised if the inference value is 'owlrl' or 'both', but 'none' and 'rdfs' do not raise a runtime error.  Discuss how to flag this test case.
     res = validate(
         data_file_text_XFAIL_lexical_space,
         shacl_graph=shacl_file_text,
@@ -170,7 +169,7 @@ def test_validate_with_ontology_XFAIL_lexical_space() -> None:
         shacl_graph_format='turtle',
         ont_graph=ontology_file_text,
         ont_graph_format="turtle",
-        # inference="both",
+        inference="both",
         debug=True,
     )
     conforms, graph, string = res
