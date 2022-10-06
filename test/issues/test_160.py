@@ -67,7 +67,7 @@ def test_160() -> None:
     assert not conforms
 
     # Find set of nodes expected to be foci of validation results.
-    expected: Set[URIRef] = {URIRef("http://example.org/thing-b-1")}
+    expected: Set[URIRef] = {URIRef("http://example.org/kb/thing-b-1")}
     computed: Set[URIRef] = set()
     for triple in conformance_graph.triples((None, SH.focusNode, None)):
         assert isinstance(triple[2], URIRef)
