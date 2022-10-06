@@ -56,11 +56,7 @@ ex:propertyOfA-shape
 
 
 def test_160() -> None:
-    (
-        conforms,
-        conformance_graph,
-        conformance_text,
-    ) = validate(
+    (conforms, conformance_graph, conformance_text,) = validate(
         mixed_file_text,
         shacl_graph=mixed_file_text,
         data_graph_format='turtle',
@@ -71,9 +67,7 @@ def test_160() -> None:
     assert not conforms
 
     # Find set of nodes expected to be foci of validation results.
-    expected: Set[URIRef] = {
-        URIRef("http://example.org/thing-b-1")
-    }
+    expected: Set[URIRef] = {URIRef("http://example.org/thing-b-1")}
     computed: Set[URIRef] = set()
     for triple in conformance_graph.triples((None, SH.focusNode, None)):
         assert isinstance(triple[2], URIRef)
