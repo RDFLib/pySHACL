@@ -146,7 +146,7 @@ class NodeConstraintComponent(ConstraintComponent):
         if len(self.node_shapes) < 2:
             m = "Value does not conform to Shape {}".format(stringify_node(self.shape.sg.graph, self.node_shapes[0]))
         else:
-            rules = "', '".join(stringify_node(self.shape.sg.graph, self.node_shapes[0]) for c in self.node_shapes)
+            rules = "', '".join(stringify_node(self.shape.sg.graph, c) for c in self.node_shapes)
             m = "Value does not conform to every Shape in ('{}')".format(rules)
         return [rdflib.Literal(m)]
 
