@@ -55,7 +55,7 @@ ex:test_entity a ex:text_class ;
 """
 
 
-def test_161() -> None:
+def test_162() -> None:
     data_g = rdflib.Graph()
     data_g.parse(data=data_file, format="turtle")
     shapes = rdflib.Graph()
@@ -67,4 +67,4 @@ def test_161() -> None:
 
 
 if __name__ == "__main__":
-    test_161()
+    test_162()
