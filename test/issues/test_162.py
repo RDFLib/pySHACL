@@ -16,7 +16,7 @@ shacl_file = """\
 @prefix schema: <http://schema.org/> .
 
 ex:ExampleParentShape a sh:NodeShape ;
-    sh:targetClass ex:text_class ;
+    sh:targetClass ex:test_class ;
     sh:node ex:nodeShape1,
         ex:nodeShape2 .
 
@@ -48,7 +48,7 @@ ex:test_class_2 a owl:Class .
 ex:name_1 a ex:test_class_1 .
 ex:org_1 a ex:test_class_2 . # this will cause test to fail
 
-ex:test_entity a ex:text_class ;
+ex:test_entity a ex:test_class ;
     schema:name ex:name_1 ;
     schema:subOrganization ex:org_1 .
 
