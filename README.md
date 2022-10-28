@@ -63,14 +63,14 @@ Full CLI Usage options:
 $ pyshacl -h
 $ python3 -m pyshacl -h
 usage: pyshacl [-h] [-s [SHACL]] [-e [ONT]] [-i {none,rdfs,owlrl,both}] [-m]
-               [-im] [-a] [-j] [-it] [--abort] [--allow-infos] [-w] [-d]
+               [-im] [-a] [-j] [-it] [--abort] [--allow-info] [-w] [-d]
                [-f {human,table,turtle,xml,json-ld,nt,n3}]
                [-df {auto,turtle,xml,json-ld,nt,n3}]
                [-sf {auto,turtle,xml,json-ld,nt,n3}]
                [-ef {auto,turtle,xml,json-ld,nt,n3}] [-V] [-o [OUTPUT]]
                DataGraph
 
-PySHACL 0.18.1 command line tool.
+PySHACL 0.20.0 command line tool.
 
 positional arguments:
   DataGraph             The file containing the Target Data Graph.
@@ -95,9 +95,11 @@ optional arguments:
   -it, --iterate-rules  Run Shape's SHACL Rules iteratively until the
                         data_graph reaches a steady state.
   --abort               Abort on first invalid data.
-  --allow-infos         Shapes marked with severity of Info will not cause
+  --allow-info, --allow-infos
+                        Shapes marked with severity of Info will not cause
                         result to be invalid.
-  -w, --allow-warnings  Shapes marked with severity of Warning or Info will
+  -w, --allow-warning, --allow-warnings
+                        Shapes marked with severity of Warning or Info will
                         not cause result to be invalid.
   -d, --debug           Output additional runtime messages.
   -f {human,table,turtle,xml,json-ld,nt,n3}, --format {human,table,turtle,xml,json-ld,nt,n3}
@@ -213,6 +215,17 @@ This will output ``pyshacl.exe`` in the ``dist`` directory in ``src/pyshacl``.
 You can now run the pySHACL Command Line utility via ``pyshacl.exe``.
 See above for the pySHACL command line util usage instructions.
 
+## Docker
+Pull out the official docker image from Dockerhub:
+`docker pull docker.io/ashleysommer/pyshacl:latest`
+
+Or build the image yourself, from the PySHACL repository with `docker build . -t pyshacl`.
+
+You can now run PySHACL inside a container; but you need to mount the data you want to validate.
+For example, to validate `graph.ttl` against `shacl.ttl`, run :
+```bash
+docker run --rm --mount type=bind,src=`pwd`,dst=/data pyshacl -s /data/shacl.ttl /data/graph.ttl
+```
 
 ## Compatibility
 PySHACL is a Python3 library. For best compatibility use Python v3.7 or greater. Python3 v3.6 or below is _**not supported**_ and this library _**does not work**_ on Python v2.7.x or below.

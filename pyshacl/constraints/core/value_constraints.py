@@ -3,6 +3,7 @@
 https://www.w3.org/TR/shacl/#core-components-value-type
 """
 from datetime import date, datetime, time
+from decimal import Decimal
 from typing import Dict, List
 
 import rdflib
@@ -41,6 +42,7 @@ XSD_boolean = XSD.boolean
 XSD_date = XSD.date
 XSD_time = XSD.time
 XSD_dateTime = XSD.dateTime
+XSD_decimal = XSD.decimal
 
 SH_class = SH["class"]
 SH_ClassConstraintComponent = SH.ClassConstraintComponent
@@ -181,7 +183,11 @@ class DatatypeConstraintComponent(ConstraintComponent):
                     datatype = v.datatype
                     lang = v.language
                     if datatype == dtype_rule:
-                        matches = self._assert_actual_datatype(v, dtype_rule)
+                        ill_formed = getattr(v, "ill_typed", None)
+                        if ill_formed is True:
+                            matches = False
+                        else:
+                            matches = self._assert_actual_datatype(v, dtype_rule)
                     elif dtype_rule == RDFS_Literal:
                         # Special case. All literals are instance of RDFS.Literal
                         # and all literals have datatype of RDFS.Literal
@@ -213,6 +219,8 @@ class DatatypeConstraintComponent(ConstraintComponent):
             return isinstance(value, int)
         elif datatype_rule == XSD_float:
             return isinstance(value, float)
+        elif datatype_rule == XSD_decimal:
+            return isinstance(value, Decimal)
         elif datatype_rule == XSD_boolean:
             return isinstance(value, bool)
         elif datatype_rule == XSD_date:

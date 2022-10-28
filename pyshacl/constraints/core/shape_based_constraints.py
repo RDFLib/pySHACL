@@ -8,7 +8,7 @@ from warnings import warn
 import rdflib
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
-from pyshacl.consts import SH, SH_node, SH_property
+from pyshacl.consts import SH, SH_node, SH_NodeConstraintComponent, SH_property, SH_PropertyConstraintComponent
 from pyshacl.errors import (
     ConstraintLoadError,
     ConstraintLoadWarning,
@@ -19,9 +19,6 @@ from pyshacl.errors import (
 from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
 
-
-SH_PropertyConstraintComponent = SH.PropertyConstraintComponent
-SH_NodeConstraintComponent = SH.NodeConstraintComponent
 
 SH_QualifiedValueCountConstraintComponent = SH.QualifiedValueConstraintComponent
 SH_QualifiedMaxCountConstraintComponent = SH.QualifiedMaxCountConstraintComponent
@@ -74,17 +71,25 @@ class PropertyConstraintComponent(ConstraintComponent):
         :type target_graph: rdflib.Graph
         :type _evaluation_path: list
         """
-        reports = []
+        reports: List[Dict] = []
         non_conformant = False
         shape = self.shape
+
+        # Shortcut, when there are no value nodes, don't check for recursion, don't validate and exit early
+        value_node_count = 0
+        for f, value_nodes in focus_value_nodes.items():
+            value_node_count = value_node_count + len(value_nodes)
+        if value_node_count < 1:
+            return (not non_conformant), reports
+
         potentially_recursive = self.recursion_triggers(_evaluation_path)
 
         def _evaluate_property_shape(prop_shape):
-            nonlocal shape, target_graph, focus_value_nodes, _evaluation_path
+            nonlocal shape, target_graph, focus_value_nodes, _evaluation_path, potentially_recursive
             _reports = []
             _non_conformant = False
             prop_shape = shape.get_other_shape(prop_shape)
-            if prop_shape in potentially_recursive:
+            if potentially_recursive and prop_shape in potentially_recursive:
                 warn(ShapeRecursionWarning(_evaluation_path))
                 return _non_conformant, _reports
             if not prop_shape or not prop_shape.is_property_shape:
@@ -141,7 +146,7 @@ class NodeConstraintComponent(ConstraintComponent):
         if len(self.node_shapes) < 2:
             m = "Value does not conform to Shape {}".format(stringify_node(self.shape.sg.graph, self.node_shapes[0]))
         else:
-            rules = "', '".join(stringify_node(self.shape.sg.graph, self.node_shapes[0]) for c in self.node_shapes)
+            rules = "', '".join(stringify_node(self.shape.sg.graph, c) for c in self.node_shapes)
             m = "Value does not conform to every Shape in ('{}')".format(rules)
         return [rdflib.Literal(m)]
 
@@ -152,17 +157,25 @@ class NodeConstraintComponent(ConstraintComponent):
         :type target_graph: rdflib.Graph
         :type _evaluation_path: list
         """
-        reports = []
+        reports: List[Dict] = []
         non_conformant = False
         shape = self.shape
+
+        # Shortcut, when there are no value nodes, don't check for recursion, don't validate and exit early
+        value_node_count = 0
+        for f, value_nodes in focus_value_nodes.items():
+            value_node_count = value_node_count + len(value_nodes)
+        if value_node_count < 1:
+            return (not non_conformant), reports
+
         potentially_recursive = self.recursion_triggers(_evaluation_path)
 
         def _evaluate_node_shape(node_shape):
-            nonlocal self, target_graph, shape, focus_value_nodes, _evaluation_path
+            nonlocal self, target_graph, shape, focus_value_nodes, _evaluation_path, potentially_recursive
             _reports = []
             _non_conformant = False
             node_shape = shape.get_other_shape(node_shape)
-            if node_shape in potentially_recursive:
+            if potentially_recursive and node_shape in potentially_recursive:
                 warn(ShapeRecursionWarning(_evaluation_path))
                 return _non_conformant, _reports
             if not node_shape or node_shape.is_property_shape:
@@ -277,17 +290,25 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
         :type target_graph: rdflib.Graph
         :type _evaluation_path: List
         """
-        reports = []
+        reports: List[Dict] = []
         non_conformant = False
         shape = self.shape
+
+        # Shortcut, when there are no value nodes, don't check for recursion, don't validate and exit early
+        value_node_count = 0
+        for f, value_nodes in focus_value_nodes.items():
+            value_node_count = value_node_count + len(value_nodes)
+        if value_node_count < 1:
+            return (not non_conformant), reports
+
         potentially_recursive = self.recursion_triggers(_evaluation_path)
 
         def _evaluate_value_shape(_v_shape):
-            nonlocal self, shape, target_graph, focus_value_nodes, _evaluation_path
+            nonlocal self, shape, target_graph, focus_value_nodes, _evaluation_path, potentially_recursive
             _reports = []
             _non_conformant = False
             other_shape = shape.get_other_shape(_v_shape)
-            if other_shape in potentially_recursive:
+            if potentially_recursive and other_shape in potentially_recursive:
                 warn(ShapeRecursionWarning(_evaluation_path))
                 return _non_conformant, _reports
             if not other_shape:

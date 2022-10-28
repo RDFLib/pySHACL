@@ -91,7 +91,7 @@ class NotConstraintComponent(ConstraintComponent):
         :type not_c: List[Node]
         :type datagraph: rdflib.Graph
         :type focus_value_nodes: dict
-        :type potentially_recursive: List
+        :type potentially_recursive: Optional[List]
         :type _evaluation_path: List
         """
         _reports = []
@@ -101,7 +101,7 @@ class NotConstraintComponent(ConstraintComponent):
             raise ReportableRuntimeError(
                 "Shape pointed to by sh:not does not exist or is not a well-formed SHACL Shape."
             )
-        if not_shape in potentially_recursive:
+        if potentially_recursive and not_shape in potentially_recursive:
             warn(ShapeRecursionWarning(_evaluation_path))
             return _non_conformant, _reports
         for f, value_nodes in focus_value_nodes.items():

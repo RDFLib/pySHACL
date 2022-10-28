@@ -95,8 +95,8 @@ parser.add_argument(
 )
 parser.add_argument('--abort', dest='abort', action='store_true', default=False, help='Abort on first invalid data.')
 parser.add_argument(
-    '--allow-infos',
     '--allow-info',
+    '--allow-infos',
     dest='allow_infos',
     action='store_true',
     default=False,
@@ -282,7 +282,7 @@ def main():
                         r[SH.resultSeverity],
                         r[SH.focusNode],
                         r[SH.resultPath] if r.get(SH.resultPath) is not None else '-',
-                        r[SH.resultMessage],
+                        r[SH.resultMessage] if r.get(SH.resultMessage) is not None else '-',
                         r[SH.sourceConstraintComponent],
                         r[SH.sourceShape],
                         r[SH.value] if r.get(SH.value) is not None else '-',
