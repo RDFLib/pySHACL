@@ -325,9 +325,6 @@ class Shape(object):
         specified as explicit input to the SHACL processor for validating a specific RDF term against a shape
         :return:
         """
-        # 'unified' takes into account any class structure defined in the
-        # shape graph for the purposes of finding instances of the target class
-        unified = data_graph + self.sg.graph
         (target_nodes, target_classes, implicit_classes, target_objects_of, target_subjects_of) = self.target()
         if self._advanced:
             advanced_targets = self.advanced_target()
@@ -341,13 +338,13 @@ class Shape(object):
         target_classes.update(set(implicit_classes))
         found_target_instances = set()
         for tc in target_classes:
-            s = unified.subjects(RDF_type, tc)
+            s = data_graph.subjects(RDF_type, tc)
             found_target_instances.update(s)
-            subc = unified.transitive_subjects(RDFS_subClassOf, tc)
+            subc = data_graph.transitive_subjects(RDFS_subClassOf, tc)
             for subclass in iter(subc):
                 if subclass == tc:
                     continue
-                s1 = unified.subjects(RDF_type, subclass)
+                s1 = data_graph.subjects(RDF_type, subclass)
                 found_target_instances.update(s1)
         found_node_targets.update(found_target_instances)
         found_target_subject_of = set()
@@ -365,7 +362,7 @@ class Shape(object):
                 if at['type'] == SH_SPARQLTarget:
                     qh = at['qh']
                     select = qh.apply_prefixes(qh.select_text)
-                    results = unified.query(select, initBindings=None)
+                    results = data_graph.query(select, initBindings=None)
                     if not results or len(results.bindings) < 1:
                         continue
                     for r in results:
