@@ -188,7 +188,7 @@ class NodeConstraintComponent(ConstraintComponent):
                     # ignore the fails from the node, create our own fail
                     if (not _is_conform) or len(_r) > 0:
                         _non_conformant = True
-                        rept = self.make_v_result(target_graph, f, value_node=v)
+                        rept = self.make_v_result(target_graph, f, value_node=v, source_constraint=node_shape.node)
                         _reports.append(rept)
             return _non_conformant, _reports
 
