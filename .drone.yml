@@ -15,7 +15,7 @@ steps:
     - name: tox_cache
       path: /tmp/.tox
   commands:
-  - pip3 install --upgrade tox
+  - pip3 install --upgrade "tox>=4.0.8"
   - tox -e py37
 
 volumes:
@@ -43,7 +43,7 @@ steps:
     - name: tox_cache
       path: /tmp/.tox
   commands:
-  - pip3 install --upgrade tox
+  - pip3 install --upgrade "tox>=4.0.8"
   - tox -e py38
 - name: type-checking-3-8
   image: python:3.8
@@ -53,7 +53,7 @@ steps:
     - name: tox_cache
       path: /tmp/.tox
   commands:
-  - pip3 install --upgrade tox
+  - pip3 install --upgrade "tox>=4.0.8"
   - tox -e type-checking
 - name: lint-3-8
   image: python:3.8
@@ -63,7 +63,7 @@ steps:
     - name: tox_cache
       path: /tmp/.tox
   commands:
-  - pip3 install --upgrade tox
+  - pip3 install --upgrade "tox>=4.0.8"
   - tox -e lint
 #- name: security
 #  image: snyk/snyk:python-3.8
@@ -97,7 +97,7 @@ steps:
       path: /tmp/.tox
   commands:
   - pip3 install -U "pip>=21.0"
-  - pip3 install --upgrade tox
+  - pip3 install --upgrade "tox>=4.0.8"
   - tox -e py39
 
 ---
@@ -118,7 +118,7 @@ steps:
       path: /tmp/.tox
   commands:
   - pip3 install -U "pip>=21.3"
-  - pip3 install --upgrade tox
+  - pip3 install --upgrade "tox>=4.0.8"
   - tox -e py310
 - name: type-checking-3-10
   image: python:3.10
@@ -128,7 +128,7 @@ steps:
     - name: tox_cache
       path: /tmp/.tox
   commands:
-  - pip3 install --upgrade tox
+  - pip3 install --upgrade "tox>=4.0.8"
   - tox -e type-checking
 - name: lint-3-10
   image: python:3.10
@@ -138,7 +138,47 @@ steps:
     - name: tox_cache
       path: /tmp/.tox
   commands:
-  - pip3 install --upgrade tox
+  - pip3 install --upgrade "tox>=4.0.8"
+  - tox -e lint
+
+---
+kind: pipeline
+name: python-3-11
+type: docker
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: test-3-11
+  image: python:3.11
+  environment:
+    TOX_WORK_DIR: /tmp/.tox
+  volumes:
+    - name: tox_cache
+      path: /tmp/.tox
+  commands:
+  - pip3 install --upgrade "tox>=4.0.8"
+  - tox -e py311
+- name: type-checking-3-11
+  image: python:3.11
+  environment:
+    TOX_WORK_DIR: /tmp/.tox
+  volumes:
+    - name: tox_cache
+      path: /tmp/.tox
+  commands:
+  - pip3 install --upgrade "tox>=4.0.8"
+  - tox -e type-checking
+- name: lint-3-11
+  image: python:3.11
+  environment:
+    TOX_WORK_DIR: /tmp/.tox
+  volumes:
+    - name: tox_cache
+      path: /tmp/.tox
+  commands:
+  - pip3 install --upgrade "tox>=4.0.8"
   - tox -e lint
 
 volumes:
