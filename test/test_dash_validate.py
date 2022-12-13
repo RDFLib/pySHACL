@@ -39,8 +39,7 @@ def test_dash_validate_all_core(target_file, shacl_file):
         v_text = ""
     assert val
     print(v_text)
-    print(v_text)
-    return True
+
 
 
 for x in walk(path.join(dash_files_dir, 'sparql')):
@@ -58,7 +57,7 @@ def test_dash_validate_all_sparql(target_file, shacl_file):
         v_text = ""
     assert val
     print(v_text)
-    return True
+
 
 # Tests for SHACL Advanced Features: https://www.w3.org/TR/shacl-af
 
@@ -96,7 +95,6 @@ def test_dash_validate_all_sparql_rules(target_file, shacl_file):
         v_text = ""
     assert val
     print(v_text)
-    return True
 
 # Get all triple-rules tests.
 for x in walk(path.join(dash_files_dir, 'rules', 'triple')):
@@ -137,7 +135,6 @@ def test_dash_validate_all_triple_rules(target_file, shacl_file):
             raise ae
 
     print(v_text)
-    return True
 
 # Get all SHACL-AF sh:target tests.
 for x in walk(path.join(dash_files_dir, 'target')):
@@ -178,7 +175,6 @@ def test_dash_validate_target(target_file, shacl_file):
             raise ae
 
     print(v_text)
-    return True
 
 # Get all SHACL-AF sh:expression tests.
 for x in walk(path.join(dash_files_dir, 'expression')):
@@ -219,7 +215,6 @@ def test_dash_validate_expression(target_file, shacl_file):
             raise ae
 
     print(v_text)
-    return True
 
 # Get all SHACLFunction tests
 for x in walk(path.join(dash_files_dir, 'function')):
@@ -260,4 +255,3 @@ def test_dash_validate_functions(target_file, shacl_file):
             raise ae
 
     print(v_text)
-    return True

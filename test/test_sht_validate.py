@@ -70,4 +70,4 @@ def test_sht_all(base, index):
                 break
         else:
             raise ae
-    return True
+

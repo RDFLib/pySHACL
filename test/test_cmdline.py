@@ -98,7 +98,6 @@ def test_cmdline():
     print(res.stdout.decode('utf-8'))
     print(res.stderr.decode('utf-8'))
     assert res.returncode == 0
-    return True
 
 
 def test_cmdline_fail():
@@ -124,7 +123,6 @@ def test_cmdline_fail():
     print(res.stdout.decode('utf-8'))
     print(res.stderr.decode('utf-8'))
     assert res.returncode == 1
-    return True
 
 
 def test_cmdline_table():
@@ -147,17 +145,17 @@ def test_cmdline_web():
     if platform.system() == "Windows":
         print("Commandline tests cannot run on Windows.")
         assert True
-        return True
+        return
     if os.environ.get("PYBUILD_NAME", None) is not None:
         print("We don't have access to scripts dir during pybuild process.")
         assert True
-        return True
+        return
     DEB_BUILD_ARCH = os.environ.get('DEB_BUILD_ARCH', None)
     DEB_HOST_ARCH = os.environ.get('DEB_HOST_ARCH', None)
     if DEB_BUILD_ARCH is not None or DEB_HOST_ARCH is not None:
         print("Cannot run web requests in debhelper tests.")
         assert True
-        return True
+        return
     graph_file = path.join(cmdline_files_dir, 'd1.ttl')
     shacl_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/s1.ttl"
     ont_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/o1.ttl"
@@ -168,7 +166,6 @@ def test_cmdline_web():
     print(res.stdout.decode('utf-8'))
     print(res.stderr.decode('utf-8'))
     assert res.returncode == 0
-    return True
 
 
 def test_cmdline_jsonld():
@@ -179,17 +176,17 @@ def test_cmdline_jsonld():
     if platform.system() == "Windows":
         print("Commandline tests cannot run on Windows.")
         assert True
-        return True
+        return
     if os.environ.get("PYBUILD_NAME", None) is not None:
         print("We don't have access to scripts dir during pybuild process.")
         assert True
-        return True
+        return
     DEB_BUILD_ARCH = os.environ.get('DEB_BUILD_ARCH', None)
     DEB_HOST_ARCH = os.environ.get('DEB_HOST_ARCH', None)
     if DEB_BUILD_ARCH is not None or DEB_HOST_ARCH is not None:
         print("Cannot run web requests in debhelper tests.")
         assert True
-        return True
+        return
     graph_file = path.join(cmdline_files_dir, 'd1.jsonld')
     shacl_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/s1.ttl"
     ont_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/o1.ttl"
@@ -200,7 +197,6 @@ def test_cmdline_jsonld():
     print(res.stdout.decode('utf-8'))
     print(res.stderr.decode('utf-8'))
     assert res.returncode == 0
-    return True
 
 
 if __name__ == "__main__":
