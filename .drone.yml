@@ -11,10 +11,6 @@ steps:
   image: python:3.7
   environment:
     TOX_WORK_DIR: /tmp/.tox
-    HAS_COVERALLS: true
-    COVERALLS_SERVICE_NAME: PySHACL-Drone
-    COVERALLS_REPO_TOKEN:
-      from_secret: coveralls_token
   volumes:
     - name: tox_cache
       path: /tmp/.tox
@@ -39,6 +35,10 @@ steps:
   image: python:3.8
   environment:
     TOX_WORK_DIR: /tmp/.tox
+    HAS_COVERALLS: true
+    COVERALLS_SERVICE_NAME: PySHACL-Drone
+    COVERALLS_REPO_TOKEN:
+      from_secret: coveralls_token
   volumes:
     - name: tox_cache
       path: /tmp/.tox

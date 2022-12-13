@@ -1,5 +1,5 @@
 [build-system]
-requires = ["poetry-core>=1.1.0,<2"]
+requires = ["poetry-core>=1.3.2,<2"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
@@ -71,7 +71,7 @@ coverage = {version=">6,<7,!=6.0.*,!=6.1,!=6.1.1", optional=true}
 pytest-cov = {version="^2.8.1", optional=true}
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.0"
+pytest = "^7.2"
 coverage = {version=">6,<7,!=6.0.*,!=6.1,!=6.1.1", optional=true}
 pytest-cov = {version="^2.8.1", optional=true}
 flake8 = {version="^5.0.4", optional=true}
@@ -155,7 +155,7 @@ toxworkdir={env:TOX_WORK_DIR:.tox}
 
 [testenv]
 deps =
-    poetry>=1.2.0
+    poetry>=1.3.1
 passenv = TRAVIS TRAVIS_JOB_ID TRAVIS_BRANCH TRAVIS_BUILD_DIR DRONE_BUILD_NUMBER DRONE_STAGE_NAME DRONE_STAGE_KIND DRONE_REPO_NAME DRONE_SOURCE_BRANCH COVERALLS_SERVICE_NAME COVERALLS_REPO_TOKEN DRONE_COMMIT_AUTHOR_NAME DRONE_COMMIT_AUTHOR_EMAIL DRONE_COMMIT HAS_COVERALLS
 skip_install = true
 allowlist_externals = python3, ls, pwd, env, poetry
