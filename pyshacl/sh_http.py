@@ -2,10 +2,10 @@
 import os
 import sys
 
-import sanic.application.logo
-
 
 try:
+    import sanic.application.logo
+
     from sanic import Request, Sanic
     from sanic.exceptions import InvalidUsage
     from sanic.response import HTTPResponse, JSONResponse, text
