@@ -197,6 +197,8 @@ $ pyshacl --server
 $ pyshacl_server
 # or
 $ python3 -m pyshacl server
+# or
+$ docker run --rm -e PYSHACL_SERVER=TRUE -i -t docker.io/ashleysommer/pyshacl:latest
 ```
 
 By default, this will run the service on localhost address `127.0.0.1` on port `8099`.
@@ -261,7 +263,7 @@ Or build the image yourself, from the PySHACL repository with `docker build . -t
 You can now run PySHACL inside a container; but you need to mount the data you want to validate.
 For example, to validate `graph.ttl` against `shacl.ttl`, run :
 ```bash
-docker run --rm --mount type=bind,src=`pwd`,dst=/data pyshacl -s /data/shacl.ttl /data/graph.ttl
+docker run --rm -i -t --mount type=bind,src=`pwd`,dst=/data pyshacl -s /data/shacl.ttl /data/graph.ttl
 ```
 
 ## Compatibility
