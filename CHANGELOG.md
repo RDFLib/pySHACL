@@ -5,13 +5,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
 ## [Unreleased]
-### Nothing yet
+
+## [0.21.0] - 2023-03-31
+### In this release:
+
+### Added
+- New HTTP Server functionality
+  - run PySHACL as a persistent service, exposing an OpenAPI3.0-compatible REST interface
+- Detection of filename when downloading web attachments is added
+- Better detection of invalid integer values for sh:minLength and sh:maxLength string constraints.
+
+### Fixed
+- Opening a http link that has chunked encoding, or content-disposition attachment will now work correctly.
+
 
 ## [0.20.0] - 2022-09-08
-
-### Note, while this is a normal 0.x release, it also acts as the v1.0 release candidate.
-That means, if no glaring bugs or issues are found in this release after two weeks, this version will be re-released as 
-PySHACL v1.0.
 
 ### In this release:
 
@@ -980,7 +988,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.20.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.21.0...HEAD
+[0.21.0]: https://github.com/RDFLib/pySHACL/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/RDFLib/pySHACL/compare/v0.19.1...v0.20.0
 [0.19.1]: https://github.com/RDFLib/pySHACL/compare/v0.19.0...v0.19.1
 [0.19.0]: https://github.com/RDFLib/pySHACL/compare/v0.18.1...v0.19.0

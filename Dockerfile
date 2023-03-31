@@ -9,13 +9,13 @@ WORKDIR /home/pyshacl
 RUN addgroup -g 1000 -S pyshacl &&\
     adduser --disabled-password --gecos "" --home "$(pwd)" --ingroup "pyshacl" --no-create-home --uid 1000 pyshacl
 WORKDIR /app
-LABEL org.opencontainers.image.version="0.19.1"
+LABEL org.opencontainers.image.version="0.21.0"
 COPY . .
 RUN chown -R pyshacl:pyshacl /home/pyshacl /app && chmod -R 775 /home/pyshacl /app
 USER pyshacl
 ENV PATH="/home/pyshacl/.local/bin:$PATH"
-RUN pip3 install poetry
-RUN poetry install --no-dev --extras "js"
+RUN pip3 install "poetry>=1.2.0,<2.0"
+RUN poetry install --no-dev --extras "js http"
 USER root
 RUN apk del build-dependencies
 USER pyshacl

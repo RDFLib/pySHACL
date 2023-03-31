@@ -25,13 +25,25 @@ class ShowVersion(argparse.Action):
         )
 
     def __call__(self, parser, namespace, values, option_string=None):
-        sys.stderr.write("PySHACL Version: " + str(__version__) + "\n")
-        parser.exit()
+        # parser.exit() writes message to stderr before calling sys.exit()
+        parser.exit(status=0, message="PySHACL Version: " + str(__version__) + "\n")
 
 
-parser = argparse.ArgumentParser(description='PySHACL {} command line tool.'.format(str(__version__)))
+def str_is_true(s_var: str):
+    if len(s_var) > 0:
+        if not s_var.lower() in ("0", "f", "n", "false", "no"):
+            return True
+    return False
+
+
+parser = argparse.ArgumentParser(description='PySHACL {} Validator command line tool.'.format(str(__version__)))
 parser.add_argument(
-    'data', metavar='DataGraph', type=argparse.FileType('rb'), help='The file containing the Target Data Graph.'
+    'data',
+    metavar='DataGraph',
+    type=argparse.FileType('rb'),
+    help='The file containing the Target Data Graph.',
+    default=None,
+    nargs='?',
 )
 parser.add_argument(
     '-s', '--shacl', dest='shacl', action='store', nargs='?', help='A file containing the SHACL Shapes Graph.'
@@ -160,6 +172,13 @@ parser.add_argument(
     help='Send output to a file (defaults to stdout).',
     default=sys.stdout,
 )
+parser.add_argument(
+    '--server',
+    help='Ignore all the rest of the options, start the HTTP Server. Same as `pyshacl_server`.',
+    action='store_true',
+    dest='server',
+    default=False,
+)
 # parser.add_argument('-h', '--help', action="help", help='Show this help text.')
 
 
@@ -167,7 +186,21 @@ def main():
     basename = os.path.basename(sys.argv[0])
     if basename == "__main__.py":
         parser.prog = "python3 -m pyshacl"
-    args = parser.parse_args()
+    do_server = os.getenv("PYSHACL_HTTP", "")
+    do_server = os.getenv("PYSHACL_SERVER", do_server)
+    if do_server:
+        args = {}
+    else:
+        args = parser.parse_args()
+    if str_is_true(do_server) or args.server:
+        from pyshacl.sh_http import cli as http_cli
+
+        sys.exit(http_cli())
+    elif not args.data:
+        # No datafile give, and not starting in server mode.
+        sys.stderr.write('Validation Error. No DataGraph file supplied.\n')
+        parser.print_usage(sys.stderr)
+        sys.exit(1)
     validator_kwargs = {'debug': args.debug}
     if args.shacl is not None:
         validator_kwargs['shacl_graph'] = args.shacl
@@ -197,17 +230,17 @@ def main():
     if args.allow_warnings:
         validator_kwargs['allow_warnings'] = True
     if args.shacl_file_format:
-        f = args.shacl_file_format
-        if f != "auto":
-            validator_kwargs['shacl_graph_format'] = f
+        _f: str = args.shacl_file_format
+        if _f != "auto":
+            validator_kwargs['shacl_graph_format'] = _f
     if args.ont_file_format:
-        f = args.ont_file_format
-        if f != "auto":
-            validator_kwargs['ont_graph_format'] = f
+        _f = args.ont_file_format
+        if _f != "auto":
+            validator_kwargs['ont_graph_format'] = _f
     if args.data_file_format:
-        f = args.data_file_format
-        if f != "auto":
-            validator_kwargs['data_graph_format'] = f
+        _f = args.data_file_format
+        if _f != "auto":
+            validator_kwargs['data_graph_format'] = _f
     try:
         is_conform, v_graph, v_text = validate(args.data, **validator_kwargs)
         if isinstance(v_graph, BaseException):

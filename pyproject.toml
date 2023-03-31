@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyshacl"
-version = "0.20.0"
+version = "0.21.0"
 # Don't forget to change the version number in __init__.py, Dockerfile, and CITATION.cff along with this one
 description = "Python SHACL Validator"
 license = "Apache-2.0"
@@ -59,8 +59,10 @@ html5lib = ">=1.1,<2"
 owlrl = ">=6.0.2,<7"
 prettytable = "^2.2.1"
 packaging = ">=21.3"
-rdflib-jsonld = { version=">=0.4.0,<0.6", optional=true}
 pyduktape2 = {version="^0.4.1", optional=true}
+sanic = {version=">=22.12, <23", optional=true} #For the HTTP service
+sanic-ext = {version=">=23.3, <23.6", optional=true} #For the HTTP service
+sanic-cors = {version="2.2.0", optional=true} #For the HTTP service
 flake8 = {version="^5.0.4", optional=true}
 isort = {version="^5.10.1", optional=true}
 black = {version="22.8.0", optional=true}
@@ -86,8 +88,8 @@ types-setuptools = {version="*", optional=true}
 platformdirs = {version="*", optional=true}
 
 [tool.poetry.extras]
-jsonld = ["rdflib-jsonld"]
 js = ["pyduktape2"]
+http = ["sanic", "sanic-ext", "sanic-cors"]
 dev-lint = ["isort", "black", "flake8", "platformdirs"]
 dev-type-checking = ["mypy", "types-setuptools", "platformdirs"]
 dev-coverage = ["pytest-cov", "coverage", "platformdirs"]
@@ -95,6 +97,8 @@ dev-coverage = ["pytest-cov", "coverage", "platformdirs"]
 
 [tool.poetry.scripts]
 pyshacl = "pyshacl.cli:main"
+pyshacl_validate = "pyshacl.cli:main"
+pyshacl_server = "pyshacl.http:cli"
 
 [tool.dephell.main]
 from = {format = "poetry", path = "pyproject.toml"}
