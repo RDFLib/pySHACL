@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from rdflib.namespace import Namespace
-
+from rdflib.namespace import Namespace, XSD
 
 RDF_PFX = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
 RDFS_PFX = 'http://www.w3.org/2000/01/rdf-schema#'
@@ -10,6 +9,21 @@ RDF = Namespace(RDF_PFX)
 RDFS = Namespace(RDFS_PFX)
 OWL = Namespace(OWL_PFX)
 SH = Namespace(SH_PFX)
+
+XSD_WHOLE_INTEGERS = (
+    XSD.integer,
+    XSD.int,
+    XSD.long,
+    XSD.negativeInteger,
+    XSD.nonNegativeInteger,
+    XSD.nonPositiveInteger,
+    XSD.positiveInteger,
+    XSD.short,
+    XSD.unsignedByte,
+    XSD.unsignedInt,
+    XSD.unsignedLong,
+    XSD.unsignedShort,
+)
 
 # Classes
 RDF_Property = RDF.Property
@@ -106,3 +120,4 @@ SH_optional = SH.optional
 SH_js = SH.js
 SH_jsFunctionName = SH.jsFunctionName
 SH_jsLibrary = SH.jsLibrary
+
