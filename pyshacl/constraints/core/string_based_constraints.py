@@ -113,8 +113,12 @@ class MinLengthConstraintComponent(StringBasedConstraintBase):
                 "https://www.w3.org/TR/shacl/#MinLengthConstraintComponent",
             )
         for s_r in patterns_found:
-            if (not isinstance(s_r, rdflib.Literal)) or getattr(s_r, "ill_typed", False) or s_r.datatype is None or\
-                    s_r.datatype not in XSD_WHOLE_INTEGERS:
+            if (
+                (not isinstance(s_r, rdflib.Literal))
+                or getattr(s_r, "ill_typed", False)
+                or s_r.datatype is None
+                or s_r.datatype not in XSD_WHOLE_INTEGERS
+            ):
                 raise ConstraintLoadError(
                     "sh:minLength value must be a literal value with an integer.",
                     "https://www.w3.org/TR/shacl/#MinLengthConstraintComponent",
@@ -190,8 +194,12 @@ class MaxLengthConstraintComponent(StringBasedConstraintBase):
                 "https://www.w3.org/TR/shacl/#MaxLengthConstraintComponent",
             )
         for s_r in patterns_found:
-            if (not isinstance(s_r, rdflib.Literal)) or getattr(s_r, "ill_typed", False) or s_r.datatype is None or\
-                    s_r.datatype not in XSD_WHOLE_INTEGERS:
+            if (
+                (not isinstance(s_r, rdflib.Literal))
+                or getattr(s_r, "ill_typed", False)
+                or s_r.datatype is None
+                or s_r.datatype not in XSD_WHOLE_INTEGERS
+            ):
                 raise ConstraintLoadError(
                     "sh:maxLength value must be a literal value with an integer.",
                     "https://www.w3.org/TR/shacl/#MaxLengthConstraintComponent",

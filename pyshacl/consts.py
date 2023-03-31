@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from rdflib.namespace import Namespace, XSD
+from rdflib.namespace import XSD, Namespace
+
 
 RDF_PFX = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
 RDFS_PFX = 'http://www.w3.org/2000/01/rdf-schema#'
@@ -120,4 +121,3 @@ SH_optional = SH.optional
 SH_js = SH.js
 SH_jsFunctionName = SH.jsFunctionName
 SH_jsLibrary = SH.jsLibrary
-

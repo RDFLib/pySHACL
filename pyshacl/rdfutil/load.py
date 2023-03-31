@@ -7,11 +7,12 @@ import platform
 import sys
 
 from io import BufferedIOBase, BytesIO, TextIOBase, UnsupportedOperation
+from logging import WARNING, Logger, getLogger
 from pathlib import Path
 from typing import IO, BinaryIO, List, Optional, Union, cast
 from urllib import request
 from urllib.error import HTTPError
-from logging import Logger, getLogger, INFO, WARNING
+
 import rdflib
 
 from .clone import clone_dataset, clone_graph
@@ -57,7 +58,7 @@ def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
     # Ask for everything we know about
     headers = {
         'Accept': 'text/turtle, application/rdf+xml, application/ld+json, application/n-triples, text/plain',
-        'Accept-Encoding': 'identity'
+        'Accept-Encoding': 'identity',
     }
     known_format = None
 
@@ -77,7 +78,7 @@ def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
     if filename is None:
         try:
             filename = resp.geturl()
-        except:
+        except Exception:
             pass
 
     content_types = resp.headers.get_all('Content-Type', [])
@@ -117,7 +118,7 @@ def load_from_source(
     multigraph: bool = False,
     do_owl_imports: Union[bool, int] = False,
     import_chain: Optional[List[Union[rdflib.URIRef, str]]] = None,
-    logger: Optional[Logger] = None
+    logger: Optional[Logger] = None,
 ):
     """
 
@@ -314,7 +315,7 @@ def load_from_source(
         # Check if we can seek
         try:
             _source.seek(0)  # type: ignore
-        except (AttributeError, ValueError, UnsupportedOperation) as e:
+        except (AttributeError, ValueError, UnsupportedOperation):
             # Read it all into memory
             new_bytes = BytesIO(_source.read())
             if not source_was_open:

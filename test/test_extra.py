@@ -367,6 +367,7 @@ def test_web_retrieve():
     conforms, graph, string = res
     assert conforms
 
+
 def test_web_retrieve_fail():
     DEB_BUILD_ARCH = os.environ.get('DEB_BUILD_ARCH', None)
     DEB_HOST_ARCH = os.environ.get('DEB_HOST_ARCH', None)
