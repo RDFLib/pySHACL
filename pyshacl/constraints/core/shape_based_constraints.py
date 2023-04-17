@@ -8,7 +8,14 @@ from warnings import warn
 import rdflib
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
-from pyshacl.consts import SH, SH_node, SH_NodeConstraintComponent, SH_property, SH_PropertyConstraintComponent
+from pyshacl.consts import (
+    SH,
+    SH_node,
+    SH_NodeConstraintComponent,
+    SH_property,
+    SH_PropertyConstraintComponent,
+    SH_detail,
+)
 from pyshacl.errors import (
     ConstraintLoadError,
     ConstraintLoadWarning,
@@ -18,6 +25,7 @@ from pyshacl.errors import (
 )
 from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
+from textwrap import indent
 
 SH_QualifiedValueCountConstraintComponent = SH.QualifiedValueConstraintComponent
 SH_QualifiedMaxCountConstraintComponent = SH.QualifiedMaxCountConstraintComponent
@@ -143,10 +151,11 @@ class NodeConstraintComponent(ConstraintComponent):
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.node_shapes) < 2:
-            m = "Value does not conform to Shape {}".format(stringify_node(self.shape.sg.graph, self.node_shapes[0]))
+            m = "Value does not conform to Shape {}.".format(stringify_node(self.shape.sg.graph, self.node_shapes[0]))
         else:
             rules = "', '".join(stringify_node(self.shape.sg.graph, c) for c in self.node_shapes)
-            m = "Value does not conform to every Shape in ('{}')".format(rules)
+            m = "Value does not conform to every Shape in ('{}').".format(rules)
+        m += " See details for more information."
         return [rdflib.Literal(m)]
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
@@ -181,23 +190,24 @@ class NodeConstraintComponent(ConstraintComponent):
                 raise ReportableRuntimeError(
                     "Shape pointed to by sh:node does not exist or is not a well-formed SHACL NodeShape."
                 )
-            upstream_reports = []
             for f, value_nodes in focus_value_nodes.items():
                 for v in value_nodes:
                     _is_conform, _r = node_shape.validate(target_graph, focus=v, _evaluation_path=_evaluation_path[:])
-                    if len(_r):
-                        upstream_reports.extend(_r)
-                    # ignore the fails from the node, create our own fail
+                    # Create a failure for this constraint component if any failures exist
                     if (not _is_conform) or len(_r) > 0:
                         _non_conformant = True
-                        rept = self.make_v_result(target_graph, f, value_node=v)
-                        _reports.append(rept)
-            if len(upstream_reports) > 0 and self.shape.sg.debug:
-                self.shape.logger.debug(
-                    "sh:node constraint reports will be ignored and not passed to the parent Node:"
-                )
-                for v_str, v_node, v_parts in _r:
-                    self.shape.logger.debug(v_str)
+                        rept_text, rept_node, rept_triples = self.make_v_result(target_graph, f, value_node=v)
+                        # Nest the others underneath via sh:detail
+                        rept_text = f"{rept_text}\tDetails:\n"
+                        for (text_sub, node_sub, triples_sub) in _r:
+                            # Add text of validation result in nested details section
+                            rept_text += indent(text_sub, "\t\t")
+                            # Add a triple connecting the new validation result to the
+                            # validation result for the nested node
+                            rept_triples.append((rept_node, SH_detail, node_sub))
+                            # Extend the triples in the report with the ones from the nested result
+                            rept_triples.extend(triples_sub)
+                        _reports.append((rept_text, rept_node, rept_triples))
             return _non_conformant, _reports
 
         for n_shape in self.node_shapes:
