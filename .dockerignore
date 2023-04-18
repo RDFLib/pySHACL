@@ -1,5 +1,8 @@
 /.venv
 /venv
+/.venv38
+/.venv39
+/.venv310
 /dist
 /htmlcov
 /build
@@ -20,3 +23,5 @@
 *.svg
 Dockerfile
 .dockerignore
+snyk-linux
+
