@@ -6,7 +6,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 ## [Unreleased]
 
-## [0.22.0] - 2023-03-31
+## [0.22.0] - 2023-04-18
 
 ### In this release:
 
@@ -1004,7 +1004,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.21.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.22.0...HEAD
+[0.22.0]: https://github.com/RDFLib/pySHACL/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/RDFLib/pySHACL/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/RDFLib/pySHACL/compare/v0.19.1...v0.20.0
 [0.19.1]: https://github.com/RDFLib/pySHACL/compare/v0.19.0...v0.19.1
