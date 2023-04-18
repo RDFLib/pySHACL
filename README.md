@@ -70,7 +70,7 @@ usage: pyshacl [-h] [-s [SHACL]] [-e [ONT]] [-i {none,rdfs,owlrl,both}] [-m]
                [-ef {auto,turtle,xml,json-ld,nt,n3}] [-V] [-o [OUTPUT]]
                DataGraph
 
-PySHACL 0.21.0 command line tool.
+PySHACL 0.22.0 command line tool.
 
 positional arguments:
   DataGraph             The file containing the Target Data Graph.
@@ -82,7 +82,8 @@ optional arguments:
                         A file containing the SHACL Shapes Graph.
   -e [ONT], --ont-graph [ONT]
                         A file path or URL to a document containing extra
-                        ontological information to mix into the data graph.
+                        ontological information. RDFS and OWL definitions from this 
+                        are used to inoculate the DataGraph.
   -i {none,rdfs,owlrl,both}, --inference {none,rdfs,owlrl,both}
                         Choose a type of inferencing to run against the Data
                         Graph before validating.
@@ -141,7 +142,7 @@ conforms, results_graph, results_text = r
 Where:
 * `data_graph` is an rdflib `Graph` object or file path of the graph to be validated
 * `shacl_graph` is an rdflib `Graph` object or file path or Web URL of the graph containing the SHACL shapes to validate with, or None if the SHACL shapes are included in the data_graph.
-* `ont_graph` is an rdflib `Graph` object or file path or Web URL a graph containing extra ontological information, or None if not required.
+* `ont_graph` is an rdflib `Graph` object or file path or Web URL a graph containing extra ontological information, or None if not required. RDFS and OWL definitions from this are used to inoculate the DataGraph.
 * `inference` is a Python string value to indicate whether or not to perform OWL inferencing expansion of the `data_graph` before validation.
 Options are 'rdfs', 'owlrl', 'both', or 'none'. The default is 'none'.
 * `abort_on_first` (optional) `bool` value to indicate whether or not the program should abort after encountering the first validation failure or to continue. Default is to continue.
@@ -177,7 +178,7 @@ You can get an equivalent of the Command Line Tool using the Python3 executable 
 $ python3 -m pyshacl
 ```
 
-## Integrated OpenAPI3.0-compatible HTTP REST Service
+## Integrated OpenAPI-3.0-compatible HTTP REST Service
 
 PySHACL now has a built-in validation service, exposed via an OpenAPI3.0-compatible REST API.
 

@@ -54,7 +54,8 @@ parser.add_argument(
     dest='ont',
     action='store',
     nargs='?',
-    help='A file path or URL to a document containing extra ontological information to mix into ' 'the data graph.',
+    help='A file path or URL to a document containing extra ontological information. '
+    'RDFS and OWL definitions from this are used to inoculate the DataGraph.',
 )
 parser.add_argument(
     '-i',
