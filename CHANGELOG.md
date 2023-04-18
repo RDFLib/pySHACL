@@ -6,7 +6,23 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 ## [Unreleased]
 
+## [0.22.0] - 2023-03-31
+
+### In this release:
+
+### Changed
+- Big change to how ontology mix-in mechanism works
+- Feature is now called datagraph inoculation
+- Inoculation copies _only_ RDFS and OWL axioms (classes, properties and relationships) from the extra-ontology file into the datagraph
+  - This mitigates a class of errors that cause the validator to perform validation on Nodes that should not be in the datagraph
+  - Such as cases where the Shapes graph and Extra-ontology graph are the same graph, but having SHACL Shapes and constraints in the datagraph is undesired.
+- Details around automatically cloning the datagraph before modification (inoculation) remain unchanged.
+- If you preferred the old behaviour, where the _whole_ extra-ontology file was mixed-in to the datafile, please file a Github issue outlining your need for that.
+
+
+
 ## [0.21.0] - 2023-03-31
+
 ### In this release:
 
 ### Added
