@@ -80,22 +80,25 @@ def mix_datasets(
     base_named_graphs = list(base_ds.contexts())
     if target_ds is None:
         target_ds = rdflib.Dataset(default_union=default_union)
-    elif isinstance(target_ds, rdflib.ConjunctiveGraph):
-        raise RuntimeError("Cannot mix new graphs into a ConjunctiveGraph, use Dataset instead.")
-    elif target_ds == "inplace":
-        pass  # do nothing here
-    elif not isinstance(target_ds, rdflib.Dataset):
+    elif target_ds == "inplace" or target_ds == "base":
+        target_ds = base_ds
+    elif isinstance(target_ds, str):
+        raise RuntimeError("target_ds cannot be a string (unless it is 'inplace' or 'base')")
+
+    if isinstance(target_ds, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
+        if not isinstance(target_ds, rdflib.Dataset):
+            raise RuntimeError("Cannot mix new graphs into a ConjunctiveGraph, use Dataset instead.")
+    else:
         raise RuntimeError("Cannot mix datasets if target_ds passed in is not a Dataset itself.")
+
     if isinstance(extra_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
         mixin_graphs = list(extra_ds.contexts())
     else:
         mixin_graphs = [extra_ds]
-    if target_ds == "inplace":
+    if target_ds is base_ds or target_ds == "inplace" or target_ds == "base":
         target_ds = base_ds
         for mg in mixin_graphs:
-            mod_named_graphs = {g.identifier: mix_graphs(g, mg, target_graph="inplace") for g in base_named_graphs}
-    elif isinstance(target_ds, str):
-        raise RuntimeError("target_ds cannot be a string (unless it is 'inplace')")
+            mod_named_graphs = {g.identifier: mix_graphs(g, mg, target_graph=g) for g in base_named_graphs}
     else:
 
         mixed_graphs = {}
@@ -134,12 +137,15 @@ def mix_graphs(base_graph: GraphLike, extra_graph: GraphLike, target_graph: Opti
         return mix_datasets(base_graph, extra_graph, target_ds=target_graph)
     if target_graph is None:
         g = clone_graph(base_graph, target_graph=None, identifier=base_graph.identifier)
-    elif target_graph == "inplace":
+    elif target_graph == "inplace" or target_graph == "base":
         # Special case, don't clone the basegraph, just put extra straight in
         g = base_graph
     elif isinstance(target_graph, str):
-        raise RuntimeError("target_graph cannot be a string (unless it is 'inplace')")
+        raise RuntimeError("target_graph cannot be a string (unless it is 'inplace' or 'base')")
+    elif target_graph is base_graph:
+        g = base_graph
     else:
+        # Clone base_graph into existing target, before mixing in extra
         g = clone_graph(base_graph, target_graph=target_graph)
     g = clone_graph(extra_graph, target_graph=g)
     return g

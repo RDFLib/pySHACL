@@ -4,7 +4,7 @@ import logging
 import sys
 
 from functools import wraps
-from os import path
+from os import getenv, path
 from sys import stderr
 from typing import Dict, Iterator, List, Optional, Set, Tuple, Union, cast
 
@@ -23,6 +23,7 @@ from .consts import (
     SH_result,
     SH_resultMessage,
     SH_ValidationReport,
+    env_truths,
 )
 from .errors import ReportableRuntimeError, ValidationFailure
 from .extras import check_extra_installed
@@ -30,20 +31,24 @@ from .functions import apply_functions, gather_functions, unapply_functions
 from .monkey import apply_patches, rdflib_bool_patch, rdflib_bool_unpatch
 from .pytypes import GraphLike
 from .rdfutil import (
+    add_baked_in,
     clone_blank_node,
     clone_graph,
     compare_blank_node,
     compare_node,
+    inoculate,
+    inoculate_dataset,
     load_from_source,
     mix_datasets,
     mix_graphs,
     order_graph_literal,
 )
-from .rdfutil.load import add_baked_in
 from .rules import apply_rules, gather_rules
 from .shapes_graph import ShapesGraph
 from .target import apply_target_types, gather_target_types
 
+
+USE_FULL_MIXIN = getenv("PYSHACL_USE_FULL_MIXIN") in env_truths
 
 log_handler = logging.StreamHandler(stderr)
 log = logging.getLogger(__name__)
@@ -197,9 +202,17 @@ class Validator(object):
         return self._target_graph
 
     def mix_in_ontology(self):
+        if USE_FULL_MIXIN:
+            if not self.data_graph_is_multigraph:
+                return mix_graphs(self.data_graph, self.ont_graph, "inplace" if self.inplace else None)
+            return mix_datasets(self.data_graph, self.ont_graph, "inplace" if self.inplace else None)
         if not self.data_graph_is_multigraph:
-            return mix_graphs(self.data_graph, self.ont_graph, "inplace" if self.inplace else None)
-        return mix_datasets(self.data_graph, self.ont_graph, "inplace" if self.inplace else None)
+            if self.inplace:
+                to_graph = self.data_graph
+            else:
+                to_graph = clone_graph(self.data_graph, identifier=self.data_graph.identifier)
+            return inoculate(to_graph, self.ont_graph)
+        return inoculate_dataset(self.data_graph, self.ont_graph, self.data_graph if self.inplace else None)
 
     def run(self):
         if self.target_graph is not None:

@@ -121,3 +121,6 @@ SH_optional = SH.optional
 SH_js = SH.js
 SH_jsFunctionName = SH.jsFunctionName
 SH_jsLibrary = SH.jsLibrary
+
+# For env var truth comparisons
+env_truths = ("t", "T", "y", "Y", "1", "True", "true", "TRUE", "yes", "YES", 1, True)
