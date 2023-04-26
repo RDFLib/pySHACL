@@ -3,8 +3,11 @@ from typing import Optional, Union
 
 import rdflib
 
-from .clone import clone_blank_node, clone_graph
-from .consts import RDF, ConjunctiveLike, GraphLike, OWL_classes, OWL_properties, RDFS_classes, RDFS_properties
+from .clone import clone_blank_node, clone_graph, clone_node
+from .consts import OWL, RDF, ConjunctiveLike, GraphLike, OWL_classes, OWL_properties, RDFS_classes, RDFS_properties
+
+
+OWLNamedIndividual = OWL.NamedIndividual
 
 
 def inoculate(data_graph: rdflib.Graph, ontology: rdflib.Graph):
@@ -19,7 +22,7 @@ def inoculate(data_graph: rdflib.Graph, ontology: rdflib.Graph):
     :rtype:
     """
     copied_bnode_map = {}
-
+    copied_named_map = {}
     for ont_class in chain(RDFS_classes, OWL_classes):
         found_s = list(ontology.subjects(RDF.type, ont_class))
         for s in found_s:
@@ -29,10 +32,18 @@ def inoculate(data_graph: rdflib.Graph, ontology: rdflib.Graph):
                 else:
                     new_bnode = clone_blank_node(ontology, s, data_graph)
                     copied_bnode_map[s] = new_bnode
-                new_s = new_bnode
+                data_graph.add((new_bnode, RDF.type, ont_class))
             else:
-                new_s = s
-            data_graph.add((new_s, RDF.type, ont_class))
+                if ont_class is OWLNamedIndividual:
+                    if s in copied_named_map:
+                        new_s = copied_named_map[s]
+                    else:
+                        # Whole node of NamedIndividual needs to be cloned
+                        new_s = clone_node(ontology, s, data_graph, deep_clone=True)
+                        copied_named_map[s] = new_s
+                else:
+                    new_s = clone_node(ontology, s, data_graph, deep_clone=False)
+                data_graph.add((new_s, RDF.type, ont_class))
 
     for ont_property in chain(RDFS_properties, OWL_properties):
         found_s_o = list(ontology.subject_objects(ont_property))

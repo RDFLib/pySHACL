@@ -6,8 +6,11 @@ import rdflib
 
 from rdflib.collection import Collection
 
-from .consts import RDF_first
+from .consts import OWL, RDF_first
 from .pytypes import ConjunctiveLike, GraphLike
+
+
+OWLsameAs = OWL.sameAs
 
 
 def clone_dataset(source_ds, target_ds=None):
@@ -151,14 +154,19 @@ def mix_graphs(base_graph: GraphLike, extra_graph: GraphLike, target_graph: Opti
     return g
 
 
-def clone_list(graph, lnode, target_graph, keepid=False, recursion=0):
-    if keepid:
-        cloned_node = rdflib.BNode(str(lnode))
+def clone_list(graph, lnode, target_graph, keepid=False, recursion=0, deep_clone=False):
+    # If deep_clone, copy all the contents (subjects, predicates) of a named member item
+    if isinstance(lnode, rdflib.BNode):
+        if keepid:
+            cloned_node = rdflib.BNode(str(lnode))
+        else:
+            cloned_node = rdflib.BNode()
     else:
-        cloned_node = rdflib.BNode()
+        # A list can be a NamedIndividual too
+        cloned_node = rdflib.URIRef(str(lnode))
     new_list = Collection(target_graph, cloned_node)
     for item in iter(graph.items(lnode)):
-        cloned_item = clone_node(graph, item, target_graph, recursion=recursion + 1)
+        cloned_item = clone_node(graph, item, target_graph, recursion=recursion + 1, deep_clone=deep_clone)
         new_list.append(cloned_item)
     return cloned_node
 
@@ -187,7 +195,11 @@ def clone_blank_node(graph, bnode, target_graph, keepid=False, recursion=0):
         if len(objs) < 1:
             continue
         for o in objs:
-            cloned_o = clone_node(graph, o, target_graph, recursion=recursion + 1)
+            if p is OWLsameAs and o is bnode:
+                # Avoid a crazy owl:sameAs recursion with self.
+                cloned_o = clone_node(graph, o, target_graph, recursion=recursion + 1, deep_clone=False)
+            else:
+                cloned_o = clone_node(graph, o, target_graph, recursion=recursion + 1)
             target_graph.add((cloned_bnode, cloned_p, cloned_o))
     return cloned_bnode
 
@@ -200,13 +212,36 @@ def clone_literal(graph, node, target_graph):
     return new_literal
 
 
-def clone_node(graph, node, target_graph, recursion=0):
+def clone_node(graph, node, target_graph, recursion=0, deep_clone=False):
+    # If deepclone, when the type is URIRef, it clones _all_ node content (properties, objects)
     if isinstance(node, rdflib.Literal):
         new_node = clone_literal(graph, node, target_graph)
     elif isinstance(node, rdflib.BNode):
         new_node = clone_blank_node(graph, node, target_graph, recursion=recursion + 1)
     elif isinstance(node, rdflib.URIRef):
         new_node = rdflib.URIRef(str(node))
+        if deep_clone:
+            # Treat it like a blankNode, and copy all the contents
+            if recursion >= 10:
+                return new_node  # Cannot clone this deep
+            predicates = set(graph.predicates(node))
+            if len(predicates) < 1:
+                return new_node
+            if RDF_first in predicates:
+                # don't increase recursion here, we're not actually going any deeper in the graph, just sideways
+                return clone_list(graph, node, target_graph, recursion=recursion)
+            for p in predicates:
+                cloned_p = clone_node(graph, p, target_graph, recursion=recursion + 1, deep_clone=False)
+                objs = list(graph.objects(node, p))
+                if len(objs) < 1:
+                    continue
+                for o in objs:
+                    if p is OWLsameAs and o is node:
+                        # Avoid a crazy owl:sameAs recursion with self.
+                        cloned_o = clone_node(graph, o, target_graph, recursion=recursion + 1, deep_clone=False)
+                    else:
+                        cloned_o = clone_node(graph, o, target_graph, recursion=recursion + 1, deep_clone=deep_clone)
+                    target_graph.add((new_node, cloned_p, cloned_o))
     else:
         new_node = rdflib.term.Identifier(str(node))
     return new_node
