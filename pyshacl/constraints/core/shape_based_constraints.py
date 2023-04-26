@@ -182,14 +182,23 @@ class NodeConstraintComponent(ConstraintComponent):
                 raise ReportableRuntimeError(
                     "Shape pointed to by sh:node does not exist or is not a well-formed SHACL NodeShape."
                 )
+            upstream_reports = []
             for f, value_nodes in focus_value_nodes.items():
                 for v in value_nodes:
                     _is_conform, _r = node_shape.validate(target_graph, focus=v, _evaluation_path=_evaluation_path[:])
+                    if len(_r):
+                        upstream_reports.extend(_r)
                     # ignore the fails from the node, create our own fail
                     if (not _is_conform) or len(_r) > 0:
                         _non_conformant = True
                         rept = self.make_v_result(target_graph, f, value_node=v)
                         _reports.append(rept)
+            if len(upstream_reports) > 0 and self.shape.sg.debug:
+                self.shape.logger.debug(
+                    "sh:node constraint reports will be ignored and not passed to the parent Node:"
+                )
+                for (v_str, v_node, v_parts) in _r:
+                    self.shape.logger.debug(v_str)
             return _non_conformant, _reports
 
         for n_shape in self.node_shapes:
@@ -281,7 +290,8 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         # TODO:
         #  Implement default message for QualifiedValueConstraint (seems messy)
-        return []
+        shapes_string = ",".join(str(s) for s in self.value_shapes)
+        return [rdflib.Literal(f"Focus node does not conform to shapes: [{shapes_string}]")]
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
@@ -330,6 +340,7 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
                 sibling_shapes = set(self.shape.get_other_shape(s) for s in sibling_shapes)
             else:
                 sibling_shapes = set()
+            upstream_reports = []
             for f, value_nodes in focus_value_nodes.items():
                 number_conforms = 0
                 for v in value_nodes:
@@ -337,6 +348,8 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
                         _is_conform, _r = other_shape.validate(
                             target_graph, focus=v, _evaluation_path=_evaluation_path[:]
                         )
+                        if len(_r):
+                            upstream_reports.extend(_r)
                         if _is_conform:
                             _conforms_to_sibling = False
                             for sibling_shape in sibling_shapes:
@@ -360,6 +373,12 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
                         target_graph, f, constraint_component=SH_QualifiedMinCountConstraintComponent
                     )
                     _reports.append(_r)
+            if len(upstream_reports) and self.shape.sg.debug:
+                self.shape.logger.debug(
+                    "sh:qualifiedValueShape constraint reports will be ignored and not passed to the parent Node:"
+                )
+                for (v_str, v_node, v_parts) in upstream_reports:
+                    self.shape.logger.debug(v_str)
             return _non_conformant, _reports
 
         for v_shape in self.value_shapes:

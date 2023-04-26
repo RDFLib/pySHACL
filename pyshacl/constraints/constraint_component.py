@@ -284,7 +284,6 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
             extra_messages=extra_messages,
             bound_vars=bound_vars,
         )
-        self.shape.logger.debug(desc)
         return desc, r_node, r_triples
 
     def _format_sparql_based_result_message(self, msg, bound_vars):

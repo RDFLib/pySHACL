@@ -60,7 +60,7 @@ def test_162() -> None:
     data_g.parse(data=data_file, format="turtle")
     shapes = rdflib.Graph()
     shapes.parse(data=shacl_file, format="turtle")
-    conforms, report, message = validate(data_g, shacl_graph=shapes)
+    conforms, report, message = validate(data_g, shacl_graph=shapes, debug=True)
     assert not conforms
     # confirm that both nodeShapes are included in the error message
     assert "Value does not conform to every Shape in ('ex:nodeShape1', 'ex:nodeShape2')" in message

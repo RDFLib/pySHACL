@@ -4,6 +4,7 @@ import logging
 import sys
 
 from decimal import Decimal
+from time import perf_counter
 from typing import TYPE_CHECKING, List, Optional, Set, Tuple, Type, Union
 
 from rdflib import BNode, Literal, URIRef
@@ -325,6 +326,7 @@ class Shape(object):
         specified as explicit input to the SHACL processor for validating a specific RDF term against a shape
         :return:
         """
+        t1 = perf_counter()
         (target_nodes, target_classes, implicit_classes, target_objects_of, target_subjects_of) = self.target()
         if self._advanced:
             advanced_targets = self.advanced_target()
@@ -379,6 +381,10 @@ class Shape(object):
                     for r in results:
                         t = r['this']
                         found_node_targets.add(t)
+        t2 = perf_counter()
+        if self.sg.debug:
+            elapsed = t2 - t1
+            self.logger.debug(f"Milliseconds to find focus nodes: {elapsed*1000.0:.3f}ms")
         return found_node_targets
 
     def value_nodes(self, target_graph, focus):
@@ -432,22 +438,40 @@ class Shape(object):
         _evaluation_path: Optional[List] = None,
     ):
         if self.deactivated:
+            if self.sg.debug:
+                self.logger.debug(f"Skipping shape because it is deactivated: {str(self)}")
             return True, []
         if focus is not None:
+            lh_shape = False
+            rh_shape = True
+            self.logger.debug(f"Running evaluation of Shape {str(self)}")
             if not isinstance(focus, (tuple, list, set)):
                 focus = [focus]
+            self.logger.debug(f"Shape was passed {len(focus)} Focus Node/s to evaluate.")
+            if len(focus) < 1:
+                return True, []
         else:
+            lh_shape = True
+            rh_shape = False
+            self.logger.debug(f"Checking if Shape {str(self)} defines its own targets.")
+            self.logger.debug("Identifying targets to find focus nodes.")
             focus = self.focus_nodes(target_graph)
-        if len(focus) < 1:
-            # Its possible for shapes to have _no_ focus nodes
-            # (they are called in other ways)
-            return True, []
+            self.logger.debug(f"Found {len(focus)} Focus Nodes to evaluate.")
+            if len(focus) < 1:
+                # It's possible for shapes to have _no_ focus nodes
+                # (they are called in other ways)
+                if self.sg.debug:
+                    self.logger.debug(f"Skipping shape {str(self)} because it found no focus nodes.")
+                return True, []
+            else:
+                self.logger.debug(f"Running evaluation of Shape {str(self)}")
         if _evaluation_path is None:
             _evaluation_path = []
         elif len(_evaluation_path) >= 30:
             # 27 is the depth required to successfully do the meta-shacl test on shacl.ttl
-            path_str = "->".join((str(e) for e in _evaluation_path))
+            path_str = " -> ".join((str(e) for e in _evaluation_path))
             raise ReportableRuntimeError("Evaluation path too deep!\n{}".format(path_str))
+        t1 = perf_counter()
         # Lazy import here to avoid an import loop
         CONSTRAINT_PARAMETERS, PARAMETER_MAP = getattr(module, 'CONSTRAINT_PARAMS', (None, None))
         if not CONSTRAINT_PARAMETERS or not PARAMETER_MAP:
@@ -493,12 +517,16 @@ class Shape(object):
         done_constraints = set()
         run_count = 0
         _evaluation_path.append(self)
-        # print(_evaluation_path)
+        if self.sg.debug:
+            path_str = " -> ".join((str(e) for e in _evaluation_path))
+            self.logger.debug(f"Current shape evaluation path: {path_str}")
         constraint_components = [constraint_map[p] for p in iter(parameters)]
         for constraint_component in constraint_components:  # type: Type[ConstraintComponent]
             if constraint_component in done_constraints:
                 continue
             try:
+                # if self.sg.debug:
+                #     self.logger.debug(f"Constructing Constraint Component: {repr(constraint_component)}")
                 c = constraint_component(self)
             except ConstraintLoadWarning as w:
                 self.logger.warning(repr(w))
@@ -506,9 +534,29 @@ class Shape(object):
             except ConstraintLoadError as e:
                 self.logger.error(repr(e))
                 raise e
-            _e_p = _evaluation_path[:]
-            _e_p.append(c)
-            _is_conform, _reports = c.evaluate(target_graph, focus_value_nodes, _e_p)
+            _e_p_copy = _evaluation_path[:]
+            _e_p_copy.append(c)
+            if self.sg.debug:
+                self.logger.debug(f"Checking conformance for constraint: {str(c)}")
+            ct1 = perf_counter()
+            if self.sg.debug:
+                path_str = " -> ".join((str(e) for e in _e_p_copy))
+                self.logger.debug(f"Current constraint evaluation path: {path_str}")
+            _is_conform, _reports = c.evaluate(target_graph, focus_value_nodes, _e_p_copy)
+            ct2 = perf_counter()
+            if self.sg.debug:
+                elapsed = ct2 - ct1
+                self.logger.debug(f"Milliseconds to check constraint {str(c)}: {elapsed * 1000.0:.3f}ms")
+                if _is_conform:
+                    self.logger.debug(f"DataGraph conforms to constraint {c}.")
+                elif allow_conform:
+                    self.logger.debug(f"Focus nodes do _not_ conform to constraint {c} but given severity is allowed.")
+                else:
+                    self.logger.debug(f"Focus nodes do _not_ conform to constraint {c}.")
+                    if lh_shape or (not rh_shape):
+                        for (v_str, v_node, v_parts) in _reports:
+                            self.logger.debug(v_str)
+
             if _is_conform or allow_conform:
                 ...
             elif filter_reports:
@@ -529,12 +577,16 @@ class Shape(object):
         for a in applicable_custom_constraints:
             if non_conformant and abort_on_first:
                 break
-            _e_p = _evaluation_path[:]
+            _e_p_copy2 = _evaluation_path[:]
             validator = a.make_validator_for_shape(self)
-            _e_p.append(validator)
-            _is_conform, _r = validator.evaluate(target_graph, focus_value_nodes, _e_p)
+            _e_p_copy2.append(validator)
+            _is_conform, _r = validator.evaluate(target_graph, focus_value_nodes, _e_p_copy2)
             non_conformant = non_conformant or (not _is_conform)
             reports.extend(_r)
             run_count += 1
+        t2 = perf_counter()
+        if self.sg.debug:
+            elapsed = t2 - t1
+            self.logger.debug(f"Milliseconds to evaluate shape {str(self)}: {elapsed*1000.0:.3f}ms")
         # print(_evaluation_path, "Passes" if not non_conformant else "Fails")
         return (not non_conformant), reports

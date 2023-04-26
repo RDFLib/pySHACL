@@ -62,6 +62,7 @@ log_handler.setLevel(logging.INFO)
 class Validator(object):
     @classmethod
     def _load_default_options(cls, options_dict: dict):
+        options_dict.setdefault('debug', False)
         options_dict.setdefault('advanced', False)
         options_dict.setdefault('inference', 'none')
         options_dict.setdefault('inplace', False)
@@ -72,6 +73,8 @@ class Validator(object):
         options_dict.setdefault('allow_warnings', False)
         if 'logger' not in options_dict:
             options_dict['logger'] = logging.getLogger(__name__)
+            if options_dict['debug']:
+                options_dict['logger'].setLevel(logging.DEBUG)
 
     @classmethod
     def _run_pre_inference(
@@ -176,6 +179,7 @@ class Validator(object):
         self._load_default_options(options)
         self.options = options  # type: dict
         self.logger = options['logger']  # type: logging.Logger
+        self.debug = options['debug']
         self.pre_inferenced = kwargs.pop('pre_inferenced', False)
         self.inplace = options['inplace']
         if not isinstance(data_graph, rdflib.Graph):
@@ -190,7 +194,7 @@ class Validator(object):
         if shacl_graph is None:
             shacl_graph = clone_graph(data_graph, identifier='shacl')
         assert isinstance(shacl_graph, rdflib.Graph), "shacl_graph must be a rdflib Graph object"
-        self.shacl_graph = ShapesGraph(shacl_graph, self.logger)  # type: ShapesGraph
+        self.shacl_graph = ShapesGraph(shacl_graph, self.debug, self.logger)  # type: ShapesGraph
 
         if options['use_js']:
             is_js_installed = check_extra_installed('js')
@@ -220,30 +224,38 @@ class Validator(object):
         else:
             has_cloned = False
             if self.ont_graph is not None:
+                self.logger.debug("Cloning DataGraph to temporary memory graph, to add ontology definitions.")
                 # creates a copy of self.data_graph, doesn't modify it
                 the_target_graph = self.mix_in_ontology()
                 has_cloned = True
             else:
                 the_target_graph = self.data_graph
             inference_option = self.options.get('inference', 'none')
+            if self.inplace and self.debug:
+                self.logger.debug("Skipping DataGraph clone because inplace option is passed.")
             if inference_option and not self.pre_inferenced and str(inference_option) != "none":
                 if not has_cloned and not self.inplace:
+                    self.logger.debug("Cloning DataGraph to temporary memory graph before pre-inferencing.")
                     the_target_graph = clone_graph(the_target_graph)
                     has_cloned = True
-                self._run_pre_inference(the_target_graph, inference_option, self.logger)
+                self.logger.debug(f"Running pre-inferencing with option='{inference_option}'.")
+                self._run_pre_inference(the_target_graph, inference_option, logger=self.logger)
                 self.pre_inferenced = True
             if not has_cloned and not self.inplace and self.options['advanced']:
                 # We still need to clone in advanced mode, because of triple rules
+                self.logger.debug("Forcing clone of DataGraph because advanced mode is enabled.")
                 the_target_graph = clone_graph(the_target_graph)
                 has_cloned = True
             if not has_cloned and not self.inplace:
                 # No inferencing, no ont_graph, and no advanced mode, now implies inplace mode
+                self.logger.debug("Running validation in-place, without modifying the DataGraph.")
                 self.inplace = True
             self._target_graph = the_target_graph
 
         shapes = self.shacl_graph.shapes  # This property getter triggers shapes harvest.
         iterate_rules = self.options.get("iterate_rules", False)
         if self.options['advanced']:
+            self.logger.debug("Activating SHACL-AF Features.")
             target_types = gather_target_types(self.shacl_graph)
             advanced = {
                 'functions': gather_functions(self.shacl_graph),
@@ -269,7 +281,15 @@ class Validator(object):
         allow_warnings: bool = bool(self.options.get("allow_warnings", False))
         non_conformant = False
         aborted = False
+        if abort_on_first and self.debug:
+            self.logger.debug(
+                "Abort on first error is enabled. Will exit at end of first Shape that fails validation."
+            )
+        if self.debug:
+            self.logger.debug(f"Will run validation on {len(named_graphs)} named graph/s.")
         for g in named_graphs:
+            if self.debug:
+                self.logger.debug(f"Validating DataGraph named {g.identifier}")
             if advanced:
                 apply_functions(advanced['functions'], g)
                 apply_rules(advanced['rules'], g, iterate=iterate_rules)
@@ -387,7 +407,8 @@ def validate(
     :return:
     """
 
-    if kwargs.get('debug', False):
+    do_debug = kwargs.get('debug', False)
+    if do_debug:
         log_handler.setLevel(logging.DEBUG)
         log.setLevel(logging.DEBUG)
     apply_patches()
@@ -398,17 +419,19 @@ def validate(
         to_meta_val = shacl_graph or data_graph
         conforms, v_r, v_t = meta_validate(to_meta_val, inference=inference, **kwargs)
         if not conforms:
-            msg = "Shacl File does not validate against the Shacl Shapes Shacl file.\n{}".format(v_t)
+            msg = f"SHACL File does not validate against the SHACL Shapes SHACL (MetaSHACL) file.\n{v_t}"
             log.error(msg)
             raise ReportableRuntimeError(msg)
     do_owl_imports = kwargs.pop('do_owl_imports', False)
     data_graph_format = kwargs.pop('data_graph_format', None)
     # force no owl imports on data_graph
-    loaded_dg = load_from_source(data_graph, rdf_format=data_graph_format, multigraph=True, do_owl_imports=False)
+    loaded_dg = load_from_source(
+        data_graph, rdf_format=data_graph_format, multigraph=True, do_owl_imports=False, logger=log
+    )
     ont_graph_format = kwargs.pop('ont_graph_format', None)
     if ont_graph is not None:
         loaded_og = load_from_source(
-            ont_graph, rdf_format=ont_graph_format, multigraph=True, do_owl_imports=do_owl_imports
+            ont_graph, rdf_format=ont_graph_format, multigraph=True, do_owl_imports=do_owl_imports, logger=log
         )
     else:
         loaded_og = None
@@ -416,7 +439,7 @@ def validate(
     if shacl_graph is not None:
         rdflib_bool_patch()
         loaded_sg = load_from_source(
-            shacl_graph, rdf_format=shacl_graph_format, multigraph=True, do_owl_imports=do_owl_imports
+            shacl_graph, rdf_format=shacl_graph_format, multigraph=True, do_owl_imports=do_owl_imports, logger=log
         )
         rdflib_bool_unpatch()
     else:
@@ -434,6 +457,7 @@ def validate(
             shacl_graph=loaded_sg,
             ont_graph=loaded_og,
             options={
+                'debug': do_debug or False,
                 'inference': inference,
                 'inplace': inplace,
                 'abort_on_first': abort_on_first,

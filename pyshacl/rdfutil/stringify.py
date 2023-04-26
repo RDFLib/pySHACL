@@ -7,7 +7,10 @@ import rdflib
 
 from rdflib.namespace import NamespaceManager
 
-from .consts import SH, RDF_first, RDFNode
+from .consts import OWL, SH, RDF_first, RDFNode
+
+
+OWLsameAs = OWL.sameAs
 
 
 def with_dict_cache(f):
@@ -32,7 +35,7 @@ def stringify_blank_node(
         raise RuntimeError("Can only stringify a blank node when graph is a rdflib.Graph")
     assert isinstance(graph, rdflib.Graph)
     assert isinstance(bnode, rdflib.BNode)
-    if recursion >= 9:
+    if recursion >= 12:
         return "<http://recursion.too.deep>"
     stringed_cache_key = id(graph), str(bnode)
 
@@ -70,8 +73,12 @@ def stringify_blank_node(
             continue
         o_texts = []
         for o in objs:
-            o_text = stringify_node(graph, o, ns_manager=ns_manager, recursion=recursion + 1)
-            o_texts.append(o_text)
+            if p is OWLsameAs and o is bnode:
+                # Avoid a crazy owl:sameAs recursion with self.
+                o_texts.append("<self>")
+            else:
+                o_text = stringify_node(graph, o, ns_manager=ns_manager, recursion=recursion + 1)
+                o_texts.append(o_text)
         if len(o_texts) > 1:
             o_texts.sort()
             o_text = ", ".join(o_texts)

@@ -2,6 +2,8 @@
 import logging
 import warnings
 
+from typing import Optional, Union
+
 import rdflib
 
 from .constraints.constraint_component import CustomConstraintComponentFactory
@@ -33,11 +35,13 @@ from .shape import Shape
 class ShapesGraph(object):
     system_triples = [(OWL_Class, RDFS_subClassOf, RDFS_Class), (OWL_DatatypeProperty, RDFS_subClassOf, RDF_Property)]
 
-    def __init__(self, graph, logger=None):
+    def __init__(self, graph, debug: Optional[Union[bool, int]] = False, logger: Optional[logging.Logger] = None):
         """
         ShapesGraph
         :param graph:
         :type graph: rdflib.Graph
+        :param debug:
+        :type debug: bool|int|None
         :param logger:
         :type logger: logging.Logger|None
         """
@@ -48,6 +52,7 @@ class ShapesGraph(object):
         if logger is None:
             logger = logging.getLogger(__name__)
         self.logger = logger
+        self.debug = debug
         self._node_shape_cache = {}
         self._shapes = None
         self._custom_constraints = None
@@ -184,6 +189,8 @@ class ShapesGraph(object):
         """
         g = self.graph
         defined_node_shapes = set(g.subjects(RDF_type, SH_NodeShape))
+        if self.debug:
+            self.logger.debug(f"Found {len(defined_node_shapes)} SHACL Shapes defined with type sh:NodeShape.")
         for s in defined_node_shapes:
             path_vals = list(g.objects(s, SH_path))
             if len(path_vals) > 0:
@@ -192,8 +199,9 @@ class ShapesGraph(object):
                     "A shape defined as a NodeShape cannot be the subject of a 'sh:path' predicate.",
                     "https://www.w3.org/TR/shacl/#node-shapes",
                 )
-
         defined_prop_shapes = set(g.subjects(RDF_type, SH_PropertyShape))
+        if self.debug:
+            self.logger.debug(f"Found {len(defined_prop_shapes)} SHACL Shapes defined with type sh:PropertyShape.")
         found_prop_shapes_paths = dict()
         for s in defined_prop_shapes:
             if s in defined_node_shapes:
@@ -206,17 +214,18 @@ class ShapesGraph(object):
             if len(path_vals) < 1:
                 # TODO:coverage: we don't have any tests for invalid shapes
                 raise ShapeLoadError(
-                    "A shape defined as a PropertyShape must be the subject of a 'sh:path' predicate.",
+                    "A shape defined as a PropertyShape must include one `sh:path` property.",
                     "https://www.w3.org/TR/shacl/#property-shapes",
                 )
             elif len(path_vals) > 1:
                 # TODO:coverage: we don't have any tests for invalid shapes
                 raise ShapeLoadError(
-                    "A shape defined as a PropertyShape cannot have more than one 'sh:path' predicate.",
+                    "A shape defined as a PropertyShape cannot have more than one 'sh:path' property.",
                     "https://www.w3.org/TR/shacl/#property-shapes",
                 )
             found_prop_shapes_paths[s] = path_vals[0]
-
+        if self.debug:
+            self.logger.debug(f"Found {len(found_prop_shapes_paths)} property paths to follow.")
         has_target_class = {s for s, o in g.subject_objects(SH_targetClass)}
         has_target_node = {s for s, o in g.subject_objects(SH_targetNode)}
         has_target_objects_of = {s for s, o in g.subject_objects(SH_targetObjectsOf)}
@@ -224,11 +233,12 @@ class ShapesGraph(object):
         subject_shapes = set(has_target_class).union(
             set(has_target_node).union(set(has_target_objects_of).union(set(has_target_subjects_of)))
         )
-
         # implicit shapes: their subjects must be shapes
         subject_of_property = {s for s, o in g.subject_objects(SH_property)}
         subject_of_node = {s for s, o in g.subject_objects(SH_node)}
         subject_shapes = subject_shapes.union(set(subject_of_property).union(set(subject_of_node)))
+        if self.debug:
+            self.logger.debug(f"Found {len(subject_shapes)} implied SHACL Shapes based on their properties.")
 
         # shape-expecting properties, their values must be shapes.
         value_of_property = {o for s, o in g.subject_objects(SH_property)}
@@ -255,6 +265,10 @@ class ShapesGraph(object):
             for s in list_contents:
                 value_of_shape_expecting.add(s)
 
+        if self.debug:
+            self.logger.debug(
+                f"Found {len(value_of_shape_expecting)} implied SHACL Shapes used as values in shape-expecting constraints."
+            )
         found_node_shapes = set()
         found_prop_shapes = set()
         for s in subject_shapes:
@@ -293,12 +307,15 @@ class ShapesGraph(object):
             else:
                 found_prop_shapes.add(s)
                 found_prop_shapes_paths[s] = path_vals[0]
+        node_shape_count = 0
+        property_shape_count = 0
         for node_shape in defined_node_shapes.union(found_node_shapes):
             if node_shape in self._node_shape_cache:
                 # TODO:coverage: we don't have any tests where a shape is loaded twice
                 raise ShapeLoadError("That shape has already been loaded!", "None")
             s = Shape(self, node_shape, p=False, logger=self.logger)
             self._node_shape_cache[node_shape] = s
+            node_shape_count += 1
         for prop_shape in defined_prop_shapes.union(found_prop_shapes):
             if prop_shape in self._node_shape_cache:
                 # TODO:coverage: we don't have any tests where a shape is loaded twice
@@ -306,3 +323,8 @@ class ShapesGraph(object):
             prop_shape_path = found_prop_shapes_paths[prop_shape]
             s = Shape(self, prop_shape, p=True, path=prop_shape_path, logger=self.logger)
             self._node_shape_cache[prop_shape] = s
+            property_shape_count += 1
+        if self.debug:
+            self.logger.debug(
+                f"Cached {node_shape_count} unique NodeShapes and {property_shape_count} unique PropertyShapes."
+            )

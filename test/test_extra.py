@@ -212,7 +212,7 @@ ex:AnimalShape a sh:NodeShape ;
         conforms, graph, string = res
         assert not conforms
     except ReportableRuntimeError as r:
-        assert "Shacl Shapes Shacl file" in r.message
+        assert "Shapes SHACL (MetaSHACL) file." in r.message
         did_error = True
     assert did_error
 
