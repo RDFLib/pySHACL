@@ -6,6 +6,23 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 ## [Unreleased]
 
+## [0.22.1] - 2023-04-26
+
+### In this release:
+
+### Fixed
+- Clone full contents of an `OWL:NamedIndividual` from the ontology graph to the datagraph, during the inoculation procedure.
+  - This fixes the case where an NamedIndividual in an OWL ontology had properties that were required in the datagraph at runtime to ensure successful validation
+- Avoid hitting the recursion limit when stringifying a blank node, when OWL inferencing has inserted owl:sameAs the same blank node as is being serialized.
+- Avoid hitting the recursion limit when cloning a graph with a blank node, when OWL inferencing has inserted owl:sameAs the same blank node as is being cloned.
+
+### Changed
+- Lots more debug messaging. Debugging is now _much_ more verbose.
+  - This gives more insight into how PySHACL runs, what it is doing, and how long each step takes.
+  - All constraint evaluations will now output their results, regardless of whether are conformant or non-conformant or if they are used in the final conformance report.
+  - You will probably want debug turned off unless you are tracking down the source of a problem or performance issue.
+
+
 ## [0.22.0] - 2023-04-18
 
 ### In this release:
@@ -18,7 +35,6 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
   - Such as cases where the Shapes graph and Extra-ontology graph are the same graph, but having SHACL Shapes and constraints in the datagraph is undesired.
 - Details around automatically cloning the datagraph before modification (inoculation) remain unchanged.
 - If you preferred the old behaviour, where the _whole_ extra-ontology file was mixed-in to the datafile, please file a Github issue outlining your need for that.
-
 
 
 ## [0.21.0] - 2023-03-31
@@ -1004,7 +1020,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.22.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.22.1...HEAD
+[0.22.1]: https://github.com/RDFLib/pySHACL/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/RDFLib/pySHACL/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/RDFLib/pySHACL/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/RDFLib/pySHACL/compare/v0.19.1...v0.20.0

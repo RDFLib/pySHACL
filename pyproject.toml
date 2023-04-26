@@ -1,10 +1,10 @@
 [build-system]
-requires = ["poetry-core>=1.3.2,<2"]
+requires = ["poetry-core>=1.5.2,<2"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyshacl"
-version = "0.22.0"
+version = "0.22.1"
 # Don't forget to change the version number in __init__.py, Dockerfile, and CITATION.cff along with this one
 description = "Python SHACL Validator"
 license = "Apache-2.0"
@@ -59,7 +59,7 @@ html5lib = ">=1.1,<2"
 owlrl = ">=6.0.2,<7"
 prettytable = "^2.2.1"
 packaging = ">=21.3"
-pyduktape2 = {version="^0.4.1", optional=true}
+pyduktape2 = {version="^0.4.2", optional=true}
 sanic = {version=">=22.12, <23", optional=true} #For the HTTP service
 sanic-ext = {version=">=23.3, <23.6", optional=true} #For the HTTP service
 sanic-cors = {version="2.2.0", optional=true} #For the HTTP service
@@ -162,7 +162,7 @@ toxworkdir={env:TOX_WORK_DIR:.tox}
 
 [testenv]
 deps =
-    poetry>=1.3.1
+    poetry>=1.4.2
 passenv =
     TRAVIS
     TRAVIS_JOB_ID

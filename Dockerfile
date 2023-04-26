@@ -9,7 +9,7 @@ WORKDIR /home/pyshacl
 RUN addgroup -g 1000 -S pyshacl &&\
     adduser --disabled-password --gecos "" --home "$(pwd)" --ingroup "pyshacl" --no-create-home --uid 1000 pyshacl
 WORKDIR /app
-LABEL org.opencontainers.image.version="0.22.0"
+LABEL org.opencontainers.image.version="0.22.1"
 COPY . .
 RUN chown -R pyshacl:pyshacl /home/pyshacl /app && chmod -R 775 /home/pyshacl /app
 USER pyshacl
