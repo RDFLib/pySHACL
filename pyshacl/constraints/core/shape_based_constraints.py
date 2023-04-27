@@ -290,8 +290,15 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         # TODO:
         #  Implement default message for QualifiedValueConstraint (seems messy)
-        shapes_string = ",".join(str(s) for s in self.value_shapes)
-        return [rdflib.Literal(f"Focus node does not conform to shapes: [{shapes_string}]")]
+        shapes_string = ",".join(stringify_node(self.shape.sg.graph, s) for s in self.value_shapes)
+        count_message = ""
+        if self.min_count is not None:
+            count_message += f" MinCount {self.min_count}"
+        if self.max_count is not None:
+            count_message += f" MaxCount {self.max_count}"
+        if len(self.value_shapes) > 1:
+            return [rdflib.Literal(f"Focus node does not conform to shapes{count_message}: ({shapes_string})")]
+        return [rdflib.Literal(f"Focus node does not conform to shape{count_message}: {shapes_string}")]
 
     def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
         """
