@@ -23,6 +23,13 @@ def inoculate(data_graph: rdflib.Graph, ontology: rdflib.Graph):
     """
     copied_bnode_map = {}
     copied_named_map = {}
+    ontology_ns = ontology.namespace_manager
+    data_graph_ns = data_graph.namespace_manager
+    if ontology_ns is not data_graph_ns:
+        data_graph_prefixes = {p: n for (p, n) in data_graph_ns.namespaces()}
+        for (p, n) in ontology_ns.namespaces():
+            if p not in data_graph_prefixes:
+                data_graph_ns.bind(p, n)
     for ont_class in chain(RDFS_classes, OWL_classes):
         found_s = list(ontology.subjects(RDF.type, ont_class))
         for s in found_s:
