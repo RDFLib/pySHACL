@@ -6,6 +6,16 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 ## [Unreleased]
 
+## [0.22.2] - 2023-04-27
+
+### In this release:
+
+### Fixed
+- Inoculating the datagraph using an extra ontology graph now copies over any missing namespace prefixes from the ontology graph to the datagraph.
+  - This is to match old ontology-graph-mixin behaviour that had this side-effect.
+  - Added a test to ensure this behaviour is not broken again.
+- Stringifying nodes in `QualifiedValueShape` default message was using wrong stringification operation.
+
 ## [0.22.1] - 2023-04-26
 
 ### In this release:
@@ -15,6 +25,9 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
   - This fixes the case where an NamedIndividual in an OWL ontology had properties that were required in the datagraph at runtime to ensure successful validation
 - Avoid hitting the recursion limit when stringifying a blank node, when OWL inferencing has inserted owl:sameAs the same blank node as is being serialized.
 - Avoid hitting the recursion limit when cloning a graph with a blank node, when OWL inferencing has inserted owl:sameAs the same blank node as is being cloned.
+
+### Added
+- Added a default message for `QualifiedValueShape` constraint component. It never had one before.
 
 ### Changed
 - Lots more debug messaging. Debugging is now _much_ more verbose.
@@ -1020,7 +1033,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.22.1...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.22.2...HEAD
+[0.22.2]: https://github.com/RDFLib/pySHACL/compare/v0.22.1...v0.22.2
 [0.22.1]: https://github.com/RDFLib/pySHACL/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/RDFLib/pySHACL/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/RDFLib/pySHACL/compare/v0.20.0...v0.21.0
