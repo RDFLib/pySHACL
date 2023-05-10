@@ -25,11 +25,14 @@ def inoculate(data_graph: rdflib.Graph, ontology: rdflib.Graph):
     copied_named_map = {}
     ontology_ns = ontology.namespace_manager
     data_graph_ns = data_graph.namespace_manager
+
+    # Bind any missing ontology namespaces in the DataGraph NS manager.
     if ontology_ns is not data_graph_ns:
         data_graph_prefixes = {p: n for (p, n) in data_graph_ns.namespaces()}
         for (p, n) in ontology_ns.namespaces():
             if p not in data_graph_prefixes:
                 data_graph_ns.bind(p, n)
+
     for ont_class in chain(RDFS_classes, OWL_classes):
         found_s = list(ontology.subjects(RDF.type, ont_class))
         for s in found_s:
@@ -49,6 +52,7 @@ def inoculate(data_graph: rdflib.Graph, ontology: rdflib.Graph):
                         new_s = clone_node(ontology, s, data_graph, deep_clone=True)
                         copied_named_map[s] = new_s
                 else:
+                    # Shallow-copy this node from the ontology graph to the data graph
                     new_s = clone_node(ontology, s, data_graph, deep_clone=False)
                 data_graph.add((new_s, RDF.type, ont_class))
 
@@ -64,7 +68,6 @@ def inoculate(data_graph: rdflib.Graph, ontology: rdflib.Graph):
                 new_s = new_bnode
             else:
                 new_s = s
-
             if isinstance(o, rdflib.BNode):
                 if o in copied_bnode_map:
                     new_bnode = copied_bnode_map[o]
@@ -76,6 +79,26 @@ def inoculate(data_graph: rdflib.Graph, ontology: rdflib.Graph):
                 new_o = o
 
             data_graph.add((new_s, ont_property, new_o))
+
+    # Finally add in any triples where a known NamedIndividual is the Object.
+    for ni in copied_named_map.keys():
+        found_s_p = list(ontology.subject_predicates(object=ni))
+        for s, p in found_s_p:
+            if isinstance(p, (rdflib.Literal, rdflib.BNode)):
+                # predicates pointing to NamedIndividual should not be BNode or Literal
+                continue
+            if isinstance(s, rdflib.BNode):
+                if s in copied_bnode_map:
+                    new_bnode = copied_bnode_map[s]
+                else:
+                    new_bnode = clone_blank_node(ontology, s, data_graph)
+                    copied_bnode_map[s] = new_bnode
+                new_s = new_bnode
+            else:
+                new_s = s
+
+            data_graph.add((new_s, p, ni))
+
     return data_graph
 
 

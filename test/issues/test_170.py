@@ -64,6 +64,9 @@ exOnt:contact-0
 	rdfs:comment "This named individual is provided as a stand-in default"@en ;
 	vcard:fn "NOT ENCODED" ;
 	vcard:hasEmail <mailto:null@example.org> .
+
+exOnt:canBeNamed a owl:Class ;
+    exOnt:mightHave exOnt:contact-0 .
 """
 
 ont_file2 = """\
