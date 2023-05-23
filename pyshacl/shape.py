@@ -2,9 +2,8 @@
 #
 import logging
 import sys
-
-from decimal import Decimal
 from time import perf_counter
+from decimal import Decimal
 from typing import TYPE_CHECKING, List, Optional, Set, Tuple, Type, Union
 
 from rdflib import BNode, Literal, URIRef
