@@ -583,7 +583,7 @@ class SHACLJSContext(object):
             raise ReportableRuntimeError("JS Function {} cannot be found in the loaded files.".format(fn_name))
         if fn_name not in self.fns:
             raise ReportableRuntimeError("JS Function {} args cannot be determined. Bad JS structure?".format(fn_name))
-        known_fn_args = self.fns[fn_name]  # type: tuple
+        known_fn_args: tuple = self.fns[fn_name]
         needed_args = []
         for k, v in args_map.items():
             look_for = "$" + str(k)
@@ -608,7 +608,7 @@ class SHACLJSContext(object):
         needed_args = [v for p, k, v in sorted(needed_args)]
         return needed_args
 
-    def run_js_function(self, fn_name, args, returns: list = None):
+    def run_js_function(self, fn_name, args, returns: Union[list, None] = None):
         if returns is None:
             returns = []
         c = self.context

@@ -16,7 +16,7 @@ from pyshacl.consts import (
 from pyshacl.pytypes import GraphLike, RDFNode
 
 if TYPE_CHECKING:
-    from pyshacl.extras.js.function import JSFunction
+    from pyshacl.extras.js.function import JSFunction  # noqa F401
     from pyshacl.shapes_graph import ShapesGraph
 
     from .shacl_function import SHACLFunction, SPARQLFunction
@@ -87,7 +87,7 @@ def gather_functions(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLFunctio
         JSF = getattr(module, 'JSFunction', None)
         if not JSF:
             # Lazy-import JSFunction to prevent rdflib import error
-            from pyshacl.extras.js.function import JSFunction
+            from pyshacl.extras.js.function import JSFunction  # noqa F401
 
             setattr(module, 'JSFunction', JSFunction)
             JSF = JSFunction

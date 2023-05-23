@@ -171,8 +171,9 @@ def stringify_node(
 
 def stringify_graph(graph: rdflib.Graph):
     string_builder = ""
+    t: Tuple[rdflib.term.Node, rdflib.term.Node, rdflib.term.Node]
     for t in iter(graph):
-        n1, n2, n3 = t  # type: Tuple[rdflib.term.Node, rdflib.term.Node, rdflib.term.Node]
+        n1, n2, n3 = t
         node_string = stringify_node(graph, n1, ns_manager=graph.namespace_manager)
         string_builder += node_string + ", "
         node_string = stringify_node(graph, n2, ns_manager=graph.namespace_manager)

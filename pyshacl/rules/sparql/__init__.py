@@ -55,7 +55,7 @@ class SPARQLRule(SHACLRule):
         iterate_limit = 100
         while True:
             if iterate_limit < 1:
-                raise ReportableRuntimeError("Local rule iteration exceeded iteration limit of 100.")
+                raise ReportableRuntimeError("Local SPARQLRule iteration exceeded iteration limit of 100.")
             iterate_limit -= 1
             added = 0
             applicable_nodes = self.filter_conditions(focus_nodes, data_graph)
@@ -71,14 +71,17 @@ class SPARQLRule(SHACLRule):
                     if results.type != "CONSTRUCT":
                         raise ReportableRuntimeError("Query executed by a SHACL SPARQLRule must be CONSTRUCT query.")
                     this_added = False
-                    for i in results.graph:
+                    result_graph = results.graph
+                    if result_graph is None:
+                        raise ReportableRuntimeError("Query executed by a SHACL SPARQLRule did not return a Graph.")
+                    for i in result_graph:
                         if not this_added and i not in data_graph:
                             this_added = True
                             # We only need to know at least one triple was added, then break!
                             break
                     if this_added:
                         added += 1
-                        construct_graphs.add(results.graph)
+                        construct_graphs.add(result_graph)
             if added > 0:
                 for g in construct_graphs:
                     data_graph = clone_graph(g, target_graph=data_graph)

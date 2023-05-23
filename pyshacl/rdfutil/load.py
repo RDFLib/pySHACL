@@ -46,7 +46,8 @@ def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
                 graph = rdflib.Graph(store=g_store, identifier=identifier)
                 kind = "graph"
             else:
-                graph = g
+                graph = rdflib.Graph()
+                graph.parse(g)
                 kind = None
         else:
             graph = g
@@ -67,7 +68,7 @@ def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
         raise RuntimeError("Cannot pull RDF URL from the web: {}, code: {}".format(url, str(code)))
 
     filename = None
-    content_dispositions = resp.headers.get_all("Content-Disposition", [])
+    content_dispositions: List[str] = resp.headers.get_all("Content-Disposition", [])
     for c_d in content_dispositions:
         cd_parts = [s.strip() for s in str(c_d).split(',')]
         for cd_part in cd_parts:
@@ -79,7 +80,7 @@ def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
         except Exception:
             pass
 
-    content_types = resp.headers.get_all('Content-Type', [])
+    content_types: List[str] = resp.headers.get_all('Content-Type', [])
     for content_type in content_types:
         ct_parts = [s.strip() for s in str(content_type).split(',')]
         for ct_part in ct_parts:
@@ -99,7 +100,7 @@ def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
                 continue
             break
 
-    transfer_encodings = resp.headers.get_all('Transfer-Encoding', [])
+    transfer_encodings: List[str] = resp.headers.get_all('Transfer-Encoding', [])
     for t_e in transfer_encodings:
         te_parts = [s.strip() for s in str(t_e).split(',')]
         for check in ('chunked', 'compress', 'deflate', 'gzip', 'x-gzip'):
