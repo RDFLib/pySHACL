@@ -6,6 +6,15 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 ## [Unreleased]
 
+### Changed
+- Replaced Flake8 and isort with Ruff
+- Updated to latest Black version for formatting
+
+### Fixed
+- Extend ontology inoculation to include triples where NamedIndividual URI is object.
+- Re-black all files, re-sort with new Ruff isort, fix some Mypy typing inconsistencies
+
+
 ## [0.22.2] - 2023-04-27
 
 ### In this release:
