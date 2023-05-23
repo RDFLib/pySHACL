@@ -101,7 +101,6 @@ def mix_datasets(
         for mg in mixin_graphs:
             mod_named_graphs = {g.identifier: mix_graphs(g, mg, target_graph=g) for g in base_named_graphs}
     else:
-
         mixed_graphs = {}
         for mg in mixin_graphs:
             mod_named_graphs = {

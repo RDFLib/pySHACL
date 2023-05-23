@@ -57,7 +57,6 @@ class JSConstraintImpl(JSExecutable):
 
 
 class JSConstraint(ConstraintComponent):
-
     shacl_constraint_component = SH_JSConstraint
 
     def __init__(self, shape: 'Shape'):

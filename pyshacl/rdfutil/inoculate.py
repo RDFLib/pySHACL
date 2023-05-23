@@ -14,7 +14,6 @@ if TYPE_CHECKING:
 OWLNamedIndividual = OWL.NamedIndividual
 
 
-
 def inoculate(data_graph: rdflib.Graph, ontology: rdflib.Graph):
     """
     Copies all RDFS and OWL axioms (classes, relationship definitions, and properties)
@@ -34,7 +33,7 @@ def inoculate(data_graph: rdflib.Graph, ontology: rdflib.Graph):
     # Bind any missing ontology namespaces in the DataGraph NS manager.
     if ontology_ns is not data_graph_ns:
         data_graph_prefixes = {p: n for (p, n) in data_graph_ns.namespaces()}
-        for (p, n) in ontology_ns.namespaces():
+        for p, n in ontology_ns.namespaces():
             if p not in data_graph_prefixes:
                 data_graph_ns.bind(p, n)
 

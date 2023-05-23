@@ -23,7 +23,6 @@ SH_SPARQLAskValidator = SH.SPARQLAskValidator
 
 
 class BoundShapeValidatorComponent(ConstraintComponent):
-
     shacl_constraint_component = SH_ConstraintComponent
 
     def __init__(self, constraint, shape: 'Shape', validator):

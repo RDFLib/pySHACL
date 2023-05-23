@@ -94,7 +94,7 @@ class BoundShapeJSValidatorComponent(ConstraintComponent):
                 results = self.validator.validate(f, value_nodes, p, data_graph, self.param_bind_map)
             except ValidationFailure as e:
                 raise e
-            for (v, result) in results:
+            for v, result in results:
                 if result is True:
                     continue
                 args_map = self.param_bind_map.copy()

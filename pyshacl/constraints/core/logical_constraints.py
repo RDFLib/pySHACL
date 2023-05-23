@@ -121,7 +121,7 @@ class NotConstraintComponent(ConstraintComponent):
             self.shape.logger.debug(
                 "sh:not constraint reports ignored, conformance inverted and passed to the parent Node:"
             )
-            for (v_str, v_node, v_parts) in upstream_reports:
+            for v_str, v_node, v_parts in upstream_reports:
                 self.shape.logger.debug(v_str)
         return _non_conformant, _reports
 
@@ -213,7 +213,7 @@ class AndConstraintComponent(ConstraintComponent):
                 self.shape.logger.debug(
                     "sh:and constraint reports will be inspected and not passed to the parent Node:"
                 )
-                for (v_str, v_node, v_parts) in upstream_reports:
+                for v_str, v_node, v_parts in upstream_reports:
                     self.shape.logger.debug(v_str)
             return _non_conformant, _reports
 
@@ -312,7 +312,7 @@ class OrConstraintComponent(ConstraintComponent):
                 self.shape.logger.debug(
                     "sh:or constraint reports will be inspected and not passed to the parent Node:"
                 )
-                for (v_str, v_node, v_parts) in upstream_reports:
+                for v_str, v_node, v_parts in upstream_reports:
                     self.shape.logger.debug(v_str)
             return _non_conformant, _reports
 
@@ -413,7 +413,7 @@ class XoneConstraintComponent(ConstraintComponent):
                 self.shape.logger.debug(
                     "sh:xone constraint reports ignored, conformance noted and passed to the parent Node:"
                 )
-                for (v_str, v_node, v_parts) in upstream_reports:
+                for v_str, v_node, v_parts in upstream_reports:
                     self.shape.logger.debug(v_str)
             return _non_conformant, _reports
 

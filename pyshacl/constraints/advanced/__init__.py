@@ -23,7 +23,6 @@ if typing.TYPE_CHECKING:
 
 
 class ExpressionConstraint(ConstraintComponent):
-
     shacl_constraint_component = SH_ExpressionConstraintComponent
 
     def __init__(self, shape: 'Shape'):

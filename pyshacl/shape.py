@@ -48,7 +48,6 @@ module = sys.modules[__name__]
 
 
 class Shape(object):
-
     __slots__ = (
         'logger',
         'sg',
@@ -553,14 +552,14 @@ class Shape(object):
                 else:
                     self.logger.debug(f"Focus nodes do _not_ conform to constraint {c}.")
                     if lh_shape or (not rh_shape):
-                        for (v_str, v_node, v_parts) in _reports:
+                        for v_str, v_node, v_parts in _reports:
                             self.logger.debug(v_str)
 
             if _is_conform or allow_conform:
                 ...
             elif filter_reports:
                 all_allow = True
-                for (v_str, v_node, v_parts) in _reports:
+                for v_str, v_node, v_parts in _reports:
                     severity_bits = list(filter(lambda p: p[0] == v_node and p[1] == SH_resultSeverity, v_parts))
                     if severity_bits:
                         all_allow = all_allow and (severity_bits[0][2] in allowed_severities)

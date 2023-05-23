@@ -196,7 +196,7 @@ class NodeConstraintComponent(ConstraintComponent):
                 self.shape.logger.debug(
                     "sh:node constraint reports will be ignored and not passed to the parent Node:"
                 )
-                for (v_str, v_node, v_parts) in _r:
+                for v_str, v_node, v_parts in _r:
                     self.shape.logger.debug(v_str)
             return _non_conformant, _reports
 
@@ -383,7 +383,7 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
                 self.shape.logger.debug(
                     "sh:qualifiedValueShape constraint reports will be ignored and not passed to the parent Node:"
                 )
-                for (v_str, v_node, v_parts) in upstream_reports:
+                for v_str, v_node, v_parts in upstream_reports:
                     self.shape.logger.debug(v_str)
             return _non_conformant, _reports
 

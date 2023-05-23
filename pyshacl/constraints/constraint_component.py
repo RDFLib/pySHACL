@@ -304,7 +304,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
             fdict.update(bound_vars)
         else:
             return msg
-        for (var, val) in fdict.items():
+        for var, val in fdict.items():
             substring = "{{[?$]{}}}".format(var)
             msg = re.sub(substring, str(val), msg)
         return msg
