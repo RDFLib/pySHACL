@@ -521,7 +521,8 @@ class Shape(object):
             path_str = " -> ".join((str(e) for e in _evaluation_path))
             self.logger.debug(f"Current shape evaluation path: {path_str}")
         constraint_components = [constraint_map[p] for p in iter(parameters)]
-        for constraint_component in constraint_components:  # type: Type[ConstraintComponent]
+        constraint_component: Type['ConstraintComponent']
+        for constraint_component in constraint_components:
             if constraint_component in done_constraints:
                 continue
             try:

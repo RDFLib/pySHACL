@@ -38,7 +38,7 @@ class SHACLFunction(object):
         self.node = fn_node
         self.sg = sg
         params = list(sg.objects(fn_node, SH_parameter))
-        self.parameters = [SHACLParameter(sg, p) for p in params]  # type: List[SHACLParameter]
+        self.parameters: List[SHACLParameter] = [SHACLParameter(sg, p) for p in params]
         self.comments = set(sg.objects(fn_node, RDFS_comment))
         rtypes = list(sg.objects(fn_node, SH_returnType))
         if len(rtypes) < 1:

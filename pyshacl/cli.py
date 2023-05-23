@@ -31,7 +31,7 @@ class ShowVersion(argparse.Action):
 
 def str_is_true(s_var: str):
     if len(s_var) > 0:
-        if not s_var.lower() in ("0", "f", "n", "false", "no"):
+        if s_var.lower() not in ("0", "f", "n", "false", "no"):
             return True
     return False
 

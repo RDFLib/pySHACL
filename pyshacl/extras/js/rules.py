@@ -22,7 +22,7 @@ class JSRule(SHACLRule):
 
     def __init__(self, shape: 'Shape', rule_node, **kwargs):
         super(JSRule, self).__init__(shape, rule_node, **kwargs)
-        shapes_graph = shape.sg  # type: ShapesGraph
+        shapes_graph: 'ShapesGraph' = shape.sg
         self.js_exe = JSExecutable(shapes_graph, rule_node)
 
     def apply(self, data_graph: 'GraphLike') -> int:
