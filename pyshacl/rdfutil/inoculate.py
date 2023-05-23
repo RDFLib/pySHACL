@@ -6,7 +6,6 @@ import rdflib
 from .clone import clone_blank_node, clone_graph, clone_node
 from .consts import OWL, RDF, ConjunctiveLike, GraphLike, OWL_classes, OWL_properties, RDFS_classes, RDFS_properties
 
-
 OWLNamedIndividual = OWL.NamedIndividual
 
 

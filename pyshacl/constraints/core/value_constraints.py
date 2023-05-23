@@ -7,7 +7,6 @@ from decimal import Decimal
 from typing import Dict, List
 
 import rdflib
-
 from rdflib.namespace import XSD
 from rdflib.term import Literal
 
@@ -30,7 +29,6 @@ from pyshacl.consts import (
 from pyshacl.errors import ConstraintLoadError
 from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
-
 
 RDF_langString = RDF.langString
 RDFS_Datatype = RDFS.Datatype

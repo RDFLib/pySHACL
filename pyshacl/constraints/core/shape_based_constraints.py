@@ -19,7 +19,6 @@ from pyshacl.errors import (
 from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
 
-
 SH_QualifiedValueCountConstraintComponent = SH.QualifiedValueConstraintComponent
 SH_QualifiedMaxCountConstraintComponent = SH.QualifiedMaxCountConstraintComponent
 SH_QualifiedMinCountConstraintComponent = SH.QualifiedMinCountConstraintComponent

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
 import warnings
-
 from typing import Optional, Union
 
 import rdflib

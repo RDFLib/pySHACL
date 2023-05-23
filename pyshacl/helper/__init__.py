@@ -1,6 +1,5 @@
 import sys
 
-
 mod = sys.modules[__name__]
 setattr(mod, 'SPARQLQueryHelperCls', None)
 

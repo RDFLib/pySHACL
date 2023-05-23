@@ -2,7 +2,6 @@
 from typing import TYPE_CHECKING
 
 import rdflib
-
 from rdflib import Literal
 from rdflib.namespace import XSD
 
@@ -12,7 +11,6 @@ from pyshacl.helper import get_query_helper_cls
 from pyshacl.rdfutil import clone_graph
 
 from ..shacl_rule import SHACLRule
-
 
 if TYPE_CHECKING:
     from pyshacl.pytypes import GraphLike

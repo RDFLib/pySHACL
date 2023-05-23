@@ -5,7 +5,6 @@ from rdflib.plugins.stores.memory import Memory
 
 from pyshacl.monkey import apply_patches
 
-
 apply_patches()
 identifier = "http://datashapes.org/schema"
 store = Memory(identifier=identifier)

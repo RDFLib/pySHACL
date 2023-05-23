@@ -14,7 +14,6 @@ from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
 from pyshacl.rdfutil.compare import compare_literal
 
-
 SH_MinExclusiveConstraintComponent = SH.MinExclusiveConstraintComponent
 SH_MinInclusiveConstraintComponent = SH.MinInclusiveConstraintComponent
 SH_minExclusive = SH.minExclusive

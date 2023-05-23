@@ -13,7 +13,6 @@ from pyshacl.errors import ConstraintLoadError
 from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
 
-
 XSD_integer = XSD.integer
 SH_minCount = SH.minCount
 SH_maxCount = SH.maxCount

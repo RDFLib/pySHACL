@@ -8,7 +8,6 @@ from pyshacl.pytypes import GraphLike
 from pyshacl.rules.sparql import SPARQLRule
 from pyshacl.rules.triple import TripleRule
 
-
 if TYPE_CHECKING:
     from pyshacl.shape import Shape
     from pyshacl.shapes_graph import ShapesGraph

@@ -5,7 +5,6 @@ import os
 import pickle
 import platform
 import sys
-
 from io import BufferedIOBase, BytesIO, TextIOBase, UnsupportedOperation
 from logging import WARNING, Logger, getLogger
 from pathlib import Path
@@ -16,7 +15,6 @@ from urllib.error import HTTPError
 import rdflib
 
 from .clone import clone_dataset, clone_graph
-
 
 ConjunctiveLike = Union[rdflib.ConjunctiveGraph, rdflib.Dataset]
 GraphLike = Union[ConjunctiveLike, rdflib.Graph]

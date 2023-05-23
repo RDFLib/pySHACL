@@ -3,7 +3,6 @@
 https://www.w3.org/TR/shacl/#sparql-constraint-components
 """
 import typing
-
 from typing import Dict, List, Tuple, Type, Union
 
 import rdflib
@@ -13,7 +12,6 @@ from pyshacl.consts import SH, RDF_type, SH_ask, SH_ConstraintComponent, SH_mess
 from pyshacl.errors import ConstraintLoadError, ValidationFailure
 from pyshacl.helper import get_query_helper_cls
 from pyshacl.pytypes import GraphLike
-
 
 if typing.TYPE_CHECKING:
     from pyshacl.shape import Shape

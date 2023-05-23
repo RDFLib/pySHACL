@@ -10,7 +10,6 @@ from pyshacl.functions.shacl_function import SHACLFunction
 
 from .js_executable import JSExecutable
 
-
 if typing.TYPE_CHECKING:
     from pyshacl.shapes_graph import ShapesGraph
 

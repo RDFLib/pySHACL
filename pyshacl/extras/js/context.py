@@ -1,10 +1,8 @@
 import pprint
-
 from decimal import Decimal
 from typing import Union
 
 import pyduktape2
-
 from pyduktape2 import JSProxy
 from rdflib import BNode, Literal, URIRef
 from rdflib.namespace import XSD

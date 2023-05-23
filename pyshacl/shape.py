@@ -2,8 +2,8 @@
 #
 import logging
 import sys
-from time import perf_counter
 from decimal import Decimal
+from time import perf_counter
 from typing import TYPE_CHECKING, List, Optional, Set, Tuple, Type, Union
 
 from rdflib import BNode, Literal, URIRef
@@ -39,7 +39,6 @@ from .errors import ConstraintLoadError, ConstraintLoadWarning, ReportableRuntim
 from .helper import get_query_helper_cls
 from .helper.expression_helper import value_nodes_from_path
 from .pytypes import GraphLike
-
 
 if TYPE_CHECKING:
     from pyshacl.constraints import ConstraintComponent

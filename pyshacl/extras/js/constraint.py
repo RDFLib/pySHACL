@@ -1,7 +1,6 @@
 #
 #
 import typing
-
 from typing import Dict, List
 
 from rdflib import Literal
@@ -12,7 +11,6 @@ from pyshacl.errors import ConstraintLoadError
 from pyshacl.pytypes import GraphLike
 
 from .js_executable import JSExecutable
-
 
 if typing.TYPE_CHECKING:
     from pyshacl.shape import Shape

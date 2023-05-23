@@ -5,7 +5,6 @@ https://www.w3.org/TR/shacl/#sparql-constraints
 import re
 
 import rdflib
-
 from rdflib import XSD
 
 from ..consts import (
@@ -25,7 +24,6 @@ from ..consts import (
     SH_zeroOrOnePath,
 )
 from ..errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
-
 
 SH_declare = SH.declare
 invalid_parameter_names = {'this', 'shapesGraph', 'currentShape', 'path', 'PATH', 'value'}

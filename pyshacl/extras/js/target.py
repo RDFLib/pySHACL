@@ -1,7 +1,6 @@
 #
 #
 import typing
-
 from typing import Dict, List
 from warnings import warn
 
@@ -12,7 +11,6 @@ from pyshacl.errors import ShapeLoadError
 from pyshacl.target import BoundSHACLTargetType, SHACLTargetType
 
 from .js_executable import JSExecutable
-
 
 if typing.TYPE_CHECKING:
     from pyshacl.pytypes import GraphLike

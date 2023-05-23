@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import itertools
-
 from typing import TYPE_CHECKING, Tuple, cast
 
 import rdflib
@@ -9,7 +8,6 @@ from pyshacl.consts import SH_object, SH_predicate, SH_subject
 from pyshacl.errors import ReportableRuntimeError
 from pyshacl.helper.expression_helper import nodes_from_node_expression
 from pyshacl.rules.shacl_rule import SHACLRule
-
 
 if TYPE_CHECKING:
     from rdflib.term import Node

@@ -6,7 +6,6 @@ https://www.w3.org/TR/shacl/#core-components-value-type
 import abc
 import re
 import typing
-
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple
 
 from rdflib import BNode, Literal, URIRef
@@ -36,7 +35,6 @@ from pyshacl.errors import ConstraintLoadError
 from pyshacl.parameter import SHACLParameter
 from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
-
 
 if TYPE_CHECKING:
     from pyshacl.pytypes import RDFNode

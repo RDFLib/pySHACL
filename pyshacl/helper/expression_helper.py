@@ -1,11 +1,9 @@
 import itertools
 import operator
-
 from typing import TYPE_CHECKING, List, Set, Union
 from warnings import warn
 
 import rdflib
-
 from rdflib import Literal, URIRef
 
 from pyshacl.consts import (
@@ -24,7 +22,6 @@ from pyshacl.consts import (
     SH_zeroOrOnePath,
 )
 from pyshacl.errors import ReportableRuntimeError, ShapeLoadError
-
 
 if TYPE_CHECKING:
     from pyshacl.pytypes import GraphLike, RDFNode

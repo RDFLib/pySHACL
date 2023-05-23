@@ -4,11 +4,9 @@ from functools import wraps
 from typing import Iterator, List, Optional, Tuple, Union, cast
 
 import rdflib
-
 from rdflib.namespace import NamespaceManager
 
 from .consts import OWL, SH, RDF_first, RDFNode
-
 
 OWLsameAs = OWL.sameAs
 

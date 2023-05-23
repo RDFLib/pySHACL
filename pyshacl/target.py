@@ -1,5 +1,4 @@
 import typing
-
 from typing import List, Sequence, Type, Union
 from warnings import warn
 
@@ -9,7 +8,6 @@ from .errors import ConstraintLoadError, ShapeLoadError
 from .helper import get_query_helper_cls
 from .parameter import SHACLParameter
 from .pytypes import GraphLike
-
 
 if typing.TYPE_CHECKING:
     from .shapes_graph import ShapesGraph

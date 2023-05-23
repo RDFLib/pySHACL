@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import rdflib
-
 from packaging.version import Version
 from rdflib import store
-
 
 RDFLIB_VERSION = Version(rdflib.__version__)
 RDFLIB_421 = Version("4.2.1")

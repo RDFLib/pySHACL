@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 #
 import typing
-
 from typing import Dict, List
 
 from rdflib import XSD, Literal
@@ -12,7 +11,6 @@ from ..consts import SH, RDFS_comment, SH_ask, SH_parameter, SH_select
 from ..errors import ConstraintLoadError, ReportableRuntimeError
 from ..helper import get_query_helper_cls
 from ..parameter import SHACLParameter
-
 
 if typing.TYPE_CHECKING:
     from ..pytypes import GraphLike

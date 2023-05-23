@@ -2,10 +2,8 @@
 import os
 import sys
 
-
 try:
     import sanic.application.logo
-
     from sanic import Request, Sanic
     from sanic.exceptions import InvalidUsage
     from sanic.response import HTTPResponse, JSONResponse, text
@@ -24,7 +22,6 @@ from sanic_ext.extensions.openapi.definitions import RequestBody, Response
 from . import __version__ as pyshacl_version
 from . import validate
 from .errors import ConstraintLoadError, ReportableRuntimeError, RuleLoadError, ShapeLoadError, ValidationFailure
-
 
 API_VERSION = "v1"
 

@@ -3,12 +3,10 @@
 from typing import Optional, Union
 
 import rdflib
-
 from rdflib.collection import Collection
 
 from .consts import OWL, RDF_first
 from .pytypes import ConjunctiveLike, GraphLike
-
 
 OWLsameAs = OWL.sameAs
 

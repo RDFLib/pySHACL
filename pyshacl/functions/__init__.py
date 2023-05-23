@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 #
 import sys
-
 from typing import TYPE_CHECKING, Dict, Sequence, Union
 
 from pyshacl.consts import (
@@ -15,7 +14,6 @@ from pyshacl.consts import (
     SH_SPARQLFunction,
 )
 from pyshacl.pytypes import GraphLike, RDFNode
-
 
 if TYPE_CHECKING:
     from pyshacl.extras.js.function import JSFunction

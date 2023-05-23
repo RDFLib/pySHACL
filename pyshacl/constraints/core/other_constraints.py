@@ -12,7 +12,6 @@ from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
 from pyshacl.pytypes import GraphLike, RDFNode
 from pyshacl.rdfutil import stringify_node
 
-
 SH_InConstraintComponent = SH.InConstraintComponent
 SH_ClosedConstraintComponent = SH.ClosedConstraintComponent
 SH_HasValueConstraintComponent = SH.HasValueConstraintComponent

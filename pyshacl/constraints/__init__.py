@@ -46,7 +46,6 @@ from pyshacl.constraints.core.value_range_constraints import (
 from pyshacl.constraints.sparql.sparql_based_constraint_components import SPARQLConstraintComponent  # noqa: F401
 from pyshacl.constraints.sparql.sparql_based_constraints import SPARQLBasedConstraint
 
-
 ALL_CONSTRAINT_COMPONENTS: List[Type[ConstraintComponent]] = [
     ClassConstraintComponent,
     DatatypeConstraintComponent,

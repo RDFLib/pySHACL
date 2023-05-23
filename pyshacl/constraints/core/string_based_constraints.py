@@ -3,11 +3,9 @@
 https://www.w3.org/TR/shacl/#core-components-string
 """
 import re
-
 from typing import Dict, List
 
 import rdflib
-
 from rdflib.namespace import XSD
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
@@ -15,7 +13,6 @@ from pyshacl.consts import RDF, SH, XSD_WHOLE_INTEGERS
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
 from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
-
 
 RDF_langString = RDF.langString
 XSD_string = XSD.string

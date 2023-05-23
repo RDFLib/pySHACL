@@ -1,9 +1,7 @@
 #
 #
 import typing
-
 from urllib import request
-
 
 try:
     import regex

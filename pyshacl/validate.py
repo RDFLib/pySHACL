@@ -2,14 +2,12 @@
 #
 import logging
 import sys
-
 from functools import wraps
 from os import getenv, path
 from sys import stderr
 from typing import Dict, Iterator, List, Optional, Set, Tuple, Union, cast
 
 import rdflib
-
 from rdflib import BNode, Literal, URIRef
 from rdflib.util import from_n3
 
@@ -46,7 +44,6 @@ from .rdfutil import (
 from .rules import apply_rules, gather_rules
 from .shapes_graph import ShapesGraph
 from .target import apply_target_types, gather_target_types
-
 
 USE_FULL_MIXIN = getenv("PYSHACL_USE_FULL_MIXIN") in env_truths
 

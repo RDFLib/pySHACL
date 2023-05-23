@@ -12,7 +12,6 @@ from pyshacl.errors import ConstraintLoadError, ValidationFailure
 from pyshacl.helper import get_query_helper_cls
 from pyshacl.pytypes import GraphLike
 
-
 SH_sparql = SH.sparql
 SH_SPARQLConstraintComponent = SH.SPARQLConstraintComponent
 

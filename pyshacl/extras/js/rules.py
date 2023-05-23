@@ -8,7 +8,6 @@ from pyshacl.rules.shacl_rule import SHACLRule
 
 from .js_executable import JSExecutable
 
-
 if typing.TYPE_CHECKING:
     from pyshacl.pytypes import GraphLike
     from pyshacl.shape import Shape

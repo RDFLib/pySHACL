@@ -1,7 +1,6 @@
 #
 #
 import typing
-
 from typing import Dict
 
 from rdflib import Literal
@@ -10,7 +9,6 @@ from pyshacl.consts import SH, SH_jsFunctionName, SH_jsLibrary
 from pyshacl.errors import ConstraintLoadError
 
 from .context import SHACLJSContext
-
 
 if typing.TYPE_CHECKING:
     from pyshacl.shapes_graph import ShapesGraph
