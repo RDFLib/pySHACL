@@ -63,9 +63,8 @@ pyduktape2 = {version="^0.4.2", optional=true}
 sanic = {version=">=22.12, <23", optional=true} #For the HTTP service
 sanic-ext = {version=">=23.3, <23.6", optional=true} #For the HTTP service
 sanic-cors = {version="2.2.0", optional=true} #For the HTTP service
-flake8 = {version="^5.0.4", optional=true}
-isort = {version="^5.10.1", optional=true}
-black = {version="22.8.0", optional=true}
+ruff = {version="^0.0.267", optional=true}
+black = {version="23.3.0", optional=true}
 mypy = [
     {version=">=0.800,<0.900", optional=true, python = "<3.10"},
     {version=">=0.900,<0.1000", optional=true, python = ">=3.10"}
@@ -79,7 +78,7 @@ pytest-cov = {version="^2.8.1", optional=true}
 pytest = "^7.2"
 coverage = {version=">6,<7,!=6.0.*,!=6.1,!=6.1.1", optional=true}
 pytest-cov = {version="^2.8.1", optional=true}
-flake8 = {version="^5.0.4", optional=true}
+ruff = {version="^0.0.267", optional=true}
 mypy = [
     {version=">=0.800,<0.900", optional=true, python = "<3.10"},
     {version=">=0.900,<0.1000", optional=true, python = ">=3.10"}
@@ -90,7 +89,7 @@ platformdirs = {version="*", optional=true}
 [tool.poetry.extras]
 js = ["pyduktape2"]
 http = ["sanic", "sanic-ext", "sanic-cors"]
-dev-lint = ["isort", "black", "flake8", "platformdirs"]
+dev-lint = ["ruff", "black", "platformdirs"]
 dev-type-checking = ["mypy", "types-setuptools", "platformdirs"]
 dev-coverage = ["pytest-cov", "coverage", "platformdirs"]
 
@@ -105,7 +104,7 @@ from = {format = "poetry", path = "pyproject.toml"}
 to = {format = "setuppy", path = "setup.py"}
 
 [tool.black]
-required-version = "22.8.0"
+required-version = "23.3.0"
 line-length = "119"
 skip-string-normalization = true
 target-version = ['py37']
@@ -117,6 +116,7 @@ exclude = '''
     | \.git          # root of the project
     | \.hg
     | \.mypy_cache
+    | \.ruff_cache
     | \.pytest_cache
     | \.tox
     | \.venv
@@ -133,19 +133,54 @@ exclude = '''
 )
 '''
 
-[tool.isort]
-atomic = true
-default_section = "THIRDPARTY"
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-ensure_newline_before_comments = true
-known_first_party = "pyshacl"
-known_third_party = ["pytest"]
-line_length = 119
-lines_after_imports = 2
-lines_between_types = 1
-multi_line_output = 3
+[tool.ruff]
+# Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
+select = ["E", "F"]
+ignore = []
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+unfixable = []
+
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".pytest_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "htmlcov",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "pyshacl.egg-info",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+# Same as Black.
+line-length = 119
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+# Assume Python 3.10.
+target-version = "py37"
+
+[tool.ruff.mccabe]
+# Unlike Flake8, default to a complexity level of 10.
+max-complexity = 10
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -215,8 +250,8 @@ commands_pre =
     poetry install -vv -n --no-root --extras "dev-lint"
 commands =
     - poetry show
-    poetry run flake8 pyshacl
-    poetry run isort --check-only pyshacl
+    poetry run ruff check ./pyshacl
+    poetry run ruff check --select I ./pyshacl #isort
     poetry run black --check --verbose --config ./pyproject.toml pyshacl
 
 [testenv:type-checking]

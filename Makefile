@@ -21,7 +21,7 @@ install: venvcheck  ## Install the dependencies, but not dev-dependencies
 
 .PHONY: dev
 dev: venvcheck  ## Install dependencies and dev-dependencies, but not this project itself
-	poetry install --no-root
+	poetry install --no-root --extras "js dev-lint dev-type-checking dev-coverage"
 
 .PHONY: test
 test: venvcheck		## Run the TOX tests in a TOX environment
@@ -34,27 +34,25 @@ dev-test: venvcheck		## Run the tests in dev environment
 .PHONY: format
 format: venvcheck	## Run Black and isort Formatters
 ifeq ("$(FilePath)", "")
+	poetry run ruff check --select I --fix ./pyshacl #isort fix
 	poetry run black --config=./pyproject.toml --verbose pyshacl
-	poetry run isort pyshacl
 else
+    poetry run ruff check --select I --fix "$(FilePath)" #isort fix
 	poetry run black --config=./pyproject.toml --verbose "$(FilePath)"
-	poetry run isort "$(FilePath)"
 endif
 
 .PHONY: lint
 lint: venvcheck	## Validate with Black and isort in check-only mode
 ifeq ("$(FilePath)", "")
-	poetry run flake8 pyshacl
+	poetry run ruff check --select I ./pyshacl #isort
 	poetry run black --config=./pyproject.toml --check --verbose pyshacl
-	poetry run isort --check-only pyshacl
 else
-	poetry run flake8 "$(FilePath)"
+	poetry run ruff check --select I ./"$(FilePath)" #isort
 	poetry run black --config=./pyproject.toml --check --verbose "$(FilePath)"
-	poetry run isort --check-only "$(FilePath)"
 endif
 
 .PHONY: type-check
-type-check: venvcheck	## Validate with Black and isort in check-only mode
+type-check: venvcheck	## Validate with MyPy in check-only mode
 ifeq ("$(FilePath)", "")
 	poetry run python3 -m mypy --ignore-missing-imports pyshacl
 else
@@ -68,6 +66,7 @@ upgrade: venvcheck	## Upgrade the dependencies
 .PHONY: downgrade
 downgrade: venvcheck ## Downgrade the dependencies
 	git checkout pyproject.toml && git checkout poetry.lock
+	poetry install --no-root --extras "js dev-lint dev-type-checking dev-coverage"
 
 .PHONY: publish
 publish: venvcheck	## Build and publish to PYPI
