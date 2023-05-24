@@ -2,6 +2,7 @@
 """
 https://www.w3.org/TR/shacl/#core-components-shape
 """
+from textwrap import indent
 from typing import Dict, List
 from warnings import warn
 
@@ -10,11 +11,11 @@ import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import (
     SH,
+    SH_detail,
     SH_node,
     SH_NodeConstraintComponent,
     SH_property,
     SH_PropertyConstraintComponent,
-    SH_detail,
 )
 from pyshacl.errors import (
     ConstraintLoadError,
@@ -25,7 +26,6 @@ from pyshacl.errors import (
 )
 from pyshacl.pytypes import GraphLike
 from pyshacl.rdfutil import stringify_node
-from textwrap import indent
 
 SH_QualifiedValueCountConstraintComponent = SH.QualifiedValueConstraintComponent
 SH_QualifiedMaxCountConstraintComponent = SH.QualifiedMaxCountConstraintComponent
@@ -199,7 +199,7 @@ class NodeConstraintComponent(ConstraintComponent):
                         rept_text, rept_node, rept_triples = self.make_v_result(target_graph, f, value_node=v)
                         # Nest the others underneath via sh:detail
                         rept_text = f"{rept_text}\tDetails:\n"
-                        for (text_sub, node_sub, triples_sub) in _r:
+                        for text_sub, node_sub, triples_sub in _r:
                             # Add text of validation result in nested details section
                             rept_text += indent(text_sub, "\t\t")
                             # Add a triple connecting the new validation result to the

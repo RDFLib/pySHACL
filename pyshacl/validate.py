@@ -18,10 +18,10 @@ from .consts import (
     RDF_type,
     RDFS_Resource,
     SH_conforms,
+    SH_detail,
     SH_result,
     SH_resultMessage,
     SH_ValidationReport,
-    SH_detail,
     env_truths,
 )
 from .errors import ReportableRuntimeError, ValidationFailure
