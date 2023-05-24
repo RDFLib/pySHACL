@@ -2,6 +2,7 @@ from itertools import chain
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import rdflib
+from rdflib.namespace import NamespaceManager
 
 from .clone import clone_blank_node, clone_graph, clone_node
 from .consts import OWL, RDF, ConjunctiveLike, GraphLike, OWL_classes, OWL_properties, RDFS_classes, RDFS_properties
@@ -126,6 +127,8 @@ def inoculate_dataset(
     base_default_context = base_ds.default_context.identifier
     if target_ds is None:
         target_ds = rdflib.Dataset(default_union=default_union)
+        target_ds.namespace_manager = NamespaceManager(target_ds, 'core')
+        target_ds.default_context.namespace_manager = target_ds.namespace_manager
     elif target_ds == "inplace" or target_ds == "base":
         target_ds = base_ds
     elif isinstance(target_ds, str):

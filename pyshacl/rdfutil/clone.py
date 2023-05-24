@@ -4,6 +4,7 @@ from typing import Optional, Union
 
 import rdflib
 from rdflib.collection import Collection
+from rdflib.namespace import NamespaceManager
 
 from .consts import OWL, RDF_first
 from .pytypes import ConjunctiveLike, GraphLike
@@ -17,6 +18,8 @@ def clone_dataset(source_ds, target_ds=None):
     default_union = source_ds.default_union
     if target_ds is None:
         target_ds = rdflib.Dataset(default_union=default_union)
+        target_ds.namespace_manager = NamespaceManager(target_ds, 'core')
+        target_ds.default_context.namespace_manager = target_ds.namespace_manager
     named_graphs = [
         rdflib.Graph(source_ds.store, i, namespace_manager=source_ds.namespace_manager)
         if not isinstance(i, rdflib.Graph)
@@ -51,7 +54,7 @@ def clone_graph(source_graph, target_graph=None, identifier=None):
     if isinstance(source_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
         return clone_dataset(source_graph, target_ds=target_graph)
     if target_graph is None:
-        g = rdflib.Graph(identifier=identifier)
+        g = rdflib.Graph(identifier=identifier, bind_namespaces='core')
         for p, n in source_graph.namespace_manager.namespaces():
             g.namespace_manager.bind(p, n, override=True, replace=True)
     else:
@@ -81,6 +84,8 @@ def mix_datasets(
     base_named_graphs = list(base_ds.contexts())
     if target_ds is None:
         target_ds = rdflib.Dataset(default_union=default_union)
+        target_ds.namespace_manager = NamespaceManager(target_ds, 'core')
+        target_ds.default_context.namespace_manager = target_ds.namespace_manager
     elif target_ds == "inplace" or target_ds == "base":
         target_ds = base_ds
     elif isinstance(target_ds, str):
@@ -105,7 +110,11 @@ def mix_datasets(
         for mg in mixin_graphs:
             mod_named_graphs = {
                 g.identifier: mix_graphs(
-                    g, mg, target_graph=rdflib.Graph(store=target_ds.store, identifier=g.identifier)
+                    g,
+                    mg,
+                    target_graph=rdflib.Graph(
+                        store=target_ds.store, namespace_manager=target_ds.namespace_manager, identifier=g.identifier
+                    ),
                 )
                 for g in base_named_graphs
             }

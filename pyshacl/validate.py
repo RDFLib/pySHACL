@@ -135,7 +135,7 @@ class Validator(object):
             raise RuntimeError("A Non-Conformant Validation Report must have at least one result.")
         if result_len > 0:
             v_text += "Results ({}):\n".format(str(result_len))
-        vg = rdflib.Graph()
+        vg = rdflib.Graph(bind_namespaces='core')
         for p, n in sg.graph.namespace_manager.namespaces():
             vg.namespace_manager.bind(p, n)
         vr = BNode()

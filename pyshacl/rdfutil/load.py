@@ -13,6 +13,7 @@ from urllib import request
 from urllib.error import HTTPError
 
 import rdflib
+from rdflib.namespace import NamespaceManager
 
 from .clone import clone_dataset, clone_graph
 
@@ -281,7 +282,12 @@ def load_from_source(
         if source_is_graph:
             target_g: Union[rdflib.Graph, rdflib.ConjunctiveGraph, rdflib.Dataset] = source  # type: ignore
         else:
-            target_g = rdflib.Dataset() if multigraph else rdflib.Graph()
+            if multigraph:
+                target_g = rdflib.Dataset()
+                target_g.namespace_manager = NamespaceManager(target_g, 'core')
+                target_g.default_context.namespace_manager = target_g.namespace_manager
+            else:
+                target_g = rdflib.Graph(bind_namespaces='core')
     else:
         if not isinstance(g, (rdflib.Graph, rdflib.Dataset, rdflib.ConjunctiveGraph)):
             raise RuntimeError("Passing in 'g' must be a rdflib Graph or Dataset.")
