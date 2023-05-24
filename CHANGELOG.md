@@ -6,7 +6,18 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 ## [Unreleased]
 
+## [0.23.0] - 2023-05-23
+### Added
+- Added Python 3.11 support (use it, its faster!)
+- `sh:node` NodeConstraint now includes details of its child validation results, that were normally not included in the validation report.
+  - exposed via the `sh:detail` property on the NodeConstraint validation report
+
 ### Changed
+- Added compatibility with Python 3.11, this requires:
+  - RDFLib v6.3 or greater (recommended v6.3.2)
+  - PyDuktape v0.4.3 for python 3.11 support
+  - Poetry v1.5.0 (or poetry-core v1.6.0)
+- Graph Namespace manager now only registers 'core' namespaces, this avoids having inconsistencies and incompatibilities with your own namespaces.
 - Replaced Flake8 and isort with Ruff
 - Updated to latest Black version for formatting
 
@@ -1042,7 +1053,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.22.2...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.23.0...HEAD
+[0.23.0]: https://github.com/RDFLib/pySHACL/compare/v0.22.2...v0.23.0
 [0.22.2]: https://github.com/RDFLib/pySHACL/compare/v0.22.1...v0.22.2
 [0.22.1]: https://github.com/RDFLib/pySHACL/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/RDFLib/pySHACL/compare/v0.21.0...v0.22.0

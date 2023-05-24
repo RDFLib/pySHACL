@@ -1,6 +1,6 @@
-FROM docker.io/library/python:3.10-alpine
-LABEL org.opencontainers.image.base.name="docker.io/library/python:3.10-alpine"
-LABEL org.opencontainers.image.base.digest="sha256:97725c6081f5670080322188827ef5cd95325b8c69e401047f0fa0c21910042d"
+FROM docker.io/library/python:3.11-alpine
+LABEL org.opencontainers.image.base.name="docker.io/library/python:3.11-alpine"
+LABEL org.opencontainers.image.base.digest="sha256:caafba876f841774905f73df0fcaf7fe3f55aaf9cb48a9e369a41077f860d4a7"
 LABEL org.opencontainers.image.source="https://github.com/RDFLib/pySHACL"
 LABEL maintainer="ashleysommer@gmail.com"
 RUN apk add --no-cache --update tini-static cython
@@ -9,12 +9,12 @@ WORKDIR /home/pyshacl
 RUN addgroup -g 1000 -S pyshacl &&\
     adduser --disabled-password --gecos "" --home "$(pwd)" --ingroup "pyshacl" --no-create-home --uid 1000 pyshacl
 WORKDIR /app
-LABEL org.opencontainers.image.version="0.22.2"
+LABEL org.opencontainers.image.version="0.23.0"
 COPY . .
 RUN chown -R pyshacl:pyshacl /home/pyshacl /app && chmod -R 775 /home/pyshacl /app
 USER pyshacl
 ENV PATH="/home/pyshacl/.local/bin:$PATH"
-RUN pip3 install "poetry>=1.2.0,<2.0"
+RUN pip3 install "poetry>=1.5.0,<2.0"
 RUN poetry install --no-dev --extras "js http"
 USER root
 RUN apk del build-dependencies
