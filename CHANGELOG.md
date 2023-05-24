@@ -8,7 +8,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 ## [0.23.0] - 2023-05-23
 ### Added
-- Added Python 3.11 support (use it, its faster!)
+- Added Python 3.11 support (use it, internal benchmarking shows its 25-30% faster than Python 3.8)
 - `sh:node` NodeConstraint now includes details of its child validation results, that were normally not included in the validation report.
   - exposed via the `sh:detail` property on the NodeConstraint validation report
 
