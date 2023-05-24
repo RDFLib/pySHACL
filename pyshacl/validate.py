@@ -21,6 +21,7 @@ from .consts import (
     SH_result,
     SH_resultMessage,
     SH_ValidationReport,
+    SH_detail,
     env_truths,
 )
 from .errors import ReportableRuntimeError, ValidationFailure
@@ -491,6 +492,7 @@ def validate(
 def clean_validation_reports(actual_graph, actual_report, expected_graph, expected_report):
     # remove rdfs-added stuff
     # remove resultMessage if expected_report does not include result_message
+    # remove sh:detail if expected_report does not include details
     # expected_graph.remove((expected_report, RDF_type, RDFS_Resource))
     # actual_graph.remove((actual_report, RDF_type, RDFS_Resource))
     expected_graph.remove((None, RDF_type, RDFS_Resource))
@@ -498,9 +500,11 @@ def clean_validation_reports(actual_graph, actual_report, expected_graph, expect
     expected_results = list(expected_graph.objects(expected_report, SH_result))
     actual_results = list(actual_graph.objects(actual_report, SH_result))
     er_has_messages = None
+    er_has_details = False
     for er in expected_results:
         expected_graph.remove((er, RDF_type, RDFS_Resource))
         er_has_messages = list(expected_graph.objects(er, SH_resultMessage))
+        er_has_details = er_has_details or expected_graph.value(er, SH_detail) is not None
         # sourceShapes = list(expected_graph.objects(er, SH_sourceShape))
         # for s in sourceShapes:
         #     expected_graph.remove((s, RDF_type, RDFS_Resource))
@@ -516,6 +520,12 @@ def clean_validation_reports(actual_graph, actual_report, expected_graph, expect
     else:
         for ar in actual_results:
             actual_graph.remove((ar, SH_resultMessage, None))
+    if not er_has_details:
+        # If no expected result had details, remove all details from actual
+        for ar in actual_results:
+            for detail in actual_graph.objects(ar, SH_detail):
+                actual_graph -= actual_graph.cbd(detail)
+                actual_graph.remove((ar, SH_detail, detail))
     return True
 
 
