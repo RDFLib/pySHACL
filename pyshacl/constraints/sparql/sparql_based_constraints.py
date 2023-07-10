@@ -180,9 +180,9 @@ class SPARQLBasedConstraint(ConstraintComponent):
                 v = var_dict.pop('value', None)
                 t = var_dict.pop('this', None)
                 if (p is not None) or (v is not None) or (t is not None):
-                    if (t, p, v) in dedup_set:
+                    # Guard against duplicate results
+                    if (t, p, v, var_dict) in violations:
                         continue
                     violations.append((t, p, v, var_dict))
-                    dedup_set.add((t, p, v))
 
         return violations
