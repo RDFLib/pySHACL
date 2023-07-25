@@ -23,4 +23,4 @@ if (len(sys.argv) > 1 and str(sys.argv[1]).lower() in ('serve', 'server', '--ser
 
     sys.exit(http_cli())
 
-sys.exit(main())
+main()
