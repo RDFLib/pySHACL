@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 #
 
+# Portions of this file contributed by NIST are governed by the following
+# statement:
+#
 # This software was developed at the National Institute of Standards
 # and Technology by employees of the Federal Government in the course
-# of their official duties. Pursuant to title 17 Section 105 of the
-# United States Code this software is not subject to copyright
-# protection and is in the public domain. NIST assumes no
-# responsibility whatsoever for its use by other parties, and makes
-# no guarantees, expressed or implied, about its quality,
-# reliability, or any other characteristic.
+# of their official duties. Pursuant to Title 17 Section 105 of the
+# United States Code, this software is not subject to copyright
+# protection within the United States. NIST assumes no responsibility
+# whatsoever for its use by other parties, and makes no guarantees,
+# expressed or implied, about its quality, reliability, or any other
+# characteristic.
 #
 # We would appreciate acknowledgement if the software is used.
 
@@ -33,7 +36,7 @@ the "focus" node as either sh:focusNode, or sh:value.
 
 from typing import Set
 
-from rdflib import SH, URIRef
+from rdflib import Graph, SH, URIRef
 
 from pyshacl import validate
 
@@ -99,7 +102,11 @@ def _test_160_template(
     shacl_file_text: str,
     n_validation_result_property: URIRef,
 ) -> None:
-    (conforms, conformance_graph, conformance_text,) = validate(
+    (
+        conforms,
+        conformance_graph,
+        conformance_text,
+    ) = validate(
         data_ontology_file_text,
         shacl_graph=shacl_file_text,
         data_graph_format='turtle',
@@ -109,6 +116,7 @@ def _test_160_template(
     )
 
     assert not conforms
+    assert isinstance(conformance_graph, Graph)
 
     # Find set of nodes expected to be foci of validation results.
     expected: Set[URIRef] = {URIRef("http://example.org/kb/thing-b-1")}
