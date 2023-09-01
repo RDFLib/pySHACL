@@ -42,7 +42,7 @@ class SPARQLQueryHelper(object):
         r"SELECT[\s\(\)\$\?\a-z]*\{[^\}]*SELECT\s+((?:(?:[\?\$]\w+\s+)|(?:\*\s+))+)", flags=re.M | re.I
     )
     has_as_var_regex = re.compile(r"[^\w]+AS[\s]+[\$\?](\w+)", flags=re.M | re.I)
-    find_msg_subs = re.compile(r"({[\$\?](.+)})", flags=re.M)
+    find_msg_subs = re.compile(r"({[\$\?]([^{}]+)})", flags=re.M)
 
     def __init__(self, shape, node, select_text, parameters=None, messages=None, deactivated=False):
         self._shape = None
@@ -119,7 +119,7 @@ class SPARQLQueryHelper(object):
                 except KeyError:
                     replacer = re.compile(r"{[\$\?]" + variable + r"}", flags=re.M)
                     var_replacers[variable] = replacer
-                m_val = replacer.sub(str(param_map[variable].value), m_val, 1)
+                m_val = replacer.sub(str(param_map[variable]), m_val, 1)
             bound_messages.add(rdflib.Literal(m_val, lang=m.language, datatype=m.datatype))
         self.bound_messages = bound_messages
 
