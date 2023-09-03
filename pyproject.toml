@@ -215,6 +215,10 @@ passenv =
     DRONE_COMMIT_AUTHOR_EMAIL
     DRONE_COMMIT
     HAS_COVERALLS
+    DBUS_SESSION_BUS_ADDRESS
+    PIP_KEYRING_PROVIDER
+    PIP_FORCE_KEYRING
+    PYTHON_KEYRING_BACKEND
 skip_install = true
 allowlist_externals = python3, ls, pwd, env, poetry
 setenv =
