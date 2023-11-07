@@ -11,6 +11,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ### Changed
 - Switched from deprecated `pkg_resources` to `importlib.metadata` for compatibility with Python 3.11 and 3.12.
   - This changes the way `pyshacl[extras]` are detected at runtime. If this adversely affects you, let us know.
+- Bumped PrettyTable dependency to a much newer version, to fix distro packaging conflicts and other issues.
 - Fixed more internal typing issues, particularly with newer versions of MyPy and Python 3.11+
 
 ## [0.23.0] - 2023-05-23
