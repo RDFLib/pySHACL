@@ -5,7 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
 ## [Unreleased]
-- Nothing yet.
+### Fixed
+- `sh:qualifiedMinValue` on `sh:qualifiedValueShape` now works again, even if there are no value nodes found
+  on the path of the parent `PropertyShape`. Fixes #213 Thank you @ajnelson-nist for finding and reporting this.
 
 
 ## [0.23.0] - 2023-05-23

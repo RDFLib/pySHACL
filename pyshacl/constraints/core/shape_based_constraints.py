@@ -257,7 +257,11 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
             )
         else:
             min_count = next(iter(min_count))
-            assert isinstance(min_count, rdflib.Literal) and isinstance(min_count.value, int)
+            if not isinstance(min_count, rdflib.Literal) or not isinstance(min_count.value, int):
+                raise ConstraintLoadError(
+                    "QualifiedMinCountConstraintComponent sh:qualifiedMinCount must be a Literal with Int.",
+                    "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent",
+                )
             min_count = min_count.value
 
         max_count = set(self.shape.objects(SH_qualifiedMaxCount))
@@ -270,7 +274,11 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
             )
         else:
             max_count = next(iter(max_count))
-            assert isinstance(max_count, rdflib.Literal) and isinstance(max_count.value, int)
+            if not isinstance(max_count, rdflib.Literal) or not isinstance(max_count.value, int):
+                raise ConstraintLoadError(
+                    "QualifiedMaxCountConstraintComponent sh:qualifiedMaxCount must be a Literal with Int.",
+                    "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent",
+                )
             max_count = max_count.value
         if min_count is None and max_count is None:
             raise ConstraintLoadError(
@@ -324,7 +332,7 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
         value_node_count = 0
         for f, value_nodes in focus_value_nodes.items():
             value_node_count = value_node_count + len(value_nodes)
-        if value_node_count < 1:
+        if not self.is_disjoint and value_node_count < 1 and (self.min_count is None or self.min_count < 1):
             return (not non_conformant), reports
 
         potentially_recursive = self.recursion_triggers(_evaluation_path)
@@ -339,7 +347,7 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
                 return _non_conformant, _reports
             if not other_shape:
                 raise ReportableRuntimeError(
-                    "Shape pointed to by sh:property does not exist or is not a well-formed SHACL Shape."
+                    "Shape pointed to by sh:qualifiedValueShape does not exist or is not a well-formed SHACL Shape."
                 )
             if self.is_disjoint:
                 # Textual Definition of Sibling Shapes:
@@ -347,11 +355,13 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
                 sibling_shapes = set()
                 parent_shapes = set(self.shape.sg.subjects(SH_property, self.shape.node))
                 for p in iter(parent_shapes):
-                    found_siblings = set(self.shape.sg.objects(p, SH_property))
-                    for s in iter(found_siblings):
-                        if s == self.shape.node:
-                            continue
-                        sibling_shapes.update(self.shape.sg.objects(s, SH_qualifiedValueShape))
+                    parent_property_shapes = set(self.shape.sg.objects(p, SH_property))
+                    for s in iter(parent_property_shapes):
+                        parent_property_qualifiedvalueshapes = set(self.shape.sg.objects(s, SH_qualifiedValueShape))
+                        for sibling in parent_property_qualifiedvalueshapes:
+                            if sibling == _v_shape:
+                                continue
+                            sibling_shapes.add(sibling)
 
                 sibling_shapes = set(self.shape.get_other_shape(s) for s in sibling_shapes)
             else:
