@@ -1,5 +1,5 @@
 [build-system]
-requires = ["poetry-core>=1.6.0,<2"]
+requires = ["poetry-core>=1.8.1,<2"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
@@ -60,7 +60,7 @@ html5lib = ">=1.1,<2"
 owlrl = ">=6.0.2,<7"
 prettytable = "^2.2.1"
 packaging = ">=21.3"
-pyduktape2 = {version="^0.4.3", optional=true}
+pyduktape2 = {version="^0.4.6", optional=true}
 sanic = {version=">=22.12, <23", optional=true} #For the HTTP service
 sanic-ext = {version=">=23.3, <23.6", optional=true} #For the HTTP service
 sanic-cors = {version="2.2.0", optional=true} #For the HTTP service
@@ -198,7 +198,7 @@ toxworkdir={env:TOX_WORK_DIR:.tox}
 
 [testenv]
 deps =
-    poetry>=1.5.0
+    poetry>=1.7.0
 passenv =
     TRAVIS
     TRAVIS_JOB_ID
@@ -237,6 +237,7 @@ setenv =
 commands_pre =
     py39: poetry run pip3 install -U "pip>=21.0"
     py310: poetry run pip3 install -U "pip>=21.3"
+    py311: poetry run pip3 install -U "pip>=22.1"
     poetry install -vv -n --no-root --extras "js dev-coverage"
     # Coveralls required to send coverage report to coveralls.io
     py38: poetry run pip3 install "coveralls>=3.3.1"
