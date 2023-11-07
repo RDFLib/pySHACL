@@ -8,7 +8,10 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ### Fixed
 - `sh:qualifiedMinValue` on `sh:qualifiedValueShape` now works again, even if there are no value nodes found
   on the path of the parent `PropertyShape`. Fixes #213 Thank you @ajnelson-nist for finding and reporting this.
-
+### Changed
+- Switched from deprecated `pkg_resources` to `importlib.metadata` for compatibility with Python 3.11 and 3.12.
+  - This changes the way `pyshacl[extras]` are detected at runtime. If this adversely affects you, let us know.
+- Fixed more internal typing issues, particularly with newer versions of MyPy and Python 3.11+
 
 ## [0.23.0] - 2023-05-23
 ### Added
