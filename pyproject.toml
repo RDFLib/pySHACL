@@ -67,7 +67,7 @@ sanic-cors = {version="2.2.0", optional=true} #For the HTTP service
 ruff = {version="^0.0.267", optional=true}
 black = {version="23.3.0", optional=true}
 mypy = [
-    {version=">=0.800,<0.900", optional=true, python = "<3.10"},
+    {version=">=0.812,<0.900", optional=true, python = "<3.10"},
     {version=">=0.900,<0.1000", optional=true, python = ">=3.10"}
     ]
 types-setuptools = {version="*", optional=true}
@@ -81,7 +81,7 @@ coverage = {version=">6,<7,!=6.0.*,!=6.1,!=6.1.1", optional=true}
 pytest-cov = {version="^2.8.1", optional=true}
 ruff = {version="^0.0.267", optional=true}
 mypy = [
-    {version=">=0.800,<0.900", optional=true, python = "<3.10"},
+    {version=">=0.812,<0.900", optional=true, python = "<3.10"},
     {version=">=0.900,<0.1000", optional=true, python = ">=3.10"}
     ]
 types-setuptools = {version="*", optional=true}
@@ -264,7 +264,7 @@ commands =
 commands_pre =
     python --version
     poetry install -vv -n --no-root --extras "dev-type-checking"
-    poetry run pip3 install "mypy>=0.800" "types-setuptools"
+    poetry run pip3 install "mypy>=0.812" "types-setuptools"
 commands =
     - poetry show
     poetry run python3 -m mypy --ignore-missing-imports pyshacl

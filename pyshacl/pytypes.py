@@ -3,8 +3,10 @@
 
 from typing import Union
 
-from rdflib import BNode, ConjunctiveGraph, Dataset, Graph, Literal, URIRef
+from rdflib import ConjunctiveGraph, Dataset, Graph, Literal
+from rdflib.term import IdentifiedNode, Node
 
 ConjunctiveLike = Union[ConjunctiveGraph, Dataset]
 GraphLike = Union[ConjunctiveLike, Graph]
-RDFNode = Union[URIRef, Literal, BNode]
+RDFNode = Union[IdentifiedNode, Literal]
+BaseNode = Node
