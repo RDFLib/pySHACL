@@ -8,7 +8,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - Nothing yet...
 
 
-## [0.23.0] - 2023-11-08
+## [0.24.0] - 2023-11-08
 ## Note - This is the last version to support Python 3.7
 ### RDFLib v7.0.0 and some other dependencies already don't support 3.7, so PySHACL will drop it after this release.
 ### Added
@@ -16,7 +16,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ### Fixed
 - `sh:qualifiedMinValue` on `sh:qualifiedValueShape` now works again, even if there are no value nodes found
   on the path of the parent `PropertyShape`. Fixes #213 Thank you @ajnelson-nist for finding and reporting this.
-- Fixes in rdfutl (clone dataset, mixin dataset, and innoculate dataset) to support the case where all the DS's
+- Fixes in rdfuitl (clone dataset, mixin dataset, and innoculate dataset) to support the case where all the DS's
   triples are in the default-context-uri graph.
 ### Changed
 - In accordance with corresponding changes in RDFLib v7.0.0, PySHACL will now always use the default-context-uri graph
