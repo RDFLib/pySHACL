@@ -67,7 +67,7 @@ prettytable = [
     {version=">=3.7.0", python = ">=3.12"}
 ]
 packaging = ">=21.3"
-importlib-metadata = {version="4.13", python = "<3.11"}
+importlib-metadata = {version=">=4.13", python = "<3.11"}
 pyduktape2 = {version="^0.4.6", optional=true}
 sanic = {version=">=22.12, <23", optional=true} #For the HTTP service
 sanic-ext = {version=">=23.3, <23.6", optional=true} #For the HTTP service
