@@ -37,16 +37,18 @@ ifeq ("$(FilePath)", "")
 	poetry run ruff check --select I --fix ./pyshacl #isort fix
 	poetry run black --config=./pyproject.toml --verbose pyshacl
 else
-    poetry run ruff check --select I --fix "$(FilePath)" #isort fix
+	poetry run ruff check --select I --fix "$(FilePath)" #isort fix
 	poetry run black --config=./pyproject.toml --verbose "$(FilePath)"
 endif
 
 .PHONY: lint
 lint: venvcheck	## Validate with Black and isort in check-only mode
 ifeq ("$(FilePath)", "")
-	poetry run ruff check --select I ./pyshacl #isort
+	poetry run ruff check ./pyshacl  #flake8
+	poetry run ruff check --select I ./pyshacl  #isort
 	poetry run black --config=./pyproject.toml --check --verbose pyshacl
 else
+	poetry run ruff check ./"$(FilePath)"  #flake8
 	poetry run ruff check --select I ./"$(FilePath)" #isort
 	poetry run black --config=./pyproject.toml --check --verbose "$(FilePath)"
 endif
