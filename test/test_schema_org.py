@@ -37,10 +37,12 @@ def schema_org():
     dataGraph = rdflib.Graph().parse(data=data, format='ttl')
     #print(dataGraph.serialize(format='ttl').decode('utf8'))
 
-    shaclGraph = rdflib.Dataset()
+    shaclDS = rdflib.Dataset()
+    shaclGraph = shaclDS.default_context
+    shaclDS.graph(shaclGraph)
     shaclGraph.parse(data=shacl, format='ttl')
 
-    report = validate(dataGraph, shacl_graph=shaclGraph, abort_on_first=False, inference='both', meta_shacl=False, debug=False, advanced=True, do_owl_imports=True)
+    report = validate(dataGraph, shacl_graph=shaclDS, abort_on_first=False, inference='both', meta_shacl=False, debug=False, advanced=True, do_owl_imports=True)
 
     print(report[2])
 

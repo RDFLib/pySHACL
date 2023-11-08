@@ -283,9 +283,12 @@ def load_from_source(
             target_g: Union[rdflib.Graph, rdflib.ConjunctiveGraph, rdflib.Dataset] = source  # type: ignore
         else:
             if multigraph:
-                target_g = rdflib.Dataset()
-                target_g.namespace_manager = NamespaceManager(target_g, 'core')
-                target_g.default_context.namespace_manager = target_g.namespace_manager
+                target_ds = rdflib.Dataset(default_graph_base=public_id)
+                target_ds.namespace_manager = NamespaceManager(target_ds, 'core')
+                target_ds.default_context.namespace_manager = target_ds.namespace_manager
+                default_g = target_ds.default_context
+                target_ds.graph(default_g)
+                target_g = target_ds
             else:
                 target_g = rdflib.Graph(bind_namespaces='core')
     else:
@@ -403,7 +406,12 @@ def load_from_source(
                 raise RuntimeError("Seek failed while pre-parsing Turtle File.")
             except ValueError:
                 raise RuntimeError("File closed while pre-parsing Turtle File.")
-        target_g.parse(source=cast(IO[bytes], _source), format=rdf_format, publicID=public_id)
+        if isinstance(target_g, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+            default_g = target_g.default_context
+            default_g.base = public_id
+            default_g.parse(source=cast(IO[bytes], _source), format=rdf_format, publicID=public_id)
+        else:
+            target_g.parse(source=cast(IO[bytes], _source), format=rdf_format, publicID=public_id)
         # If the target was open to begin with, leave it open.
         if not source_was_open:
             _source.close()

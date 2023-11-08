@@ -4,6 +4,7 @@ from typing import Optional, Union
 
 import rdflib
 from rdflib.collection import Collection
+from rdflib.graph import DATASET_DEFAULT_GRAPH_ID
 from rdflib.namespace import NamespaceManager
 
 from .consts import OWL, RDF_first
@@ -12,7 +13,7 @@ from .pytypes import ConjunctiveLike, GraphLike
 OWLsameAs = OWL.sameAs
 
 
-def clone_dataset(source_ds, target_ds=None):
+def clone_dataset(source_ds: ConjunctiveLike, target_ds=None):
     if target_ds and not isinstance(target_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
         raise RuntimeError("when cloning a dataset, the target_ds must be a conjunctiveGraph or rdflib Dataset.")
     default_union = source_ds.default_union
@@ -26,16 +27,46 @@ def clone_dataset(source_ds, target_ds=None):
         else i
         for i in source_ds.store.contexts(None)
     ]
+    if isinstance(source_ds, rdflib.Dataset) and len(named_graphs) < 1:
+        named_graphs = [
+            rdflib.Graph(source_ds.store, DATASET_DEFAULT_GRAPH_ID, namespace_manager=source_ds.namespace_manager)
+        ]
     cloned_graphs = [
         clone_graph(ng, rdflib.Graph(target_ds.store, ng.identifier, namespace_manager=target_ds.namespace_manager))
         for ng in named_graphs
     ]
-    default_context_id = target_ds.default_context.identifier
+    source_graph_identifiers = [ng.identifier for ng in named_graphs]
+    source_default_context_id = source_ds.default_context.identifier
+    target_default_context_id = target_ds.default_context.identifier
+    if source_default_context_id != target_default_context_id:
+        old_target_default_context = target_ds.default_context
+        old_target_default_context_id = old_target_default_context.identifier
+        if isinstance(target_ds, rdflib.Dataset):
+            new_target_default_context = target_ds.graph(source_default_context_id)
+        else:
+            new_target_default_context = target_ds.get_context(source_default_context_id)
+            target_ds.store.add_graph(new_target_default_context)
+        target_ds.default_context = new_target_default_context
+        if old_target_default_context_id not in source_graph_identifiers:
+            if isinstance(target_ds, rdflib.Dataset):
+                target_ds.remove_graph(old_target_default_context)
+            else:
+                target_ds.store.remove_graph(old_target_default_context)
+        target_default_context_id = new_target_default_context.identifier
+    else:
+        if isinstance(target_ds, rdflib.Dataset):
+            _ = target_ds.graph(target_default_context_id)
+        else:
+            t_default = target_ds.get_context(target_default_context_id)
+            target_ds.store.add_graph(t_default)
+
     for g in cloned_graphs:
-        if g.identifier == default_context_id:
-            target_ds.store.remove_graph(target_ds.default_context)
-            target_ds.default_context = g
-        target_ds.add_graph(g)
+        if g == target_ds.default_context or g.identifier == target_default_context_id:
+            continue
+        if isinstance(target_ds, rdflib.Dataset):
+            _ = target_ds.graph(g)  # alias to Dataset.add_graph()
+        else:
+            target_ds.store.add_graph(g)
     return target_ds
 
 
@@ -81,7 +112,16 @@ def mix_datasets(
     :rtype: rdflib.Dataset
     """
     default_union = base_ds.default_union
-    base_named_graphs = list(base_ds.contexts())
+    base_named_graphs = [
+        rdflib.Graph(base_ds.store, i, namespace_manager=base_ds.namespace_manager)
+        if not isinstance(i, rdflib.Graph)
+        else i
+        for i in base_ds.store.contexts(None)
+    ]
+    if isinstance(base_ds, rdflib.Dataset) and len(base_named_graphs) < 1:
+        base_named_graphs = [
+            rdflib.Graph(base_ds.store, DATASET_DEFAULT_GRAPH_ID, namespace_manager=base_ds.namespace_manager)
+        ]
     if target_ds is None:
         target_ds = rdflib.Dataset(default_union=default_union)
         target_ds.namespace_manager = NamespaceManager(target_ds, 'core')
@@ -98,7 +138,12 @@ def mix_datasets(
         raise RuntimeError("Cannot mix datasets if target_ds passed in is not a Dataset itself.")
 
     if isinstance(extra_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
-        mixin_graphs = list(extra_ds.contexts())
+        mixin_graphs = [
+            rdflib.Graph(extra_ds.store, i, namespace_manager=extra_ds.namespace_manager)
+            if not isinstance(i, rdflib.Graph)
+            else i
+            for i in extra_ds.store.contexts(None)
+        ]
     else:
         mixin_graphs = [extra_ds]
     if target_ds is base_ds or target_ds == "inplace" or target_ds == "base":
@@ -119,12 +164,38 @@ def mix_datasets(
                 for g in base_named_graphs
             }
             mixed_graphs.update(mod_named_graphs)
-        default_context_id = target_ds.default_context.identifier
+
+        base_graph_identifiers = [bg.identifier for bg in base_named_graphs]
+        base_default_context_id = base_ds.default_context.identifier
+        target_default_context_id = target_ds.default_context.identifier
+        if base_default_context_id != target_default_context_id:
+            old_target_default_context = target_ds.default_context
+            old_target_default_context_id = old_target_default_context.identifier
+            if isinstance(target_ds, rdflib.Dataset):
+                new_target_default_context = target_ds.graph(base_default_context_id)
+            else:
+                new_target_default_context = target_ds.get_context(base_default_context_id)
+                target_ds.store.add_graph(new_target_default_context)
+            target_ds.default_context = new_target_default_context
+            if old_target_default_context_id not in base_graph_identifiers:
+                if isinstance(target_ds, rdflib.Dataset):
+                    target_ds.remove_graph(old_target_default_context)
+                else:
+                    target_ds.store.remove_graph(old_target_default_context)
+            target_default_context_id = new_target_default_context.identifier
+        else:
+            if isinstance(target_ds, rdflib.Dataset):
+                _ = target_ds.graph(target_default_context_id)
+            else:
+                t_default = target_ds.get_context(target_default_context_id)
+                target_ds.store.add_graph(t_default)
         for i, m in mixed_graphs.items():
-            if i == default_context_id:
-                target_ds.store.remove_graph(target_ds.default_context)
-                target_ds.default_context = m
-            target_ds.add_graph(m)
+            if m == target_ds.default_context or i == target_default_context_id:
+                continue
+            if isinstance(target_ds, rdflib.Dataset):
+                _ = target_ds.graph(m)  # alias to Dataset.add_graph()
+            else:
+                target_ds.store.add_graph(m)
     return target_ds
 
 

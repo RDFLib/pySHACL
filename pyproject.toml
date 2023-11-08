@@ -55,12 +55,15 @@ include = [
 
 [tool.poetry.dependencies]
 python = "^3.7.0"  # Compatible python versions must be declared here
-rdflib = ">=6.3.2,<7"
+rdflib = [
+    {version=">=6.3.2,<8.0", python = ">=3.8.1"},
+    {version=">=6.2.0,<=6.3.2", python = "<3.8.1"}
+]
 html5lib = ">=1.1,<2"
 owlrl = ">=6.0.2,<7"
 prettytable = [
-    {version=">=3.5.0,<3.8.0", python = "<=3.7"},
-    {version=">=3.5.0", python = ">3.7,<3.12"},
+    {version=">=3.5.0,<3.8.0", python = "<3.8"},
+    {version=">=3.5.0", python = ">=3.8,<3.12"},
     {version=">=3.7.0", python = ">=3.12"}
 ]
 packaging = ">=21.3"

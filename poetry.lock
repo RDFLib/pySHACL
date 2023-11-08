@@ -789,6 +789,27 @@ lxml = ["lxml (>=4.3.0,<5.0.0)"]
 networkx = ["networkx (>=2.0.0,<3.0.0)"]
 
 [[package]]
+name = "rdflib"
+version = "7.0.0"
+description = "RDFLib is a Python library for working with RDF, a simple yet powerful language for representing information."
+optional = false
+python-versions = ">=3.8.1,<4.0.0"
+files = [
+    {file = "rdflib-7.0.0-py3-none-any.whl", hash = "sha256:0438920912a642c866a513de6fe8a0001bd86ef975057d6962c79ce4771687cd"},
+    {file = "rdflib-7.0.0.tar.gz", hash = "sha256:9995eb8569428059b8c1affd26b25eac510d64f5043d9ce8c84e0d0036e995ae"},
+]
+
+[package.dependencies]
+isodate = ">=0.6.0,<0.7.0"
+pyparsing = ">=2.1.0,<4"
+
+[package.extras]
+berkeleydb = ["berkeleydb (>=18.1.0,<19.0.0)"]
+html = ["html5lib (>=1.0,<2.0)"]
+lxml = ["lxml (>=4.3.0,<5.0.0)"]
+networkx = ["networkx (>=2.0.0,<3.0.0)"]
+
+[[package]]
 name = "ruff"
 version = "0.0.267"
 description = "An extremely fast Python linter, written in Rust."
@@ -1279,4 +1300,4 @@ js = ["pyduktape2"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.0"
-content-hash = "b4c35d5bf6a157038d74435542e3756a5e0f0a179cd132456b18b495e352ddb4"
+content-hash = "4c8a37964fd7f6cd9c7c6d32c4f08ad304a01856a71bbe27a02e08cc605f2406"
