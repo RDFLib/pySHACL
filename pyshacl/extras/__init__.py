@@ -7,7 +7,7 @@ from warnings import warn
 if python_version[:2] < (3, 11):
     from importlib_metadata import PackageNotFoundError, metadata
 else:
-    from importlib.metadata import PackageNotFoundError, metadata
+    from importlib.metadata import PackageNotFoundError, metadata  # type: ignore[assignment]
 
 
 # In dev mode, the extras-loader doesn't check if extension is installed before loading it.

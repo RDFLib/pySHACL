@@ -125,7 +125,7 @@ def inoculate_dataset(
     # or we clone base_ds as part of this function
     default_union = base_ds.default_union
     base_named_graphs = [
-        rdflib.Graph(base_ds.store, i, namespace_manager=base_ds.namespace_manager)
+        rdflib.Graph(base_ds.store, i, namespace_manager=base_ds.namespace_manager)  # type: ignore[arg-type]
         if not isinstance(i, rdflib.Graph)
         else i
         for i in base_ds.store.contexts(None)
@@ -150,7 +150,7 @@ def inoculate_dataset(
         raise RuntimeError("Cannot inoculate datasets if target_ds passed in is not a Dataset itself.")
     if isinstance(ontology_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
         ont_graphs = [
-            rdflib.Graph(ontology_ds.store, i, namespace_manager=ontology_ds.namespace_manager)
+            rdflib.Graph(ontology_ds.store, i, namespace_manager=ontology_ds.namespace_manager)  # type: ignore[arg-type]
             if not isinstance(i, rdflib.Graph)
             else i
             for i in ontology_ds.store.contexts(None)
