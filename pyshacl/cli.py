@@ -4,7 +4,6 @@
 import argparse
 import os
 import sys
-from typing import Any, Dict, Union
 
 from prettytable import PrettyTable
 from rdflib import Graph
@@ -191,7 +190,10 @@ def main() -> None:
         parser.prog = "python3 -m pyshacl"
     do_server = os.getenv("PYSHACL_HTTP", "")
     do_server = os.getenv("PYSHACL_SERVER", do_server)
-    args = parser.parse_args()
+    if do_server:
+        args = argparse.Namespace()
+    else:
+        args = parser.parse_args()
     if str_is_true(do_server) or args.server:
         from pyshacl.sh_http import cli as http_cli
 
