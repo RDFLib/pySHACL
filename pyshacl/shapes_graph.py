@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import warnings
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import rdflib
 
@@ -30,6 +30,9 @@ from .consts import (
 from .errors import ShapeLoadError
 from .shape import Shape
 
+if TYPE_CHECKING:
+    from .pytypes import RDFNode
+
 
 class ShapesGraph(object):
     system_triples = [(OWL_Class, RDFS_subClassOf, RDFS_Class), (OWL_DatatypeProperty, RDFS_subClassOf, RDF_Property)]
@@ -52,11 +55,11 @@ class ShapesGraph(object):
             logger = logging.getLogger(__name__)
         self.logger = logger
         self.debug = debug
-        self._node_shape_cache = {}
+        self._node_shape_cache: Dict['RDFNode', Shape] = {}
         self._shapes = None
         self._custom_constraints = None
-        self._shacl_functions = {}
-        self._shacl_target_types = {}
+        self._shacl_functions: Dict[str, tuple] = {}
+        self._shacl_target_types: Dict[str, 'RDFNode'] = {}
         self._use_js = False
         self._add_system_triples()
 
@@ -114,17 +117,17 @@ class ShapesGraph(object):
             components.add(CustomConstraintComponentFactory(self, c))
         return components
 
-    def add_shacl_function(self, uri, function, optionals):
-        uri = str(uri)
-        if uri in self._shacl_functions:
+    def add_shacl_function(self, uri: Union[str, 'RDFNode'], function, optionals):
+        uri_str = str(uri)
+        if uri_str in self._shacl_functions:
             warnings.warn(Warning("SHACLFunction {} is already registered.".format(uri)))
         else:
-            self._shacl_functions[uri] = (function, optionals)
+            self._shacl_functions[uri_str] = (function, optionals)
 
-    def get_shacl_function(self, uri):
-        uri = str(uri)
+    def get_shacl_function(self, uri: Union[str, 'RDFNode']):
+        uri_str = str(uri)
         try:
-            f = self._shacl_functions[uri]
+            f = self._shacl_functions[uri_str]
         except LookupError:
             raise KeyError("SHACLFunction {} not found.".format(uri))
         return f
@@ -142,20 +145,20 @@ class ShapesGraph(object):
             return  # Not registered
         del self._shacl_functions[uri]
 
-    def add_shacl_target_type(self, uri, tt):
-        uri = str(uri)
-        if uri in self._shacl_target_types:
+    def add_shacl_target_type(self, uri: Union[str, 'RDFNode'], tt):
+        uri_str = str(uri)
+        if uri_str in self._shacl_target_types:
             warnings.warn(Warning("SHACL TargetType {} is already registered.".format(uri)))
         else:
-            self._shacl_target_types[uri] = tt
+            self._shacl_target_types[uri_str] = tt
 
-    def get_shacl_target_type(self, uri):
-        uri = str(uri)
+    def get_shacl_target_type(self, uri: Union[str, 'RDFNode']):
+        uri_str = str(uri)
         try:
-            f = self._shacl_target_types[uri]
+            tt = self._shacl_target_types[uri_str]
         except LookupError:
             raise KeyError("SHACL TargetType {} not found.".format(uri))
-        return f
+        return tt
 
     @property
     def shapes(self):

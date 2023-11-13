@@ -5,7 +5,7 @@ import sys
 from functools import wraps
 from os import getenv, path
 from sys import stderr
-from typing import Dict, Iterator, List, Optional, Set, Tuple, Union, cast
+from typing import TYPE_CHECKING, Dict, Iterator, List, Optional, Set, Tuple, Union, cast
 
 import rdflib
 from rdflib import BNode, Literal, URIRef
@@ -45,6 +45,9 @@ from .rdfutil import (
 from .rules import apply_rules, gather_rules
 from .shapes_graph import ShapesGraph
 from .target import apply_target_types, gather_target_types
+
+if TYPE_CHECKING:
+    from .pytypes import BaseNode
 
 USE_FULL_MIXIN = getenv("PYSHACL_USE_FULL_MIXIN") in env_truths
 
@@ -112,12 +115,14 @@ class Validator(object):
                 "Error during creation of OWL-RL Deductive Closure\n{}".format(str(e.args[0]))
             )
         if isinstance(target_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
-            named_graphs = [
-                rdflib.Graph(target_graph.store, i, namespace_manager=target_graph.namespace_manager)
-                if not isinstance(i, rdflib.Graph)
-                else i
-                for i in target_graph.store.contexts(None)
-            ]
+            named_graphs = []
+            for i in target_graph.store.contexts(None):
+                if isinstance(i, rdflib.Graph):
+                    named_graphs.append(i)
+                else:
+                    named_graphs.append(
+                        rdflib.Graph(target_graph.store, i, namespace_manager=target_graph.namespace_manager)
+                    )
         else:
             named_graphs = [target_graph]
         try:
@@ -719,19 +724,21 @@ def check_dash_result(validator: Validator, report_graph: GraphLike, expected_re
             parts = [e.strip() for e in expression.split("(", 1)]
             if len(parts) < 1:
                 expression = parts[0]
-                eargs: List[Union[str, URIRef]] = []
+                eargs: List[Optional[Union[str, BaseNode]]] = []
             else:
                 expression, sargs = parts
                 sargs = sargs.rstrip(")")
                 if len(sargs) < 1:
-                    eargs = []
+                    eargs_str_list: List[str] = []
                 else:
-                    eargs = [a.strip() for a in sargs.split(',')]
+                    eargs_str_list = [a.strip() for a in sargs.split(',')]
                 eargs = [
-                    from_n3(e, None, expected_result_graph.store, expected_result_graph.namespace_manager)
-                    for e in eargs
+                    from_n3(e, None, expected_result_graph.store, expected_result_graph.namespace_manager)  # type: ignore[arg-type]
+                    for e in eargs_str_list
                 ]
-            find_uri = from_n3(expression, None, expected_result_graph.store, expected_result_graph.namespace_manager)
+            find_uri = from_n3(expression, None, expected_result_graph.store, expected_result_graph.namespace_manager)  # type: ignore[arg-type]
+            if find_uri is None or not isinstance(find_uri, (str, URIRef, Literal, BNode)):
+                raise ReportableRuntimeError("Cannot execute function {}.\nBad declaration format.".format(find_uri))
             try:
                 fn, options = validator.shacl_graph.get_shacl_function(find_uri)
             except KeyError:

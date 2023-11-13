@@ -5,8 +5,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
 ## [Unreleased]
-- Nothing yet.
+- Nothing yet...
 
+
+## [0.24.0] - 2023-11-08
+## Note - This is the last version to support Python 3.7
+### RDFLib v7.0.0 and some other dependencies already don't support 3.7, so PySHACL will drop it after this release.
+### Added
+- Compatibility with RDFLib v7.0.0 - Closes #197
+### Fixed
+- `sh:qualifiedMinValue` on `sh:qualifiedValueShape` now works again, even if there are no value nodes found
+  on the path of the parent `PropertyShape`. Fixes #213 Thank you @ajnelson-nist for finding and reporting this.
+- Fixes in rdfuitl (clone dataset, mixin dataset, and innoculate dataset) to support the case where all the DS's
+  triples are in the default-context-uri graph.
+### Changed
+- In accordance with corresponding changes in RDFLib v7.0.0, PySHACL will now always use the default-context-uri graph
+  when parsing a grpah into a Dataset or a ConjunctiveGraph
+- Switched from deprecated `pkg_resources` to `importlib.metadata` for compatibility with Python 3.11 and 3.12.
+  - This changes the way `pyshacl[extras]` are detected at runtime. If this adversely affects you, let us know.
+- Bumped PrettyTable dependency to a much newer version, to fix distro packaging conflicts and other issues.
+- Fixed more internal typing issues, particularly with newer versions of MyPy and Python 3.11+
 
 ## [0.23.0] - 2023-05-23
 ### Added
@@ -1055,7 +1073,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.23.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.24.0...HEAD
+[0.24.0]: https://github.com/RDFLib/pySHACL/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/RDFLib/pySHACL/compare/v0.22.2...v0.23.0
 [0.22.2]: https://github.com/RDFLib/pySHACL/compare/v0.22.1...v0.22.2
 [0.22.1]: https://github.com/RDFLib/pySHACL/compare/v0.22.0...v0.22.1

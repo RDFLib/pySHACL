@@ -2,6 +2,7 @@ from itertools import chain
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import rdflib
+from rdflib.graph import DATASET_DEFAULT_GRAPH_ID
 from rdflib.namespace import NamespaceManager
 
 from .clone import clone_blank_node, clone_graph, clone_node
@@ -123,8 +124,17 @@ def inoculate_dataset(
     # TODO: Decide whether we need to clone base_ds before calling this,
     # or we clone base_ds as part of this function
     default_union = base_ds.default_union
-    base_named_graphs = list(base_ds.contexts())
-    base_default_context = base_ds.default_context.identifier
+    base_named_graphs = [
+        rdflib.Graph(base_ds.store, i, namespace_manager=base_ds.namespace_manager)  # type: ignore[arg-type]
+        if not isinstance(i, rdflib.Graph)
+        else i
+        for i in base_ds.store.contexts(None)
+    ]
+    if isinstance(base_ds, rdflib.Dataset) and len(base_named_graphs) < 1:
+        base_named_graphs = [
+            rdflib.Graph(base_ds.store, DATASET_DEFAULT_GRAPH_ID, namespace_manager=base_ds.namespace_manager)
+        ]
+    base_default_context_id = base_ds.default_context.identifier
     if target_ds is None:
         target_ds = rdflib.Dataset(default_union=default_union)
         target_ds.namespace_manager = NamespaceManager(target_ds, 'core')
@@ -139,40 +149,72 @@ def inoculate_dataset(
     else:
         raise RuntimeError("Cannot inoculate datasets if target_ds passed in is not a Dataset itself.")
     if isinstance(ontology_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
-        ont_graphs = list(ontology_ds.contexts())
-        ont_default_context = ontology_ds.default_context.identifier
+        ont_graphs = [
+            rdflib.Graph(ontology_ds.store, i, namespace_manager=ontology_ds.namespace_manager)  # type: ignore[arg-type]
+            if not isinstance(i, rdflib.Graph)
+            else i
+            for i in ontology_ds.store.contexts(None)
+        ]
+        ont_default_context_id = ontology_ds.default_context.identifier
     else:
         ont_graphs = [ontology_ds]
-        ont_default_context = None
+        ont_default_context_id = None
     if target_ds is base_ds or target_ds == "inplace" or target_ds == "base":
         target_ds = base_ds
         for bg in base_named_graphs:
-            if len(base_named_graphs) > 1 and bg.identifier == base_default_context and len(bg) < 1:
+            if len(base_named_graphs) > 1 and bg.identifier == base_default_context_id and len(bg) < 1:
                 # skip empty default named graph in base_graph
                 continue
             for og in ont_graphs:
-                if len(ont_graphs) > 1 and og.identifier == ont_default_context and len(og) < 1:
+                if len(ont_graphs) > 1 and og.identifier == ont_default_context_id and len(og) < 1:
                     # skip empty default named graph in ontology_graph
                     continue
                 inoculate(bg, og)
     else:
         inoculated_graphs = {}
         for bg in base_named_graphs:
-            if len(base_named_graphs) > 1 and bg.identifier == base_default_context and len(bg) < 1:
+            if len(base_named_graphs) > 1 and bg.identifier == base_default_context_id and len(bg) < 1:
                 # skip empty default named graph in base_graph
                 continue
             target_g = rdflib.Graph(store=target_ds.store, identifier=bg.identifier)
             clone_g = clone_graph(bg, target_graph=target_g)
             for og in ont_graphs:
-                if len(ont_graphs) > 1 and og.identifier == ont_default_context and len(og) < 1:
+                if len(ont_graphs) > 1 and og.identifier == ont_default_context_id and len(og) < 1:
                     # skip empty default named graph in ontology_graph
                     continue
                 inoculate(clone_g, og)
             inoculated_graphs[bg.identifier] = clone_g
-        default_context_id = target_ds.default_context.identifier
-        for i, m in inoculated_graphs.items():
-            if i == default_context_id:
-                target_ds.store.remove_graph(target_ds.default_context)
-                target_ds.default_context = m
-            target_ds.add_graph(m)
+
+        base_graph_identifiers = [bg.identifier for bg in base_named_graphs]
+        base_default_context_id = base_ds.default_context.identifier
+        target_default_context_id = target_ds.default_context.identifier
+        if base_default_context_id != target_default_context_id:
+            old_target_default_context = target_ds.default_context
+            old_target_default_context_id = old_target_default_context.identifier
+            if isinstance(target_ds, rdflib.Dataset):
+                new_target_default_context = target_ds.graph(base_default_context_id)
+            else:
+                new_target_default_context = target_ds.get_context(base_default_context_id)
+                target_ds.store.add_graph(new_target_default_context)
+            target_ds.default_context = new_target_default_context
+            if old_target_default_context_id not in base_graph_identifiers:
+                if isinstance(target_ds, rdflib.Dataset):
+                    target_ds.remove_graph(old_target_default_context)
+                else:
+                    target_ds.store.remove_graph(old_target_default_context)
+            target_default_context_id = new_target_default_context.identifier
+        else:
+            if isinstance(target_ds, rdflib.Dataset):
+                _ = target_ds.graph(target_default_context_id)
+            else:
+                t_default = target_ds.get_context(target_default_context_id)
+                target_ds.store.add_graph(t_default)
+        for i, ig in inoculated_graphs.items():
+            if ig == target_ds.default_context or i == target_default_context_id:
+                continue
+            if isinstance(target_ds, rdflib.Dataset):
+                _ = target_ds.graph(ig)  # alias to Dataset.add_graph()
+            else:
+                target_ds.store.add_graph(ig)
+
     return target_ds

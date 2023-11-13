@@ -44,19 +44,19 @@ class InputRDFFormat(Enum):
 
 @dataclass
 class ValidationRequest:
-    data_graph: openapi_types.String(
+    data_graph: openapi_types.String(  # type: ignore[valid-type]
         required=True, title="DataGraph", description="The target DataGraph to validate (serialized in an RDF string)"
     )
-    shapes_graph: openapi_types.String(
+    shapes_graph: openapi_types.String(  # type: ignore[valid-type]
         required=False,
         nullable=True,
         title="DataGraph",
         description="Your SHACL ShapesGraph (serialized in an RDF string)",
     )
-    ontology_graph: openapi_types.String(
+    ontology_graph: openapi_types.String(  # type: ignore[valid-type]
         required=False, nullable=True, title="OntologyGraph", description="Optional ontological definitions graph"
     )
-    data_graph_format: openapi_types.String(
+    data_graph_format: openapi_types.String(  # type: ignore[valid-type]
         required=False,
         nullable=False,
         default="auto",
@@ -64,7 +64,7 @@ class ValidationRequest:
         description="Optionally specify the RDF format for your DataGraph",
         enum=InputRDFFormat,
     )
-    shapes_graph_format: openapi_types.String(
+    shapes_graph_format: openapi_types.String(  # type: ignore[valid-type]
         required=False,
         nullable=False,
         default="auto",
@@ -72,7 +72,7 @@ class ValidationRequest:
         description="Optionally specify the RDF format for your ShapesGraph",
         enum=InputRDFFormat,
     )
-    ontology_graph_format: openapi_types.String(
+    ontology_graph_format: openapi_types.String(  # type: ignore[valid-type]
         required=False,
         nullable=False,
         default="auto",
@@ -80,14 +80,14 @@ class ValidationRequest:
         description="Optionally specify the RDF format for your OntologyGraph",
         enum=InputRDFFormat,
     )
-    advanced: openapi_types.Boolean(
+    advanced: openapi_types.Boolean(  # type: ignore[valid-type]
         required=False,
         nullable=False,
         default=False,
         title="Advanced",
         description="Enable features from the SHACL Advanced Features spec.",
     )
-    inference: openapi_types.String(
+    inference: openapi_types.String(  # type: ignore[valid-type]
         required=False,
         nullable=False,
         default="none",
@@ -95,14 +95,14 @@ class ValidationRequest:
         description="Set a pre-inference option",
         enum=InferenceKind,
     )
-    do_owl_imports: openapi_types.Boolean(
+    do_owl_imports: openapi_types.Boolean(  # type: ignore[valid-type]
         required=False,
         nullable=False,
         default=False,
         title="Do OWL Imports",
         description="Enable the feature to follow links to import OWL ontologies in Shapes graph and Ontology Graph.",
     )
-    allow_infos: openapi_types.Boolean(
+    allow_infos: openapi_types.Boolean(  # type: ignore[valid-type]
         required=False,
         nullable=False,
         default=False,
@@ -110,7 +110,7 @@ class ValidationRequest:
         description="The datagraph will still be considered conformant when encountering constraint failures with "
         "sh:Info level severity.",
     )
-    allow_warnings: openapi_types.Boolean(
+    allow_warnings: openapi_types.Boolean(  # type: ignore[valid-type]
         required=False,
         nullable=False,
         default=False,
@@ -118,7 +118,7 @@ class ValidationRequest:
         description="The datagraph will still be considered conformant when encountering constraint failures with "
         "sh:Warning or sh:Info level severity.",
     )
-    iterate_rules: openapi_types.Boolean(
+    iterate_rules: openapi_types.Boolean(  # type: ignore[valid-type]
         required=False,
         nullable=False,
         default=False,
@@ -126,10 +126,10 @@ class ValidationRequest:
         description="Continue to execute SHACL Rules until the resulting output graph reaches steady state. "
         "This only works when advanced mode is enabled, and is usually not required.",
     )
-    js: openapi_types.String(
+    js: openapi_types.String(  # type: ignore[valid-type]
         required=False, nullable=False, default=False, title="JS", description="Enable SHACL-JS validator extension"
     )
-    metashacl: openapi_types.Boolean(
+    metashacl: openapi_types.Boolean(  # type: ignore[valid-type]
         required=False,
         nullable=False,
         default=False,
@@ -152,16 +152,16 @@ failures_array_ref = openapi.Component(
 
 @dataclass
 class ValidationResponseSimple:
-    conforms: openapi_types.Boolean(
+    conforms: openapi_types.Boolean(  # type: ignore[valid-type]
         required=True, title="Conforms", description="The datagraph conforms to the SHACL Shapes"
     )
-    validation_report: openapi_types.String(
+    validation_report: openapi_types.String(  # type: ignore[valid-type]
         required=False,
         nullable=True,
         title="ValidationReport",
         description="The text representation of the validation report.",
     )
-    validation_failures: failures_array_ref
+    validation_failures: failures_array_ref  # type: ignore[valid-type]
 
 
 def make_validation_response_RDF(format, mimetype):

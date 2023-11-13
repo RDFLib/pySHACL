@@ -391,7 +391,7 @@ class CustomConstraintComponentFactory(object):
                     break
                 if is_sparql_constraint_component:
                     raise ConstraintLoadError(
-                        "Found a mix of SPARQL-based validators and non-SPARQL validators on a SPARQLConstraintComponent.",
+                        "Found a mix of SPARQL-based validators and non-SPARQL validators on a SPARQLConstraintComponent.",  # noqa
                         'https://www.w3.org/TR/shacl/#constraint-components-validators',
                     )
                 elif is_js_constraint_component:
