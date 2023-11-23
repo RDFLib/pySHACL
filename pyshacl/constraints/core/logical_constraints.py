@@ -45,11 +45,6 @@ class NotConstraintComponent(ConstraintComponent):
                 "NotConstraintComponent must have at least one sh:not predicate.",
                 "https://www.w3.org/TR/shacl/#NotConstraintComponent",
             )
-        if len(not_list) > 1:
-            raise ConstraintLoadError(
-                "NotConstraintComponent must have at most one sh:not predicate.",
-                "https://www.w3.org/TR/shacl/#NotConstraintComponent",
-            )
         self.not_list = not_list
 
     @classmethod
