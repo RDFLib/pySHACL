@@ -2,9 +2,14 @@
 requires = ["poetry-core>=1.8.1,<2"]
 build-backend = "poetry.core.masonry.api"
 
+[project]
+name = "pyshacl"
+# Black and Ruff both now read target-version from [project.requires-python]
+requires-python = ">=3.8.1"
+
 [tool.poetry]
 name = "pyshacl"
-version = "0.24.1"
+version = "0.25.0"
 # Don't forget to change the version number in __init__.py, Dockerfile, and CITATION.cff along with this one
 description = "Python SHACL Validator"
 license = "Apache-2.0"
@@ -24,11 +29,11 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Operating System :: OS Independent"
 ]
@@ -54,26 +59,24 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7.0"  # Compatible python versions must be declared here
-rdflib = [
-    {version=">=6.3.2,<8.0", python = ">=3.8.1"},
-    {version=">=6.2.0,<=6.3.2", python = "<3.8.1"}
-]
+python = "^3.8.1"  # Poetry doesn't read from [project.requires-python]
+# Note, 3.8.0 is not supported, only 3.8.1 or above. See:
+# https://github.com/RDFLib/rdflib/blob/3bee979cd0e5b6efc57296b4fc43dd8ede8cf375/CHANGELOG.md?plain=1#L53
+rdflib = {version=">=6.3.2,<8.0", python = ">=3.8.1"}
 html5lib = ">=1.1,<2"
 owlrl = ">=6.0.2,<7"
 prettytable = [
-    {version=">=3.5.0,<3.8.0", python = "<3.8"},
     {version=">=3.5.0", python = ">=3.8,<3.12"},
     {version=">=3.7.0", python = ">=3.12"}
 ]
 packaging = ">=21.3"
-importlib-metadata = {version="4.13", python = "<3.11"}
+importlib-metadata = {version=">6", python = "<3.12"}
 pyduktape2 = {version="^0.4.6", optional=true}
 sanic = {version=">=22.12, <23", optional=true} #For the HTTP service
 sanic-ext = {version=">=23.3, <23.6", optional=true} #For the HTTP service
 sanic-cors = {version="2.2.0", optional=true} #For the HTTP service
-ruff = {version="^0.0.267", optional=true}
-black = {version="23.3.0", optional=true}
+ruff = {version="^0.1.5", optional=true}
+black = {version="23.11.0", optional=true}
 mypy = [
     {version=">=0.812,<0.900", optional=true, python = "<3.10"},
     {version=">=0.900,<0.1000", optional=true, python = ">=3.10"}
@@ -87,7 +90,8 @@ pytest-cov = {version="^2.8.1", optional=true}
 pytest = "^7.2"
 coverage = {version=">6,<7,!=6.0.*,!=6.1,!=6.1.1", optional=true}
 pytest-cov = {version="^2.8.1", optional=true}
-ruff = {version="^0.0.267", optional=true}
+ruff = {version="^0.1.5", optional=true}
+black = {version="23.11.0", optional=true}
 mypy = [
     {version=">=0.812,<0.900", optional=true, python = "<3.10"},
     {version=">=0.900,<0.1000", optional=true, python = ">=3.10"}
@@ -113,10 +117,9 @@ from = {format = "poetry", path = "pyproject.toml"}
 to = {format = "setuppy", path = "setup.py"}
 
 [tool.black]
-required-version = "23.3.0"
+required-version = "23.11.0"
 line-length = "119"
 skip-string-normalization = true
-target-version = ['py37']
 include = '\.pyi?$'
 exclude = '''
 (
@@ -184,9 +187,6 @@ line-length = 119
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
-# Assume Python 3.10.
-target-version = "py37"
-
 [tool.ruff.mccabe]
 # Unlike Flake8, default to a complexity level of 10.
 max-complexity = 10
@@ -204,7 +204,7 @@ testpaths = [
 legacy_tox_ini = """
 [tox]
 skipsdist = true
-envlist = py38, py39, py310, py311, lint, type-checking
+envlist = py38, py39, py310, py311, py312, lint, type-checking
 toxworkdir={env:TOX_WORK_DIR:.tox}
 
 [testenv]
