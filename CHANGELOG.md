@@ -7,10 +7,28 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]
 - Nothing yet...
 
+## [0.25.0] - 2023-11-23
+### Changed
+- Dropped support for Python 3.7
+  - Note, for compatibility with RDFLib 7.0, we specify a minimum Python version of v3.8.1
+  - https://github.com/RDFLib/rdflib/blob/3bee979cd0e5b6efc57296b4fc43dd8ede8cf375/CHANGELOG.md?plain=1#L53
+- Add preliminary support for Python 3.12
+- Dropped support for RDFLib v6.2.0 and earlier
+  - Only RDFLib v6.3.2 and v7.0 are supported by PySHACL v0.25.0+
+- Bumped to updated version of Black and Ruff
+  - Reformatted everything according to py38 codestyle
+### Fixed
+- Do not hard-pin to importlib-metadata. Fixes #214
+
+## [0.24.1] - 2023-11-23
+## Note - The 0.24.x series is the last to support Python 3.7
+### RDFLib v7.0.0 and some other dependencies already don't support 3.7, so PySHACL will drop it from 0.25+
+### Fixed
+- Shape can have multiple values for `sh:not`. Fixes #217
 
 ## [0.24.0] - 2023-11-08
-## Note - This is the last version to support Python 3.7
-### RDFLib v7.0.0 and some other dependencies already don't support 3.7, so PySHACL will drop it after this release.
+## Note - The 0.24.x series is the last to support Python 3.7
+### RDFLib v7.0.0 and some other dependencies already don't support 3.7, so PySHACL will drop it from 0.25+
 ### Added
 - Compatibility with RDFLib v7.0.0 - Closes #197
 ### Fixed
@@ -1073,7 +1091,9 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.24.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.25.0...HEAD
+[0.25.0]: https://github.com/RDFLib/pySHACL/compare/v0.24.1...v0.25.0
+[0.24.1]: https://github.com/RDFLib/pySHACL/compare/v0.24.0...v0.24.1
 [0.24.0]: https://github.com/RDFLib/pySHACL/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/RDFLib/pySHACL/compare/v0.22.2...v0.23.0
 [0.22.2]: https://github.com/RDFLib/pySHACL/compare/v0.22.1...v0.22.2
