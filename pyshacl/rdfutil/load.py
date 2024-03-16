@@ -37,6 +37,7 @@ def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
     :return:
     """
     no_hash_url: str = str(url).rstrip("#")
+    kind: Optional[str]
     if no_hash_url in baked_in:
         g = baked_in[no_hash_url]
         if isinstance(g, str):

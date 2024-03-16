@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 #
 from functools import lru_cache
-from sys import version_info as python_version
+import sys
 from warnings import warn
 
-if python_version[:2] < (3, 12):
+if sys.version_info[:2] < (3, 12):
     from importlib_metadata import PackageNotFoundError, metadata
 else:
-    from importlib.metadata import PackageNotFoundError, metadata  # type: ignore[assignment]
+    from importlib.metadata import PackageNotFoundError, metadata
 
 
 # In dev mode, the extras-loader doesn't check if extension is installed before loading it.
