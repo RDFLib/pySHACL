@@ -10,6 +10,7 @@ from .consts import OWL, RDF, ConjunctiveLike, GraphLike, OWL_classes, OWL_prope
 
 if TYPE_CHECKING:
     from rdflib import BNode
+    from rdflib.term import IdentifiedNode
 
     from .consts import RDFNode
 
@@ -148,6 +149,7 @@ def inoculate_dataset(
             raise RuntimeError("Cannot inoculate ConjunctiveGraph, use Dataset instead.")
     else:
         raise RuntimeError("Cannot inoculate datasets if target_ds passed in is not a Dataset itself.")
+    ont_default_context_id: Union[IdentifiedNode, str, None]
     if isinstance(ontology_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
         ont_graphs = [
             rdflib.Graph(ontology_ds.store, i, namespace_manager=ontology_ds.namespace_manager)  # type: ignore[arg-type]
