@@ -6,6 +6,7 @@ import os
 import sys
 
 from prettytable import PrettyTable
+from rdflib import Graph
 from rdflib.namespace import SH
 
 from pyshacl import __version__, validate
@@ -183,14 +184,14 @@ parser.add_argument(
 # parser.add_argument('-h', '--help', action="help", help='Show this help text.')
 
 
-def main():
+def main() -> None:
     basename = os.path.basename(sys.argv[0])
     if basename == "__main__.py":
         parser.prog = "python3 -m pyshacl"
     do_server = os.getenv("PYSHACL_HTTP", "")
     do_server = os.getenv("PYSHACL_SERVER", do_server)
     if do_server:
-        args = {}
+        args = argparse.Namespace()
     else:
         args = parser.parse_args()
     if str_is_true(do_server) or args.server:
@@ -306,10 +307,11 @@ def main():
             t2.field_names = ['No.', 'Severity', 'Focus Node', 'Result Path', 'Message', 'Component', 'Shape', 'Value']
             t2.align = "l"
 
+            assert isinstance(v_graph, Graph)
             for i, o in enumerate(v_graph.objects(None, SH.result)):
                 r = {}
                 for o2 in v_graph.predicate_objects(o):
-                    r[o2[0]] = str(col_widther(o2[1].replace(f'{SH}', ''), 25))  # max col width 30 chars
+                    r[o2[0]] = str(col_widther(str(o2[1]).replace(f'{SH}', ''), 25))  # max col width 30 chars
                 t2.add_row(
                     [
                         i + 1,
