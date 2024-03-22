@@ -76,7 +76,7 @@ sanic = {version=">=22.12, <23", optional=true} #For the HTTP service
 sanic-ext = {version=">=23.3, <23.6", optional=true} #For the HTTP service
 sanic-cors = {version="2.2.0", optional=true} #For the HTTP service
 ruff = {version="^0.1.5", optional=true}
-black = {version="23.11.0", optional=true}
+black = {version="24.3.0", optional=true}
 mypy = [
     {version=">=0.812,<0.900", optional=true, python = "<3.10"},
     {version=">=0.900,<0.1000", optional=true, python = ">=3.10"}
@@ -91,7 +91,7 @@ pytest = "^7.2"
 coverage = {version=">6,<7,!=6.0.*,!=6.1,!=6.1.1", optional=true}
 pytest-cov = {version="^2.8.1", optional=true}
 ruff = {version="^0.1.5", optional=true}
-black = {version="23.11.0", optional=true}
+black = {version="24.3.0", optional=true}
 mypy = [
     {version=">=0.812,<0.900", optional=true, python = "<3.10"},
     {version=">=0.900,<0.1000", optional=true, python = ">=3.10"}
