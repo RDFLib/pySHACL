@@ -1,5 +1,5 @@
 [build-system]
-requires = ["poetry-core>=1.8.1,<2"]
+requires = ["poetry-core>=1.9.0,<2"]
 build-backend = "poetry.core.masonry.api"
 
 [project]
@@ -117,7 +117,7 @@ from = {format = "poetry", path = "pyproject.toml"}
 to = {format = "setuppy", path = "setup.py"}
 
 [tool.black]
-required-version = "23.11.0"
+required-version = "24.3.0"
 line-length = "119"
 skip-string-normalization = true
 include = '\.pyi?$'
@@ -171,6 +171,7 @@ exclude = [
     ".svn",
     ".tox",
     ".venv",
+    ".idea",
     "htmlcov",
     "__pypackages__",
     "_build",
@@ -209,7 +210,7 @@ toxworkdir={env:TOX_WORK_DIR:.tox}
 
 [testenv]
 deps =
-    poetry>=1.7.0
+    poetry>=1.8.2
 passenv =
     TRAVIS
     TRAVIS_JOB_ID

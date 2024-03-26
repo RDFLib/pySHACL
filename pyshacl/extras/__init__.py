@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-from functools import lru_cache
 import sys
+from functools import lru_cache
 from warnings import warn
 
 if sys.version_info[:2] < (3, 12):

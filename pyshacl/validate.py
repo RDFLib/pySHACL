@@ -271,9 +271,11 @@ class Validator(object):
             advanced = {}
         if isinstance(the_target_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
             named_graphs = [
-                rdflib.Graph(the_target_graph.store, i, namespace_manager=the_target_graph.namespace_manager)
-                if not isinstance(i, rdflib.Graph)
-                else i
+                (
+                    rdflib.Graph(the_target_graph.store, i, namespace_manager=the_target_graph.namespace_manager)
+                    if not isinstance(i, rdflib.Graph)
+                    else i
+                )
                 for i in the_target_graph.store.contexts(None)
             ]
         else:

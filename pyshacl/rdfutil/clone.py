@@ -22,9 +22,11 @@ def clone_dataset(source_ds: ConjunctiveLike, target_ds=None):
         target_ds.namespace_manager = NamespaceManager(target_ds, 'core')
         target_ds.default_context.namespace_manager = target_ds.namespace_manager
     named_graphs = [
-        rdflib.Graph(source_ds.store, i, namespace_manager=source_ds.namespace_manager)  # type: ignore[arg-type]
-        if not isinstance(i, rdflib.Graph)
-        else i
+        (
+            rdflib.Graph(source_ds.store, i, namespace_manager=source_ds.namespace_manager)  # type: ignore[arg-type]
+            if not isinstance(i, rdflib.Graph)
+            else i
+        )
         for i in source_ds.store.contexts(None)
     ]
     if isinstance(source_ds, rdflib.Dataset) and len(named_graphs) < 1:
@@ -113,9 +115,11 @@ def mix_datasets(
     """
     default_union = base_ds.default_union
     base_named_graphs = [
-        rdflib.Graph(base_ds.store, i, namespace_manager=base_ds.namespace_manager)  # type: ignore[arg-type]
-        if not isinstance(i, rdflib.Graph)
-        else i
+        (
+            rdflib.Graph(base_ds.store, i, namespace_manager=base_ds.namespace_manager)  # type: ignore[arg-type]
+            if not isinstance(i, rdflib.Graph)
+            else i
+        )
         for i in base_ds.store.contexts(None)
     ]
     if isinstance(base_ds, rdflib.Dataset) and len(base_named_graphs) < 1:
@@ -139,9 +143,11 @@ def mix_datasets(
 
     if isinstance(extra_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
         mixin_graphs = [
-            rdflib.Graph(extra_ds.store, i, namespace_manager=extra_ds.namespace_manager)  # type: ignore[arg-type]
-            if not isinstance(i, rdflib.Graph)
-            else i
+            (
+                rdflib.Graph(extra_ds.store, i, namespace_manager=extra_ds.namespace_manager)  # type: ignore[arg-type]
+                if not isinstance(i, rdflib.Graph)
+                else i
+            )
             for i in extra_ds.store.contexts(None)
         ]
     else:

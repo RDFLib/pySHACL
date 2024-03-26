@@ -186,9 +186,9 @@ class JSConstraintComponent(CustomConstraintComponent):
                 "https://www.w3.org/TR/shacl/#constraint-components-validators",
             )
         if is_property_val:
-            validator: Union[
-                JSConstraintComponentValidator, JSConstraintComponentPathValidator
-            ] = JSConstraintComponentPathValidator(self.sg, validator_node)
+            validator: Union[JSConstraintComponentValidator, JSConstraintComponentPathValidator] = (
+                JSConstraintComponentPathValidator(self.sg, validator_node)
+            )
         else:
             validator = JSConstraintComponentValidator(self.sg, validator_node)
         applied_validator = validator.apply_to_shape_via_constraint(self, shape)

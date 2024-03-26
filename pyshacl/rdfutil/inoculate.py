@@ -126,9 +126,11 @@ def inoculate_dataset(
     # or we clone base_ds as part of this function
     default_union = base_ds.default_union
     base_named_graphs = [
-        rdflib.Graph(base_ds.store, i, namespace_manager=base_ds.namespace_manager)  # type: ignore[arg-type]
-        if not isinstance(i, rdflib.Graph)
-        else i
+        (
+            rdflib.Graph(base_ds.store, i, namespace_manager=base_ds.namespace_manager)  # type: ignore[arg-type]
+            if not isinstance(i, rdflib.Graph)
+            else i
+        )
         for i in base_ds.store.contexts(None)
     ]
     if isinstance(base_ds, rdflib.Dataset) and len(base_named_graphs) < 1:
@@ -152,9 +154,11 @@ def inoculate_dataset(
     ont_default_context_id: Union[IdentifiedNode, str, None]
     if isinstance(ontology_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
         ont_graphs = [
-            rdflib.Graph(ontology_ds.store, i, namespace_manager=ontology_ds.namespace_manager)  # type: ignore[arg-type]
-            if not isinstance(i, rdflib.Graph)
-            else i
+            (
+                rdflib.Graph(ontology_ds.store, i, namespace_manager=ontology_ds.namespace_manager)  # type: ignore[arg-type]
+                if not isinstance(i, rdflib.Graph)
+                else i
+            )
             for i in ontology_ds.store.contexts(None)
         ]
         ont_default_context_id = ontology_ds.default_context.identifier
