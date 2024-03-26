@@ -56,9 +56,11 @@ class NotConstraintComponent(ConstraintComponent):
         return "NotConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
-        m = "Node {} conforms to shape {}".format(
-            stringify_node(datagraph, value_node), stringify_node(self.shape.sg.graph, self.not_list[0])
-        )
+        if len(self.not_list) == 1:
+            m = f"Node {stringify_node(datagraph, value_node)} conforms to shape {stringify_node(self.shape.sg.graph, self.not_list[0])}"
+        else:
+            nots_list = " , ".join(stringify_node(self.shape.sg.graph, n) for n in self.not_list)
+            m = f"Node {stringify_node(datagraph, value_node)} conforms to one or more shapes in {nots_list}"
         return [rdflib.Literal(m)]
 
     def evaluate(self, datagraph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):

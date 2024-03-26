@@ -3,9 +3,11 @@
 """
 https://github.com/RDFLib/pySHACL/issues/217
 """
-import rdflib
-import pyshacl
 import sys
+
+import rdflib
+
+import pyshacl
 
 shapes_data = '''\
 @prefix ex: <http://example.org/ontology/> .
@@ -66,7 +68,8 @@ def test_217():
         data_g, shacl_graph=shape_g, debug=True, meta_shacl=False,
     )
     assert not conforms
-    assert "Node kb:Thing-2 conforms to shape" in results_text and "Node kb:Thing-3 conforms to shape" in results_text
+    assert ("Node kb:Thing-2 conforms to shape" in results_text or "Node kb:Thing-2 conforms to one or more shapes" in results_text) and \
+           ("Node kb:Thing-3 conforms to shape" in results_text or "Node kb:Thing-3 conforms to one or more shapes" in results_text)
 
 
 if __name__ == "__main__":
