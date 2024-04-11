@@ -10,7 +10,7 @@ from rdflib.term import Literal
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError
-from pyshacl.pytypes import GraphLike
+from pyshacl.pytypes import GraphLike, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 
 XSD_integer = XSD.integer
@@ -81,8 +81,11 @@ class MinCountConstraintComponent(ConstraintComponent):
             m = "Less than {} values on {}".format(str(self.min_count.value), stringify_node(datagraph, focus_node))
         return [Literal(m)]
 
-    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+    def evaluate(
+        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+    ):
         """
+        :type executor: SHACLExecutor
         :type target_graph: rdflib.Graph
         :type focus_value_nodes: dict
         :type _evaluation_path: list
@@ -161,8 +164,11 @@ class MaxCountConstraintComponent(ConstraintComponent):
             m = "More than {} values on {}".format(str(self.max_count.value), stringify_node(datagraph, focus_node))
         return [Literal(m)]
 
-    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+    def evaluate(
+        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+    ):
         """
+        :type executor: SHACLExecutor
         :type target_graph: rdflib.Graph
         :type focus_value_nodes: dict
         :type _evaluation_path: list

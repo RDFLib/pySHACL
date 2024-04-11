@@ -13,7 +13,7 @@ from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH, SH_message
 from pyshacl.errors import ConstraintLoadError
 from pyshacl.helper.expression_helper import nodes_from_node_expression
-from pyshacl.pytypes import GraphLike
+from pyshacl.pytypes import GraphLike, SHACLExecutor
 
 SH_expression = SH.expression
 SH_ExpressionConstraintComponent = SH.ExpressionConstraintComponent
@@ -45,8 +45,11 @@ class ExpressionConstraint(ConstraintComponent):
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
         return [Literal("Expression evaluation generated constraint did not return true.")]
 
-    def evaluate(self, data_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+    def evaluate(
+        self, executor: SHACLExecutor, data_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+    ):
         """
+        :type executor: SHACLExecutor
         :type data_graph: rdflib.Graph
         :type focus_value_nodes: dict
         :type _evaluation_path: list

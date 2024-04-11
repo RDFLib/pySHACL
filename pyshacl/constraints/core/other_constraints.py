@@ -9,7 +9,7 @@ import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import RDFS, SH, RDF_type, SH_property
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
-from pyshacl.pytypes import GraphLike, RDFNode
+from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 
 SH_InConstraintComponent = SH.InConstraintComponent
@@ -66,8 +66,11 @@ class InConstraintComponent(ConstraintComponent):
         m = "Value {} not in list {}".format(stringify_node(datagraph, value_node), list1)
         return [rdflib.Literal(m)]
 
-    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+    def evaluate(
+        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+    ):
         """
+        :type executor: SHACLExecutor
         :type target_graph: rdflib.Graph
         :type focus_value_nodes: dict
         :type _evaluation_path: list
@@ -143,8 +146,11 @@ class ClosedConstraintComponent(ConstraintComponent):
         )
         return [rdflib.Literal(m)]
 
-    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+    def evaluate(
+        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+    ):
         """
+        :type executor: SHACLExecutor
         :type target_graph: rdflib.Graph
         :type focus_value_nodes: dict
         :type _evaluation_path: list
@@ -229,8 +235,11 @@ class HasValueConstraintComponent(ConstraintComponent):
             )
         return [rdflib.Literal(m)]
 
-    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+    def evaluate(
+        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+    ):
         """
+        :type executor: SHACLExecutor
         :type target_graph: rdflib.Graph
         :type focus_value_nodes: dict
         :type _evaluation_path: list

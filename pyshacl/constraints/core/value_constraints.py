@@ -27,7 +27,7 @@ from pyshacl.consts import (
     SH_nodeKind,
 )
 from pyshacl.errors import ConstraintLoadError
-from pyshacl.pytypes import GraphLike
+from pyshacl.pytypes import GraphLike, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 
 RDF_langString = RDF.langString
@@ -85,8 +85,11 @@ class ClassConstraintComponent(ConstraintComponent):
             m = "Value class is not in classes ({})".format(rules)
         return [Literal(m)]
 
-    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+    def evaluate(
+        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+    ):
         """
+        :type executor: SHACLExecutor
         :type target_graph: rdflib.Graph
         :type focus_value_nodes: dict
         :type _evaluation_path: list
@@ -165,8 +168,11 @@ class DatatypeConstraintComponent(ConstraintComponent):
         m = "Value is not Literal with datatype {}".format(stringify_node(self.shape.sg.graph, self.datatype_rule))
         return [Literal(m)]
 
-    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+    def evaluate(
+        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+    ):
         """
+        :type executor: SHACLExecutor
         :type target_graph: rdflib.Graph
         :type focus_value_nodes: dict
         :type _evaluation_path: list
@@ -270,8 +276,11 @@ class NodeKindConstraintComponent(ConstraintComponent):
         m = "Value is not of Node Kind {}".format(stringify_node(self.shape.sg.graph, self.nodekind_rule))
         return [Literal(m)]
 
-    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+    def evaluate(
+        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+    ):
         """
+        :type executor: SHACLExecutor
         :type target_graph: rdflib.Graph
         :type focus_value_nodes: dict
         :type _evaluation_path: list

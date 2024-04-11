@@ -11,7 +11,7 @@ from rdflib.namespace import XSD
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import RDF, SH, XSD_WHOLE_INTEGERS
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
-from pyshacl.pytypes import GraphLike
+from pyshacl.pytypes import GraphLike, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 
 RDF_langString = RDF.langString
@@ -66,8 +66,11 @@ class StringBasedConstraintBase(ConstraintComponent):
     def _evaluate_string_rule(self, r, target_graph, f_v_dict):
         raise NotImplementedError()
 
-    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+    def evaluate(
+        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+    ):
         """
+        :type executor: SHACLExecutor
         :type target_graph: rdflib.Graph
         :type focus_value_nodes: dict
         :type _evaluation_path: list

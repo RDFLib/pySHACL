@@ -12,22 +12,23 @@ from pyshacl.rules.shacl_rule import SHACLRule
 if TYPE_CHECKING:
     from rdflib.term import Node
 
-    from pyshacl.pytypes import GraphLike
+    from pyshacl.pytypes import GraphLike, SHACLExecutor
     from pyshacl.shape import Shape
 
 
 class TripleRule(SHACLRule):
     __slots__ = ("s", "p", "o")
 
-    def __init__(self, shape: 'Shape', rule_node: 'rdflib.term.Identifier', **kwargs):
+    def __init__(self, executor: 'SHACLExecutor', shape: 'Shape', rule_node: 'rdflib.term.Identifier', **kwargs):
         """
-
+        :param executor:
+        :type executor: SHACLExecutor
         :param shape:
         :type shape: Shape
         :param rule_node:
         :type rule_node: rdflib.term.Identifier
         """
-        super(TripleRule, self).__init__(shape, rule_node, **kwargs)
+        super(TripleRule, self).__init__(executor, shape, rule_node, **kwargs)
         my_subject_nodes = set(self.shape.sg.objects(self.node, SH_subject))
         if len(my_subject_nodes) < 1:
             raise RuntimeError("No sh:subject")

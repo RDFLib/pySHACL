@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type, Union
 
 from pyshacl.consts import RDF_type, SH_rule, SH_SPARQLRule, SH_TripleRule
 from pyshacl.errors import ReportableRuntimeError, RuleLoadError
-from pyshacl.pytypes import GraphLike
+from pyshacl.pytypes import GraphLike, SHACLExecutor
 from pyshacl.rules.sparql import SPARQLRule
 from pyshacl.rules.triple import TripleRule
 
@@ -15,9 +15,10 @@ if TYPE_CHECKING:
     from .shacl_rule import SHACLRule
 
 
-def gather_rules(shacl_graph: 'ShapesGraph', iterate_rules=False) -> Dict['Shape', List['SHACLRule']]:
+def gather_rules(executor: SHACLExecutor, shacl_graph: 'ShapesGraph') -> Dict['Shape', List['SHACLRule']]:
     """
-
+    :param executor:
+    :type executor: SHACLExecutor
     :param shacl_graph:
     :type shacl_graph: ShapesGraph
     :return:
@@ -62,11 +63,11 @@ def gather_rules(shacl_graph: 'ShapesGraph', iterate_rules=False) -> Dict['Shape
                 "https://www.w3.org/TR/shacl-af/#rules-syntax",
             )
         if obj in triple_rule_nodes:
-            rule: SHACLRule = TripleRule(shape, obj, iterate=iterate_rules)
+            rule: SHACLRule = TripleRule(executor, shape, obj, iterate=executor.iterate_rules)
         elif obj in sparql_rule_nodes:
-            rule = SPARQLRule(shape, obj)
+            rule = SPARQLRule(executor, shape, obj)
         elif use_JSRule and callable(use_JSRule) and obj in js_rule_nodes:
-            rule = use_JSRule(shape, obj)
+            rule = use_JSRule(executor, shape, obj)
         else:
             raise RuleLoadError(
                 "when using sh:rule, the Rule must be defined as either a TripleRule or SPARQLRule.",
@@ -76,7 +77,7 @@ def gather_rules(shacl_graph: 'ShapesGraph', iterate_rules=False) -> Dict['Shape
     return ret_rules
 
 
-def apply_rules(shapes_rules: Dict, data_graph: GraphLike, iterate=False) -> int:
+def apply_rules(executor: SHACLExecutor, shapes_rules: Dict, data_graph: GraphLike) -> int:
     # short the shapes dict by shapes sh:order before execution
     sorted_shapes_rules: List[Tuple[Any, Any]] = sorted(shapes_rules.items(), key=lambda x: x[0].order)
     total_modified = 0
@@ -96,7 +97,7 @@ def apply_rules(shapes_rules: Dict, data_graph: GraphLike, iterate=False) -> int
                 this_modified += n_modified
             if this_modified > 0:
                 total_modified += this_modified
-                if iterate:
+                if executor.iterate_rules:
                     continue
                 else:
                     break

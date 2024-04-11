@@ -33,7 +33,7 @@ from pyshacl.consts import (
 )
 from pyshacl.errors import ConstraintLoadError
 from pyshacl.parameter import SHACLParameter
-from pyshacl.pytypes import GraphLike
+from pyshacl.pytypes import GraphLike, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 
 if TYPE_CHECKING:
@@ -77,7 +77,9 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         raise NotImplementedError()  # pragma: no cover
 
     @abc.abstractmethod
-    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+    def evaluate(
+        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+    ):
         raise NotImplementedError()  # pragma: no cover
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:

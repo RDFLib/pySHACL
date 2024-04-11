@@ -10,7 +10,7 @@ from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH, SH_deactivated, SH_message, SH_select
 from pyshacl.errors import ConstraintLoadError, ValidationFailure
 from pyshacl.helper import get_query_helper_cls
-from pyshacl.pytypes import GraphLike
+from pyshacl.pytypes import GraphLike, SHACLExecutor
 
 SH_sparql = SH.sparql
 SH_SPARQLConstraintComponent = SH.SPARQLConstraintComponent
@@ -88,8 +88,11 @@ class SPARQLBasedConstraint(ConstraintComponent):
     def constraint_name(cls):
         return "SPARQLConstraintComponent"
 
-    def evaluate(self, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+    def evaluate(
+        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+    ):
         """
+        :type executor: SHACLExecutor
         :type target_graph: rdflib.Graph
         :type focus_value_nodes: dict
         :type _evaluation_path: list

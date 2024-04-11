@@ -63,11 +63,13 @@ Full CLI Usage options:
 $ pyshacl -h
 $ python3 -m pyshacl -h
 usage: pyshacl [-h] [-s [SHACL]] [-e [ONT]] [-i {none,rdfs,owlrl,both}] [-m]
-               [-im] [-a] [-j] [-it] [--abort] [--allow-info] [-w] [-d]
+               [-im] [-a] [-j] [-it] [--abort] [--allow-info] [-w]
+               [--max-depth [MAX_DEPTH]] [-d]
                [-f {human,table,turtle,xml,json-ld,nt,n3}]
                [-df {auto,turtle,xml,json-ld,nt,n3}]
                [-sf {auto,turtle,xml,json-ld,nt,n3}]
                [-ef {auto,turtle,xml,json-ld,nt,n3}] [-V] [-o [OUTPUT]]
+               [--server]
                DataGraph
 
 PySHACL 0.25.0 command line tool.
@@ -103,6 +105,10 @@ optional arguments:
   -w, --allow-warning, --allow-warnings
                         Shapes marked with severity of Warning or Info will
                         not cause result to be invalid.
+  --max-depth [MAX_DEPTH]
+                        The maximum number of SHACL shapes "deep" that the
+                        validator can go before reaching an "endpoint"
+                        constraint.
   -d, --debug           Output additional runtime messages.
   -f {human,table,turtle,xml,json-ld,nt,n3}, --format {human,table,turtle,xml,json-ld,nt,n3}
                         Choose an output format. Default is "human".
@@ -118,6 +124,8 @@ optional arguments:
   -V, --version         Show PySHACL version and exit.
   -o [OUTPUT], --output [OUTPUT]
                         Send output to a file (defaults to stdout).
+  --server              Ignore all the rest of the options, start the HTTP
+                        Server. Same as `pyshacl_server`.
 ```
 
 ## Python Module Use

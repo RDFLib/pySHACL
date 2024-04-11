@@ -8,7 +8,7 @@ from rdflib import Literal
 from pyshacl.constraints import ConstraintComponent
 from pyshacl.consts import SH, SH_js, SH_message
 from pyshacl.errors import ConstraintLoadError
-from pyshacl.pytypes import GraphLike
+from pyshacl.pytypes import GraphLike, SHACLExecutor
 
 from .js_executable import JSExecutable
 
@@ -80,8 +80,11 @@ class JSConstraint(ConstraintComponent):
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
         return [Literal("Javascript Function generated constraint validation reports.")]
 
-    def evaluate(self, data_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+    def evaluate(
+        self, executor: SHACLExecutor, data_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+    ):
         """
+        :type executor: SHACLExecutor
         :type data_graph: rdflib.Graph
         :type focus_value_nodes: dict
         :type _evaluation_path: list

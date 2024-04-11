@@ -9,7 +9,7 @@ from pyshacl.rules.shacl_rule import SHACLRule
 from .js_executable import JSExecutable
 
 if typing.TYPE_CHECKING:
-    from pyshacl.pytypes import GraphLike
+    from pyshacl.pytypes import GraphLike, SHACLExecutor
     from pyshacl.shape import Shape
     from pyshacl.shapes_graph import ShapesGraph
 
@@ -19,8 +19,8 @@ SH_JSRule = SH.JSRule
 class JSRule(SHACLRule):
     __slots__ = ('js_exe',)
 
-    def __init__(self, shape: 'Shape', rule_node, **kwargs):
-        super(JSRule, self).__init__(shape, rule_node, **kwargs)
+    def __init__(self, executor: 'SHACLExecutor', shape: 'Shape', rule_node, **kwargs):
+        super(JSRule, self).__init__(executor, shape, rule_node, **kwargs)
         shapes_graph: 'ShapesGraph' = shape.sg
         self.js_exe = JSExecutable(shapes_graph, rule_node)
 

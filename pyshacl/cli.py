@@ -126,6 +126,14 @@ parser.add_argument(
     help='Shapes marked with severity of Warning or Info will not cause result to be invalid.',
 )
 parser.add_argument(
+    '--max-depth',
+    dest='max_depth',
+    action='store',
+    nargs='?',
+    type=int,
+    help="The maximum number of SHACL shapes \"deep\" that the validator can go before reaching an \"endpoint\" constraint.",
+)
+parser.add_argument(
     '-d', '--debug', dest='debug', action='store_true', default=False, help='Output additional runtime messages.'
 )
 parser.add_argument(

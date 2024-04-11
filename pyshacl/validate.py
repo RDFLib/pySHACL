@@ -28,7 +28,7 @@ from .errors import ReportableRuntimeError, ValidationFailure
 from .extras import check_extra_installed
 from .functions import apply_functions, gather_functions, unapply_functions
 from .monkey import apply_patches, rdflib_bool_patch, rdflib_bool_unpatch
-from .pytypes import GraphLike
+from .pytypes import GraphLike, SHACLExecutor
 from .rdfutil import (
     add_baked_in,
     clone_blank_node,
@@ -72,6 +72,7 @@ class Validator(object):
         options_dict.setdefault('abort_on_first', False)
         options_dict.setdefault('allow_infos', False)
         options_dict.setdefault('allow_warnings', False)
+        options_dict.setdefault('max_validation_depth', 15)
         if 'logger' not in options_dict:
             options_dict['logger'] = logging.getLogger(__name__)
             if options_dict['debug']:
@@ -221,6 +222,17 @@ class Validator(object):
             return inoculate(to_graph, self.ont_graph)
         return inoculate_dataset(self.data_graph, self.ont_graph, self.data_graph if self.inplace else None)
 
+    def make_executor(self) -> SHACLExecutor:
+        return SHACLExecutor(
+            validator=self,
+            abort_on_first=bool(self.options.get("abort_on_first", False)),
+            allow_infos=bool(self.options.get("allow_infos", False)),
+            allow_warnings=bool(self.options.get("allow_warnings", False)),
+            iterate_rules=bool(self.options.get("iterate_rules", False)),
+            max_validation_depth=self.options.get("max_validation_depth", 15),
+            debug=self.debug,
+        )
+
     def run(self):
         if self.target_graph is not None:
             the_target_graph = self.target_graph
@@ -256,13 +268,13 @@ class Validator(object):
             self._target_graph = the_target_graph
 
         shapes = self.shacl_graph.shapes  # This property getter triggers shapes harvest.
-        iterate_rules = self.options.get("iterate_rules", False)
+        executor = self.make_executor()
         if self.options['advanced']:
             self.logger.debug("Activating SHACL-AF Features.")
             target_types = gather_target_types(self.shacl_graph)
             advanced = {
-                'functions': gather_functions(self.shacl_graph),
-                'rules': gather_rules(self.shacl_graph, iterate_rules=iterate_rules),
+                'functions': gather_functions(executor, self.shacl_graph),
+                'rules': gather_rules(executor, self.shacl_graph),
             }
             for s in shapes:
                 s.set_advanced(True)
@@ -281,12 +293,10 @@ class Validator(object):
         else:
             named_graphs = [the_target_graph]
         reports = []
-        abort_on_first: bool = bool(self.options.get("abort_on_first", False))
-        allow_infos: bool = bool(self.options.get("allow_infos", False))
-        allow_warnings: bool = bool(self.options.get("allow_warnings", False))
+
         non_conformant = False
         aborted = False
-        if abort_on_first and self.debug:
+        if executor.abort_on_first and self.debug:
             self.logger.debug(
                 "Abort on first error is enabled. Will exit at end of first Shape that fails validation."
             )
@@ -296,16 +306,14 @@ class Validator(object):
             if self.debug:
                 self.logger.debug(f"Validating DataGraph named {g.identifier}")
             if advanced:
-                apply_functions(advanced['functions'], g)
-                apply_rules(advanced['rules'], g, iterate=iterate_rules)
+                apply_functions(executor, advanced['functions'], g)
+                apply_rules(executor, advanced['rules'], g)
             try:
                 for s in shapes:
-                    _is_conform, _reports = s.validate(
-                        g, abort_on_first=abort_on_first, allow_infos=allow_infos, allow_warnings=allow_warnings
-                    )
+                    _is_conform, _reports = s.validate(executor, g)
                     non_conformant = non_conformant or (not _is_conform)
                     reports.extend(_reports)
-                    if abort_on_first and non_conformant:
+                    if executor.abort_on_first and non_conformant:
                         aborted = True
                         break
                 if aborted:
@@ -384,6 +392,7 @@ def validate(
     abort_on_first: Optional[bool] = False,
     allow_infos: Optional[bool] = False,
     allow_warnings: Optional[bool] = False,
+    max_validation_depth: Optional[int] = None,
     **kwargs,
 ):
     """
@@ -408,6 +417,8 @@ def validate(
     :type allow_infos: bool | None
     :param allow_warnings: Shapes marked with severity of sh:Warning or sh:Info will not cause result to be invalid.
     :type allow_warnings: bool | None
+    :param max_validation_depth: The maximum number of SHACL shapes "deep" that the validator can go before reaching an "endpoint" constraint.
+    :type max_validation_depth: int | None
     :param kwargs:
     :return:
     """
@@ -455,24 +466,27 @@ def validate(
         log.warning("Usage of abort_on_error is deprecated. Use abort_on_first instead.")
         ae = kwargs.pop("abort_on_error")
         abort_on_first = bool(abort_on_first) or bool(ae)
+    validator_options_dict = {
+        'debug': do_debug or False,
+        'inference': inference,
+        'inplace': inplace,
+        'abort_on_first': abort_on_first,
+        'allow_infos': allow_infos,
+        'allow_warnings': allow_warnings,
+        'advanced': advanced,
+        'iterate_rules': iterate_rules,
+        'use_js': use_js,
+        'logger': log,
+    }
+    if max_validation_depth is not None:
+        validator_options_dict['max_validation_depth'] = max_validation_depth
     validator = None
     try:
         validator = Validator(
             loaded_dg,
             shacl_graph=loaded_sg,
             ont_graph=loaded_og,
-            options={
-                'debug': do_debug or False,
-                'inference': inference,
-                'inplace': inplace,
-                'abort_on_first': abort_on_first,
-                'allow_infos': allow_infos,
-                'allow_warnings': allow_warnings,
-                'advanced': advanced,
-                'iterate_rules': iterate_rules,
-                'use_js': use_js,
-                'logger': log,
-            },
+            options=validator_options_dict,
         )
         conforms, report_graph, report_text = validator.run()
     except ValidationFailure as e:
@@ -705,9 +719,10 @@ def check_dash_result(validator: Validator, report_graph: GraphLike, expected_re
     else:
         inf_res = None
     if len(fn_test_cases_set) > 0:
+        executor = validator.make_executor()
         data_graph = validator.target_graph
-        fns = gather_functions(validator.shacl_graph)
-        apply_functions(fns, data_graph)
+        fns = gather_functions(executor, validator.shacl_graph)
+        apply_functions(executor, fns, data_graph)
         fn_res: Union[bool, None] = True
         for test_case in fn_test_cases_set:
             expected_results_set = set(expected_result_graph.objects(test_case, DASH_expectedResult))

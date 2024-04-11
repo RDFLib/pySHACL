@@ -13,7 +13,7 @@ from pyshacl.rdfutil import clone_graph
 from ..shacl_rule import SHACLRule
 
 if TYPE_CHECKING:
-    from pyshacl.pytypes import GraphLike
+    from pyshacl.pytypes import GraphLike, SHACLExecutor
     from pyshacl.shape import Shape
 
 XSD_string = XSD.string
@@ -22,15 +22,16 @@ XSD_string = XSD.string
 class SPARQLRule(SHACLRule):
     __slots__ = ("_constructs", "_qh")
 
-    def __init__(self, shape: 'Shape', rule_node: 'rdflib.term.Identifier', **kwargs):
+    def __init__(self, executor: 'SHACLExecutor', shape: 'Shape', rule_node: 'rdflib.term.Identifier', **kwargs):
         """
-
+        :param executor:
+        :type executor: SHACLExecutor
         :param shape:
         :type shape: Shape
         :param rule_node:
         :type rule_node: rdflib.term.Identifier
         """
-        super(SPARQLRule, self).__init__(shape, rule_node, **kwargs)
+        super(SPARQLRule, self).__init__(executor, shape, rule_node, **kwargs)
         construct_nodes = set(self.shape.sg.objects(self.node, SH_construct))
         if len(construct_nodes) < 1:
             raise RuleLoadError("No sh:construct on SPARQLRule", "https://www.w3.org/TR/shacl-af/#SPARQLRule")

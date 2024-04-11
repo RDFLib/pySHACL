@@ -13,7 +13,7 @@ from pyshacl.consts import (
     SH_SHACLFunction,
     SH_SPARQLFunction,
 )
-from pyshacl.pytypes import GraphLike, RDFNode
+from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
 
 if TYPE_CHECKING:
     from pyshacl.extras.js.function import JSFunction  # noqa F401
@@ -25,9 +25,12 @@ if TYPE_CHECKING:
 module = sys.modules[__name__]
 
 
-def gather_functions(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLFunction', 'SPARQLFunction']]:
+def gather_functions(
+    executor: SHACLExecutor, shacl_graph: 'ShapesGraph'
+) -> Sequence[Union['SHACLFunction', 'SPARQLFunction']]:
     """
-
+    :param executor:
+    :type executor: SHACLExecutor
     :param shacl_graph:
     :type shacl_graph: ShapesGraph
     :return:
@@ -96,7 +99,7 @@ def gather_functions(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLFunctio
     return list(all_fns.values())
 
 
-def apply_functions(fns: Sequence, data_graph: GraphLike):
+def apply_functions(executor: SHACLExecutor, fns: Sequence, data_graph: GraphLike):
     for f in fns:
         f.apply(data_graph)
 
