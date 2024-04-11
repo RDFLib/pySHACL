@@ -7,6 +7,22 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]
 - Nothing yet...
 
+## [0.26.0] - 2024-04-11
+### Added
+- Added ability to specify a custom max-evaluation-depth. If you find yourself with a legitimate use case, and you are certain you need to increase this limit, and you are cetain you know what you are doing:
+  - use `--max-depth i` argument on the commandline where `i` is an integer 1 to 999.
+  - or use `max_validation_depth=i` in the validator arguments if using PySHACL as a library.
+  - Fixes #224
+- Add a "SHACLExecutor" context to be passed down to all Shape and Constraint objects, to allow them to operate in a common mode with common configuration values, as chosen by the mechanism that starts them (eg, the Validator).
+  - This will allow for further configuration of "modes of operation" for PySHACL in the future, to allow for forms of exectors other than "Validator".
+### Changed
+- Bumped Black version to 24.3.0 to mitigate CVE.
+- Bumped Poetry and Poetry-Core version to latest-and-greatest (fixes a bunch of long-standing bugs, I highly recommend updating).
+- cli `main()` no longer returns and `int`, it now emits `sys.exit(code)` and never returns.
+### Fixed
+- Fixed typing on Python 3.8 and 3.12 (PRs #192 and #223). Thanks @ajnelson-nist
+- Fixed auto-generated validation message for `sh:not` when more than one `sh:not` is used on a constraint.
+
 ## [0.25.0] - 2023-11-23
 ### Changed
 - Dropped support for Python 3.7
@@ -1091,7 +1107,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.25.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.26.0...HEAD
+[0.26.0]: https://github.com/RDFLib/pySHACL/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/RDFLib/pySHACL/compare/v0.24.1...v0.25.0
 [0.24.1]: https://github.com/RDFLib/pySHACL/compare/v0.24.0...v0.24.1
 [0.24.0]: https://github.com/RDFLib/pySHACL/compare/v0.23.0...v0.24.0

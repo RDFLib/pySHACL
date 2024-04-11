@@ -72,7 +72,7 @@ usage: pyshacl [-h] [-s [SHACL]] [-e [ONT]] [-i {none,rdfs,owlrl,both}] [-m]
                [--server]
                DataGraph
 
-PySHACL 0.25.0 command line tool.
+PySHACL 0.26.0 command line tool.
 
 positional arguments:
   DataGraph             The file containing the Target Data Graph.
