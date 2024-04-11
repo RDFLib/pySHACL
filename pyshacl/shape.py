@@ -464,10 +464,14 @@ class Shape(object):
                 self.logger.debug(f"Running evaluation of Shape {str(self)}")
         if _evaluation_path is None:
             _evaluation_path = []
-        elif len(_evaluation_path) >= 30:
-            # 27 is the depth required to successfully do the meta-shacl test on shacl.ttl
-            path_str = " -> ".join((str(e) for e in _evaluation_path))
-            raise ReportableRuntimeError("Evaluation path too deep!\n{}".format(path_str))
+        else:
+            evaluation_depth = len(_evaluation_path) // 2
+
+            if evaluation_depth >= 15:
+                # depth of 14 (_evaluation_length=28) is the depth required to
+                # successfully do the meta-shacl test on shacl.ttl
+                path_str = " -> ".join((str(e) for e in _evaluation_path))
+                raise ReportableRuntimeError("Evaluation path too deep!\n{}".format(path_str))
         t1 = perf_counter()
         # Lazy import here to avoid an import loop
         CONSTRAINT_PARAMETERS, PARAMETER_MAP = getattr(module, 'CONSTRAINT_PARAMS', (None, None))
