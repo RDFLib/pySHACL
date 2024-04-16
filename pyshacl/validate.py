@@ -3,6 +3,7 @@
 import logging
 import sys
 from functools import wraps
+from io import BufferedIOBase, TextIOBase
 from os import getenv, path
 from sys import stderr
 from typing import TYPE_CHECKING, Dict, Iterator, List, Optional, Set, Tuple, Union, cast
@@ -239,7 +240,10 @@ class Validator(object):
         else:
             has_cloned = False
             if self.ont_graph is not None:
-                self.logger.debug("Cloning DataGraph to temporary memory graph, to add ontology definitions.")
+                if self.inplace:
+                    self.logger.debug("Adding ontology definitions to DataGraph")
+                else:
+                    self.logger.debug("Cloning DataGraph to temporary memory graph, to add ontology definitions.")
                 # creates a copy of self.data_graph, doesn't modify it
                 the_target_graph = self.mix_in_ontology()
                 has_cloned = True
@@ -382,10 +386,10 @@ def meta_validate(shacl_graph: Union[GraphLike, str], inference: Optional[str] =
 
 
 def validate(
-    data_graph: Union[GraphLike, str, bytes],
+    data_graph: Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes],
     *args,
-    shacl_graph: Optional[Union[GraphLike, str, bytes]] = None,
-    ont_graph: Optional[Union[GraphLike, str, bytes]] = None,
+    shacl_graph: Optional[Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes]] = None,
+    ont_graph: Optional[Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes]] = None,
     advanced: Optional[bool] = False,
     inference: Optional[str] = None,
     inplace: Optional[bool] = False,
@@ -440,6 +444,30 @@ def validate(
             raise ReportableRuntimeError(msg)
     do_owl_imports = kwargs.pop('do_owl_imports', False)
     data_graph_format = kwargs.pop('data_graph_format', None)
+
+    if isinstance(data_graph, (str, bytes, BufferedIOBase, TextIOBase)):
+        # DataGraph is passed in as Text. It is not an rdflib.Graph
+        # That means we load it into an ephemeral graph at runtime
+        # that means we don't need to make a copy to prevent polluting it.
+        if isinstance(data_graph, str) and (
+            data_graph.startswith("http:/")
+            or data_graph.startswith("https:/")
+            or data_graph.startswith("file:/")
+            or data_graph.startswith("urn:")
+        ):
+            ephemeral = False
+        elif isinstance(data_graph, bytes) and (
+            data_graph.startswith(b"http:/")
+            or data_graph.startswith(b"https:/")
+            or data_graph.startswith(b"file:/")
+            or data_graph.startswith(b"urn:")
+        ):
+            ephemeral = False
+        else:
+            ephemeral = True
+    else:
+        ephemeral = True
+
     # force no owl imports on data_graph
     loaded_dg = load_from_source(
         data_graph, rdf_format=data_graph_format, multigraph=True, do_owl_imports=False, logger=log
@@ -469,7 +497,7 @@ def validate(
     validator_options_dict = {
         'debug': do_debug or False,
         'inference': inference,
-        'inplace': inplace,
+        'inplace': inplace or ephemeral,
         'abort_on_first': abort_on_first,
         'allow_infos': allow_infos,
         'allow_warnings': allow_warnings,

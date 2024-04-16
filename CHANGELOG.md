@@ -5,7 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
 ## [Unreleased]
-- Nothing yet...
+### Changed
+- Don't make a clone of the DataGraph if the input data graph is ephemeral.
+  - An ephemeral graph is one that is loaded from a string or file location by PySHACL
+  - This includes all files opened by the PySHACL CLI validator tool
+  - We don't need to make a copy because PySHACL parsed the Graph into memory itself already, so we are not concerned about not polluting the user's graph.
+
 
 ## [0.26.0] - 2024-04-11
 ### Added
