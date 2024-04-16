@@ -8,7 +8,7 @@ import sys
 from io import BufferedIOBase, BytesIO, TextIOBase, UnsupportedOperation
 from logging import WARNING, Logger, getLogger
 from pathlib import Path
-from typing import IO, BinaryIO, List, Optional, Union, cast
+from typing import IO, List, Optional, Union, cast
 from urllib import request
 from urllib.error import HTTPError
 
@@ -113,7 +113,7 @@ def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
 
 
 def load_from_source(
-    source: Union[GraphLike, BufferedIOBase, TextIOBase, BinaryIO, Union[str, bytes]],
+    source: Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes],
     g: Optional[GraphLike] = None,
     rdf_format: Optional[str] = None,
     multigraph: bool = False,
@@ -139,9 +139,9 @@ def load_from_source(
     :return:
     """
     source_is_graph = False
-    open_source: Optional[Union[BufferedIOBase, BinaryIO]] = None
+    open_source: Optional[BufferedIOBase] = None
     source_was_open: bool = False
-    source_as_file: Optional[Union[BufferedIOBase, BinaryIO]] = None
+    source_as_file: Optional[BufferedIOBase] = None
     source_as_filename: Optional[str] = None
     source_as_bytes: Optional[bytes] = None
     filename = None
@@ -241,13 +241,13 @@ def load_from_source(
             pid = os.getpid()
             fd0 = "/proc/{}/fd/0".format(str(pid))
             if filename == "/dev/stdin" or filename == fd0:
-                source = source_as_file = open_source = sys.stdin.buffer
+                source = source_as_file = open_source = cast(BufferedIOBase, sys.stdin.buffer)
                 source_was_open = True
             else:
                 try:
                     filename = os.readlink(filename)
                     if filename == fd0 or filename == "/dev/stdin":
-                        source = source_as_file = open_source = sys.stdin.buffer
+                        source = source_as_file = open_source = cast(BufferedIOBase, sys.stdin.buffer)
                         source_was_open = True
                 except OSError:
                     pass
