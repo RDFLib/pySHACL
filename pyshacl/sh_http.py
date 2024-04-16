@@ -1,6 +1,7 @@
 # HTTP Server for PySHACL
 import os
 import sys
+from typing import Union
 
 try:
     import sanic.application.logo
@@ -431,7 +432,7 @@ def run_server():
     )
 
 
-def cli():
+def main(prog: Union[None, str] = None) -> None:
     """CLI entrypoint for the HTTP Service"""
     try:
         run_server()
@@ -441,5 +442,5 @@ def cli():
         sys.stderr.write(f"{r}\r\n")
         traceback.print_tb(r.__traceback__, file=sys.stderr)
         sys.stderr.flush()
-        return 1
-    return 0
+        sys.exit(1)
+    sys.exit(0)

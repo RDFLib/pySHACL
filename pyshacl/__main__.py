@@ -19,8 +19,8 @@ do_server = os.getenv("PYSHACL_SERVER", do_server)
 if (len(sys.argv) > 1 and str(sys.argv[1]).lower() in ('serve', 'server', '--server')) or (
     do_server and str_is_true(do_server)
 ):
-    from pyshacl.sh_http import cli as http_cli
+    from pyshacl.sh_http import main as http_main
 
-    sys.exit(http_cli())
+    http_main()
 
-main()
+main(prog="python3 -m pyshacl")

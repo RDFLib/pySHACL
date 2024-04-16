@@ -4,6 +4,7 @@
 import argparse
 import os
 import sys
+from typing import Union
 
 from prettytable import PrettyTable
 from rdflib import Graph
@@ -47,7 +48,13 @@ parser.add_argument(
     nargs='?',
 )
 parser.add_argument(
-    '-s', '--shacl', dest='shacl', action='store', nargs='?', help='A file containing the SHACL Shapes Graph.'
+    '-s',
+    '--shapes',
+    '--shacl',
+    dest='shacl',
+    action='store',
+    nargs='?',
+    help='A file containing the SHACL Shapes Graph.',
 )
 parser.add_argument(
     '-e',
@@ -192,10 +199,9 @@ parser.add_argument(
 # parser.add_argument('-h', '--help', action="help", help='Show this help text.')
 
 
-def main() -> None:
-    basename = os.path.basename(sys.argv[0])
-    if basename == "__main__.py":
-        parser.prog = "python3 -m pyshacl"
+def main(prog: Union[str, None] = None) -> None:
+    if prog is not None and len(prog) > 0:
+        parser.prog = prog
     do_server = os.getenv("PYSHACL_HTTP", "")
     do_server = os.getenv("PYSHACL_SERVER", do_server)
     if do_server:
@@ -203,9 +209,9 @@ def main() -> None:
     else:
         args = parser.parse_args()
     if str_is_true(do_server) or args.server:
-        from pyshacl.sh_http import cli as http_cli
+        from pyshacl.sh_http import main as http_main
 
-        sys.exit(http_cli())
+        http_main()
     elif not args.data:
         # No datafile give, and not starting in server mode.
         sys.stderr.write('Validation Error. No DataGraph file supplied.\n')
@@ -339,10 +345,7 @@ def main() -> None:
             v_graph = v_graph.decode('utf-8')
         args.output.write(v_graph)
     args.output.close()
-    if is_conform:
-        sys.exit(0)
-    else:
-        sys.exit(1)
+    sys.exit(0 if is_conform else 1)
 
 
 if __name__ == "__main__":

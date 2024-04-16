@@ -124,7 +124,7 @@ def inoculate_dataset(
 
     # TODO: Decide whether we need to clone base_ds before calling this,
     # or we clone base_ds as part of this function
-    default_union = base_ds.default_union
+    default_union: bool = base_ds.default_union
     base_named_graphs = [
         (
             rdflib.Graph(base_ds.store, i, namespace_manager=base_ds.namespace_manager)  # type: ignore[arg-type]
