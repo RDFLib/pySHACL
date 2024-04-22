@@ -83,7 +83,6 @@ class PropertyConstraintComponent(ConstraintComponent):
         """
         reports: List[Dict] = []
         non_conformant = False
-        shape = self.shape
 
         # Shortcut, when there are no value nodes, don't check for recursion, don't validate and exit early
         value_node_count = 0
@@ -177,7 +176,6 @@ class NodeConstraintComponent(ConstraintComponent):
         """
         reports: List[Dict] = []
         non_conformant = False
-        shape = self.shape
 
         # Shortcut, when there are no value nodes, don't check for recursion, don't validate and exit early
         value_node_count = 0
@@ -343,7 +341,6 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
         """
         reports: List[Dict] = []
         non_conformant = False
-        shape = self.shape
 
         # Shortcut, when there are no value nodes, don't check for recursion, don't validate and exit early
         value_node_count = 0
