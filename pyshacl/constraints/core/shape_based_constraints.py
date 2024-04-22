@@ -2,7 +2,6 @@
 """
 https://www.w3.org/TR/shacl/#core-components-shape
 """
-from dataclasses import dataclass
 from textwrap import indent
 from typing import Dict, List
 from warnings import warn
@@ -77,7 +76,7 @@ class PropertyConstraintComponent(ConstraintComponent):
     ):
         """
         Entrypoint for constraint evaluation.
-        :type executor: dataclass
+        :type executor: SHACLExecutor
         :type target_graph: rdflib.Graph
         :type focus_value_nodes: dict
         :type _evaluation_path: list
