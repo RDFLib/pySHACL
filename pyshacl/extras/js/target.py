@@ -4,6 +4,7 @@ import typing
 from typing import Dict, List
 from warnings import warn
 
+import rdflib
 from rdflib import URIRef
 
 from pyshacl.consts import SH_JSTargetType
@@ -13,7 +14,7 @@ from pyshacl.target import BoundSHACLTargetType, SHACLTargetType
 from .js_executable import JSExecutable
 
 if typing.TYPE_CHECKING:
-    from pyshacl.pytypes import GraphLike, SHACLExecutor
+    from pyshacl.pytypes import SHACLExecutor
     from pyshacl.shape import Shape
     from pyshacl.shapes_graph import ShapesGraph
 
@@ -47,7 +48,7 @@ class BoundJSTargetType(BoundSHACLTargetType):
         return SH_JSTargetType
 
     def evaluate(
-        self, executor: 'SHACLExecutor', target_graph: 'GraphLike', focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: 'SHACLExecutor', target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor

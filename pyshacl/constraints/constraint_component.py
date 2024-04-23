@@ -8,6 +8,7 @@ import re
 import typing
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple
 
+import rdflib
 from rdflib import BNode, Literal, URIRef
 
 from pyshacl.consts import (
@@ -33,7 +34,7 @@ from pyshacl.consts import (
 )
 from pyshacl.errors import ConstraintLoadError
 from pyshacl.parameter import SHACLParameter
-from pyshacl.pytypes import GraphLike, SHACLExecutor
+from pyshacl.pytypes import SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 
 if TYPE_CHECKING:
@@ -78,11 +79,11 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         raise NotImplementedError()  # pragma: no cover
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[Literal]:
         return []
 
     def __str__(self):
@@ -127,7 +128,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
 
     def make_v_result_description(
         self,
-        datagraph: GraphLike,
+        datagraph: rdflib.Graph,
         focus_node: 'RDFNode',
         severity: URIRef,
         value_node: Optional['RDFNode'],
@@ -209,7 +210,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
 
     def make_v_result(
         self,
-        datagraph: GraphLike,
+        datagraph: rdflib.Graph,
         focus_node: 'RDFNode',
         value_node: Optional['RDFNode'] = None,
         result_path: Optional['RDFNode'] = None,

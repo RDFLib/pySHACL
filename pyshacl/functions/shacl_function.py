@@ -3,6 +3,7 @@
 import typing
 from typing import Dict, List
 
+import rdflib
 from rdflib import XSD, Literal
 from rdflib.plugins.sparql.operators import register_custom_function, unregister_custom_function
 from rdflib.plugins.sparql.sparql import SPARQLError
@@ -13,7 +14,6 @@ from ..helper import get_query_helper_cls
 from ..parameter import SHACLParameter
 
 if typing.TYPE_CHECKING:
-    from ..pytypes import GraphLike
     from ..shapes_graph import ShapesGraph
 
 
@@ -145,7 +145,7 @@ class SPARQLFunction(SHACLFunction):
         else:
             return self.execute_select(g, init_bindings)
 
-    def execute_select(self, g: 'GraphLike', init_bindings: Dict):
+    def execute_select(self, g: rdflib.Graph, init_bindings: Dict):
         s = self._qh.apply_prefixes(self.select)
         results = g.query(s, initBindings=init_bindings)
         if results.type != "SELECT" or results.vars is None:
@@ -158,7 +158,7 @@ class SPARQLFunction(SHACLFunction):
         result = results.bindings[0]
         return result[rvar]
 
-    def execute_ask(self, g: 'GraphLike', init_bindings: Dict):
+    def execute_ask(self, g: rdflib.Graph, init_bindings: Dict):
         a = self._qh.apply_prefixes(self.ask)
         results = g.query(a, initBindings=init_bindings)
         if results.type != "ASK":

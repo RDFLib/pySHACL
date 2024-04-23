@@ -9,7 +9,7 @@ import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
-from pyshacl.pytypes import GraphLike, SHACLExecutor
+from pyshacl.pytypes import SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 
 SH_equals = SH.equals
@@ -52,7 +52,7 @@ class EqualsConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "EqualsConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.property_compare_set) < 2:
             m = "Value of {}->{} != {}".format(
                 stringify_node(datagraph, focus_node),
@@ -67,7 +67,7 @@ class EqualsConstraintComponent(ConstraintComponent):
         return [rdflib.Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor
@@ -134,7 +134,7 @@ class DisjointConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "DisjointConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.property_compare_set) < 2:
             m = "Value of {}->{} == {}".format(
                 stringify_node(datagraph, focus_node),
@@ -149,7 +149,7 @@ class DisjointConstraintComponent(ConstraintComponent):
         return [rdflib.Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor
@@ -218,7 +218,7 @@ class LessThanConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "LessThanConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.property_compare_set) < 2:
             m = "Value of {}->{} <= {}".format(
                 stringify_node(datagraph, focus_node),
@@ -233,7 +233,7 @@ class LessThanConstraintComponent(ConstraintComponent):
         return [rdflib.Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor
@@ -326,7 +326,7 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "LessThanOrEqualsConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.property_compare_set) < 2:
             m = "Value of {}->{} < {}".format(
                 stringify_node(datagraph, focus_node),
@@ -341,7 +341,7 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
         return [rdflib.Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor

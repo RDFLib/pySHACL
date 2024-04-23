@@ -11,7 +11,7 @@ from pyshacl.constraints.constraint_component import ConstraintComponent, Custom
 from pyshacl.consts import SH, RDF_type, SH_ask, SH_ConstraintComponent, SH_message, SH_select
 from pyshacl.errors import ConstraintLoadError, ValidationFailure
 from pyshacl.helper import get_query_helper_cls
-from pyshacl.pytypes import GraphLike, SHACLExecutor
+from pyshacl.pytypes import SHACLExecutor
 
 if typing.TYPE_CHECKING:
     from pyshacl.shape import Shape
@@ -55,11 +55,11 @@ class BoundShapeValidatorComponent(ConstraintComponent):
     def constraint_name(cls):
         return "ConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         return [rdflib.Literal("Parameterised SHACL Query generated constraint validation reports.")]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor

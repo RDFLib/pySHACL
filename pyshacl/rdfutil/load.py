@@ -17,9 +17,6 @@ from rdflib.namespace import NamespaceManager
 
 from .clone import clone_dataset, clone_graph
 
-ConjunctiveLike = Union[rdflib.ConjunctiveGraph, rdflib.Dataset]
-GraphLike = Union[ConjunctiveLike, rdflib.Graph]
-
 is_windows = platform.system() == "Windows"
 MAX_OWL_IMPORT_DEPTH = 3
 baked_in = {}
@@ -113,8 +110,8 @@ def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
 
 
 def load_from_source(
-    source: Union[GraphLike, BufferedIOBase, TextIOBase, BinaryIO, str, bytes],
-    g: Optional[GraphLike] = None,
+    source: Union[rdflib.Graph, BufferedIOBase, TextIOBase, BinaryIO, str, bytes],
+    g: Optional[rdflib.Graph] = None,
     rdf_format: Optional[str] = None,
     multigraph: bool = False,
     do_owl_imports: Union[bool, int] = False,

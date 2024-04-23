@@ -10,7 +10,7 @@ import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
-from pyshacl.pytypes import GraphLike, SHACLExecutor
+from pyshacl.pytypes import SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 from pyshacl.rdfutil.compare import compare_literal
 
@@ -52,7 +52,7 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "MinExclusiveConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.min_vals) < 2:
             m = "Value is not > {}".format(stringify_node(self.shape.sg.graph, self.min_vals[0]))
         else:
@@ -61,7 +61,7 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
         return [rdflib.Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor
@@ -142,7 +142,7 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "MinInclusiveConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.min_vals) < 2:
             m = "Value is not >= {}".format(stringify_node(self.shape.sg.graph, self.min_vals[0]))
         else:
@@ -151,7 +151,7 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
         return [rdflib.Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor
@@ -232,7 +232,7 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "MaxExclusiveConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.max_vals) < 2:
             m = "Value is not < {}".format(stringify_node(self.shape.sg.graph, self.max_vals[0]))
         else:
@@ -241,7 +241,7 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
         return [rdflib.Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor
@@ -322,7 +322,7 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "MaxInclusiveConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.max_vals) < 2:
             m = "Value is not <= {}".format(stringify_node(self.shape.sg.graph, self.max_vals[0]))
         else:
@@ -331,7 +331,7 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
         return [rdflib.Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor

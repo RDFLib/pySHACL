@@ -29,7 +29,7 @@ from .errors import ReportableRuntimeError, ValidationFailure
 from .extras import check_extra_installed
 from .functions import apply_functions, gather_functions, unapply_functions
 from .monkey import apply_patches, rdflib_bool_patch, rdflib_bool_unpatch
-from .pytypes import GraphLike, SHACLExecutor
+from .pytypes import SHACLExecutor
 from .rdfutil import (
     add_baked_in,
     clone_blank_node,
@@ -81,7 +81,7 @@ class Validator(object):
 
     @classmethod
     def _run_pre_inference(
-        cls, target_graph: GraphLike, inference_option: str, logger: Optional[logging.Logger] = None
+        cls, target_graph: rdflib.Graph, inference_option: str, logger: Optional[logging.Logger] = None
     ):
         """
         Note, this is the OWL/RDFS pre-inference,
@@ -148,7 +148,7 @@ class Validator(object):
         vr = BNode()
         vg.add((vr, RDF_type, SH_ValidationReport))
         vg.add((vr, SH_conforms, Literal(conforms)))
-        cloned_nodes: Dict[Tuple[GraphLike, str], Union[BNode, URIRef]] = {}
+        cloned_nodes: Dict[Tuple[rdflib.Graph, str], Union[BNode, URIRef]] = {}
         for result in iter(results):
             _d, _bn, _tr = result
             v_text += _d
@@ -173,10 +173,10 @@ class Validator(object):
 
     def __init__(
         self,
-        data_graph: GraphLike,
+        data_graph: rdflib.Graph,
         *args,
-        shacl_graph: Optional[GraphLike] = None,
-        ont_graph: Optional[GraphLike] = None,
+        shacl_graph: Optional[rdflib.Graph] = None,
+        ont_graph: Optional[rdflib.Graph] = None,
         options: Optional[dict] = None,
         **kwargs,
     ):
@@ -189,9 +189,9 @@ class Validator(object):
         self.inplace = options['inplace']
         if not isinstance(data_graph, rdflib.Graph):
             raise RuntimeError("data_graph must be a rdflib Graph object")
-        self.data_graph = data_graph  # type: GraphLike
+        self.data_graph = data_graph
         self._target_graph = None
-        self.ont_graph = ont_graph  # type: Optional[GraphLike]
+        self.ont_graph = ont_graph
         self.data_graph_is_multigraph = isinstance(self.data_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph))
         if self.ont_graph is not None and isinstance(self.ont_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
             self.ont_graph.default_union = True
@@ -378,7 +378,7 @@ def with_metashacl_shacl_graph_cache(f):
 
 
 @with_metashacl_shacl_graph_cache
-def meta_validate(shacl_graph: Union[GraphLike, str], inference: Optional[str] = 'rdfs', **kwargs):
+def meta_validate(shacl_graph: Union[rdflib.Graph, str], inference: Optional[str] = 'rdfs', **kwargs):
     shacl_shacl_graph = meta_validate.graph_cache
     shacl_graph = load_from_source(shacl_graph, rdf_format=kwargs.pop('shacl_graph_format', None), multigraph=True)
     _ = kwargs.pop('meta_shacl', None)
@@ -386,10 +386,10 @@ def meta_validate(shacl_graph: Union[GraphLike, str], inference: Optional[str] =
 
 
 def validate(
-    data_graph: Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes],
+    data_graph: Union[rdflib.Graph, BufferedIOBase, TextIOBase, str, bytes],
     *args,
-    shacl_graph: Optional[Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes]] = None,
-    ont_graph: Optional[Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes]] = None,
+    shacl_graph: Optional[Union[rdflib.Graph, BufferedIOBase, TextIOBase, str, bytes]] = None,
+    ont_graph: Optional[Union[rdflib.Graph, BufferedIOBase, TextIOBase, str, bytes]] = None,
     advanced: Optional[bool] = False,
     inference: Optional[str] = None,
     inplace: Optional[bool] = False,
@@ -578,7 +578,7 @@ def clean_validation_reports(actual_graph, actual_report, expected_graph, expect
     return True
 
 
-def compare_validation_reports(report_graph: GraphLike, expected_graph: GraphLike, expected_result):
+def compare_validation_reports(report_graph: rdflib.Graph, expected_graph: rdflib.Graph, expected_result):
     expected_conforms_i = expected_graph.objects(expected_result, SH_conforms)
     expected_conforms = set(cast(Iterator[Literal], expected_conforms_i))
     if len(expected_conforms) < 1:  # pragma: no cover
@@ -627,7 +627,9 @@ def compare_validation_reports(report_graph: GraphLike, expected_graph: GraphLik
     return True
 
 
-def compare_inferencing_reports(data_graph: GraphLike, expected_graph: GraphLike, expected_results: Union[List, Set]):
+def compare_inferencing_reports(
+    data_graph: rdflib.Graph, expected_graph: rdflib.Graph, expected_results: Union[List, Set]
+):
     all_good = True
     for expected_result in expected_results:
         expected_objects = set(expected_graph.objects(expected_result, RDF_object))
@@ -697,7 +699,7 @@ def compare_inferencing_reports(data_graph: GraphLike, expected_graph: GraphLike
     return all_good
 
 
-def check_dash_result(validator: Validator, report_graph: GraphLike, expected_result_graph: GraphLike):
+def check_dash_result(validator: Validator, report_graph: rdflib.Graph, expected_result_graph: rdflib.Graph):
     DASH = rdflib.namespace.Namespace('http://datashapes.org/dash#')
     DASH_GraphValidationTestCase = DASH.GraphValidationTestCase
     DASH_InferencingTestCase = DASH.InferencingTestCase
@@ -804,7 +806,7 @@ def check_dash_result(validator: Validator, report_graph: GraphLike, expected_re
     return (gv_res or gv_res is None) and (inf_res or inf_res is None) and (fn_res or fn_res is None)
 
 
-def check_sht_result(report_graph: GraphLike, sht_graph: GraphLike, sht_result_node: Union[URIRef, BNode]):
+def check_sht_result(report_graph: rdflib.Graph, sht_graph: rdflib.Graph, sht_result_node: Union[URIRef, BNode]):
     SHT = rdflib.namespace.Namespace('http://www.w3.org/ns/shacl-test#')
     types = set(sht_graph.objects(sht_result_node, RDF_type))
     expected_failure = sht_result_node == SHT.Failure

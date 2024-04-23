@@ -11,7 +11,7 @@ from rdflib.namespace import XSD
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import RDF, SH, XSD_WHOLE_INTEGERS
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
-from pyshacl.pytypes import GraphLike, SHACLExecutor
+from pyshacl.pytypes import SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 
 RDF_langString = RDF.langString
@@ -67,7 +67,7 @@ class StringBasedConstraintBase(ConstraintComponent):
         raise NotImplementedError()
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor
@@ -139,7 +139,7 @@ class MinLengthConstraintComponent(StringBasedConstraintBase):
     def constraint_name(cls):
         return "MinLengthConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         m = "String length not >= {}".format(stringify_node(datagraph, self.string_rules[0]))
         return [rdflib.Literal(m)]
 
@@ -219,7 +219,7 @@ class MaxLengthConstraintComponent(StringBasedConstraintBase):
     def constraint_name(cls):
         return "MaxLengthConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         m = "String length not <= {}".format(stringify_node(datagraph, self.string_rules[0]))
         return [rdflib.Literal(m)]
 
@@ -287,7 +287,7 @@ class PatternConstraintComponent(StringBasedConstraintBase):
     def constraint_name(cls):
         return "PatternConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.string_rules) < 2:
             m = "Value does not match pattern '{}'".format(str(self.string_rules[0].value))
         else:
@@ -365,7 +365,7 @@ class LanguageInConstraintComponent(StringBasedConstraintBase):
     def constraint_name(cls):
         return "LanguageInConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         m = "String language is not in {}".format(stringify_node(datagraph, self.string_rules[0]))
         return [rdflib.Literal(m)]
 
@@ -459,7 +459,7 @@ class UniqueLangConstraintComponent(StringBasedConstraintBase):
     def constraint_name(cls):
         return "UniqueLangConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         return [rdflib.Literal("More than one String shares the same Language")]
 
     def _evaluate_string_rule(self, is_unique_lang, target_graph, f_v_dict):

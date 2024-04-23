@@ -13,7 +13,7 @@ from pyshacl.rdfutil import clone_graph
 from ..shacl_rule import SHACLRule
 
 if TYPE_CHECKING:
-    from pyshacl.pytypes import GraphLike, SHACLExecutor
+    from pyshacl.pytypes import SHACLExecutor
     from pyshacl.shape import Shape
 
 XSD_string = XSD.string
@@ -49,7 +49,7 @@ class SPARQLRule(SHACLRule):
         query_helper.collect_prefixes()
         self._qh = query_helper
 
-    def apply(self, data_graph: 'GraphLike') -> int:
+    def apply(self, data_graph: rdflib.Graph) -> int:
         focus_nodes = self.shape.focus_nodes(data_graph)  # uses target nodes to find focus nodes
         all_added = 0
         SPARQLQueryHelper = get_query_helper_cls()

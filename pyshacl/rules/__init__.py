@@ -2,9 +2,11 @@
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type, Union
 
+import rdflib
+
 from pyshacl.consts import RDF_type, SH_rule, SH_SPARQLRule, SH_TripleRule
 from pyshacl.errors import ReportableRuntimeError, RuleLoadError
-from pyshacl.pytypes import GraphLike, SHACLExecutor
+from pyshacl.pytypes import SHACLExecutor
 from pyshacl.rules.sparql import SPARQLRule
 from pyshacl.rules.triple import TripleRule
 
@@ -77,7 +79,7 @@ def gather_rules(executor: SHACLExecutor, shacl_graph: 'ShapesGraph') -> Dict['S
     return ret_rules
 
 
-def apply_rules(executor: SHACLExecutor, shapes_rules: Dict, data_graph: GraphLike) -> int:
+def apply_rules(executor: SHACLExecutor, shapes_rules: Dict, data_graph: rdflib.Graph) -> int:
     # short the shapes dict by shapes sh:order before execution
     sorted_shapes_rules: List[Tuple[Any, Any]] = sorted(shapes_rules.items(), key=lambda x: x[0].order)
     total_modified = 0

@@ -3,13 +3,14 @@
 import typing
 from typing import Any, Dict, List, Tuple, Union
 
+import rdflib
 from rdflib import Literal
 
 from pyshacl.constraints import ConstraintComponent
 from pyshacl.constraints.constraint_component import CustomConstraintComponent
 from pyshacl.consts import SH, SH_ConstraintComponent, SH_message
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
-from pyshacl.pytypes import GraphLike, SHACLExecutor
+from pyshacl.pytypes import SHACLExecutor
 
 from .js_executable import JSExecutable
 
@@ -73,11 +74,11 @@ class BoundShapeJSValidatorComponent(ConstraintComponent):
     def constraint_name(cls):
         return "ConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[Literal]:
         return [Literal("Parameterised Javascript Function generated constraint validation reports.")]
 
     def evaluate(
-        self, executor: SHACLExecutor, data_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, data_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor

@@ -2,11 +2,12 @@ from itertools import chain
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import rdflib
+from rdflib import ConjunctiveGraph
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID
 from rdflib.namespace import NamespaceManager
 
 from .clone import clone_blank_node, clone_graph, clone_node
-from .consts import OWL, RDF, ConjunctiveLike, GraphLike, OWL_classes, OWL_properties, RDFS_classes, RDFS_properties
+from .consts import OWL, RDF, OWL_classes, OWL_properties, RDFS_classes, RDFS_properties
 
 if TYPE_CHECKING:
     from rdflib import BNode
@@ -108,7 +109,7 @@ def inoculate(data_graph: rdflib.Graph, ontology: rdflib.Graph):
 
 
 def inoculate_dataset(
-    base_ds: ConjunctiveLike, ontology_ds: GraphLike, target_ds: Optional[Union[ConjunctiveLike, str]] = None
+    base_ds: ConjunctiveGraph, ontology_ds: rdflib.Graph, target_ds: Optional[Union[ConjunctiveGraph, str]] = None
 ):
     """
     Make a clone of base_ds (dataset) and add RDFS and OWL triples from ontology_ds

@@ -6,6 +6,7 @@ from decimal import Decimal
 from time import perf_counter
 from typing import TYPE_CHECKING, List, Optional, Set, Tuple, Type, Union
 
+import rdflib
 from rdflib import BNode, Literal, URIRef
 
 from .consts import (
@@ -38,7 +39,7 @@ from .consts import (
 from .errors import ConstraintLoadError, ConstraintLoadWarning, ReportableRuntimeError, ShapeLoadError
 from .helper import get_query_helper_cls
 from .helper.expression_helper import value_nodes_from_path
-from .pytypes import GraphLike, SHACLExecutor
+from .pytypes import SHACLExecutor
 
 if TYPE_CHECKING:
     from pyshacl.constraints import ConstraintComponent
@@ -423,7 +424,7 @@ class Shape(object):
     def validate(
         self,
         executor: SHACLExecutor,
-        target_graph: GraphLike,
+        target_graph: rdflib.Graph,
         focus: Optional[
             Union[
                 Tuple[Union[URIRef, BNode]],

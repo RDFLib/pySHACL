@@ -3,19 +3,19 @@
 from typing import Optional, Union
 
 import rdflib
+from rdflib import ConjunctiveGraph
 from rdflib.collection import Collection
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID
 from rdflib.namespace import NamespaceManager
 
 from .consts import OWL, RDF_first
-from .pytypes import ConjunctiveLike, GraphLike
 
 OWLsameAs = OWL.sameAs
 
 
-def clone_dataset(source_ds: ConjunctiveLike, target_ds=None):
+def clone_dataset(source_ds: ConjunctiveGraph, target_ds=None):
     if target_ds and not isinstance(target_ds, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
-        raise RuntimeError("when cloning a dataset, the target_ds must be a conjunctiveGraph or rdflib Dataset.")
+        raise RuntimeError("when cloning a dataset, the target_ds must be a ConjunctiveGraph or rdflib Dataset.")
     default_union = source_ds.default_union
     if target_ds is None:
         target_ds = rdflib.Dataset(default_union=default_union)
@@ -100,7 +100,7 @@ def clone_graph(source_graph, target_graph=None, identifier=None):
 
 
 def mix_datasets(
-    base_ds: ConjunctiveLike, extra_ds: GraphLike, target_ds: Optional[Union[ConjunctiveLike, str]] = None
+    base_ds: ConjunctiveGraph, extra_ds: rdflib.Graph, target_ds: Optional[Union[ConjunctiveGraph, str]] = None
 ):
     """
     Make a clone of base_ds (dataset) and add in the triples from extra_ds (dataset)
@@ -205,7 +205,9 @@ def mix_datasets(
     return target_ds
 
 
-def mix_graphs(base_graph: GraphLike, extra_graph: GraphLike, target_graph: Optional[Union[GraphLike, str]] = None):
+def mix_graphs(
+    base_graph: rdflib.Graph, extra_graph: rdflib.Graph, target_graph: Optional[Union[rdflib.Graph, str]] = None
+):
     """
     Make a clone of base_graph and add in the triples from extra_graph
     :param base_graph:

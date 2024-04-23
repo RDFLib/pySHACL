@@ -2,12 +2,14 @@ import typing
 from typing import List, Sequence, Type, Union
 from warnings import warn
 
+import rdflib
+
 from .constraints import ConstraintComponent
 from .consts import SH, RDF_type, RDFS_subClassOf, SH_parameter, SH_select, SH_SPARQLTargetType
 from .errors import ConstraintLoadError, ShapeLoadError
 from .helper import get_query_helper_cls
 from .parameter import SHACLParameter
-from .pytypes import GraphLike, SHACLExecutor
+from .pytypes import SHACLExecutor
 
 if typing.TYPE_CHECKING:
     from .shapes_graph import ShapesGraph
@@ -117,7 +119,11 @@ class BoundSHACLTargetType(ConstraintComponent):
         return SH_SPARQLTargetType
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: typing.Dict, _evaluation_path: List
+        self,
+        executor: SHACLExecutor,
+        target_graph: rdflib.Graph,
+        focus_value_nodes: typing.Dict,
+        _evaluation_path: List,
     ):
         """
         :type executor: SHACLExecutor
