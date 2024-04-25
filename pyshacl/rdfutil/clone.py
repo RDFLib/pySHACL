@@ -254,7 +254,9 @@ def clone_list(graph, lnode, target_graph, keepid=False, recursion=0, deep_clone
     return cloned_node
 
 
-def clone_blank_node(graph, bnode, target_graph, keepid=False, recursion=0):
+def clone_blank_node(
+    graph: rdflib.Graph, bnode: rdflib.BNode, target_graph: rdflib.Graph, keepid: bool = False, recursion: int = 0
+) -> rdflib.BNode:
     if not isinstance(graph, rdflib.Graph):
         raise RuntimeError("clone_blank_node must take an rdflib.Graph as first parameter")
     if not isinstance(bnode, rdflib.BNode):
