@@ -7,7 +7,7 @@ from rdflib.collection import Collection
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID
 from rdflib.namespace import NamespaceManager
 
-from .consts import OWL, RDF_first
+from .consts import OWL, RDF_first, RDFNode
 from .pytypes import ConjunctiveLike, GraphLike
 
 OWLsameAs = OWL.sameAs
@@ -319,7 +319,9 @@ def clone_literal(graph, node, target_graph):
     return new_literal
 
 
-def clone_node(graph, node, target_graph, recursion=0, deep_clone=False):
+def clone_node(
+    graph: rdflib.Graph, node: RDFNode, target_graph: rdflib.Graph, recursion: int = 0, deep_clone: bool = False
+) -> RDFNode:
     # If deepclone, when the type is URIRef, it clones _all_ node content (properties, objects)
     if isinstance(node, rdflib.Literal):
         new_node = clone_literal(graph, node, target_graph)
