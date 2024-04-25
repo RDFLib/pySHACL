@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-from typing import Optional, Union
+from typing import Optional, Union, overload
 
 import rdflib
 from rdflib.collection import Collection
@@ -235,6 +235,28 @@ def mix_graphs(base_graph: GraphLike, extra_graph: GraphLike, target_graph: Opti
         g = clone_graph(base_graph, target_graph=target_graph)
     g = clone_graph(extra_graph, target_graph=g)
     return g
+
+
+@overload
+def clone_list(
+    graph: rdflib.Graph,
+    lnode: rdflib.BNode,
+    target_graph: rdflib.Graph,
+    keepid: bool = ...,
+    recursion: int = ...,
+    deep_clone: bool = ...,
+) -> rdflib.BNode: ...
+
+
+@overload
+def clone_list(
+    graph: rdflib.Graph,
+    lnode: rdflib.URIRef,
+    target_graph: rdflib.Graph,
+    keepid: bool = ...,
+    recursion: int = ...,
+    deep_clone: bool = ...,
+) -> rdflib.URIRef: ...
 
 
 def clone_list(graph, lnode, target_graph, keepid=False, recursion=0, deep_clone=False):
