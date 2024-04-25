@@ -311,7 +311,7 @@ def clone_blank_node(
     return cloned_bnode
 
 
-def clone_literal(graph, node, target_graph):
+def clone_literal(graph: rdflib.Graph, node: rdflib.Literal, target_graph: rdflib.Graph) -> rdflib.Literal:
     lex_val_string = str(node)
     lang = node.language
     datatype = node.datatype
@@ -323,6 +323,7 @@ def clone_node(
     graph: rdflib.Graph, node: RDFNode, target_graph: rdflib.Graph, recursion: int = 0, deep_clone: bool = False
 ) -> RDFNode:
     # If deepclone, when the type is URIRef, it clones _all_ node content (properties, objects)
+    new_node: RDFNode
     if isinstance(node, rdflib.Literal):
         new_node = clone_literal(graph, node, target_graph)
     elif isinstance(node, rdflib.BNode):
