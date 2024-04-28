@@ -4,13 +4,14 @@ https://www.w3.org/TR/shacl/#core-components-count
 """
 from typing import Dict, List
 
+import rdflib
 from rdflib.namespace import XSD
 from rdflib.term import Literal
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError
-from pyshacl.pytypes import GraphLike, SHACLExecutor
+from pyshacl.pytypes import SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 
 XSD_integer = XSD.integer
@@ -70,7 +71,7 @@ class MinCountConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "MinCountConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[Literal]:
         p = self.shape.path()
         if p:
             p = stringify_node(self.shape.sg.graph, p)
@@ -82,7 +83,7 @@ class MinCountConstraintComponent(ConstraintComponent):
         return [Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor
@@ -153,7 +154,7 @@ class MaxCountConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "MaxCountConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[Literal]:
         p = self.shape.path()
         if p:
             p = stringify_node(self.shape.sg.graph, p)
@@ -165,7 +166,7 @@ class MaxCountConstraintComponent(ConstraintComponent):
         return [Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor

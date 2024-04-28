@@ -7,13 +7,14 @@ https://www.w3.org/TR/shacl-af/#ExpressionConstraintComponent
 import typing
 from typing import Dict, List
 
+import rdflib
 from rdflib import Literal
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH, SH_message
 from pyshacl.errors import ConstraintLoadError
 from pyshacl.helper.expression_helper import nodes_from_node_expression
-from pyshacl.pytypes import GraphLike, SHACLExecutor
+from pyshacl.pytypes import SHACLExecutor
 
 SH_expression = SH.expression
 SH_ExpressionConstraintComponent = SH.ExpressionConstraintComponent
@@ -42,11 +43,11 @@ class ExpressionConstraint(ConstraintComponent):
     def constraint_name(cls):
         return "ExpressionConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[Literal]:
         return [Literal("Expression evaluation generated constraint did not return true.")]
 
     def evaluate(
-        self, executor: SHACLExecutor, data_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, data_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor

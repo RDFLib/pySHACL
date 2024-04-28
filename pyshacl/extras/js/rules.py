@@ -2,6 +2,8 @@
 #
 import typing
 
+import rdflib
+
 from pyshacl.consts import SH
 from pyshacl.errors import ReportableRuntimeError
 from pyshacl.rules.shacl_rule import SHACLRule
@@ -9,7 +11,7 @@ from pyshacl.rules.shacl_rule import SHACLRule
 from .js_executable import JSExecutable
 
 if typing.TYPE_CHECKING:
-    from pyshacl.pytypes import GraphLike, SHACLExecutor
+    from pyshacl.pytypes import SHACLExecutor
     from pyshacl.shape import Shape
     from pyshacl.shapes_graph import ShapesGraph
 
@@ -24,7 +26,7 @@ class JSRule(SHACLRule):
         shapes_graph: 'ShapesGraph' = shape.sg
         self.js_exe = JSExecutable(shapes_graph, rule_node)
 
-    def apply(self, data_graph: 'GraphLike') -> int:
+    def apply(self, data_graph: rdflib.Graph) -> int:
         focus_nodes = self.shape.focus_nodes(data_graph)  # uses target nodes to find focus nodes
         all_added = 0
         iterate_limit = 100

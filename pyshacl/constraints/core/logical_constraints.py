@@ -10,7 +10,7 @@ import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError, ShapeRecursionWarning, ValidationFailure
-from pyshacl.pytypes import GraphLike, SHACLExecutor
+from pyshacl.pytypes import SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 
 SH_not = SH["not"]
@@ -55,7 +55,7 @@ class NotConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "NotConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.not_list) == 1:
             m = f"Node {stringify_node(datagraph, value_node)} conforms to shape {stringify_node(self.shape.sg.graph, self.not_list[0])}"
         else:
@@ -63,7 +63,9 @@ class NotConstraintComponent(ConstraintComponent):
             m = f"Node {stringify_node(datagraph, value_node)} conforms to one or more shapes in {nots_list}"
         return [rdflib.Literal(m)]
 
-    def evaluate(self, executor: SHACLExecutor, datagraph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
+    def evaluate(
+        self, executor: SHACLExecutor, datagraph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
+    ):
         """
         :type executor: SHACLExecutor
         :type datagraph: rdflib.Graph
@@ -158,7 +160,7 @@ class AndConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "AndConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         and_list = " , ".join(
             stringify_node(self.shape.sg.graph, a_c) for a in self.and_list for a_c in self.shape.sg.graph.items(a)
         )
@@ -166,7 +168,7 @@ class AndConstraintComponent(ConstraintComponent):
         return [rdflib.Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor
@@ -254,7 +256,7 @@ class OrConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "OrConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         or_list = " , ".join(
             stringify_node(self.shape.sg.graph, o_c) for o in self.or_list for o_c in self.shape.sg.graph.items(o)
         )
@@ -264,7 +266,7 @@ class OrConstraintComponent(ConstraintComponent):
         return [rdflib.Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor
@@ -352,7 +354,7 @@ class XoneConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "XoneConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         xone_list = " , ".join(
             stringify_node(self.shape.sg.graph, a_c) for a in self.xone_nodes for a_c in self.shape.sg.graph.items(a)
         )
@@ -362,7 +364,7 @@ class XoneConstraintComponent(ConstraintComponent):
         return [rdflib.Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor

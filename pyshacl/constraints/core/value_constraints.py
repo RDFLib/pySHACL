@@ -27,7 +27,7 @@ from pyshacl.consts import (
     SH_nodeKind,
 )
 from pyshacl.errors import ConstraintLoadError
-from pyshacl.pytypes import GraphLike, SHACLExecutor
+from pyshacl.pytypes import SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 
 RDF_langString = RDF.langString
@@ -77,7 +77,7 @@ class ClassConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "ClassConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[Literal]:
         if len(self.class_rules) < 2:
             m = "Value does not have class {}".format(stringify_node(self.shape.sg.graph, self.class_rules[0]))
         else:
@@ -86,7 +86,7 @@ class ClassConstraintComponent(ConstraintComponent):
         return [Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor
@@ -164,12 +164,12 @@ class DatatypeConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "DatatypeConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[Literal]:
         m = "Value is not Literal with datatype {}".format(stringify_node(self.shape.sg.graph, self.datatype_rule))
         return [Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor
@@ -272,12 +272,12 @@ class NodeKindConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "NodeKindConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[Literal]:
         m = "Value is not of Node Kind {}".format(stringify_node(self.shape.sg.graph, self.nodekind_rule))
         return [Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor

@@ -9,7 +9,7 @@ import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import RDFS, SH, RDF_type, SH_property
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
-from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
+from pyshacl.pytypes import RDFNode, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 
 SH_InConstraintComponent = SH.InConstraintComponent
@@ -61,13 +61,13 @@ class InConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "InConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         list1 = [stringify_node(self.shape.sg.graph, val) for val in self.in_vals]
         m = "Value {} not in list {}".format(stringify_node(datagraph, value_node), list1)
         return [rdflib.Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor
@@ -140,14 +140,14 @@ class ClosedConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "ClosedConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         m = "Node {} is closed. It cannot have value: {}".format(
             stringify_node(datagraph, focus_node), stringify_node(datagraph, value_node)
         )
         return [rdflib.Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor
@@ -221,7 +221,7 @@ class HasValueConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "HasValueConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         the_set = [stringify_node(self.shape.sg.graph, s) for s in self.has_value_set]
         p = self.shape.path()
         if p:
@@ -236,7 +236,7 @@ class HasValueConstraintComponent(ConstraintComponent):
         return [rdflib.Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor

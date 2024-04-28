@@ -24,7 +24,7 @@ from pyshacl.errors import (
     ShapeRecursionWarning,
     ValidationFailure,
 )
-from pyshacl.pytypes import GraphLike, SHACLExecutor
+from pyshacl.pytypes import SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 
 SH_QualifiedValueCountConstraintComponent = SH.QualifiedValueConstraintComponent
@@ -68,11 +68,11 @@ class PropertyConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "PropertyConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         raise NotImplementedError("A Property Constraint Component should not be able to generate its own message.")
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         Entrypoint for constraint evaluation.
@@ -156,7 +156,7 @@ class NodeConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "NodeConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.node_shapes) < 2:
             m = "Value does not conform to Shape {}.".format(stringify_node(self.shape.sg.graph, self.node_shapes[0]))
         else:
@@ -166,7 +166,7 @@ class NodeConstraintComponent(ConstraintComponent):
         return [rdflib.Literal(m)]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor
@@ -317,7 +317,7 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
     def constraint_name(cls):
         return "QualifiedValueShapeConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: rdflib.Graph, focus_node, value_node) -> List[rdflib.Literal]:
         # TODO:
         #  Implement default message for QualifiedValueConstraint (seems messy)
         shapes_string = ",".join(stringify_node(self.shape.sg.graph, s) for s in self.value_shapes)
@@ -331,7 +331,7 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
         return [rdflib.Literal(f"Focus node does not conform to shape{count_message}: {shapes_string}")]
 
     def evaluate(
-        self, executor: SHACLExecutor, target_graph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List
+        self, executor: SHACLExecutor, target_graph: rdflib.Graph, focus_value_nodes: Dict, _evaluation_path: List
     ):
         """
         :type executor: SHACLExecutor

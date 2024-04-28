@@ -24,7 +24,7 @@ from pyshacl.consts import (
 from pyshacl.errors import ReportableRuntimeError, ShapeLoadError
 
 if TYPE_CHECKING:
-    from pyshacl.pytypes import GraphLike, RDFNode
+    from pyshacl.pytypes import RDFNode
     from pyshacl.shapes_graph import ShapesGraph
 
 
@@ -141,7 +141,7 @@ def value_nodes_from_path(sg, focus, path_val, target_graph, recursion=0):
 
 
 def nodes_from_node_expression(
-    expr, focus_node, data_graph: 'GraphLike', sg: 'ShapesGraph', recurse_depth=0
+    expr, focus_node, data_graph: rdflib.Graph, sg: 'ShapesGraph', recurse_depth=0
 ) -> Union[Set[Union['RDFNode', None]], List[Union['RDFNode', None]]]:
     # https://www.w3.org/TR/shacl-af/#node-expressions
     if expr == SH_this:

@@ -12,7 +12,7 @@ from pyshacl.rules.shacl_rule import SHACLRule
 if TYPE_CHECKING:
     from rdflib.term import Node
 
-    from pyshacl.pytypes import GraphLike, SHACLExecutor
+    from pyshacl.pytypes import SHACLExecutor
     from pyshacl.shape import Shape
 
 
@@ -50,7 +50,7 @@ class TripleRule(SHACLRule):
             raise RuntimeError("Too many sh:object")
         self.o = next(iter(my_object_nodes))
 
-    def apply(self, data_graph: 'GraphLike') -> int:
+    def apply(self, data_graph: rdflib.Graph) -> int:
         focus_nodes = self.shape.focus_nodes(data_graph)  # uses target nodes to find focus nodes
         applicable_nodes = self.filter_conditions(focus_nodes, data_graph)
         all_added = 0
