@@ -2,7 +2,6 @@
 """
 https://www.w3.org/TR/shacl/#core-components-shape
 """
-from dataclasses import dataclass
 from textwrap import indent
 from typing import Dict, List
 from warnings import warn
@@ -77,14 +76,13 @@ class PropertyConstraintComponent(ConstraintComponent):
     ):
         """
         Entrypoint for constraint evaluation.
-        :type executor: dataclass
+        :type executor: SHACLExecutor
         :type target_graph: rdflib.Graph
         :type focus_value_nodes: dict
         :type _evaluation_path: list
         """
         reports: List[Dict] = []
         non_conformant = False
-        shape = self.shape
 
         # Shortcut, when there are no value nodes, don't check for recursion, don't validate and exit early
         value_node_count = 0
@@ -178,7 +176,6 @@ class NodeConstraintComponent(ConstraintComponent):
         """
         reports: List[Dict] = []
         non_conformant = False
-        shape = self.shape
 
         # Shortcut, when there are no value nodes, don't check for recursion, don't validate and exit early
         value_node_count = 0
@@ -344,7 +341,6 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
         """
         reports: List[Dict] = []
         non_conformant = False
-        shape = self.shape
 
         # Shortcut, when there are no value nodes, don't check for recursion, don't validate and exit early
         value_node_count = 0
