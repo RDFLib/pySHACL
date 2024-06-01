@@ -466,7 +466,7 @@ def validate(
         else:
             ephemeral = True
     else:
-        ephemeral = True
+        ephemeral = False
 
     # force no owl imports on data_graph
     loaded_dg = load_from_source(
