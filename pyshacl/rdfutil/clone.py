@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 #
-from typing import Optional, Union
+from typing import Optional, Union, overload
 
 import rdflib
 from rdflib.collection import Collection
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID
 from rdflib.namespace import NamespaceManager
 
-from .consts import OWL, RDF_first
+from .consts import OWL, RDF_first, RDFNode
 from .pytypes import ConjunctiveLike, GraphLike
 
 OWLsameAs = OWL.sameAs
@@ -237,6 +237,28 @@ def mix_graphs(base_graph: GraphLike, extra_graph: GraphLike, target_graph: Opti
     return g
 
 
+@overload
+def clone_list(
+    graph: rdflib.Graph,
+    lnode: rdflib.BNode,
+    target_graph: rdflib.Graph,
+    keepid: bool = ...,
+    recursion: int = ...,
+    deep_clone: bool = ...,
+) -> rdflib.BNode: ...
+
+
+@overload
+def clone_list(
+    graph: rdflib.Graph,
+    lnode: rdflib.URIRef,
+    target_graph: rdflib.Graph,
+    keepid: bool = ...,
+    recursion: int = ...,
+    deep_clone: bool = ...,
+) -> rdflib.URIRef: ...
+
+
 def clone_list(graph, lnode, target_graph, keepid=False, recursion=0, deep_clone=False):
     # If deep_clone, copy all the contents (subjects, predicates) of a named member item
     if isinstance(lnode, rdflib.BNode):
@@ -254,7 +276,9 @@ def clone_list(graph, lnode, target_graph, keepid=False, recursion=0, deep_clone
     return cloned_node
 
 
-def clone_blank_node(graph, bnode, target_graph, keepid=False, recursion=0):
+def clone_blank_node(
+    graph: rdflib.Graph, bnode: rdflib.BNode, target_graph: rdflib.Graph, keepid: bool = False, recursion: int = 0
+) -> rdflib.BNode:
     if not isinstance(graph, rdflib.Graph):
         raise RuntimeError("clone_blank_node must take an rdflib.Graph as first parameter")
     if not isinstance(bnode, rdflib.BNode):
@@ -287,7 +311,7 @@ def clone_blank_node(graph, bnode, target_graph, keepid=False, recursion=0):
     return cloned_bnode
 
 
-def clone_literal(graph, node, target_graph):
+def clone_literal(graph: rdflib.Graph, node: rdflib.Literal, target_graph: rdflib.Graph) -> rdflib.Literal:
     lex_val_string = str(node)
     lang = node.language
     datatype = node.datatype
@@ -295,8 +319,11 @@ def clone_literal(graph, node, target_graph):
     return new_literal
 
 
-def clone_node(graph, node, target_graph, recursion=0, deep_clone=False):
+def clone_node(
+    graph: rdflib.Graph, node: RDFNode, target_graph: rdflib.Graph, recursion: int = 0, deep_clone: bool = False
+) -> RDFNode:
     # If deepclone, when the type is URIRef, it clones _all_ node content (properties, objects)
+    new_node: RDFNode
     if isinstance(node, rdflib.Literal):
         new_node = clone_literal(graph, node, target_graph)
     elif isinstance(node, rdflib.BNode):

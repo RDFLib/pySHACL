@@ -8,7 +8,7 @@ import sys
 from io import BufferedIOBase, BytesIO, TextIOBase, UnsupportedOperation
 from logging import WARNING, Logger, getLogger
 from pathlib import Path
-from typing import IO, BinaryIO, List, Optional, Union, cast
+from typing import IO, List, Optional, Union, cast
 from urllib import request
 from urllib.error import HTTPError
 
@@ -113,7 +113,7 @@ def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
 
 
 def load_from_source(
-    source: Union[GraphLike, BufferedIOBase, TextIOBase, BinaryIO, str, bytes],
+    source: Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes],
     g: Optional[GraphLike] = None,
     rdf_format: Optional[str] = None,
     multigraph: bool = False,
@@ -139,7 +139,7 @@ def load_from_source(
     :return:
     """
     source_is_graph = False
-    open_source: Optional[Union[BufferedIOBase, BinaryIO]] = None
+    open_source: Optional[BufferedIOBase] = None
     source_was_open: bool = False
     source_as_file: Optional[BufferedIOBase] = None
     source_as_filename: Optional[str] = None
@@ -316,7 +316,7 @@ def load_from_source(
         filename = str(Path(filename).resolve())
         if not public_id:
             public_id = Path(filename).as_uri() + "#"
-        source = open_source = open(filename, mode='rb')
+        source = open_source = cast(BufferedIOBase, open(filename, mode='rb'))
     if not open_source and source_as_bytes:
         source = open_source = BytesIO(source_as_bytes)  # type: ignore
     if open_source:
