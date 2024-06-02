@@ -263,7 +263,7 @@ You can now run the pySHACL Command Line utility via ``pyshacl.exe``.
 See above for the pySHACL command line util usage instructions.
 
 ## Docker
-Pull out the official docker image from Dockerhub:
+Pull the official docker image from Dockerhub:
 `docker pull docker.io/ashleysommer/pyshacl:latest`
 
 Or build the image yourself, from the PySHACL repository with `docker build . -t pyshacl`.
@@ -275,12 +275,12 @@ docker run --rm -i -t --mount type=bind,src=`pwd`,dst=/data pyshacl -s /data/sha
 ```
 
 ## Compatibility
-PySHACL is a Python3 library. For best compatibility use Python v3.7 or greater. Python3 v3.6 or below is _**not supported**_ and this library _**does not work**_ on Python v2.7.x or below.
+PySHACL is a Python3 library. For best compatibility use Python v3.8 or greater. Python3 v3.7 or below is _**not supported**_ and this library _**does not work**_ on Python v2.7.x or below.
 
-PySHACL is now a PEP518 & PEP517 project, it uses `pyproject.toml` and `poetry` to manage dependencies, build and install.
+PySHACL is a PEP518 & PEP517 project, it uses `pyproject.toml` and `poetry` to manage dependencies, build and install.
 
-For best compatibility when installing from PyPI with `pip`, upgrade to pip v18.1.0 or above.
-  - If you're on Ubuntu 16.04 or 18.04, you will need to run `sudo pip3 install --upgrade pip` to get the newer version.
+For best compatibility when installing from PyPI with `pip`, upgrade to pip v20.0.2 or above.
+  - If you're on Ubuntu 18.04 or older, you will need to run `sudo pip3 install --upgrade pip` to get the newer version.
 
 
 ## Features
