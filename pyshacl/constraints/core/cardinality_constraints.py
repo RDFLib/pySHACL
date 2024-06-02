@@ -2,7 +2,7 @@
 """
 https://www.w3.org/TR/shacl/#core-components-count
 """
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from rdflib.namespace import XSD
 from rdflib.term import Literal
@@ -10,7 +10,7 @@ from rdflib.term import Literal
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError
-from pyshacl.pytypes import GraphLike, SHACLExecutor
+from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 
 XSD_integer = XSD.integer
@@ -32,9 +32,12 @@ class MinCountConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_MinCountConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape, min_count_objects: Optional[List[RDFNode]] = None):
         super(MinCountConstraintComponent, self).__init__(shape)
-        min_count = list(self.shape.objects(SH_minCount))
+        if min_count_objects is None:
+            min_count = list(self.shape.objects(SH_minCount))
+        else:
+            min_count = min_count_objects
         if len(min_count) < 1:
             raise ConstraintLoadError(
                 "MinCountConstraintComponent must have at least one sh:minCount predicate.",
@@ -115,9 +118,13 @@ class MaxCountConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_MaxCountConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape, max_count_objects: Optional[List[RDFNode]] = None):
         super(MaxCountConstraintComponent, self).__init__(shape)
-        max_count = list(self.shape.objects(SH_maxCount))
+        if max_count_objects is None:
+            max_count = list(self.shape.objects(SH_maxCount))
+        else:
+            max_count = max_count_objects
+
         if len(max_count) < 1:
             raise ConstraintLoadError(
                 "MaxCountConstraintComponent must have at least one sh:maxCount predicate.",
