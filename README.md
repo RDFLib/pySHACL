@@ -169,7 +169,6 @@ Some other optional keyword variables available on the `validate` function:
 * `do_owl_imports`: Enable the feature to allow the import of subgraphs using `owl:imports` for the shapes graph and the ontology graph. Note, you explicitly cannot use this on the target data graph.
 * `serialize_report_graph`: Convert the report results_graph into a serialised representation (for example, 'turtle')
 * `check_dash_result`: Check the validation result against the given expected DASH test suite result.
-* `check_sht_result`: Check the validation result against the given expected SHT test suite result.
 
 Return value:
 * a three-component `tuple` containing:

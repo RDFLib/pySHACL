@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #
+import logging
 from collections import defaultdict, OrderedDict
 import platform
 import pytest
@@ -7,6 +8,8 @@ from os import path
 import pyshacl
 from pyshacl.errors import ReportableRuntimeError
 from rdflib.namespace import Namespace, RDF, RDFS
+
+from pyshacl.validator_conformance import check_sht_result
 from test.helpers import load_manifest, flatten_manifests
 
 here_dir = path.abspath(path.dirname(__file__))
@@ -26,6 +29,9 @@ for m in manifests_with_entries:
     tests_found_in_manifests[m.base].extend(tests)
 
 tests_found_in_manifests = OrderedDict(sorted(tests_found_in_manifests.items()))
+test_index_map = [[base, i]
+                  for base,tests in tests_found_in_manifests.items()
+                  for i, t in enumerate(tests)]
 
 # There are some tests we know will fail, but we don't want to stop deployment
 # if we hit them. List them here:
@@ -34,39 +40,45 @@ ALLOWABLE_FAILURES = [
 ]
 
 
-@pytest.mark.parametrize(
-    "base, index",
-    [[base, i]
-     for base,tests in tests_found_in_manifests.items()
-     for i, t in enumerate(tests)]
-)
-def test_sht_all(base, index):
+@pytest.mark.parametrize("base, index", test_index_map)
+def test_sht_all(base, index, caplog) -> None:
+    caplog.set_level(logging.DEBUG)
     tests = tests_found_in_manifests[base]
-    t = tests[index]
+    test = tests[index]
+    run_sht_test(test, {
+        "inference": 'rdfs',
+        "debug": True,
+        "meta_shacl": False
+    })
+
+
+def run_sht_test(sht_test, validate_args: dict) -> None:
+    logger = logging.getLogger()  # pytest uses the root logger with a capturing handler
     if platform.system() == "Windows":
-        test_id = str(t.node).replace("file:///", "")
+        test_id = str(sht_test.node).replace("file:///", "")
     else:
-        test_id = str(t.node).replace("file://", "")
-    label = t.label
-    data_file = t.data_graph
-    shacl_file = t.shapes_graph
-    sht_validate = (t.sht_graph, t.sht_result)
+        test_id = str(sht_test.node).replace("file://", "")
+    label = sht_test.label
+    data_file = sht_test.data_graph
+    shacl_file = sht_test.shapes_graph
     if label:
-        print("testing: ".format(label))
+        logger.info("testing: ".format(label))
     try:
-        val, _, v_text = pyshacl.validate(
-            data_file, shacl_graph=shacl_file, inference='rdfs', check_sht_result=True, sht_validate=sht_validate, debug=True, meta_shacl=False)
+        conforms, r_graph, r_text = pyshacl.validate(
+            data_file, shacl_graph=shacl_file, **validate_args)
     except (NotImplementedError, ReportableRuntimeError) as e:
-        print(e)
-        val = False
-        v_text = ""
-    print(v_text)
+        logger.exception(e)
+        r_text = ""
+        passes = False
+    else:
+        passes = check_sht_result(r_graph, sht_test.sht_graph, sht_test.sht_result, log=logger)
+    logger.info(r_text)
     try:
-        assert val
+        assert passes
     except AssertionError as ae:
         for af in ALLOWABLE_FAILURES:
             if test_id.endswith(af):
-                print("Allowing failure in test: {}".format(test_id))
+                logger.warning("Allowing failure in test: {}".format(test_id))
                 break
         else:
             raise ae
