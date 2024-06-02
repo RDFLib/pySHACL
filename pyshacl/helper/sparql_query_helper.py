@@ -14,16 +14,12 @@ from ..consts import (
     SH,
     OWL_Ontology,
     RDF_type,
-    SH_alternativePath,
-    SH_inversePath,
     SH_namespace,
-    SH_oneOrMorePath,
     SH_prefix,
     SH_prefixes,
-    SH_zeroOrMorePath,
-    SH_zeroOrOnePath,
 )
 from ..errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
+from .path_helper import shacl_path_to_sparql_path
 
 SH_declare = SH.declare
 invalid_parameter_names = {'this', 'shapesGraph', 'currentShape', 'path', 'PATH', 'value'}
@@ -198,78 +194,6 @@ class SPARQLQueryHelper(object):
             prefix_string += "PREFIX {}: <{}>\n".format(str(p), str(ns))
         return "{}\n{}".format(prefix_string, sparql)
 
-    def _shacl_path_to_sparql_path(self, path_val, recursion=0):
-        """
-
-        :param path_val:
-        :type path_val: rdflib.term.Node
-        :param recursion:
-        :type recursion: int
-        :returns: string
-        :rtype: str
-        """
-        sg = self.shape.sg
-        # Link: https://www.w3.org/TR/shacl/#property-paths
-        if isinstance(path_val, rdflib.URIRef):
-            string_uri = str(path_val)
-            for p, ns in self.prefixes.items():
-                if string_uri.startswith(ns):
-                    string_uri = ':'.join([p, string_uri.replace(ns, '')])
-                    return string_uri
-            return "<{}>".format(string_uri)
-        elif isinstance(path_val, rdflib.Literal):
-            raise ReportableRuntimeError("Values of a property path cannot be a Literal.")
-        # At this point, path_val _must_ be a BNode
-        # TODO, the path_val BNode must be value of exactly one sh:path subject in the SG.
-        if recursion >= 10:
-            raise ReportableRuntimeError("Path traversal depth is too much!")
-        sequence_list = list(sg.graph.items(path_val))
-        if len(sequence_list) > 0:
-            all_collected = []
-            for s in sequence_list:
-                seq1_string = self._shacl_path_to_sparql_path(s, recursion=recursion + 1)
-                all_collected.append(seq1_string)
-            if len(all_collected) < 2:
-                raise ReportableRuntimeError("List of SHACL sequence paths must have alt least two path items.")
-            return "/".join(all_collected)
-
-        find_inverse = set(sg.objects(path_val, SH_inversePath))
-        if len(find_inverse) > 0:
-            inverse_path = next(iter(find_inverse))
-            inverse_path_string = self._shacl_path_to_sparql_path(inverse_path, recursion=recursion + 1)
-            return "^{}".format(inverse_path_string)
-
-        find_alternatives = set(sg.objects(path_val, SH_alternativePath))
-        if len(find_alternatives) > 0:
-            alternatives_list = next(iter(find_alternatives))
-            all_collected = []
-            for a in sg.graph.items(alternatives_list):
-                alt1_string = self._shacl_path_to_sparql_path(a, recursion=recursion + 1)
-                all_collected.append(alt1_string)
-            if len(all_collected) < 2:
-                raise ReportableRuntimeError("List of SHACL alternate paths must have alt least two path items.")
-            return "|".join(all_collected)
-
-        find_zero_or_more = set(sg.objects(path_val, SH_zeroOrMorePath))
-        if len(find_zero_or_more) > 0:
-            zero_or_more_path = next(iter(find_zero_or_more))
-            zom_path_string = self._shacl_path_to_sparql_path(zero_or_more_path, recursion=recursion + 1)
-            return "{}*".format(zom_path_string)
-
-        find_zero_or_one = set(sg.objects(path_val, SH_zeroOrOnePath))
-        if len(find_zero_or_one) > 0:
-            zero_or_one_path = next(iter(find_zero_or_one))
-            zoo_path_string = self._shacl_path_to_sparql_path(zero_or_one_path, recursion=recursion + 1)
-            return "{}?".format(zoo_path_string)
-
-        find_one_or_more = set(sg.objects(path_val, SH_oneOrMorePath))
-        if len(find_one_or_more) > 0:
-            one_or_more_path = next(iter(find_one_or_more))
-            oom_path_string = self._shacl_path_to_sparql_path(one_or_more_path, recursion=recursion + 1)
-            return "{}+".format(oom_path_string)
-
-        raise NotImplementedError("That path method to get value nodes of property shapes is not yet implemented.")
-
     @classmethod
     def _node_to_sparql_text(cls, node):
         if isinstance(node, rdflib.Literal):
@@ -362,7 +286,7 @@ class SPARQLQueryHelper(object):
             init_bindings['currentShape'] = self.shape.node
         path = self.shape.path()
         if path:
-            path_string = self._shacl_path_to_sparql_path(path)
+            path_string = shacl_path_to_sparql_path(self.shape.sg, path, prefixes=self.prefixes)
             new_query_text = self.bind_path_regex.sub(r"\g<1>{}".format(path_string), new_query_text)
         else:
             found_path = self.bind_path_regex.search(new_query_text)
