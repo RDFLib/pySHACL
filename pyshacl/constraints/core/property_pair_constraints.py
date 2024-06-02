@@ -9,6 +9,7 @@ import rdflib
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
+from pyshacl.helper.path_helper import shacl_path_to_sparql_path
 from pyshacl.pytypes import GraphLike, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 
@@ -79,12 +80,57 @@ class EqualsConstraintComponent(ConstraintComponent):
         non_conformant = False
 
         for eq in iter(self.property_compare_set):
-            _nc, _r = self._evaluate_property_equals(eq, target_graph, focus_value_nodes)
+            if executor.sparql_mode:
+                _nc, _r = self._evaluate_property_equals_sparql(eq, target_graph, focus_value_nodes)
+            else:
+                _nc, _r = self._evaluate_property_equals_rdflib(eq, target_graph, focus_value_nodes)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
 
-    def _evaluate_property_equals(self, eq, target_graph, f_v_dict):
+    def _evaluate_property_equals_sparql(self, eq, target_graph, f_v_dict):
+        reports = []
+        non_conformant = False
+        prefixes = dict(target_graph.namespaces())
+        eq_path = shacl_path_to_sparql_path(self.shape.sg, eq, prefixes=prefixes)
+        eq_lookup_query = f"SELECT DISTINCT {' '.join(f'?v{i}' for i,_ in enumerate(f_v_dict))} WHERE {{\n"
+        init_bindings = {}
+        f_eq_results = {}
+        for i, f in enumerate(f_v_dict.keys()):
+            eq_lookup_query += f"OPTIONAL {{ $f{i} {eq_path} ?v{i} . }}\n"
+            init_bindings[f"f{i}"] = f
+            f_eq_results[f] = set()
+        eq_lookup_query += "}"
+        try:
+            results = target_graph.query(eq_lookup_query, initBindings=init_bindings)
+        except Exception as e:
+            print(e)
+            raise
+        if len(results) > 0:
+            for r in results:
+                for i, f in enumerate(f_v_dict.keys()):
+                    val_i = r[i]
+                    if val_i is None or val_i == "UNDEF":
+                        continue
+                    f_eq_results[f].add(val_i)
+        for i, f in enumerate(f_v_dict.keys()):
+            value_node_set = set(f_v_dict[f])
+            compare_values = f_eq_results[f]
+            value_nodes_missing = value_node_set.difference(compare_values)
+            compare_values_missing = compare_values.difference(value_node_set)
+            if len(value_nodes_missing) > 0 or len(compare_values_missing) > 0:
+                non_conformant = True
+            else:
+                continue
+            for value_node in value_nodes_missing:
+                rept = self.make_v_result(target_graph, f, value_node=value_node)
+                reports.append(rept)
+            for compare_value in compare_values_missing:
+                rept = self.make_v_result(target_graph, f, value_node=compare_value)
+                reports.append(rept)
+        return non_conformant, reports
+
+    def _evaluate_property_equals_rdflib(self, eq, target_graph, f_v_dict):
         reports = []
         non_conformant = False
         for f, value_nodes in f_v_dict.items():
@@ -161,12 +207,53 @@ class DisjointConstraintComponent(ConstraintComponent):
         non_conformant = False
 
         for dj in iter(self.property_compare_set):
-            _nc, _r = self._evaluate_property_disjoint(dj, target_graph, focus_value_nodes)
+            if executor.sparql_mode:
+                _nc, _r = self._evaluate_property_disjoint_sparql(dj, target_graph, focus_value_nodes)
+            else:
+                _nc, _r = self._evaluate_property_disjoint_rdflib(dj, target_graph, focus_value_nodes)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
 
-    def _evaluate_property_disjoint(self, dj, target_graph, f_v_dict):
+    def _evaluate_property_disjoint_sparql(self, dj, target_graph, f_v_dict):
+        reports = []
+        non_conformant = False
+        prefixes = dict(target_graph.namespaces())
+        dj_path = shacl_path_to_sparql_path(self.shape.sg, dj, prefixes=prefixes)
+        dj_lookup_query = f"SELECT DISTINCT {' '.join(f'?v{i}' for i,_ in enumerate(f_v_dict))} WHERE {{\n"
+        init_bindings = {}
+        f_dj_results = {}
+        for i, f in enumerate(f_v_dict.keys()):
+            dj_lookup_query += f"OPTIONAL {{ $f{i} {dj_path} ?v{i} . }}\n"
+            init_bindings[f"f{i}"] = f
+            f_dj_results[f] = set()
+        dj_lookup_query += "}"
+        try:
+            results = target_graph.query(dj_lookup_query, initBindings=init_bindings)
+        except Exception as e:
+            print(e)
+            raise
+        if len(results) > 0:
+            for r in results:
+                for i, f in enumerate(f_v_dict.keys()):
+                    val_i = r[i]
+                    if val_i is None or val_i == "UNDEF":
+                        continue
+                    f_dj_results[f].add(val_i)
+        for i, f in enumerate(f_v_dict.keys()):
+            value_node_set = set(f_v_dict[f])
+            compare_values = f_dj_results[f]
+            common_nodes = value_node_set.intersection(compare_values)
+            if len(common_nodes) > 0:
+                non_conformant = True
+            else:
+                continue
+            for common_node in common_nodes:
+                rept = self.make_v_result(target_graph, f, value_node=common_node)
+                reports.append(rept)
+        return non_conformant, reports
+
+    def _evaluate_property_disjoint_rdflib(self, dj, target_graph, f_v_dict):
         reports = []
         non_conformant = False
         for f, value_nodes in f_v_dict.items():
@@ -247,48 +334,91 @@ class LessThanConstraintComponent(ConstraintComponent):
         for lt in iter(self.property_compare_set):
             if isinstance(lt, rdflib.Literal) or isinstance(lt, rdflib.BNode):
                 raise ReportableRuntimeError("Value of sh:lessThan MUST be a URI Identifier.")
-            _nc, _r = self._evaluate_less_than(lt, target_graph, focus_value_nodes)
+            if executor.sparql_mode:
+                _nc, _r = self._evaluate_less_than_sparql(lt, target_graph, focus_value_nodes)
+            else:
+                _nc, _r = self._evaluate_less_than_rdflib(lt, target_graph, focus_value_nodes)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
 
-    def _evaluate_less_than(self, lt, target_graph, f_v_dict):
+    def _compare_lt(self, value_node_set, compare_values, datagraph, f):
+        non_conformant = False
+        reports = []
+        for value_node in iter(value_node_set):
+            if isinstance(value_node, rdflib.BNode):
+                raise ReportableRuntimeError("Cannot use sh:lessThan to compare a BlankNode.")
+            value_is_string = False
+            orig_value_node = value_node
+            if isinstance(value_node, rdflib.URIRef):
+                value_node = str(value_node)
+                value_is_string = True
+            elif isinstance(value_node, rdflib.Literal) and isinstance(value_node.value, str):
+                value_node = value_node.value
+                value_is_string = True
+
+            for compare_value in compare_values:
+                if isinstance(compare_value, rdflib.BNode):
+                    raise ReportableRuntimeError("Cannot use sh:lessThan to compare a BlankNode.")
+                compare_is_string = False
+                if isinstance(compare_value, rdflib.URIRef):
+                    compare_value = str(compare_value)
+                    compare_is_string = True
+                elif isinstance(compare_value, rdflib.Literal) and isinstance(compare_value.value, str):
+                    compare_value = compare_value.value
+                    compare_is_string = True
+                if (value_is_string and not compare_is_string) or (compare_is_string and not value_is_string):
+                    non_conformant = True
+                elif not value_node < compare_value:
+                    non_conformant = True
+                else:
+                    continue
+                rept = self.make_v_result(datagraph, f, value_node=orig_value_node)
+                reports.append(rept)
+        return non_conformant, reports
+
+    def _evaluate_less_than_sparql(self, lt, target_graph, f_v_dict):
+        reports = []
+        non_conformant = False
+        prefixes = dict(target_graph.namespaces())
+        lt_path = shacl_path_to_sparql_path(self.shape.sg, lt, prefixes=prefixes)
+        lt_lookup_query = f"SELECT DISTINCT {' '.join(f'?v{i}' for i,_ in enumerate(f_v_dict))} WHERE {{\n"
+        init_bindings = {}
+        f_lt_results = {}
+        for i, f in enumerate(f_v_dict.keys()):
+            lt_lookup_query += f"OPTIONAL {{ $f{i} {lt_path} ?v{i} . }}\n"
+            init_bindings[f"f{i}"] = f
+            f_lt_results[f] = set()
+        lt_lookup_query += "}"
+        try:
+            results = target_graph.query(lt_lookup_query, initBindings=init_bindings)
+        except Exception as e:
+            print(e)
+            raise
+        if len(results) > 0:
+            for r in results:
+                for i, f in enumerate(f_v_dict.keys()):
+                    val_i = r[i]
+                    if val_i is None or val_i == "UNDEF":
+                        continue
+                    f_lt_results[f].add(val_i)
+        for i, f in enumerate(f_v_dict.keys()):
+            value_node_set = set(f_v_dict[f])
+            compare_values = f_lt_results[f]
+            _nc, _r = self._compare_lt(value_node_set, compare_values, target_graph, f)
+            non_conformant = non_conformant or _nc
+            reports.extend(_r)
+        return non_conformant, reports
+
+    def _evaluate_less_than_rdflib(self, lt, target_graph, f_v_dict):
         reports = []
         non_conformant = False
         for f, value_nodes in f_v_dict.items():
             value_node_set = set(value_nodes)
             compare_values = set(target_graph.objects(f, lt))
-
-            for value_node in iter(value_node_set):
-                if isinstance(value_node, rdflib.BNode):
-                    raise ReportableRuntimeError("Cannot use sh:lessThan to compare a BlankNode.")
-                value_is_string = False
-                orig_value_node = value_node
-                if isinstance(value_node, rdflib.URIRef):
-                    value_node = str(value_node)
-                    value_is_string = True
-                elif isinstance(value_node, rdflib.Literal) and isinstance(value_node.value, str):
-                    value_node = value_node.value
-                    value_is_string = True
-
-                for compare_value in compare_values:
-                    if isinstance(compare_value, rdflib.BNode):
-                        raise ReportableRuntimeError("Cannot use sh:lessThan to compare a BlankNode.")
-                    compare_is_string = False
-                    if isinstance(compare_value, rdflib.URIRef):
-                        compare_value = str(compare_value)
-                        compare_is_string = True
-                    elif isinstance(compare_value, rdflib.Literal) and isinstance(compare_value.value, str):
-                        compare_value = compare_value.value
-                        compare_is_string = True
-                    if (value_is_string and not compare_is_string) or (compare_is_string and not value_is_string):
-                        non_conformant = True
-                    elif not value_node < compare_value:
-                        non_conformant = True
-                    else:
-                        continue
-                    rept = self.make_v_result(target_graph, f, value_node=orig_value_node)
-                    reports.append(rept)
+            _nc, _r = self._compare_lt(value_node_set, compare_values, target_graph, f)
+            non_conformant = non_conformant or _nc
+            reports.extend(_r)
         return non_conformant, reports
 
 
@@ -355,46 +485,89 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
         for lt in iter(self.property_compare_set):
             if isinstance(lt, rdflib.Literal) or isinstance(lt, rdflib.BNode):
                 raise ReportableRuntimeError("Value of sh:lessThanOrEquals MUST be a URI Identifier.")
-            _nc, _r = self._evaluate_ltoe(lt, target_graph, focus_value_nodes)
+            if executor.sparql_mode:
+                _nc, _r = self._evaluate_ltoe_sparql(lt, target_graph, focus_value_nodes)
+            else:
+                _nc, _r = self._evaluate_ltoe_rdflib(lt, target_graph, focus_value_nodes)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
 
-    def _evaluate_ltoe(self, lt, target_graph, f_v_dict):
+    def _compare_ltoe(self, value_node_set, compare_values, datagraph, f):
+        non_conformant = False
+        reports = []
+        for value_node in iter(value_node_set):
+            if isinstance(value_node, rdflib.BNode):
+                raise ReportableRuntimeError("Cannot use sh:lessThanOrEquals to compare a BlankNode.")
+            value_is_string = False
+            orig_value_node = value_node
+            if isinstance(value_node, rdflib.URIRef):
+                value_node = str(value_node)
+                value_is_string = True
+            elif isinstance(value_node, rdflib.Literal) and isinstance(value_node.value, str):
+                value_node = value_node.value
+                value_is_string = True
+
+            for compare_value in compare_values:
+                if isinstance(compare_value, rdflib.BNode):
+                    raise ReportableRuntimeError("Cannot use sh:lessThanOrEquals to compare a BlankNode.")
+                compare_is_string = False
+                if isinstance(compare_value, rdflib.URIRef):
+                    compare_value = str(compare_value)
+                    compare_is_string = True
+                elif isinstance(compare_value, rdflib.Literal) and isinstance(compare_value.value, str):
+                    compare_value = compare_value.value
+                    compare_is_string = True
+                if (value_is_string and not compare_is_string) or (compare_is_string and not value_is_string):
+                    non_conformant = True
+                elif not value_node <= compare_value:
+                    non_conformant = True
+                else:
+                    continue
+                rept = self.make_v_result(datagraph, f, value_node=orig_value_node)
+                reports.append(rept)
+        return non_conformant, reports
+
+    def _evaluate_ltoe_sparql(self, ltoe, target_graph, f_v_dict):
+        reports = []
+        non_conformant = False
+        prefixes = dict(target_graph.namespaces())
+        ltoe_path = shacl_path_to_sparql_path(self.shape.sg, ltoe, prefixes=prefixes)
+        ltoe_lookup_query = f"SELECT DISTINCT {' '.join(f'?v{i}' for i,_ in enumerate(f_v_dict))} WHERE {{\n"
+        init_bindings = {}
+        f_ltoe_results = {}
+        for i, f in enumerate(f_v_dict.keys()):
+            ltoe_lookup_query += f"OPTIONAL {{ $f{i} {ltoe_path} ?v{i} . }}\n"
+            init_bindings[f"f{i}"] = f
+            f_ltoe_results[f] = set()
+        ltoe_lookup_query += "}"
+        try:
+            results = target_graph.query(ltoe_lookup_query, initBindings=init_bindings)
+        except Exception as e:
+            print(e)
+            raise
+        if len(results) > 0:
+            for r in results:
+                for i, f in enumerate(f_v_dict.keys()):
+                    val_i = r[i]
+                    if val_i is None or val_i == "UNDEF":
+                        continue
+                    f_ltoe_results[f].add(val_i)
+        for i, f in enumerate(f_v_dict.keys()):
+            value_node_set = set(f_v_dict[f])
+            compare_values = f_ltoe_results[f]
+            _nc, _r = self._compare_ltoe(value_node_set, compare_values, target_graph, f)
+            non_conformant = non_conformant or _nc
+            reports.extend(_r)
+        return non_conformant, reports
+
+    def _evaluate_ltoe_rdflib(self, ltoe, target_graph, f_v_dict):
         reports = []
         non_conformant = False
         for f, value_nodes in f_v_dict.items():
             value_node_set = set(value_nodes)
-            compare_values = set(target_graph.objects(f, lt))
-
-            for value_node in iter(value_node_set):
-                if isinstance(value_node, rdflib.BNode):
-                    raise ReportableRuntimeError("Cannot use sh:lessThanOrEquals to compare a BlankNode.")
-                value_is_string = False
-                orig_value_node = value_node
-                if isinstance(value_node, rdflib.URIRef):
-                    value_node = str(value_node)
-                    value_is_string = True
-                elif isinstance(value_node, rdflib.Literal) and isinstance(value_node.value, str):
-                    value_node = value_node.value
-                    value_is_string = True
-
-                for compare_value in compare_values:
-                    if isinstance(compare_value, rdflib.BNode):
-                        raise ReportableRuntimeError("Cannot use sh:lessThanOrEquals to compare a BlankNode.")
-                    compare_is_string = False
-                    if isinstance(compare_value, rdflib.URIRef):
-                        compare_value = str(compare_value)
-                        compare_is_string = True
-                    elif isinstance(compare_value, rdflib.Literal) and isinstance(compare_value.value, str):
-                        compare_value = compare_value.value
-                        compare_is_string = True
-                    if (value_is_string and not compare_is_string) or (compare_is_string and not value_is_string):
-                        non_conformant = True
-                    elif not value_node <= compare_value:
-                        non_conformant = True
-                    else:
-                        continue
-                    rept = self.make_v_result(target_graph, f, value_node=orig_value_node)
-                    reports.append(rept)
+            compare_values = set(target_graph.objects(f, ltoe))
+            _nc, _r = self._compare_ltoe(value_node_set, compare_values, target_graph, f)
+            non_conformant = non_conformant or _nc
+            reports.extend(_r)
         return non_conformant, reports

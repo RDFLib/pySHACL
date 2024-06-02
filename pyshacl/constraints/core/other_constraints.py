@@ -174,21 +174,86 @@ class ClosedConstraintComponent(ConstraintComponent):
             if p:
                 working_paths.add(p)
 
-        for f, value_nodes in focus_value_nodes.items():
-            for v in value_nodes:
-                pred_obs = target_graph.predicate_objects(v)
-                for p, o in pred_obs:
-                    if (p, o) in self.ALWAYS_IGNORE:
-                        continue
-                    elif p in self.ignored_props:
-                        continue
-                    elif p in working_paths:
-                        continue
-                    non_conformant = True
-                    o_node = cast(RDFNode, o)
-                    p_node = cast(RDFNode, p)
-                    rept = self.make_v_result(target_graph, f, value_node=o_node, result_path=p_node)
-                    reports.append(rept)
+        if executor.sparql_mode:
+            select_vars_string = ""
+            filter_props_list = []
+            bgp_list = []
+            init_bindings = {}
+            if len(self.ignored_props) > 0:
+                filter_template = "("
+                if len(self.ignored_props) == 1:
+                    filter_template += f"{{P}} != {next(iter(self.ignored_props)).n3()}"
+                else:
+                    this_filter_parts = []
+                    for ig in self.ignored_props:
+                        this_filter_parts.append(f"({{P}} != {ig.n3()})")
+                    filter_template += " && ".join(this_filter_parts)
+                filter_template += ")"
+            else:
+                filter_template = ""
+            for i, f in enumerate(focus_value_nodes.keys()):
+                for j, v in enumerate(focus_value_nodes[f]):
+                    select_vars_string += f"?p{i}_{j} ?o{i}_{j} "
+                    bgp_line = f"OPTIONAL {{ $v{i}_{j} ?p{i}_{j} ?o{i}_{j} . }}"
+                    bgp_list.append(bgp_line)
+                    if filter_template:
+                        filter_props_line = filter_template.replace("{P}", f"?p{i}_{j}")
+                        filter_props_list.append(filter_props_line)
+                    init_bindings[f"v{i}_{j}"] = v
+            bgp_string = "\n".join(bgp_list)
+            if len(filter_props_list) > 1:
+                filter_props_string = "FILTER (" + " && ".join(filter_props_list) + ")"
+            elif len(filter_props_list) == 1:
+                filter_props_string = "FILTER " + filter_props_list[0]
+            else:
+                filter_props_string = ""
+            closed_query = f"SELECT DISTINCT {select_vars_string} {{\n\t{bgp_string}\n\t{filter_props_string}\n}}"
+            try:
+                results = target_graph.query(closed_query, initBindings=init_bindings)
+            except Exception as e:
+                print(e)
+                raise
+            found_fvpo = []
+            if len(results) > 0:
+                for r in results:
+                    for i, f in enumerate(focus_value_nodes.keys()):
+                        for j, v in enumerate(focus_value_nodes[f]):
+                            p = r[f"p{i}_{j}"]
+                            o = r[f"o{i}_{j}"]
+                            if p is None or o is None or p == "UNDEF" or o == "UNDEF":
+                                continue
+                            fvpo = (f, v, p, o)
+                            if fvpo in found_fvpo:
+                                continue
+                            found_fvpo.append(fvpo)
+                            # TODO: remove code duplication
+                            if (p, o) in self.ALWAYS_IGNORE:
+                                continue
+                            elif p in self.ignored_props:
+                                continue
+                            elif p in working_paths:
+                                continue
+                            non_conformant = True
+                            o_node = cast(RDFNode, o)
+                            p_node = cast(RDFNode, p)
+                            rept = self.make_v_result(target_graph, f, value_node=o_node, result_path=p_node)
+                            reports.append(rept)
+        else:
+            for f, value_nodes in focus_value_nodes.items():
+                for v in value_nodes:
+                    pred_obs = target_graph.predicate_objects(v)
+                    for p, o in pred_obs:
+                        if (p, o) in self.ALWAYS_IGNORE:
+                            continue
+                        elif p in self.ignored_props:
+                            continue
+                        elif p in working_paths:
+                            continue
+                        non_conformant = True
+                        o_node = cast(RDFNode, o)
+                        p_node = cast(RDFNode, p)
+                        rept = self.make_v_result(target_graph, f, value_node=o_node, result_path=p_node)
+                        reports.append(rept)
         return (not non_conformant), reports
 
 

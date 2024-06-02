@@ -15,9 +15,11 @@ RDFNode = Union[IdentifiedNode, Literal]
 @dataclass
 class SHACLExecutor:
     validator: Optional[object] = None
+    advanced_mode: bool = False
     abort_on_first: bool = False
     allow_infos: bool = False
     allow_warnings: bool = False
     iterate_rules: bool = False
     debug: bool = False
+    sparql_mode: bool = False
     max_validation_depth: int = 15

@@ -52,6 +52,18 @@ def test_sht_all(base, index, caplog) -> None:
     })
 
 
+@pytest.mark.parametrize("base, index", test_index_map)
+def test_sht_all_sparql_mode(base, index, caplog) -> None:
+    caplog.set_level(logging.DEBUG)
+    tests = tests_found_in_manifests[base]
+    test = tests[index]
+    run_sht_test(test, {
+        "inference": 'none',
+        "debug": True,
+        "sparql_mode": True,
+        "meta_shacl": False
+    })
+
 def run_sht_test(sht_test, validate_args: dict) -> None:
     logger = logging.getLogger()  # pytest uses the root logger with a capturing handler
     if platform.system() == "Windows":
@@ -61,6 +73,10 @@ def run_sht_test(sht_test, validate_args: dict) -> None:
     label = sht_test.label
     data_file = sht_test.data_graph
     shacl_file = sht_test.shapes_graph
+    sparql_mode = validate_args.get('sparql_mode', False)
+    if sparql_mode and shacl_file is None:
+        # shacl_file cannot be None in SPARQL Remote Graph Mode
+        shacl_file = data_file
     if label:
         logger.info("testing: ".format(label))
     try:
