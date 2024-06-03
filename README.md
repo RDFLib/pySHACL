@@ -186,15 +186,15 @@ $ python3 -m pyshacl
 ```
 
 ## Errors
-Under certain circumstances pySHACL can produce a `Validation Failure`. This is a formal error defined by the SHACL specification and is required to be produced as a result of specific conditions within the SHACL graph.
-If the validator produces a `Validation Failure`, the `results_graph` variable returned by the `validate()` function will be an instance of `ValidationFailure`.
+Under certain circumstances pySHACL can produce a [`Validation Failure`](https://www.w3.org/TR/shacl/#failures). This is a formal error [defined by the SHACL specification](https://www.w3.org/TR/shacl/#failures) and is required to be produced as a result of specific conditions within the SHACL graph that leads to the inability to complete the validation.
+If the validator produces a [`Validation Failure`](https://www.w3.org/TR/shacl/#failures), the `results_graph` variable returned by the `validate()` function will be an instance of `ValidationFailure`.
 See the `message` attribute on that instance to get more information about the validation failure.
 
 Other errors the validator can generate:
 - `ShapeLoadError`: This error is thrown when a SHACL Shape in the SHACL graph is in an invalid state and cannot be loaded into the validation engine.
 - `ConstraintLoadError`: This error is thrown when a SHACL Constraint Component is in an invalid state and cannot be loaded into the validation engine.
 - `ReportableRuntimeError`: An error occurred for a different reason, and the reason should be communicated back to the user of the validator.
-- `RuntimeError`: The validator encountered a situation that caused it to throw an error, but the reason does concern the user.
+- `RuntimeError`: The validator encountered a situation that caused it to throw an error, but the reason does not concern the user.
 
 Unlike `ValidationFailure`, these errors are not passed back as a result by the `validate()` function, but thrown as exceptions by the validation engine and must be
 caught in a `try ... except` block.
