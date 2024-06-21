@@ -220,7 +220,7 @@ def main(prog: Union[str, None] = None) -> None:
         http_main()
     if not args.data:
         # No datafile give, and not starting in server mode.
-        sys.stderr.write('Validation Error. No DataGraph file or endpoint supplied.\n')
+        sys.stderr.write('Input Error. No DataGraph file or endpoint supplied.\n')
         parser.print_usage(sys.stderr)
         sys.exit(1)
     validator_kwargs = {'debug': args.debug}
@@ -228,7 +228,7 @@ def main(prog: Union[str, None] = None) -> None:
     if args.sparql_mode is not None and args.sparql_mode is True:
         endpoint = str(args.data).strip()
         if not endpoint.lower().startswith("http:") and not endpoint.lower().startswith("https:"):
-            sys.stderr.write("Validation Error. SPARQL Endpoint must start with http:// or https://.\n")
+            sys.stderr.write("Input Error. SPARQL Endpoint must start with http:// or https://.\n")
             sys.exit(1)
         data_graph = endpoint
         validator_kwargs['sparql_mode'] = True
@@ -236,10 +236,10 @@ def main(prog: Union[str, None] = None) -> None:
         try:
             data_file = open(args.data, 'rb')
         except FileNotFoundError:
-            sys.stderr.write('Validation Error. DataGraph file not found.\n')
+            sys.stderr.write('Input Error. DataGraph file not found.\n')
             sys.exit(1)
         except PermissionError:
-            sys.stderr.write('Validation Error. DataGraph file not readable.\n')
+            sys.stderr.write('Input Error. DataGraph file not readable.\n')
             sys.exit(1)
         else:
             data_graph = data_file
