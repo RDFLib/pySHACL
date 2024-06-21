@@ -7,8 +7,6 @@ import sys
 from typing import Union
 
 from prettytable import PrettyTable
-from rdflib import Graph
-from rdflib.namespace import SH
 
 from pyshacl import __version__, validate
 from pyshacl.errors import (
@@ -42,8 +40,7 @@ parser = argparse.ArgumentParser(description='PySHACL {} Validator command line 
 parser.add_argument(
     'data',
     metavar='DataGraph',
-    type=argparse.FileType('rb'),
-    help='The file containing the Target Data Graph.',
+    help='The file or endpoint containing the Target Data Graph.',
     default=None,
     nargs='?',
 )
@@ -81,6 +78,14 @@ parser.add_argument(
     action='store_true',
     default=False,
     help='Validate the SHACL Shapes graph against the shacl-shacl Shapes Graph before validating the Data Graph.',
+)
+parser.add_argument(
+    '-q',
+    '--sparql-mode',
+    dest='sparql_mode',
+    action='store_true',
+    default=False,
+    help='Treat the DataGraph as a SPARQL endpoint, validate the graph at the SPARQL endpoint.',
 )
 parser.add_argument(
     '-im',
@@ -211,13 +216,33 @@ def main(prog: Union[str, None] = None) -> None:
     if str_is_true(do_server) or args.server:
         from pyshacl.sh_http import main as http_main
 
+        # http_main calls sys.exit(0) and never returns
         http_main()
-    elif not args.data:
+    if not args.data:
         # No datafile give, and not starting in server mode.
-        sys.stderr.write('Validation Error. No DataGraph file supplied.\n')
+        sys.stderr.write('Input Error. No DataGraph file or endpoint supplied.\n')
         parser.print_usage(sys.stderr)
         sys.exit(1)
     validator_kwargs = {'debug': args.debug}
+    data_file = None
+    if args.sparql_mode is not None and args.sparql_mode is True:
+        endpoint = str(args.data).strip()
+        if not endpoint.lower().startswith("http:") and not endpoint.lower().startswith("https:"):
+            sys.stderr.write("Input Error. SPARQL Endpoint must start with http:// or https://.\n")
+            sys.exit(1)
+        data_graph = endpoint
+        validator_kwargs['sparql_mode'] = True
+    else:
+        try:
+            data_file = open(args.data, 'rb')
+        except FileNotFoundError:
+            sys.stderr.write('Input Error. DataGraph file not found.\n')
+            sys.exit(1)
+        except PermissionError:
+            sys.stderr.write('Input Error. DataGraph file not readable.\n')
+            sys.exit(1)
+        else:
+            data_graph = data_file
     if args.shacl is not None:
         validator_kwargs['shacl_graph'] = args.shacl
     if args.ont is not None:
@@ -257,37 +282,38 @@ def main(prog: Union[str, None] = None) -> None:
         _f = args.data_file_format
         if _f != "auto":
             validator_kwargs['data_graph_format'] = _f
+    exit_code: Union[int, None] = None
     try:
-        is_conform, v_graph, v_text = validate(args.data, **validator_kwargs)
+        is_conform, v_graph, v_text = validate(data_graph, **validator_kwargs)
         if isinstance(v_graph, BaseException):
             raise v_graph
     except ValidationFailure as vf:
         args.output.write("Validator generated a Validation Failure result:\n")
         args.output.write(str(vf.message))
         args.output.write("\n")
-        sys.exit(1)
+        exit_code = 1
     except ShapeLoadError as sle:
         sys.stderr.write("Validator encountered a Shape Load Error:\n")
         sys.stderr.write(str(sle))
-        sys.exit(2)
+        exit_code = 2
     except ConstraintLoadError as cle:
         sys.stderr.write("Validator encountered a Constraint Load Error:\n")
         sys.stderr.write(str(cle))
-        sys.exit(2)
+        exit_code = 2
     except RuleLoadError as rle:
         sys.stderr.write("Validator encountered a Rule Load Error:\n")
         sys.stderr.write(str(rle))
-        sys.exit(2)
+        exit_code = 2
     except ReportableRuntimeError as rre:
         sys.stderr.write("Validator encountered a Runtime Error:\n")
         sys.stderr.write(str(rre.message))
         sys.stderr.write("\nIf you believe this is a bug in pyshacl, open an Issue on the pyshacl github page.\n")
-        sys.exit(2)
+        exit_code = 2
     except NotImplementedError as nie:
         sys.stderr.write("Validator feature is not implemented:\n")
         sys.stderr.write(str(nie.args[0]))
         sys.stderr.write("\nIf your use-case requires this feature, open an Issue on the pyshacl github page.\n")
-        sys.exit(3)
+        exit_code = 3
     except RuntimeError as re:
         import traceback
 
@@ -295,8 +321,16 @@ def main(prog: Union[str, None] = None) -> None:
         sys.stderr.write(
             "\n\nValidator encountered a Runtime Error. Please report this to the PySHACL issue tracker.\n"
         )
-        sys.exit(2)
-
+        exit_code = 2
+    finally:
+        if data_file is not None:
+            try:
+                data_file.close()
+            except Exception as e:
+                sys.stderr.write("Error closing data file:\n")
+                sys.stderr.write(str(e))
+        if exit_code is not None:
+            sys.exit(exit_code)
     if args.format == 'human':
         args.output.write(v_text)
     elif args.format == 'table':
@@ -317,6 +351,9 @@ def main(prog: Union[str, None] = None) -> None:
             return '\n'.join(s2)
 
         if not is_conform:
+            from rdflib import Graph
+            from rdflib.namespace import SH
+
             t2 = PrettyTable()
             t2.field_names = ['No.', 'Severity', 'Focus Node', 'Result Path', 'Message', 'Component', 'Shape', 'Value']
             t2.align = "l"

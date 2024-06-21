@@ -96,13 +96,40 @@ class ClassConstraintComponent(ConstraintComponent):
         """
         reports = []
         non_conformant = False
-        for c in self.class_rules:
-            _n, _r = self._evaluate_class_rules(target_graph, focus_value_nodes, c)
-            non_conformant = non_conformant or _n
-            reports.extend(_r)
+        if executor.sparql_mode:
+            for c in self.class_rules:
+                _n, _r = self._evaluate_class_rules_sparql(target_graph, focus_value_nodes, c)
+                non_conformant = non_conformant or _n
+                reports.extend(_r)
+        else:
+            for c in self.class_rules:
+                _n, _r = self._evaluate_class_rules_rdflib(target_graph, focus_value_nodes, c)
+                non_conformant = non_conformant or _n
+                reports.extend(_r)
         return (not non_conformant), reports
 
-    def _evaluate_class_rules(self, target_graph, f_v_dict, class_rule):
+    def _evaluate_class_rules_sparql(self, target_graph, f_v_dict, class_rule):
+        reports = []
+        non_conformant = False
+        sparql_ask = """ASK {$value rdf:type/rdfs:subClassOf* $class .}"""
+        for f, value_nodes in f_v_dict.items():
+            for v in value_nodes:
+                found = False
+                if isinstance(v, Literal):
+                    self.shape.logger.debug(
+                        "Class Constraint won't work with Literals. "
+                        "Attempting to match Literal node {} to class of {} will fail.".format(v, class_rule)
+                    )
+                else:
+                    resp = target_graph.query(sparql_ask, initBindings={"value": v, "class": class_rule})
+                    found = resp.askAnswer
+                if not found:
+                    non_conformant = True
+                    rept = self.make_v_result(target_graph, f, value_node=v)
+                    reports.append(rept)
+        return non_conformant, reports
+
+    def _evaluate_class_rules_rdflib(self, target_graph, f_v_dict, class_rule):
         reports = []
         non_conformant = False
         for f, value_nodes in f_v_dict.items():
@@ -305,9 +332,3 @@ class NodeKindConstraintComponent(ConstraintComponent):
                     rept = self.make_v_result(target_graph, f, value_node=v)
                     reports.append(rept)
         return (not non_conformant), reports
-
-    def _evaluate_nodekind_rules(self, target_graph, f_v_pairs, nodekind_rule):
-        reports = []
-        non_conformant = False
-
-        return non_conformant, reports
