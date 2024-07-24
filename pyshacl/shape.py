@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #
+import itertools
 import logging
 import sys
 from decimal import Decimal
@@ -38,6 +39,7 @@ from .consts import (
 from .errors import ConstraintLoadError, ConstraintLoadWarning, ReportableRuntimeError, ShapeLoadError
 from .helper import get_query_helper_cls
 from .helper.expression_helper import value_nodes_from_path
+from .helper.path_helper import shacl_path_to_sparql_path
 from .pytypes import GraphLike, SHACLExecutor
 
 if TYPE_CHECKING:
@@ -386,23 +388,217 @@ class Shape(object):
             self.logger.debug(f"Milliseconds to find focus nodes: {elapsed*1000.0:.3f}ms")
         return found_node_targets
 
-    def value_nodes(self, target_graph, focus):
+    @classmethod
+    def make_focus_nodes_sparql_values(
+        cls, target_classes_s: Set, implicit_classes_s: Set, target_objects_of_s: Set, target_subjects_of_s: Set
+    ):
+        init_bindings = {}
+        values_keys = []
+        values_vals = []
+        if len(target_classes_s) > 1:
+            values_keys.append("$targetClass")
+            values_vals.append(list(target_classes_s))
+        else:
+            init_bindings["targetClass"] = next(iter(target_classes_s)) if len(target_classes_s) > 0 else "UNDEF"
+        if len(implicit_classes_s) > 1:
+            values_keys.append("$implicitClass")
+            values_vals.append(list(implicit_classes_s))
+        else:
+            init_bindings["implicitClass"] = next(iter(implicit_classes_s)) if len(implicit_classes_s) > 0 else "UNDEF"
+        if len(target_subjects_of_s) > 1:
+            values_keys.append("$targetSubjectsOf")
+            values_vals.append(list(target_subjects_of_s))
+        else:
+            init_bindings["targetSubjectsOf"] = (
+                next(iter(target_subjects_of_s)) if len(target_subjects_of_s) > 0 else "UNDEF"
+            )
+        if len(target_objects_of_s) > 1:
+            values_keys.append("$targetObjectsOf")
+            values_vals.append(list(target_objects_of_s))
+        else:
+            init_bindings["targetObjectsOf"] = (
+                next(iter(target_objects_of_s)) if len(target_objects_of_s) > 0 else "UNDEF"
+            )
+        if len(values_keys) < 1:
+            return "", init_bindings
+        else:
+            values_clause = f"VALUES ({' '.join(values_keys)}) {{\n"
+            product = itertools.product(*values_vals)
+            for p in product:
+                values_clause += f"\t( {' '.join(p_x.n3() for p_x in p)} )\n"
+            values_clause += "}"
+            return values_clause, init_bindings
+
+    def focus_nodes_sparql(self, data_graph, debug=False):
+        """
+        The set of focus nodes for a shape may be identified as follows:
+
+        specified in a shape using target declarations
+        specified in any constraint that references a shape in parameters of shape-expecting constraint parameters (e.g. sh:node)
+        specified as explicit input to the SHACL processor for validating a specific RDF term against a shape
+        :return:
+        """
+        t1 = 0.0
+        if debug:
+            t1 = perf_counter()
+        (target_nodes, target_classes, implicit_classes, target_objects_of, target_subjects_of) = self.target()
+        if self._advanced:
+            advanced_targets = self.advanced_target()
+        else:
+            advanced_targets = False
+        found_node_targets = set()
+        target_nodes = set(target_nodes)
+        target_classes = set(target_classes)
+        implicit_classes = set(implicit_classes)
+        target_objects_of = set(target_objects_of)
+        target_subjects_of = set(target_subjects_of)
+        if all(
+            (
+                advanced_targets is False,
+                len(target_nodes) < 1,
+                len(target_classes) < 1,
+                len(implicit_classes) < 1,
+                len(target_objects_of) < 1,
+                len(target_subjects_of) < 1,
+            )
+        ):
+            return found_node_targets
+
+        found_node_targets.update(target_nodes)
+        if (
+            advanced_targets is False
+            and len(target_classes) < 1
+            and len(implicit_classes) < 1
+            and len(target_objects_of) < 1
+            and len(target_subjects_of) < 1
+        ):
+            return found_node_targets
+        if (
+            len(target_classes) > 0
+            or len(implicit_classes) > 0
+            or len(target_objects_of) > 0
+            or len(target_subjects_of) > 0
+        ):
+            focus_query = """\
+            SELECT ?targetClass_F ?targetSubjectsOf_F ?targetObjectsOf_F WHERE {
+                {VALUES_CLAUSE}
+                OPTIONAL { {
+                ?targetClass_F rdf:type/rdfs:subClassOf* $targetClass .
+                } UNION {
+                ?targetClass_F rdf:type/rdfs:subClassOf* $implicitClass .
+                }. }
+                OPTIONAL { ?targetSubjectsOf_F $targetSubjectsOf ?anyA . }
+                OPTIONAL {?anyB $targetObjectsOf ?targetObjectsOf_F . }
+            }
+            """
+            values_clause, init_bindings = self.make_focus_nodes_sparql_values(
+                target_classes, implicit_classes, target_objects_of, target_subjects_of
+            )
+            new_query = focus_query.replace("{VALUES_CLAUSE}", values_clause)
+            try:
+                resp = data_graph.query(new_query, initBindings=init_bindings)
+            except Exception as e:
+                print(new_query)
+                raise e
+            if len(resp) > 0:
+                for result_set in resp:
+                    target_class_f, target_subjects_of_f, target_objects_of_f = result_set
+                    if target_class_f is not None and target_class_f != "UNDEF":
+                        found_node_targets.add(target_class_f)
+                    if target_subjects_of_f is not None and target_subjects_of_f != "UNDEF":
+                        found_node_targets.add(target_subjects_of_f)
+                    if target_objects_of_f is not None and target_objects_of_f != "UNDEF":
+                        found_node_targets.add(target_objects_of_f)
+        if advanced_targets:
+            for at_node, at in advanced_targets.items():
+                if at['type'] == SH_SPARQLTarget:
+                    qh = at['qh']
+                    select = qh.apply_prefixes(qh.select_text)
+                    results = data_graph.query(select, initBindings=None)
+                    if not results or len(results.bindings) < 1:
+                        continue
+                    for r in results:
+                        t = r['this']
+                        found_node_targets.add(t)
+                elif at['type'] in (SH_JSTarget, SH_JSTargetType):
+                    raise ReportableRuntimeError(
+                        "SHACL Advanced Targets with JSTargets are not yet implemented in SPARQL Remote Graph Mode."
+                    )
+                else:
+                    results = at['qt'].find_targets(data_graph)
+                    if not results or len(results.bindings) < 1:
+                        continue
+                    for r in results:
+                        t = r['this']
+                        found_node_targets.add(t)
+        if debug:
+            t2 = perf_counter()
+            elapsed = t2 - t1
+            self.logger.debug(f"Milliseconds to find focus nodes: {elapsed*1000.0:.3f}ms")
+        return found_node_targets
+
+    def value_nodes(self, target_graph, focus, sparql_mode: bool = False, debug: bool = False):
         """
         For each focus node, you can get a set of value nodes.
         For a Node Shape, each focus node has just one value node,
             which is just the focus_node
         :param target_graph:
         :param focus:
+        :param sparql_mode:
+        :type sparql_mode: bool
+        :param debug:
+        :type debug: bool
         :return:
         """
+        t1 = 0.0
+        if debug:
+            t1 = perf_counter()
         if not isinstance(focus, (tuple, list, set)):
             focus = [focus]
         if not self.is_property_shape:
+            if debug:
+                t2 = perf_counter()
+                elapsed = t2 - t1
+                self.logger.debug(f"Milliseconds to find value nodes for focus nodes: {elapsed * 1000.0:.3f}ms")
             return {f: set((f,)) for f in focus}
         path_val = self.path()
+
         focus_dict = {}
-        for f in focus:
-            focus_dict[f] = value_nodes_from_path(self.sg, f, path_val, target_graph)
+        if sparql_mode:
+            # Shortcut for simple URI path, path rewriting and everything else
+            if isinstance(path_val, URIRef):
+                sparql_path = path_val.n3(namespace_manager=target_graph.namespace_manager)
+            else:
+                prefixes = dict(target_graph.namespace_manager.namespaces())
+                sparql_path = shacl_path_to_sparql_path(self.sg, path_val, prefixes=prefixes)
+            values_query = f"SELECT {' '.join(f'?v{i}' for i,_ in enumerate(focus))} WHERE {{\n"
+            init_bindings = {}
+            for i, f in enumerate(focus):
+                focus_dict[f] = set()
+                values_query += f"OPTIONAL {{ \t$f{i} {sparql_path} ?v{i} . }}\n"
+                init_bindings[f"f{i}"] = f
+            values_query += "}"
+            try:
+                results = target_graph.query(values_query, initBindings=init_bindings)
+            except Exception as e:
+                print(e)
+                raise
+            if len(results) > 0:
+                for r in results:
+                    for i, f in enumerate(focus):
+                        row_focus_result = r[i]
+                        if row_focus_result is None or row_focus_result == "UNDEF":
+                            continue
+                        focus_dict[f].add(row_focus_result)
+            else:
+                pass
+        else:
+            for f in focus:
+                focus_dict[f] = value_nodes_from_path(self.sg, f, path_val, target_graph)
+        if debug:
+            t2 = perf_counter()
+            elapsed = t2 - t1
+            self.logger.debug(f"Milliseconds to find value nodes for focus nodes: {elapsed*1000.0:.3f}ms")
         return focus_dict
 
     def find_custom_constraints(self):
@@ -452,7 +648,10 @@ class Shape(object):
             rh_shape = False
             self.logger.debug(f"Checking if Shape {str(self)} defines its own targets.")
             self.logger.debug("Identifying targets to find focus nodes.")
-            focus = self.focus_nodes(target_graph, debug=executor.debug)
+            if executor.sparql_mode:
+                focus = self.focus_nodes_sparql(target_graph, debug=executor.debug)
+            else:
+                focus = self.focus_nodes(target_graph, debug=executor.debug)
             self.logger.debug(f"Found {len(focus)} Focus Nodes to evaluate.")
             if len(focus) < 1:
                 # It's possible for shapes to have _no_ focus nodes
@@ -503,7 +702,9 @@ class Shape(object):
             constraint_map = PARAMETER_MAP
         parameters = (p for p, v in self.sg.predicate_objects(self.node) if p in search_parameters)
         reports = []
-        focus_value_nodes = self.value_nodes(target_graph, focus)
+        focus_value_nodes = self.value_nodes(
+            target_graph, focus, sparql_mode=executor.sparql_mode, debug=executor.debug
+        )
         filter_reports: bool = False
         allow_conform: bool = False
         allowed_severities: Set[URIRef] = set()

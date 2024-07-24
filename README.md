@@ -185,6 +185,33 @@ You can get an equivalent of the Command Line Tool using the Python3 executable 
 $ python3 -m pyshacl
 ```
 
+## Errors
+Under certain circumstances pySHACL can produce a [`Validation Failure`](https://www.w3.org/TR/shacl/#failures). This is a formal error [defined by the SHACL specification](https://www.w3.org/TR/shacl/#failures) and is required to be produced as a result of specific conditions within the SHACL graph that leads to the inability to complete the validation.
+If the validator produces a [`Validation Failure`](https://www.w3.org/TR/shacl/#failures), the `results_graph` variable returned by the `validate()` function will be an instance of `ValidationFailure`.
+See the `message` attribute on that instance to get more information about the validation failure.
+
+Other errors the validator can generate:
+- `ShapeLoadError`: This error is thrown when a SHACL Shape in the SHACL graph is in an invalid state and cannot be loaded into the validation engine.
+- `ConstraintLoadError`: This error is thrown when a SHACL Constraint Component is in an invalid state and cannot be loaded into the validation engine.
+- `ReportableRuntimeError`: An error occurred for a different reason, and the reason should be communicated back to the user of the validator.
+- `RuntimeError`: The validator encountered a situation that caused it to throw an error, but the reason does not concern the user.
+
+Unlike `ValidationFailure`, these errors are not passed back as a result by the `validate()` function, but thrown as exceptions by the validation engine and must be
+caught in a `try ... except` block.
+In the case of `ShapeLoadError` and `ConstraintLoadError`, see the `str()` string representation of the exception instance for the error message along with a link to the relevant section in the SHACL spec document.
+
+## SPARQL Remote Graph Mode
+
+_**PySHACL now has a built-in SPARQL Remote Graph Mode, which allows you to validate a data graph that is stored on a remote server.**_
+
+- In this mode, PySHAL operates strictly in read-only mode, and does not modify the remote data graph.
+- Some features are disabled when using the SPARQL Remote Graph Mode:
+    - "rdfs" and "owl" inferencing is not allowed (because the remote graph is read-only, it cannot be expanded)
+    - Extra Ontology file (Inoculation or Mix-In mode) is disabled (because the remote graph is read-only)
+    - SHACL Rules (Advanced mode SPARQL-Rules) are not allowed (because the remote graph is read-only)
+    - All SHACL-JS features are disabled (this is not safe when operating on a remote graph)
+    - "inplace" mode is disabled (actually all operations on the remote data graph are inherently performed in-place)
+
 ## Integrated OpenAPI-3.0-compatible HTTP REST Service
 
 PySHACL now has a built-in validation service, exposed via an OpenAPI3.0-compatible REST API.
@@ -221,23 +248,6 @@ To view the OpenAPI3 schema see `http://127.0.0.1:8099/docs/openapi.json`
 - `PYSHACL_SERVER_LISTEN=1.2.3.4` listen on a different IP Address or hostname
 - `PYSHACL_SERVER_PORT=8080` listen on given different TCP PORT
 - `PYSHACL_SERVER_HOSTNAME=example.org` when you are hosting the server behind a reverse-proxy or in a containerised environment, use this so PySHACL server knows what your externally facing hostname is
-
-
-
-## Errors
-Under certain circumstances pySHACL can produce a `Validation Failure`. This is a formal error defined by the SHACL specification and is required to be produced as a result of specific conditions within the SHACL graph.
-If the validator produces a `Validation Failure`, the `results_graph` variable returned by the `validate()` function will be an instance of `ValidationFailure`.
-See the `message` attribute on that instance to get more information about the validation failure.
-
-Other errors the validator can generate:
-- `ShapeLoadError`: This error is thrown when a SHACL Shape in the SHACL graph is in an invalid state and cannot be loaded into the validation engine.
-- `ConstraintLoadError`: This error is thrown when a SHACL Constraint Component is in an invalid state and cannot be loaded into the validation engine.
-- `ReportableRuntimeError`: An error occurred for a different reason, and the reason should be communicated back to the user of the validator.
-- `RuntimeError`: The validator encountered a situation that caused it to throw an error, but the reason does concern the user.
-
-Unlike `ValidationFailure`, these errors are not passed back as a result by the `validate()` function, but thrown as exceptions by the validation engine and must be
-caught in a `try ... except` block.
-In the case of `ShapeLoadError` and `ConstraintLoadError`, see the `str()` string representation of the exception instance for the error message along with a link to the relevant section in the SHACL spec document.
 
 
 ## Windows CLI

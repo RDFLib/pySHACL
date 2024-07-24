@@ -1,27 +1,21 @@
 # -*- coding: utf-8 -*-
 #
 import logging
+import os
 import sys
 from functools import wraps
 from io import BufferedIOBase, TextIOBase
 from os import getenv, path
 from sys import stderr
-from typing import TYPE_CHECKING, Dict, Iterator, List, Optional, Set, Tuple, Union, cast
+from typing import Dict, List, Optional, Tuple, Union
 
 import rdflib
 from rdflib import BNode, Literal, URIRef
-from rdflib.util import from_n3
 
 from .consts import (
-    RDF_object,
-    RDF_predicate,
-    RDF_subject,
     RDF_type,
-    RDFS_Resource,
     SH_conforms,
-    SH_detail,
     SH_result,
-    SH_resultMessage,
     SH_ValidationReport,
     env_truths,
 )
@@ -34,14 +28,11 @@ from .rdfutil import (
     add_baked_in,
     clone_blank_node,
     clone_graph,
-    compare_blank_node,
-    compare_node,
     inoculate,
     inoculate_dataset,
     load_from_source,
     mix_datasets,
     mix_graphs,
-    order_graph_literal,
 )
 from .rules import apply_rules, gather_rules
 from .shapes_graph import ShapesGraph
@@ -71,6 +62,7 @@ class Validator(object):
         options_dict.setdefault('abort_on_first', False)
         options_dict.setdefault('allow_infos', False)
         options_dict.setdefault('allow_warnings', False)
+        options_dict.setdefault('sparql_mode', False)
         options_dict.setdefault('max_validation_depth', 15)
         if 'logger' not in options_dict:
             options_dict['logger'] = logging.getLogger(__name__)
@@ -193,13 +185,20 @@ class Validator(object):
         self.data_graph_is_multigraph = isinstance(self.data_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph))
         if self.ont_graph is not None and isinstance(self.ont_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
             self.ont_graph.default_union = True
-
+        if self.ont_graph is not None and options['sparql_mode']:
+            raise ReportableRuntimeError("Cannot use SPARQL Remote Graph Mode with extra Ontology Graph inoculation.")
         if shacl_graph is None:
+            if options['sparql_mode']:
+                raise ReportableRuntimeError(
+                    "SHACL Shapes Graph must be a separate local graph or file when in SPARQL Remote Graph Mode."
+                )
             shacl_graph = clone_graph(data_graph, identifier='shacl')
         assert isinstance(shacl_graph, rdflib.Graph), "shacl_graph must be a rdflib Graph object"
         self.shacl_graph = ShapesGraph(shacl_graph, self.debug, self.logger)  # type: ShapesGraph
 
         if options['use_js']:
+            if options['sparql_mode']:
+                raise ReportableRuntimeError("Cannot use SHACL-JS in SPARQL Remote Graph Mode.")
             is_js_installed = check_extra_installed('js')
             if is_js_installed:
                 self.shacl_graph.enable_js()
@@ -224,10 +223,12 @@ class Validator(object):
     def make_executor(self) -> SHACLExecutor:
         return SHACLExecutor(
             validator=self,
+            advanced_mode=bool(self.options.get('advanced', False)),
             abort_on_first=bool(self.options.get("abort_on_first", False)),
             allow_infos=bool(self.options.get("allow_infos", False)),
             allow_warnings=bool(self.options.get("allow_warnings", False)),
             iterate_rules=bool(self.options.get("iterate_rules", False)),
+            sparql_mode=bool(self.options.get("sparql_mode", False)),
             max_validation_depth=self.options.get("max_validation_depth", 15),
             debug=self.debug,
         )
@@ -249,8 +250,10 @@ class Validator(object):
                 the_target_graph = self.data_graph
             inference_option = self.options.get('inference', 'none')
             if self.inplace and self.debug:
-                self.logger.debug("Skipping DataGraph clone because inplace option is passed.")
+                self.logger.debug("Skipping DataGraph clone because PySHACL is operating in inplace mode.")
             if inference_option and not self.pre_inferenced and str(inference_option) != "none":
+                if self.options.get('sparql_mode', False):
+                    raise ReportableRuntimeError("Cannot use any pre-inference option in SPARQL Remote Graph Mode.")
                 if not has_cloned and not self.inplace:
                     self.logger.debug("Cloning DataGraph to temporary memory graph before pre-inferencing.")
                     the_target_graph = clone_graph(the_target_graph)
@@ -259,6 +262,8 @@ class Validator(object):
                 self._run_pre_inference(the_target_graph, inference_option, logger=self.logger)
                 self.pre_inferenced = True
             if not has_cloned and not self.inplace and self.options['advanced']:
+                if self.options.get('sparql_mode', False):
+                    raise ReportableRuntimeError("Cannot clone DataGraph in SPARQL Remote Graph Mode.")
                 # We still need to clone in advanced mode, because of triple rules
                 self.logger.debug("Forcing clone of DataGraph because advanced mode is enabled.")
                 the_target_graph = clone_graph(the_target_graph)
@@ -271,7 +276,7 @@ class Validator(object):
 
         shapes = self.shacl_graph.shapes  # This property getter triggers shapes harvest.
         executor = self.make_executor()
-        if self.options['advanced']:
+        if executor.advanced_mode:
             self.logger.debug("Activating SHACL-AF Features.")
             target_types = gather_target_types(self.shacl_graph)
             advanced = {
@@ -308,8 +313,13 @@ class Validator(object):
             if self.debug:
                 self.logger.debug(f"Validating DataGraph named {g.identifier}")
             if advanced:
-                apply_functions(executor, advanced['functions'], g)
-                apply_rules(executor, advanced['rules'], g)
+                if advanced['functions']:
+                    apply_functions(executor, advanced['functions'], g)
+                if advanced['rules']:
+                    if executor.sparql_mode:
+                        self.logger.warning("Skipping SHACL Rules because operating in SPARQL Remote Graph Mode.")
+                    else:
+                        apply_rules(executor, advanced['rules'], g)
             try:
                 for s in shapes:
                     _is_conform, _reports = s.validate(executor, g)
@@ -395,6 +405,7 @@ def validate(
     allow_infos: Optional[bool] = False,
     allow_warnings: Optional[bool] = False,
     max_validation_depth: Optional[int] = None,
+    sparql_mode: Optional[bool] = False,
     **kwargs,
 ):
     """
@@ -411,7 +422,7 @@ def validate(
     :type advanced: bool | None
     :param inference: One of "rdfs", "owlrl", "both", "none", or None
     :type inference: str | None
-    :param inplace: If this is enabled, do not clone the datagraph, manipulate it inplace
+    :param inplace: If this is enabled, do not clone the datagraph, manipulate it in-place
     :type inplace: bool
     :param abort_on_first: Stop evaluating constraints after first violation is found
     :type abort_on_first: bool | None
@@ -421,6 +432,8 @@ def validate(
     :type allow_warnings: bool | None
     :param max_validation_depth: The maximum number of SHACL shapes "deep" that the validator can go before reaching an "endpoint" constraint.
     :type max_validation_depth: int | None
+    :param sparql_mode: Treat the DataGraph as a SPARQL endpoint, validate the graph at the SPARQL endpoint.
+    :type sparql_mode: bool | None
     :param kwargs:
     :return:
     """
@@ -446,29 +459,45 @@ def validate(
         # DataGraph is passed in as Text. It is not an rdflib.Graph
         # That means we load it into an ephemeral graph at runtime
         # that means we don't need to make a copy to prevent polluting it.
-        if isinstance(data_graph, str) and (
-            data_graph.startswith("http:/")
-            or data_graph.startswith("https:/")
-            or data_graph.startswith("file:/")
-            or data_graph.startswith("urn:")
-        ):
-            ephemeral = False
-        elif isinstance(data_graph, bytes) and (
-            data_graph.startswith(b"http:/")
-            or data_graph.startswith(b"https:/")
-            or data_graph.startswith(b"file:/")
-            or data_graph.startswith(b"urn:")
-        ):
-            ephemeral = False
-        else:
-            ephemeral = True
+        ephemeral = True
     else:
         ephemeral = False
+    use_js = kwargs.pop('js', None)
+    if sparql_mode:
+        if use_js:
+            raise ReportableRuntimeError("Cannot use SHACL-JS in SPARQL Remote Graph Mode.")
+        if inplace:
+            raise ReportableRuntimeError("Cannot use inplace mode in SPARQL Remote Graph Mode.")
+        if ont_graph is not None:
+            raise ReportableRuntimeError("Cannot use SPARQL Remote Graph Mode with extra Ontology Graph inoculation.")
+        if isinstance(data_graph, bytes):
+            data_graph: str = data_graph.decode('utf-8')
+        else:
+            data_graph = data_graph
+        ephemeral = False
+        inplace = True
+    if (
+        sparql_mode
+        and isinstance(data_graph, str)
+        and (data_graph.lower().startswith("http:") or data_graph.lower().startswith("https:"))
+    ):
+        from rdflib.plugins.stores.sparqlstore import SPARQLStore
 
-    # force no owl imports on data_graph
-    loaded_dg = load_from_source(
-        data_graph, rdf_format=data_graph_format, multigraph=True, do_owl_imports=False, logger=log
-    )
+        query_endpoint: str = data_graph
+        username = os.getenv("PYSHACL_SPARQL_USERNAME", "")
+        method = os.getenv("PYSHACL_SPARQL_METHOD", "GET")
+        if username:
+            password = os.getenv("PYSHACL_SPARQL_PASSWORD", "")
+            auth = (username, None if not password else password)
+        else:
+            auth = None
+        store = SPARQLStore(query_endpoint=query_endpoint, auth=auth, method=method)
+        loaded_dg = rdflib.Dataset(store=store, default_union=True)
+    else:
+        # force no owl imports on data_graph
+        loaded_dg = load_from_source(
+            data_graph, rdf_format=data_graph_format, multigraph=True, do_owl_imports=False, logger=log
+        )
     ont_graph_format = kwargs.pop('ont_graph_format', None)
     if ont_graph is not None:
         loaded_og = load_from_source(
@@ -485,7 +514,6 @@ def validate(
         rdflib_bool_unpatch()
     else:
         loaded_sg = None
-    use_js = kwargs.pop('js', None)
     iterate_rules = kwargs.pop('iterate_rules', False)
     if "abort_on_error" in kwargs:
         log.warning("Usage of abort_on_error is deprecated. Use abort_on_first instead.")
@@ -501,6 +529,7 @@ def validate(
         'advanced': advanced,
         'iterate_rules': iterate_rules,
         'use_js': use_js,
+        'sparql_mode': sparql_mode,
         'logger': log,
     }
     if max_validation_depth is not None:
