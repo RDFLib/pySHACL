@@ -51,10 +51,10 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
     """
 
     # True if constraint component is defined as "shape-expecting"
-    shape_expecting = False
+    shape_expecting: bool = False
 
     # True if constraint component is defined as "list-taking"
-    list_taking = False
+    list_taking: bool = False
 
     shacl_constraint_component: URIRef = URIRef("urn:notimplemented")
 
@@ -435,4 +435,6 @@ class CustomConstraintComponent(object):
         return self
 
     def make_validator_for_shape(self, shape: 'Shape'):
-        raise NotImplementedError()
+        raise ConstraintLoadError(
+            "A Custom Constraint must include one of a SPARQLConstraintComponent validator or a JSConstraint validator."
+        )

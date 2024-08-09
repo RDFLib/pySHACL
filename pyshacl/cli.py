@@ -311,7 +311,10 @@ def main(prog: Union[str, None] = None) -> None:
         exit_code = 2
     except NotImplementedError as nie:
         sys.stderr.write("Validator feature is not implemented:\n")
-        sys.stderr.write(str(nie.args[0]))
+        if len(nie.args) > 0:
+            sys.stderr.write(str(nie.args[0]))
+        else:
+            sys.stderr.write("No message provided.")
         sys.stderr.write("\nIf your use-case requires this feature, open an Issue on the pyshacl github page.\n")
         exit_code = 3
     except RuntimeError as re:
