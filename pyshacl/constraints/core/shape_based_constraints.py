@@ -110,9 +110,15 @@ class PropertyConstraintComponent(ConstraintComponent):
         if potentially_recursive and prop_shape in potentially_recursive:
             warn(ShapeRecursionWarning(_evaluation_path))
             return _non_conformant, _reports
-        if not prop_shape or not prop_shape.is_property_shape:
+        if not prop_shape:
             raise ReportableRuntimeError(
-                "Shape pointed to by sh:property does not exist or is not a well-formed SHACL PropertyShape."
+                f"SHACL PropertyShape not found: The shape referenced by sh:property does not exist. "
+                f"Please check if the shape '{prop_shape}' is defined."
+            )
+        elif not prop_shape.is_property_shape:
+            raise ReportableRuntimeError(
+                f"Invalid SHACL PropertyShape: The shape '{prop_shape}' exists but is not a valid SHACL PropertyShape. "
+                f"Ensure it has the correct type (sh:PropertyShape) and all required properties."
             )
 
         for f, value_nodes in focus_value_nodes.items():
