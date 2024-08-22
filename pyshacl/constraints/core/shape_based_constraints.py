@@ -117,7 +117,7 @@ class PropertyConstraintComponent(ConstraintComponent):
             )
         elif not prop_shape.is_property_shape:
             raise ReportableRuntimeError(
-                f"Invalid SHACL PropertyShape: The shape '{prop_shape}' exists but is not a valid SHACL PropertyShape. "
+                f"'{prop_shape}' exists but is not a well-formed SHACL PropertyShape. "
                 f"Ensure it has the correct type (sh:PropertyShape) and all required properties."
             )
 
