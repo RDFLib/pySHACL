@@ -216,6 +216,7 @@ class ClosedConstraintComponent(ConstraintComponent):
             found_fvpo = []
             if len(results) > 0:
                 for r in results:
+                    assert isinstance(r, rdflib.query.ResultRow)
                     for i, f in enumerate(focus_value_nodes.keys()):
                         for j, v in enumerate(focus_value_nodes[f]):
                             p = r[f"p{i}_{j}"]
