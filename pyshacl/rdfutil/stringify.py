@@ -46,7 +46,7 @@ def stringify_blank_node(
         ns_manager = graph.namespace_manager
         ns_manager.bind("sh", SH)
 
-    def stringify_list(node):
+    def stringify_list(node: rdflib.BNode) -> str:
         nonlocal graph, ns_manager, recursion
         item_texts: List[str] = []
         for item in iter(graph.items(node)):
