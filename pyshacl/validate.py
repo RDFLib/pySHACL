@@ -471,7 +471,7 @@ def validate(
         if ont_graph is not None:
             raise ReportableRuntimeError("Cannot use SPARQL Remote Graph Mode with extra Ontology Graph inoculation.")
         if isinstance(data_graph, bytes):
-            data_graph: str = data_graph.decode('utf-8')
+            data_graph = data_graph.decode('utf-8')
         else:
             data_graph = data_graph
         ephemeral = False
@@ -486,9 +486,10 @@ def validate(
         query_endpoint: str = data_graph
         username = os.getenv("PYSHACL_SPARQL_USERNAME", "")
         method = os.getenv("PYSHACL_SPARQL_METHOD", "GET")
+        auth: Optional[Tuple[str, str]]
         if username:
-            password = os.getenv("PYSHACL_SPARQL_PASSWORD", "")
-            auth = (username, None if not password else password)
+            password: str = os.getenv("PYSHACL_SPARQL_PASSWORD", "")
+            auth = (username, password)
         else:
             auth = None
         store = SPARQLStore(query_endpoint=query_endpoint, auth=auth, method=method)
