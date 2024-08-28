@@ -436,5 +436,6 @@ class CustomConstraintComponent(object):
 
     def make_validator_for_shape(self, shape: 'Shape'):
         raise ConstraintLoadError(
-            "A Custom Constraint must include one of a SPARQLConstraintComponent validator or a JSConstraint validator."
+            "A Custom Constraint must include one of a SPARQLConstraintComponent validator or a JSConstraint validator.",
+            "https://www.w3.org/TR/shacl/#constraint-components-validators",
         )
