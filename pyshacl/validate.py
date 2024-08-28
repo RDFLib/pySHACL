@@ -486,9 +486,10 @@ def validate(
         query_endpoint: str = data_graph
         username = os.getenv("PYSHACL_SPARQL_USERNAME", "")
         method = os.getenv("PYSHACL_SPARQL_METHOD", "GET")
+        auth: Optional[Tuple[str, str]]
         if username:
-            password = os.getenv("PYSHACL_SPARQL_PASSWORD", "")
-            auth = (username, None if not password else password)
+            password: str = os.getenv("PYSHACL_SPARQL_PASSWORD", "")
+            auth = (username, password)
         else:
             auth = None
         store = SPARQLStore(query_endpoint=query_endpoint, auth=auth, method=method)
