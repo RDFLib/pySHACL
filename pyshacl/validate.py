@@ -471,7 +471,7 @@ def validate(
         if ont_graph is not None:
             raise ReportableRuntimeError("Cannot use SPARQL Remote Graph Mode with extra Ontology Graph inoculation.")
         if isinstance(data_graph, bytes):
-            data_graph: str = data_graph.decode('utf-8')
+            data_graph = data_graph.decode('utf-8')
         else:
             data_graph = data_graph
         ephemeral = False
