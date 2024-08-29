@@ -243,16 +243,16 @@ class ClosedConstraintComponent(ConstraintComponent):
             for f, value_nodes in focus_value_nodes.items():
                 for v in value_nodes:
                     pred_obs = target_graph.predicate_objects(v)
-                    for p, o in pred_obs:
-                        if (p, o) in self.ALWAYS_IGNORE:
+                    for _p, _o in pred_obs:
+                        if (_p, _o) in self.ALWAYS_IGNORE:
                             continue
-                        elif p in self.ignored_props:
+                        elif _p in self.ignored_props:
                             continue
-                        elif p in working_paths:
+                        elif _p in working_paths:
                             continue
                         non_conformant = True
-                        o_node = cast(RDFNode, o)
-                        p_node = cast(RDFNode, p)
+                        o_node = cast(RDFNode, _o)
+                        p_node = cast(RDFNode, _p)
                         rept = self.make_v_result(target_graph, f, value_node=o_node, result_path=p_node)
                         reports.append(rept)
         return (not non_conformant), reports
