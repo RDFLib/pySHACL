@@ -5,7 +5,7 @@ import logging
 import sys
 from decimal import Decimal
 from time import perf_counter
-from typing import TYPE_CHECKING, List, Optional, Set, Tuple, Type, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Set, Tuple, Type, Union
 
 from rdflib import BNode, Literal, URIRef
 
@@ -40,7 +40,7 @@ from .errors import ConstraintLoadError, ConstraintLoadWarning, ReportableRuntim
 from .helper import get_query_helper_cls
 from .helper.expression_helper import value_nodes_from_path
 from .helper.path_helper import shacl_path_to_sparql_path
-from .pytypes import GraphLike, SHACLExecutor
+from .pytypes import GraphLike, RDFNode, SHACLExecutor
 
 if TYPE_CHECKING:
     from pyshacl.constraints import ConstraintComponent
@@ -563,7 +563,7 @@ class Shape(object):
             return {f: set((f,)) for f in focus}
         path_val = self.path()
 
-        focus_dict = {}
+        focus_dict: Dict[RDFNode, Set[RDFNode]] = {}
         if sparql_mode:
             # Shortcut for simple URI path, path rewriting and everything else
             if isinstance(path_val, URIRef):
