@@ -266,9 +266,10 @@ def check_dash_result(
             expression_node = next(iter(expressions))
             expression = str(expression_node).strip()
             parts = [e.strip() for e in expression.split("(", 1)]
+            eargs: List[Optional[Union[str, RDFNode]]]
             if len(parts) < 1:
                 expression = parts[0]
-                eargs: List[Optional[Union[str, RDFNode]]] = []
+                eargs = []
             else:
                 expression, sargs = parts
                 sargs = sargs.rstrip(")")
@@ -276,10 +277,9 @@ def check_dash_result(
                     eargs_str_list: List[str] = []
                 else:
                     eargs_str_list = [a.strip() for a in sargs.split(',')]
-                eargs = [
-                    from_n3(e, None, expected_result_graph.store, expected_result_graph.namespace_manager)  # type: ignore[arg-type]
-                    for e in eargs_str_list
-                ]
+                eargs = []
+                for e in eargs_str_list:
+                    eargs.append(from_n3(e, None, expected_result_graph.store, expected_result_graph.namespace_manager))  # type: ignore[arg-type]
             find_uri = from_n3(expression, None, expected_result_graph.store, expected_result_graph.namespace_manager)  # type: ignore[arg-type]
             if find_uri is None or not isinstance(find_uri, (str, URIRef, Literal, BNode)):
                 raise ReportableRuntimeError("Cannot execute function {}.\nBad declaration format.".format(find_uri))
