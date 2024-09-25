@@ -64,6 +64,7 @@ class Validator(object):
         options_dict.setdefault('allow_warnings', False)
         options_dict.setdefault('sparql_mode', False)
         options_dict.setdefault('max_validation_depth', 15)
+        options_dict.setdefault('focus_nodes', None)
         if 'logger' not in options_dict:
             options_dict['logger'] = logging.getLogger(__name__)
             if options_dict['debug']:
@@ -230,6 +231,7 @@ class Validator(object):
             iterate_rules=bool(self.options.get("iterate_rules", False)),
             sparql_mode=bool(self.options.get("sparql_mode", False)),
             max_validation_depth=self.options.get("max_validation_depth", 15),
+            focus_nodes=self.options.get("focus_nodes", None),
             debug=self.debug,
         )
 
@@ -275,6 +277,27 @@ class Validator(object):
             self._target_graph = the_target_graph
 
         shapes = self.shacl_graph.shapes  # This property getter triggers shapes harvest.
+        limit_focus_nodes = self.options.get("focus_nodes", None)
+        if limit_focus_nodes is not None and len(limit_focus_nodes) > 0:
+            # Expand any CURIEs in the focus_nodes list
+            expanded_focus_nodes = []
+            for f in limit_focus_nodes:
+                f_lower = f.lower()
+                if (
+                    f_lower.startswith("http:")
+                    or f_lower.startswith("https:")
+                    or f_lower.startswith("urn:")
+                    or f_lower.startswith("file:")
+                ):
+                    expanded_focus_nodes.append(URIRef(f))
+                else:
+                    try:
+                        expanded_focus_node = self.target_graph.namespace_manager.expand_curie(f)
+                    except ValueError:
+                        expanded_focus_node = URIRef(f)
+                    expanded_focus_nodes.append(expanded_focus_node)
+            self.options["focus_nodes"] = expanded_focus_nodes
+
         executor = self.make_executor()
         if executor.advanced_mode:
             self.logger.debug("Activating SHACL-AF Features.")
@@ -406,6 +429,7 @@ def validate(
     allow_warnings: Optional[bool] = False,
     max_validation_depth: Optional[int] = None,
     sparql_mode: Optional[bool] = False,
+    focus_nodes: Optional[List[Union[str | URIRef]]] = None,
     **kwargs,
 ):
     """
@@ -434,6 +458,8 @@ def validate(
     :type max_validation_depth: int | None
     :param sparql_mode: Treat the DataGraph as a SPARQL endpoint, validate the graph at the SPARQL endpoint.
     :type sparql_mode: bool | None
+    :param focus_nodes: A list of IRIs to validate only those nodes.
+    :type focus_nodes: list | None
     :param kwargs:
     :return:
     """
@@ -532,6 +558,7 @@ def validate(
         'use_js': use_js,
         'sparql_mode': sparql_mode,
         'logger': log,
+        'focus_nodes': focus_nodes,
     }
     if max_validation_depth is not None:
         validator_options_dict['max_validation_depth'] = max_validation_depth

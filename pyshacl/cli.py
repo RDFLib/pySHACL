@@ -149,6 +149,14 @@ parser.add_argument(
     '-d', '--debug', dest='debug', action='store_true', default=False, help='Output additional runtime messages.'
 )
 parser.add_argument(
+    '--focus',
+    dest='focus',
+    action='store',
+    help='The IRI of a focus node from the DataGraph, the shapes will validate only that node.',
+    nargs="?",
+    default=None,
+)
+parser.add_argument(
     '-f',
     '--format',
     dest='format',
@@ -259,6 +267,8 @@ def main(prog: Union[str, None] = None) -> None:
         validator_kwargs['advanced'] = True
     if args.js:
         validator_kwargs['js'] = True
+    if args.focus:
+        validator_kwargs['focus'] = args.focus
     if args.iterate_rules:
         if not args.advanced:
             sys.stderr.write("Iterate-Rules option only works when you enable Advanced Mode.\n")

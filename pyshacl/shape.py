@@ -661,6 +661,22 @@ class Shape(object):
                 return True, []
             else:
                 self.logger.debug(f"Running evaluation of Shape {str(self)}")
+
+        if executor.focus_nodes is not None and len(executor.focus_nodes) > 0:
+            filtered_focus_nodes = []
+            for f in focus:
+                if f in executor.focus_nodes:
+                    filtered_focus_nodes.append(f)
+            len_orig_focus = len(focus)
+            len_filtered_focus = len(filtered_focus_nodes)
+            if len_filtered_focus < 1:
+                self.logger.debug(f"Skipping shape {str(self)} because specified focus nodes are not targeted.")
+                return True, []
+            elif len_filtered_focus != len_orig_focus:
+                self.logger.debug(
+                    f"Filtered focus nodes based on focus_nodes option. Only {len_filtered_focus} of {len_orig_focus} focus nodes remain."
+                )
+            focus = filtered_focus_nodes
         t1 = ct1 = 0.0  # prevent warnings about use-before-assign
         collect_stats = bool(executor.debug)
 
