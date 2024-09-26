@@ -429,7 +429,7 @@ def validate(
     allow_warnings: Optional[bool] = False,
     max_validation_depth: Optional[int] = None,
     sparql_mode: Optional[bool] = False,
-    focus_nodes: Optional[List[Union[str | URIRef]]] = None,
+    focus_nodes: Optional[List[Union[str, URIRef]]] = None,
     **kwargs,
 ):
     """

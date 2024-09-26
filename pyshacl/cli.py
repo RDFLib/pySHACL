@@ -268,6 +268,7 @@ def main(prog: Union[str, None] = None) -> None:
     if args.js:
         validator_kwargs['js'] = True
     if args.focus:
+        validator_kwargs['focus_nodes'] = [_f.strip() for _f in args.focus.split(',')]
         validator_kwargs['focus'] = args.focus
     if args.iterate_rules:
         if not args.advanced:
