@@ -157,6 +157,14 @@ parser.add_argument(
     default=None,
 )
 parser.add_argument(
+    '--shape',
+    dest='shape',
+    action='store',
+    help='The IRI of a NodeShape or PropertyShape from the SHACL ShapesGraph, only this shape will be used to validate the DataGraph.',
+    nargs="?",
+    default=None,
+)
+parser.add_argument(
     '-f',
     '--format',
     dest='format',
@@ -269,7 +277,8 @@ def main(prog: Union[str, None] = None) -> None:
         validator_kwargs['js'] = True
     if args.focus:
         validator_kwargs['focus_nodes'] = [_f.strip() for _f in args.focus.split(',')]
-        validator_kwargs['focus'] = args.focus
+    if args.shape:
+        validator_kwargs['use_shapes'] = [_s.strip() for _s in args.shape.split(',')]
     if args.iterate_rules:
         if not args.advanced:
             sys.stderr.write("Iterate-Rules option only works when you enable Advanced Mode.\n")

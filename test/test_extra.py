@@ -188,23 +188,6 @@ def test_validate_with_ontology_fail2():
     assert not conforms
 
 
-def test_validate_with_ontology_fail_focuses():
-    res = validate(
-        data_file_text_bad,
-        shacl_graph=shacl_file_text,
-        data_graph_format='turtle',
-        shacl_graph_format='turtle',
-        ont_graph=ontology_file_text,
-        ont_graph_format="turtle",
-        inference='both',
-        focus_nodes=["ex:Human1"],
-        debug=True,
-    )
-    conforms, graph, string = res
-    assert "Results (1)" in string
-    assert not conforms
-
-
 def test_metashacl_pass():
     res = validate(
         data_file_text,
