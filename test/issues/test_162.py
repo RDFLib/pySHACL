@@ -4,6 +4,7 @@ https://github.com/RDFLib/pySHACL/issues/162
 """
 
 import rdflib
+
 from pyshacl import validate
 
 shacl_file = """\
@@ -63,7 +64,7 @@ def test_162() -> None:
     conforms, report, message = validate(data_g, shacl_graph=shapes, debug=True)
     assert not conforms
     # confirm that both nodeShapes are included in the error message
-    assert "Value does not conform to every Shape in ('ex:nodeShape1', 'ex:nodeShape2')" in message
+    assert "Value must conform to every Shape in ('ex:nodeShape1', 'ex:nodeShape2')" in message
 
 
 if __name__ == "__main__":

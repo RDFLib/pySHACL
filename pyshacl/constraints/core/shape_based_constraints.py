@@ -167,7 +167,7 @@ class NodeConstraintComponent(ConstraintComponent):
             m = "Value does not conform to Shape {}.".format(stringify_node(self.shape.sg.graph, self.node_shapes[0]))
         else:
             rules = "', '".join(stringify_node(self.shape.sg.graph, c) for c in self.node_shapes)
-            m = "Value does not conform to every Shape in ('{}').".format(rules)
+            m = "Value must conform to every Shape in ('{}').".format(rules)
         m += " See details for more information."
         return [rdflib.Literal(m)]
 
