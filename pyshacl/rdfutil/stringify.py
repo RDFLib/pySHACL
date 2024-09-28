@@ -140,7 +140,7 @@ def find_node_named_graph(dataset, node):
             return g
         except StopIteration:
             continue
-    raise RuntimeError("Cannot find that node in any named graph.")
+    raise RuntimeError(f"Cannot find node {node} in any named graph.")
 
 
 def stringify_node(
