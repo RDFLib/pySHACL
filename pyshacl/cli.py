@@ -147,13 +147,18 @@ parser.add_argument(
     help="The maximum number of SHACL shapes \"deep\" that the validator can go before reaching an \"endpoint\" constraint.",
 )
 parser.add_argument(
-    '-d', '--debug', dest='debug', action='store_true', default=False, help='Output additional runtime messages.'
+    '-d',
+    '--debug',
+    dest='debug',
+    action='store_true',
+    default=False,
+    help='Output additional verbose runtime messages.',
 )
 parser.add_argument(
     '--focus',
     dest='focus',
     action='store',
-    help='The IRI of a focus node from the DataGraph, the shapes will validate only that node.',
+    help='Optional IRIs of focus nodes from the DataGraph, the shapes will validate only these node. Comma-separated list.',
     nargs="?",
     default=None,
 )
@@ -161,7 +166,7 @@ parser.add_argument(
     '--shape',
     dest='shape',
     action='store',
-    help='The IRI of a NodeShape or PropertyShape from the SHACL ShapesGraph, only this shape will be used to validate the DataGraph.',
+    help='Optional IRIs of a NodeShape or PropertyShape from the SHACL ShapesGraph, only these shapes will be used to validate the DataGraph. Comma-separated list.',
     nargs="?",
     default=None,
 )
