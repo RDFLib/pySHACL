@@ -4,7 +4,8 @@
 import argparse
 import os
 import sys
-from typing import Union
+from io import BufferedReader
+from typing import Union, cast
 
 from prettytable import PrettyTable
 
@@ -241,6 +242,7 @@ def main(prog: Union[str, None] = None) -> None:
         sys.exit(1)
     validator_kwargs = {'debug': args.debug}
     data_file = None
+    data_graph: Union[BufferedReader, str]
     if args.sparql_mode is not None and args.sparql_mode is True:
         endpoint = str(args.data).strip()
         if not endpoint.lower().startswith("http:") and not endpoint.lower().startswith("https:"):
@@ -258,7 +260,8 @@ def main(prog: Union[str, None] = None) -> None:
             sys.stderr.write('Input Error. DataGraph file not readable.\n')
             sys.exit(1)
         else:
-            data_graph = data_file
+            # NOTE: This cast is not necessary in Python >= 3.10.
+            data_graph = cast(BufferedReader, data_file)
     if args.shacl is not None:
         validator_kwargs['shacl_graph'] = args.shacl
     if args.ont is not None:
