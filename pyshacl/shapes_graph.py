@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import warnings
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Union
 
 import rdflib
 
@@ -350,15 +350,16 @@ class ShapesGraph(object):
         g = self.graph
         gathered_node_shapes = set()
         gathered_prop_shapes = set()
-        found_prop_shapes_paths: Dict[rdflib.URIRef, rdflib.URIRef] = dict()
+        found_prop_shapes_paths: Dict[Union[rdflib.URIRef, rdflib.BNode], Union[rdflib.URIRef, rdflib.BNode]] = dict()
 
-        def _gather_shapes(shapes_nodes: List[rdflib.URIRef | rdflib.BNode], recurse_depth: int = 0):
+        def _gather_shapes(shapes_nodes: Sequence[Union[rdflib.URIRef, rdflib.BNode]], recurse_depth: int = 0):
             nonlocal gathered_node_shapes, gathered_prop_shapes, found_prop_shapes_paths
             if recurse_depth > 10:
                 raise ShapeLoadError(
                     "Specified shape has too many levels of attached bnodes.",
                     "https://www.w3.org/TR/shacl/#shapes-graph",
                 )
+            shape_expecting_preds = (SH_and, SH_not, SH_or, SH_xone, SH_property, SH_node, SH_qualifiedValueShape)
             for s in shapes_nodes:
                 all_po = list(g.predicate_objects(s))
                 if len(all_po) < 1:
@@ -370,8 +371,11 @@ class ShapesGraph(object):
                     else:
                         return
                 has_class = any(RDF_type == _p for _p, _o in all_po)
-                has_property = any(SH_property == _p for _p, _o in all_po)
-                has_node = any(SH_node == _p for _p, _o in all_po)
+                has_shape_expecting_p: Dict[rdflib.URIRef, bool] = {}
+                for _p in shape_expecting_preds:
+                    if any(_p == _p2 for _p2, _o in all_po):
+                        has_shape_expecting_p[_p] = True
+
                 knows_class = False
                 if has_class:
                     all_classes = list(g.objects(s, RDF_type))
@@ -387,10 +391,15 @@ class ShapesGraph(object):
                     else:
                         knows_class = False
                 if not knows_class:
-                    for _p, _o in all_po:
-                        if _p == SH_path:
+                    for po_p, po_o in all_po:
+                        if po_p == SH_path:
+                            if not isinstance(po_o, (rdflib.BNode, rdflib.URIRef)):
+                                raise ShapeLoadError(
+                                    "Found a path property with a value that is not a URIRef or BNode.",
+                                    "https://www.w3.org/TR/shacl/#property-paths",
+                                )
                             has_path = True
-                            found_prop_shapes_paths[s] = _o
+                            found_prop_shapes_paths[s] = po_o
                             break
                     else:
                         has_path = False
@@ -402,17 +411,13 @@ class ShapesGraph(object):
                             gathered_prop_shapes.add(s)
                         else:
                             gathered_node_shapes.add(s)
-                _found_child_bnodes = []
-                if has_property:
-                    property_entries = list(g.objects(s, SH_property))
-                    for p_e in property_entries:
-                        if isinstance(p_e, rdflib.BNode):
-                            _found_child_bnodes.append(p_e)
-                if has_node:
-                    node_entries = list(g.objects(s, SH_node))
-                    for n_e in node_entries:
-                        if isinstance(n_e, rdflib.BNode):
-                            _found_child_bnodes.append(n_e)
+                _found_child_bnodes: List[rdflib.BNode] = []
+                if has_shape_expecting_p:
+                    for _p in has_shape_expecting_p.keys():
+                        property_entries = list(g.objects(s, _p))
+                        for p_e in property_entries:
+                            if isinstance(p_e, rdflib.BNode):
+                                _found_child_bnodes.append(p_e)
                 if len(_found_child_bnodes) > 0:
                     _gather_shapes(_found_child_bnodes, recurse_depth=recurse_depth + 1)
 
@@ -449,7 +454,13 @@ class ShapesGraph(object):
                         "https://www.w3.org/TR/shacl/#property-shapes",
                     )
                 else:
-                    found_prop_shapes_paths[s] = path_vals[0]
+                    _p = path_vals[0]
+                    if not isinstance(_p, (rdflib.BNode, rdflib.URIRef)):
+                        raise ShapeLoadError(
+                            "Found a path property with a value that is not a URIRef or BNode.",
+                            "https://www.w3.org/TR/shacl/#property-paths",
+                        )
+                    found_prop_shapes_paths[s] = _p
 
         node_shape_count = 0
         property_shape_count = 0
@@ -457,16 +468,16 @@ class ShapesGraph(object):
             if node_shape in self._node_shape_cache:
                 # TODO:coverage: we don't have any tests where a shape is loaded twice
                 raise ShapeLoadError("That shape has already been loaded!", "None")
-            s = Shape(self, node_shape, p=False, logger=self.logger)
-            self._node_shape_cache[node_shape] = s
+            _s = Shape(self, node_shape, p=False, logger=self.logger)
+            self._node_shape_cache[node_shape] = _s
             node_shape_count += 1
         for prop_shape in gathered_prop_shapes:
             if prop_shape in self._node_shape_cache:
                 # TODO:coverage: we don't have any tests where a shape is loaded twice
                 raise ShapeLoadError("That shape has already been loaded!", "None")
             prop_shape_path = found_prop_shapes_paths[prop_shape]
-            s = Shape(self, prop_shape, p=True, path=prop_shape_path, logger=self.logger)
-            self._node_shape_cache[prop_shape] = s
+            _s = Shape(self, prop_shape, p=True, path=prop_shape_path, logger=self.logger)
+            self._node_shape_cache[prop_shape] = _s
             property_shape_count += 1
 
         if self.debug:
