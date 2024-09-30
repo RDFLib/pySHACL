@@ -45,3 +45,5 @@ jobs:
           python3 -m venv venv
           source venv/bin/activate
           pip install poetry
+          make dev
+          make type-check
