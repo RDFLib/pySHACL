@@ -57,7 +57,7 @@ class NotConstraintComponent(ConstraintComponent):
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
         if len(self.not_list) == 1:
-            m = f"Node {stringify_node(datagraph, value_node)} must not to shape {stringify_node(self.shape.sg.graph, self.not_list[0])}"
+            m = f"Node {stringify_node(datagraph, value_node)} must not conform to shape {stringify_node(self.shape.sg.graph, self.not_list[0])}"
         else:
             nots_list = " , ".join(stringify_node(self.shape.sg.graph, n) for n in self.not_list)
             m = f"Node {stringify_node(datagraph, value_node)} must not conform to any shapes in {nots_list}"
