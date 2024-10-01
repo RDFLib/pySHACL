@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 OWLNamedIndividual = OWL.NamedIndividual
 
 
-def inoculate(data_graph: rdflib.Graph, ontology: rdflib.Graph):
+def inoculate(data_graph: rdflib.Graph, ontology: rdflib.Graph) -> rdflib.Graph:
     """
     Copies all RDFS and OWL axioms (classes, relationship definitions, and properties)
     from the ontology graph into the data_graph.
