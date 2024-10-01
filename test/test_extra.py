@@ -6,7 +6,9 @@
 # are added as required.
 import os
 import re
+
 from rdflib import Graph
+
 from pyshacl import validate
 from pyshacl.errors import ReportableRuntimeError
 
@@ -123,51 +125,81 @@ ex:Pet1 rdf:type exOnt:Goanna ;
     exOnt:nLegs "four"^^xsd:string .
 """
 
+
 def test_validate_with_ontology():
     g = Graph().parse(data=data_file_text, format='turtle')
     e = Graph().parse(data=ontology_file_text, format='turtle')
     g_len = len(g)
-    res = validate(g, shacl_graph=shacl_file_text,
-                   shacl_graph_format='turtle',
-                   ont_graph=e, inference='both', debug=True)
+    res = validate(
+        g, shacl_graph=shacl_file_text, shacl_graph_format='turtle', ont_graph=e, inference='both', debug=True
+    )
     conforms, graph, string = res
     g_len2 = len(g)
     assert conforms
     assert g_len2 == g_len
 
+
 def test_validate_with_ontology_inplace():
     g = Graph().parse(data=data_file_text, format='turtle')
     e = Graph().parse(data=ontology_file_text, format='turtle')
     g_len = len(g)
-    res = validate(g, shacl_graph=shacl_file_text,
-                   shacl_graph_format='turtle',
-                   ont_graph=e, inference='both', debug=True, inplace=True)
+    res = validate(
+        g,
+        shacl_graph=shacl_file_text,
+        shacl_graph_format='turtle',
+        ont_graph=e,
+        inference='both',
+        debug=True,
+        inplace=True,
+    )
     conforms, graph, string = res
     g_len2 = len(g)
     assert conforms
     assert g_len2 != g_len
 
+
 def test_validate_with_ontology_fail1():
-    res = validate(data_file_text_bad, shacl_graph=shacl_file_text,
-                   data_graph_format='turtle', shacl_graph_format='turtle',
-                   ont_graph=ontology_file_text,  ont_graph_format="turtle",
-                   inference='both', debug=True)
+    res = validate(
+        data_file_text_bad,
+        shacl_graph=shacl_file_text,
+        data_graph_format='turtle',
+        shacl_graph_format='turtle',
+        ont_graph=ontology_file_text,
+        ont_graph_format="turtle",
+        inference='both',
+        debug=True,
+    )
     conforms, graph, string = res
     assert not conforms
+
 
 def test_validate_with_ontology_fail2():
-    res = validate(data_file_text_bad, shacl_graph=shacl_file_text,
-                   data_graph_format='turtle', shacl_graph_format='turtle',
-                   ont_graph=ontology_file_text, ont_graph_format="turtle",
-                   inference=None, debug=True)
+    res = validate(
+        data_file_text_bad,
+        shacl_graph=shacl_file_text,
+        data_graph_format='turtle',
+        shacl_graph_format='turtle',
+        ont_graph=ontology_file_text,
+        ont_graph_format="turtle",
+        inference=None,
+        debug=True,
+    )
     conforms, graph, string = res
     assert not conforms
 
+
 def test_metashacl_pass():
-    res = validate(data_file_text, shacl_graph=shacl_file_text,
-                   meta_shacl=True, data_graph_format='turtle',
-                   shacl_graph_format='turtle', ont_graph=ontology_file_text,
-                   ont_graph_format="turtle", inference='both', debug=True)
+    res = validate(
+        data_file_text,
+        shacl_graph=shacl_file_text,
+        meta_shacl=True,
+        data_graph_format='turtle',
+        shacl_graph_format='turtle',
+        ont_graph=ontology_file_text,
+        ont_graph_format="turtle",
+        inference='both',
+        debug=True,
+    )
     conforms, graph, string = res
     assert conforms
 
@@ -205,16 +237,24 @@ ex:AnimalShape a sh:NodeShape ;
 """
     did_error = False
     try:
-        res = validate(data_file_text, shacl_graph=bad_shacl_text,
-                       meta_shacl=True, data_graph_format='turtle',
-                       shacl_graph_format='turtle', ont_graph=ontology_file_text,
-                       ont_graph_format="turtle", inference='both', debug=True)
+        res = validate(
+            data_file_text,
+            shacl_graph=bad_shacl_text,
+            meta_shacl=True,
+            data_graph_format='turtle',
+            shacl_graph_format='turtle',
+            ont_graph=ontology_file_text,
+            ont_graph_format="turtle",
+            inference='both',
+            debug=True,
+        )
         conforms, graph, string = res
         assert not conforms
     except ReportableRuntimeError as r:
         assert "Shapes SHACL (MetaSHACL) file." in r.message
         did_error = True
     assert did_error
+
 
 data_file_text_bn = """
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -252,12 +292,19 @@ ex:Pet1 rdf:type exOnt:Goanna ;
     exOnt:nLegs "four"^^xsd:string .
 """
 
+
 def test_blank_node_string_generation():
 
-    res = validate(data_file_text_bad_bn, shacl_graph=shacl_file_text,
-                   data_graph_format='turtle', shacl_graph_format='turtle',
-                   ont_graph=ontology_file_text,  ont_graph_format="turtle",
-                   inference='rdfs', debug=True)
+    res = validate(
+        data_file_text_bad_bn,
+        shacl_graph=shacl_file_text,
+        data_graph_format='turtle',
+        shacl_graph_format='turtle',
+        ont_graph=ontology_file_text,
+        ont_graph_format="turtle",
+        inference='rdfs',
+        debug=True,
+    )
     conforms, graph, string = res
     assert not conforms
     rx = r"^\s*Focus Node\:\s+\[.+rdf:type\s+.+exOnt\:PreschoolTeacher.*\]$"
@@ -266,12 +313,20 @@ def test_blank_node_string_generation():
 
 
 def test_serialize_report_graph():
-    res = validate(data_file_text, shacl_graph=shacl_file_text,
-                   data_graph_format='turtle', serialize_report_graph=True,
-                   shacl_graph_format='turtle', ont_graph=ontology_file_text,
-                   ont_graph_format="turtle", inference='both', debug=True)
+    res = validate(
+        data_file_text,
+        shacl_graph=shacl_file_text,
+        data_graph_format='turtle',
+        serialize_report_graph=True,
+        shacl_graph_format='turtle',
+        ont_graph=ontology_file_text,
+        ont_graph_format="turtle",
+        inference='both',
+        debug=True,
+    )
     conforms, graph, string = res
     assert isinstance(graph, (str, bytes))
+
 
 shacl_file_property_shapes_text = """\
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
@@ -305,21 +360,36 @@ exShape:PetHasLegsShape a sh:PropertyShape ;
     sh:targetClass exOnt:Animal .
 """
 
+
 def test_property_shape_focus():
-    res = validate(data_file_text, shacl_graph=shacl_file_property_shapes_text,
-                   data_graph_format='turtle', shacl_graph_format='turtle',
-                   ont_graph=ontology_file_text,  ont_graph_format="turtle",
-                   inference='rdfs', debug=True)
+    res = validate(
+        data_file_text,
+        shacl_graph=shacl_file_property_shapes_text,
+        data_graph_format='turtle',
+        shacl_graph_format='turtle',
+        ont_graph=ontology_file_text,
+        ont_graph_format="turtle",
+        inference='rdfs',
+        debug=True,
+    )
     conforms, graph, string = res
     assert conforms
 
+
 def test_property_shape_focus_fail1():
-    res = validate(data_file_text_bad, shacl_graph=shacl_file_property_shapes_text,
-                   data_graph_format='turtle', shacl_graph_format='turtle',
-                   ont_graph=ontology_file_text,  ont_graph_format="turtle",
-                   inference='rdfs', debug=True)
+    res = validate(
+        data_file_text_bad,
+        shacl_graph=shacl_file_property_shapes_text,
+        data_graph_format='turtle',
+        shacl_graph_format='turtle',
+        ont_graph=ontology_file_text,
+        ont_graph_format="turtle",
+        inference='rdfs',
+        debug=True,
+    )
     conforms, graph, string = res
     assert not conforms
+
 
 web_d1_ttl = """\
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -352,6 +422,7 @@ ex:Pet1 rdf:type exOnt:Lizard ;
     exOnt:nLegs "g"^^xsd:string .
 """
 
+
 def test_web_retrieve():
     DEB_BUILD_ARCH = os.environ.get('DEB_BUILD_ARCH', None)
     DEB_HOST_ARCH = os.environ.get('DEB_HOST_ARCH', None)
@@ -361,9 +432,16 @@ def test_web_retrieve():
         return True
     shacl_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/s1.ttl"
     ont_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/o1.ttl"
-    res = validate(web_d1_ttl, shacl_graph=shacl_file, data_graph_format='turtle',
-                   shacl_graph_format='turtle', ont_graph=ont_file,
-                   ont_graph_format="turtle", inference='both', debug=True)
+    res = validate(
+        web_d1_ttl,
+        shacl_graph=shacl_file,
+        data_graph_format='turtle',
+        shacl_graph_format='turtle',
+        ont_graph=ont_file,
+        ont_graph_format="turtle",
+        inference='both',
+        debug=True,
+    )
     conforms, graph, string = res
     assert conforms
 
@@ -377,9 +455,16 @@ def test_web_retrieve_fail():
         return True
     shacl_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/s1.ttl"
     ont_file = "https://raw.githubusercontent.com/RDFLib/pySHACL/master/test/resources/cmdline_tests/o1.ttl"
-    res = validate(web_d2_ttl, shacl_graph=shacl_file, data_graph_format='turtle',
-                   shacl_graph_format='turtle', ont_graph=ont_file,
-                   ont_graph_format="turtle", inference='both', debug=True)
+    res = validate(
+        web_d2_ttl,
+        shacl_graph=shacl_file,
+        data_graph_format='turtle',
+        shacl_graph_format='turtle',
+        ont_graph=ont_file,
+        ont_graph_format="turtle",
+        inference='both',
+        debug=True,
+    )
     conforms, graph, string = res
     assert not conforms
 
@@ -408,9 +493,17 @@ def test_owl_imports():
         print("Cannot run owl:imports in debhelper tests.")
         assert True
         return True
-    res = validate(web_d1_ttl, shacl_graph=my_partial_shapes_text, data_graph_format='turtle',
-                   shacl_graph_format='turtle', ont_graph=my_partial_ont_text,
-                   ont_graph_format="turtle", inference='both', debug=True, do_owl_imports=True)
+    res = validate(
+        web_d1_ttl,
+        shacl_graph=my_partial_shapes_text,
+        data_graph_format='turtle',
+        shacl_graph_format='turtle',
+        ont_graph=my_partial_ont_text,
+        ont_graph_format="turtle",
+        inference='both',
+        debug=True,
+        do_owl_imports=True,
+    )
     conforms, graph, string = res
     print(string)
     assert conforms
@@ -424,12 +517,21 @@ def test_owl_imports_fail():
         assert True
         return True
 
-    res = validate(web_d2_ttl, shacl_graph=my_partial_shapes_text, data_graph_format='turtle',
-                   shacl_graph_format='turtle', ont_graph=my_partial_ont_text,
-                   ont_graph_format=None, inference='both', debug=True, do_owl_imports=True)
+    res = validate(
+        web_d2_ttl,
+        shacl_graph=my_partial_shapes_text,
+        data_graph_format='turtle',
+        shacl_graph_format='turtle',
+        ont_graph=my_partial_ont_text,
+        ont_graph_format=None,
+        inference='both',
+        debug=True,
+        do_owl_imports=True,
+    )
     conforms, graph, string = res
     print(string)
     assert not conforms
+
 
 def test_sparql_message_subst():
     df = '''@prefix ex: <http://datashapes.org/sh/tests/#> .
@@ -469,12 +571,18 @@ def test_sparql_message_subst():
             FILTER (?path = <http://www.w3.org/2000/01/rdf-schema#label>) .
         }""" ;
     .'''
-    res = validate(df, data_graph_format='turtle', inference=None, debug=True,)
+    res = validate(
+        df,
+        data_graph_format='turtle',
+        inference=None,
+        debug=True,
+    )
     conforms, graph, s = res
     assert "#InvalidResource1 cannot have a http://www.w3.org/2000/01/rdf-schema#label of Invalid resource 1" in s
     assert "#InvalidResource2 cannot have a http://www.w3.org/2000/01/rdf-schema#label of Invalid label 1" in s
     assert "#InvalidResource2 cannot have a http://www.w3.org/2000/01/rdf-schema#label of Invalid label 2" in s
     assert not conforms
+
 
 if __name__ == "__main__":
     test_validate_with_ontology()
@@ -490,4 +598,3 @@ if __name__ == "__main__":
     test_owl_imports()
     test_owl_imports_fail()
     test_sparql_message_subst()
-

@@ -95,15 +95,19 @@ def stringify_blank_node(
 
 
 def stringify_literal(graph: rdflib.Graph, node: rdflib.Literal, ns_manager: Optional[NamespaceManager] = None):
-    lit_val_string = str(node.value)
-    lex_val_string = str(node)
+    lit_val_string: Union[str, None] = None if node.value is None else str(node.value)
+    lex_string = str(node)
     if ns_manager is None:  # pragma: no cover
         ns_manager = graph.namespace_manager
         ns_manager.bind("sh", SH)
-    if lit_val_string != lex_val_string:
-        val_string = "\"{}\" = {}".format(lex_val_string, lit_val_string)
+    if lit_val_string is not None:
+        i_at = lit_val_string.find(" object at 0x")
+        if i_at > 0:
+            lit_val_string = lit_val_string[:i_at]
+    if lit_val_string is not None and lit_val_string != lex_string:
+        val_string = "\"{}\" = {}".format(lex_string, lit_val_string)
     else:
-        val_string = "\"{}\"".format(lex_val_string)
+        val_string = "\"{}\"".format(lex_string)
     if node.language:
         lang_string = ", lang={}".format(str(node.language))
     else:
@@ -136,7 +140,7 @@ def find_node_named_graph(dataset, node):
             return g
         except StopIteration:
             continue
-    raise RuntimeError("Cannot find that node in any named graph.")
+    raise RuntimeError(f"Cannot find node {node} in any named graph.")
 
 
 def stringify_node(

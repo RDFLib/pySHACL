@@ -109,7 +109,12 @@ optional arguments:
                         The maximum number of SHACL shapes "deep" that the
                         validator can go before reaching an "endpoint"
                         constraint.
-  -d, --debug           Output additional runtime messages.
+  -d, --debug           Output additional verbose runtime messages.
+  --focus [FOCUS]       Optional IRIs of focus nodes from the DataGraph, the shapes will
+                        validate only these node. Comma-separated list.
+  --shape [SHAPE]       Optional IRIs of a NodeShape or PropertyShape from the SHACL
+                        ShapesGraph, only these shapes will be used to validate the
+                        DataGraph. Comma-separated list.
   -f {human,table,turtle,xml,json-ld,nt,n3}, --format {human,table,turtle,xml,json-ld,nt,n3}
                         Choose an output format. Default is "human".
   -df {auto,turtle,xml,json-ld,nt,n3}, --data-file-format {auto,turtle,xml,json-ld,nt,n3}
@@ -172,8 +177,8 @@ Some other optional keyword variables available on the `validate` function:
 
 Return value:
 * a three-component `tuple` containing:
-  * `conforms`: a `bool`, indicating whether or not the `data_graph` conforms to the `shacl_graph`
-  * `results_graph`: a `Graph` object built according to the SHACL specification's [Validation Report](https://www.w3.org/TR/shacl/#validation-report) structure
+  * `conforms`: a `bool`, indicating whether the `data_graph` conforms to the `shacl_graph`
+  * `results_graph`: a `Graph` object built according to the SHACL specification's [Validation Report](https://www.w3.org/TR/shacl/#validation-report) scheme
   * `results_text`: python string representing a verbose textual representation of the [Validation Report](https://www.w3.org/TR/shacl/#validation-report)
 
 
@@ -199,6 +204,23 @@ Other errors the validator can generate:
 Unlike `ValidationFailure`, these errors are not passed back as a result by the `validate()` function, but thrown as exceptions by the validation engine and must be
 caught in a `try ... except` block.
 In the case of `ShapeLoadError` and `ConstraintLoadError`, see the `str()` string representation of the exception instance for the error message along with a link to the relevant section in the SHACL spec document.
+
+
+## Focus Node Filtering, and Shape Selection
+PySHACL v0.27.0 and above has two powerful new features:
+- Focus Node Filtering
+  - You can pass in a list of focus nodes to the validator, and it will only validate those focus nodes.
+  - _Note_, you still need to use a SHACL ShapesGraph, and the Shapes _still need to target_ the focus nodes.
+  - This feature will filter the Shapes' targeted focus nodes to include only those that are in the list of specified focus nodes.
+- SHACL Shape selection
+  - You can pass in a list of SHACL Shapes to the validator, and it will use only those Shapes for validation.
+  - This is useful for testing new shapes in your shapes graph, or for many other procedure-driven use cases.
+- Combined Shape Selection with Focus Node filtering
+  - The combination of the above two new features is especially powerful.
+  - If you give the validator a list of Shapes to use, and a list of focus nodes, the validator will operate in
+    a highly-targeted mode, it feeds those focus nodes directly into those given Shapes for validation.
+  - In this mode, the selected SHACL Shape does not need to specify any focus-targeting mechanisms of its own.
+
 
 ## SPARQL Remote Graph Mode
 

@@ -64,6 +64,8 @@ class Validator(object):
         options_dict.setdefault('allow_warnings', False)
         options_dict.setdefault('sparql_mode', False)
         options_dict.setdefault('max_validation_depth', 15)
+        options_dict.setdefault('focus_nodes', None)
+        options_dict.setdefault('use_shapes', None)
         if 'logger' not in options_dict:
             options_dict['logger'] = logging.getLogger(__name__)
             if options_dict['debug']:
@@ -230,6 +232,7 @@ class Validator(object):
             iterate_rules=bool(self.options.get("iterate_rules", False)),
             sparql_mode=bool(self.options.get("sparql_mode", False)),
             max_validation_depth=self.options.get("max_validation_depth", 15),
+            focus_nodes=self.options.get("focus_nodes", None),
             debug=self.debug,
         )
 
@@ -273,9 +276,60 @@ class Validator(object):
                 self.logger.debug("Running validation in-place, without modifying the DataGraph.")
                 self.inplace = True
             self._target_graph = the_target_graph
-
-        shapes = self.shacl_graph.shapes  # This property getter triggers shapes harvest.
+        if self.options.get("use_shapes", None) is not None and len(self.options["use_shapes"]) > 0:
+            using_manually_specified_shapes = True
+            expanded_use_shapes = []
+            for s in self.options["use_shapes"]:
+                s_lower = s.lower()
+                if (
+                    s_lower.startswith("http:")
+                    or s_lower.startswith("https:")
+                    or s_lower.startswith("urn:")
+                    or s_lower.startswith("file:")
+                ):
+                    expanded_use_shapes.append(URIRef(s))
+                else:
+                    try:
+                        expanded_use_shape = self.shacl_graph.graph.namespace_manager.expand_curie(s)
+                    except ValueError:
+                        expanded_use_shape = URIRef(s)
+                    expanded_use_shapes.append(expanded_use_shape)
+            shapes = self.shacl_graph.shapes_from_uris(expanded_use_shapes)
+        else:
+            using_manually_specified_shapes = False
+            shapes = self.shacl_graph.shapes  # This property getter triggers shapes harvest.
+        option_focus_nodes = self.options.get("focus_nodes", None)
+        if option_focus_nodes is not None and len(option_focus_nodes) > 0:
+            # Expand any CURIEs in the focus_nodes list
+            expanded_focus_nodes: List[URIRef] = []
+            for f in option_focus_nodes:
+                f_lower = f.lower()
+                if (
+                    f_lower.startswith("http:")
+                    or f_lower.startswith("https:")
+                    or f_lower.startswith("urn:")
+                    or f_lower.startswith("file:")
+                ):
+                    expanded_focus_nodes.append(URIRef(f))
+                else:
+                    try:
+                        expanded_focus_node = self.target_graph.namespace_manager.expand_curie(f)
+                    except ValueError:
+                        expanded_focus_node = URIRef(f)
+                    expanded_focus_nodes.append(expanded_focus_node)
+            self.options["focus_nodes"] = expanded_focus_nodes
+            specified_focus_nodes: Union[None, List[URIRef]] = expanded_focus_nodes
+        else:
+            specified_focus_nodes = None
         executor = self.make_executor()
+
+        # Special hack, if we are using manually specified shapes, and have
+        # manually specified focus nodes, then we need to disable the
+        # focus_nodes in the executor, because we apply the specified focus
+        # nodes directly to the specified shapes.
+        if using_manually_specified_shapes and specified_focus_nodes is not None:
+            executor.focus_nodes = None
+
         if executor.advanced_mode:
             self.logger.debug("Activating SHACL-AF Features.")
             target_types = gather_target_types(self.shacl_graph)
@@ -322,7 +376,10 @@ class Validator(object):
                         apply_rules(executor, advanced['rules'], g)
             try:
                 for s in shapes:
-                    _is_conform, _reports = s.validate(executor, g)
+                    if using_manually_specified_shapes and specified_focus_nodes is not None:
+                        _is_conform, _reports = s.validate(executor, g, focus=specified_focus_nodes)
+                    else:
+                        _is_conform, _reports = s.validate(executor, g)
                     non_conformant = non_conformant or (not _is_conform)
                     reports.extend(_reports)
                     if executor.abort_on_first and non_conformant:
@@ -406,6 +463,8 @@ def validate(
     allow_warnings: Optional[bool] = False,
     max_validation_depth: Optional[int] = None,
     sparql_mode: Optional[bool] = False,
+    focus_nodes: Optional[List[Union[str, URIRef]]] = None,
+    use_shapes: Optional[List[Union[str, URIRef]]] = None,
     **kwargs,
 ):
     """
@@ -434,6 +493,8 @@ def validate(
     :type max_validation_depth: int | None
     :param sparql_mode: Treat the DataGraph as a SPARQL endpoint, validate the graph at the SPARQL endpoint.
     :type sparql_mode: bool | None
+    :param focus_nodes: A list of IRIs to validate only those nodes.
+    :type focus_nodes: list | None
     :param kwargs:
     :return:
     """
@@ -532,6 +593,8 @@ def validate(
         'use_js': use_js,
         'sparql_mode': sparql_mode,
         'logger': log,
+        'focus_nodes': focus_nodes,
+        'use_shapes': use_shapes,
     }
     if max_validation_depth is not None:
         validator_options_dict['max_validation_depth'] = max_validation_depth

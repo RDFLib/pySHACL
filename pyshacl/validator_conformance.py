@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Iterator, List, Optional, Set, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
 
 import rdflib
 from rdflib import BNode, Literal, URIRef
@@ -13,14 +13,17 @@ from pyshacl.consts import (
     RDFS_Resource,
     SH_conforms,
     SH_detail,
+    SH_focusNode,
     SH_result,
     SH_resultMessage,
+    SH_resultPath,
     SH_ValidationReport,
+    SH_value,
 )
 from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 from pyshacl.functions import apply_functions, gather_functions
 from pyshacl.pytypes import GraphLike, RDFNode
-from pyshacl.rdfutil import compare_blank_node, compare_node, order_graph_literal
+from pyshacl.rdfutil import compare_blank_node, compare_node, order_graph_literal, stringify_node
 
 if TYPE_CHECKING:
     from pyshacl.validate import Validator
@@ -70,15 +73,15 @@ def compare_validation_reports(
     report_graph: GraphLike, expected_graph: GraphLike, expected_result, log: logging.Logger
 ):
     expected_conforms_i = expected_graph.objects(expected_result, SH_conforms)
-    expected_conforms = set(cast(Iterator[Literal], expected_conforms_i))
+    expected_conforms = set(expected_conforms_i)
     if len(expected_conforms) < 1:  # pragma: no cover
         raise ReportableRuntimeError(
             "Cannot check the expected result, the given expectedResult does not have an sh:conforms."
         )
     expected_conform = next(iter(expected_conforms))
-    expected_result_nodes = expected_graph.objects(expected_result, SH_result)
-    expected_result_nodes_set = set(expected_result_nodes)
-    expected_result_node_count = len(expected_result_nodes_set)
+    expected_result_nodes_i = expected_graph.objects(expected_result, SH_result)
+    expected_result_nodes = list(expected_result_nodes_i)
+    expected_result_node_count = len(expected_result_nodes)
 
     validation_reports = report_graph.subjects(RDF_type, SH_ValidationReport)
     validation_reports_set = set(validation_reports)
@@ -92,20 +95,25 @@ def compare_validation_reports(
     if eq != 0:
         return False
     report_conforms_i = report_graph.objects(validation_report, SH_conforms)
-    report_conforms = set(cast(Iterator[Literal], report_conforms_i))
+    report_conforms = set(report_conforms_i)
     if len(report_conforms) < 1:  # pragma: no cover
         raise ReportableRuntimeError(
             "Cannot check the validation report, the report graph does not have an sh:conforms."
         )
     report_conform = next(iter(report_conforms))
 
-    if bool(expected_conform.value) != bool(report_conform.value):
+    if (
+        isinstance(expected_conform, Literal)
+        and isinstance(report_conform, Literal)
+        and bool(expected_conform.value) != bool(report_conform.value)
+    ):
         # TODO:coverage: write a test for this
         log.error("Expected Result Conforms value is different from Validation Report's Conforms value.")
         return False
 
     report_result_nodes_i = report_graph.objects(validation_report, SH_result)
-    report_result_node_count = len(set(report_result_nodes_i))
+    report_result_nodes = list(report_result_nodes_i)
+    report_result_node_count = len(report_result_nodes)
 
     if expected_result_node_count != report_result_node_count:
         # TODO:coverage: write a test for this
@@ -113,6 +121,61 @@ def compare_validation_reports(
             "Number of expected result's sh:result entries is different from Validation Report's sh:result entries.\n"
             "Expected {}, got {}.".format(expected_result_node_count, report_result_node_count)
         )
+        return False
+
+    expected_results_dict: Dict[Tuple[str, str, str], Any] = {}
+    report_results_dict: Dict[Tuple[str, str, str], Any] = {}
+    for result_nodes, result_graph, dest_dict in (
+        (expected_result_nodes, expected_graph, expected_results_dict),
+        (report_result_nodes, report_graph, report_results_dict),
+    ):
+        for result in result_nodes:
+            result_focus_i = result_graph.objects(result, SH_focusNode)
+            result_focus_list = list(result_focus_i)
+            if len(result_focus_list) > 0:
+                f_node = result_focus_list[0]
+                if isinstance(f_node, Literal):
+                    result_focus = str(f_node)
+                elif isinstance(f_node, BNode):
+                    # result_value = "_:" + str(v_node)
+                    # Can't compare BNodes because they are
+                    # different in the shapes graph than the data graph
+                    result_focus = "BNode"
+                else:
+                    result_focus = stringify_node(result_graph, f_node)
+            else:
+                result_focus = ""
+            result_value_i = result_graph.objects(result, SH_value)
+            result_value_list = list(result_value_i)
+            if len(result_value_list) > 0:
+                v_node = result_value_list[0]
+                if isinstance(v_node, Literal):
+                    result_value = str(v_node)
+                elif isinstance(v_node, BNode):
+                    # result_value = "_:" + str(v_node)
+                    # Can't compare BNodes because they are
+                    # different in the shapes graph than the data graph
+                    result_value = "BNode"
+                else:
+                    result_value = stringify_node(result_graph, v_node)
+            else:
+                result_value = ""
+            result_path_i = result_graph.objects(result, SH_resultPath)
+            result_path_list = list(result_path_i)
+            if len(result_path_list) > 0:
+                result_path = stringify_node(result_graph, result_path_list[0])
+            else:
+                result_path = ""
+            dest_dict[(result_focus, result_value, result_path)] = result
+    not_found_results = 0
+    for expected_focus, expected_value, expected_path in expected_results_dict.keys():
+        if (expected_focus, expected_value, expected_path) not in report_results_dict:
+            log.error(
+                "Expected result not found in Validation Report.\n"
+                "Expected focus: {}, value: {}, path: {}.".format(expected_focus, expected_value, expected_path)
+            )
+            not_found_results += 1
+    if not_found_results > 0:
         return False
     return True
 

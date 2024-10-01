@@ -65,11 +65,19 @@ def test_217():
     shape_g = rdflib.Graph().parse(data=shapes_data, format='turtle')
     data_g = rdflib.Graph().parse(data=data_g_text, format="turtle")
     conforms, results_graph, results_text = pyshacl.validate(
-        data_g, shacl_graph=shape_g, debug=True, meta_shacl=False,
+        data_g,
+        shacl_graph=shape_g,
+        debug=True,
+        meta_shacl=False,
     )
     assert not conforms
-    assert ("Node kb:Thing-2 conforms to shape" in results_text or "Node kb:Thing-2 conforms to one or more shapes" in results_text) and \
-           ("Node kb:Thing-3 conforms to shape" in results_text or "Node kb:Thing-3 conforms to one or more shapes" in results_text)
+    assert (
+        "Node kb:Thing-2 must not conform to shape" in results_text
+        or "Node kb:Thing-2 must not conform to any shapes" in results_text
+    ) and (
+        "Node kb:Thing-3 must not conform to shape" in results_text
+        or "Node kb:Thing-3 must not conform to any shapes" in results_text
+    )
 
 
 if __name__ == "__main__":

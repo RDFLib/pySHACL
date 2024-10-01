@@ -5,11 +5,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
 ## [Unreleased]
+
+### Added
+- Focus Node Filtering
+  - You can now pass in a list of focus nodes to the validator, and it will only validate those focus nodes.
+  - Note, you still need to pass in a SHACL Shapes Graph, and the shapes still need to target the focus nodes.
+  - This feature will filter the Shapes' targeted focus nodes to include only those that are in the list of specified focus nodes.
+- SHACL Shape selection
+  - You can now pass in a list of SHACL Shapes to the validator, and it will use only those Shapes for validation.
+  - This is useful for testing new shapes in your shapes graph, or for many other procedure-driven use cases.
+- Combined Shape Selection with Focus Node filtering
+  - The combination of the above two new features is especially powerful.
+  - If you give the validator a list of Shapes to use, and a list of focus nodes, the validator will operate in
+    a highly-targeted mode, it feeds those focus nodes directly into those given Shapes for validation.
+  - In this mode, the selected SHACL Shape does not need to specify any focus-targeting mechanisms of its own.
+
 ### Changed
 - Don't make a clone of the DataGraph if the input data graph is ephemeral.
   - An ephemeral graph is one that is loaded from a string or file location by PySHACL
   - This includes all files opened by the PySHACL CLI validator tool
   - We don't need to make a copy because PySHACL parsed the Graph into memory itself already, so we are not concerned about not polluting the user's graph.
+- Refactorings
+  - shacl_path_to_sparql_path code to a reusable importable function
+  - move sht_validate and dash_validate routes to `validator_conformance.py` module.
+    - Removes some complexity from the main `validate` function.
+- Typing
+  - A whole swathe of python typing fixes and new type annotations. Thanks @ajnelson-nist
+
+### Fixed
+- Fix logic determining if a datagraph is ephemeral.
 
 
 ## [0.26.0] - 2024-04-11

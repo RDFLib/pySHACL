@@ -147,7 +147,28 @@ parser.add_argument(
     help="The maximum number of SHACL shapes \"deep\" that the validator can go before reaching an \"endpoint\" constraint.",
 )
 parser.add_argument(
-    '-d', '--debug', dest='debug', action='store_true', default=False, help='Output additional runtime messages.'
+    '-d',
+    '--debug',
+    dest='debug',
+    action='store_true',
+    default=False,
+    help='Output additional verbose runtime messages.',
+)
+parser.add_argument(
+    '--focus',
+    dest='focus',
+    action='store',
+    help='Optional IRIs of focus nodes from the DataGraph, the shapes will validate only these node. Comma-separated list.',
+    nargs="?",
+    default=None,
+)
+parser.add_argument(
+    '--shape',
+    dest='shape',
+    action='store',
+    help='Optional IRIs of a NodeShape or PropertyShape from the SHACL ShapesGraph, only these shapes will be used to validate the DataGraph. Comma-separated list.',
+    nargs="?",
+    default=None,
 )
 parser.add_argument(
     '-f',
@@ -262,6 +283,10 @@ def main(prog: Union[str, None] = None) -> None:
         validator_kwargs['advanced'] = True
     if args.js:
         validator_kwargs['js'] = True
+    if args.focus:
+        validator_kwargs['focus_nodes'] = [_f.strip() for _f in args.focus.split(',')]
+    if args.shape:
+        validator_kwargs['use_shapes'] = [_s.strip() for _s in args.shape.split(',')]
     if args.iterate_rules:
         if not args.advanced:
             sys.stderr.write("Iterate-Rules option only works when you enable Advanced Mode.\n")
