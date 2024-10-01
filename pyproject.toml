@@ -251,4 +251,13 @@ commands =
     - poetry show
     poetry run python3 -m mypy --ignore-missing-imports pyshacl
 
+[gh]
+# Don't include lint or type-checking in gh-actions matrix
+python =
+    3.12 = py312
+    3.11 = py311
+    3.10 = py310
+    3.9 = py39
+    3.8 = py38
+
 """
