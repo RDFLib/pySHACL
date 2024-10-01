@@ -33,6 +33,9 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
   - A whole swathe of python typing fixes and new type annotations. Thanks @ajnelson-nist
 
 ### Fixed
+- Fixed SHACL Path generation where sh:inversePath is wrapping a different kind of SHACL Path.
+  -  This probably fixes lots of unreported sh:inversePath bugs
+  -  Fixes #227
 - Fix logic determining if a datagraph is ephemeral.
 
 

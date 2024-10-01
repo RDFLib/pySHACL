@@ -194,15 +194,15 @@ def nodes_from_node_expression(
             return inter_nodes
         path_nodes = set(sg.objects(expr, SH_path))
         if len(path_nodes) > 0:
-            path_results = []
+            path_results: Set[Union['RDFNode', None]] = set()
             for p in path_nodes:
                 vals = value_nodes_from_path(sg, focus_node, p, data_graph)
-                path_results.extend(vals)
+                path_results.update(vals)
             return path_results
         filter_shapes = set(sg.objects(expr, SH_filterShape))
         nodes_nodes = set(sg.objects(expr, SH_nodes))
         if len(filter_shapes) > 0:  # pragma: no cover
-            # Note: Theres no tests for this whole filterShapes feature!
+            # Note: There's no tests for this whole filterShapes feature!
             if len(nodes_nodes) > 1:
                 warn(Warning("More than one sh:nodes found. Using the first one."))
             elif len(nodes_nodes) < 1:
