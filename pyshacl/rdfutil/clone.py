@@ -72,7 +72,9 @@ def clone_dataset(source_ds: ConjunctiveLike, target_ds=None):
     return target_ds
 
 
-def clone_graph(source_graph, target_graph=None, identifier=None):
+def clone_graph(
+    source_graph: rdflib.Graph, target_graph: Optional[rdflib.Graph] = None, identifier: Optional[str] = None
+) -> rdflib.Graph:
     """
     Make a clone of the source_graph by directly copying triples from source_graph to target_graph
     :param source_graph:
