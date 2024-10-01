@@ -653,8 +653,8 @@ class Shape(object):
                 focus_set = self.focus_nodes_sparql(target_graph, debug=executor.debug)
             else:
                 focus_set = self.focus_nodes(target_graph, debug=executor.debug)
-            self.logger.debug(f"Found {len(focus_list)} Focus Nodes to evaluate.")
             focus_list = list(focus_set)
+            self.logger.debug(f"Found {len(focus_list)} Focus Nodes to evaluate.")
 
         if len(focus_list) < 1:
             # It's possible for shapes to have _no_ focus nodes
