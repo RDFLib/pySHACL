@@ -212,47 +212,18 @@ toxworkdir={env:TOX_WORK_DIR:.tox}
 deps =
     poetry>=1.8.2
 passenv =
-    TRAVIS
-    TRAVIS_JOB_ID
-    TRAVIS_BRANCH
-    TRAVIS_BUILD_DIR
-    DRONE_BUILD_NUMBER
-    DRONE_STAGE_NAME
-    DRONE_STAGE_KIND
-    DRONE_REPO_NAME
-    DRONE_SOURCE_BRANCH
-    COVERALLS_SERVICE_NAME
-    COVERALLS_REPO_TOKEN
-    DRONE_COMMIT_AUTHOR_NAME
-    DRONE_COMMIT_AUTHOR_EMAIL
-    DRONE_COMMIT
-    HAS_COVERALLS
     DBUS_SESSION_BUS_ADDRESS
     PIP_KEYRING_PROVIDER
     PIP_FORCE_KEYRING
     PYTHON_KEYRING_BACKEND
 skip_install = true
 allowlist_externals = python3, ls, pwd, env, poetry
-setenv =
-    COVERALLS_SERVICE_NUMBER ={env:DRONE_BUILD_NUMBER:0}
-    COVERALLS_SERVICE_JOB_ID = {env:DRONE_STAGE_NAME:stage}
-    COVERALLS_SERVICE_JOB_NUMBER = {env:DRONE_BUILD_NUMBER:0}
-    COVERALLS_FLAG_NAME = {env:DRONE_STAGE_KIND:build}
-    COVERALLS_GIT_REPO = {env:DRONE_REPO_NAME:RDFLib/pySHACL}
-    COVERALLS_GIT_BRANCH = {env:DRONE_SOURCE_BRANCH:master}
-    CI_BRANCH = {env:DRONE_SOURCE_BRANCH:master}
-    GIT_BRANCH = {env:DRONE_SOURCE_BRANCH:master}
-    GIT_AUTHOR_NAME = {env:DRONE_COMMIT_AUTHOR_NAME:nobody}
-    GIT_AUTHOR_EMAIL = {env:DRONE_COMMIT_AUTHOR_EMAIL:nobody@example.com}
-    GIT_ID = {env:DRONE_COMMIT:0}
 
 commands_pre =
     py39: poetry run pip3 install -U "pip>=21.0"
     py310: poetry run pip3 install -U "pip>=21.3"
     py311: poetry run pip3 install -U "pip>=22.1"
     poetry install -vv -n --no-root --extras "js dev-coverage"
-    # Coveralls required to send coverage report to coveralls.io
-    py38: poetry run pip3 install "coveralls>=3.3.1"
 
 commands =
     - poetry show
@@ -260,7 +231,6 @@ commands =
     - poetry run coverage combine --append
     poetry run coverage report -m
     poetry run coverage html -i
-    py38: - coveralls
 
 [testenv:lint]
 commands_pre =
@@ -280,5 +250,14 @@ commands_pre =
 commands =
     - poetry show
     poetry run python3 -m mypy --ignore-missing-imports pyshacl
+
+[gh]
+# Don't include lint or type-checking in gh-actions matrix
+python =
+    3.12 = py312
+    3.11 = py311
+    3.10 = py310
+    3.9 = py39
+    3.8 = py38
 
 """
