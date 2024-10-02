@@ -92,7 +92,7 @@ class TripleRule(SHACLRule):
                     added += 1
             if added > 0:
                 for i in to_add:
-                    data_graph.add(cast(Tuple['Node', 'Node', 'Node'], i))
+                    data_graph.add(cast(Tuple['RDFNode', 'RDFNode', 'RDFNode'], i))
                 all_added += added
                 if self.iterate:
                     continue  # Jump up to iterate

@@ -2,7 +2,7 @@
 #
 import logging
 from os import getenv
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 import rdflib
 from rdflib import URIRef
@@ -242,7 +242,7 @@ class RuleExpandRunner(PySHACLRunType):
                         expanded_focus_node = URIRef(f)
                     expanded_focus_nodes.append(expanded_focus_node)
             self.options["focus_nodes"] = expanded_focus_nodes
-            specified_focus_nodes: Union[None, List[URIRef]] = expanded_focus_nodes
+            specified_focus_nodes: Union[None, Sequence[URIRef]] = expanded_focus_nodes
         else:
             specified_focus_nodes = None
         executor = self.make_executor()
@@ -264,7 +264,7 @@ class RuleExpandRunner(PySHACLRunType):
         if isinstance(the_target_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
             named_graphs = [
                 (
-                    rdflib.Graph(the_target_graph.store, i, namespace_manager=the_target_graph.namespace_manager)
+                    rdflib.Graph(the_target_graph.store, i, namespace_manager=the_target_graph.namespace_manager)  # type: ignore[arg-type]
                     if not isinstance(i, rdflib.Graph)
                     else i
                 )
@@ -273,7 +273,7 @@ class RuleExpandRunner(PySHACLRunType):
         else:
             named_graphs = [the_target_graph]
         if specified_focus_nodes is not None and using_manually_specified_shapes:
-            on_focus_nodes = specified_focus_nodes
+            on_focus_nodes: Union[Sequence[URIRef], None] = specified_focus_nodes
         else:
             on_focus_nodes = None
         if self.debug:

@@ -11,7 +11,7 @@ from rdflib import ConjunctiveGraph, Dataset, Graph, Literal, URIRef
 from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 from pyshacl.pytypes import GraphLike
 
-from .consts import RDF, SH, RDF_type
+from .consts import SH, RDF_type
 from .monkey import apply_patches, rdflib_bool_patch, rdflib_bool_unpatch
 from .rdfutil import load_from_source
 from .rule_expand_runner import RuleExpandRunner
