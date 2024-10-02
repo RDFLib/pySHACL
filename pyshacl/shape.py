@@ -632,7 +632,7 @@ class Shape(object):
             if executor.debug:
                 self.logger.debug(f"Skipping shape because it is deactivated: {str(self)}")
             return True, []
-        focus_list: Sequence[RDFNode] = []
+        focus_list: Sequence[RDFNode]
         if focus is not None:
             lh_shape = False
             rh_shape = True
