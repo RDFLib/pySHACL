@@ -319,15 +319,17 @@ class Validator(PySHACLRunType):
         if executor.advanced_mode:
             self.logger.debug("Activating SHACL-AF Features.")
             target_types = gather_target_types(self.shacl_graph)
+            gather_from_shapes = None if not using_manually_specified_shapes else [s.node for s in shapes]
             advanced = {
                 'functions': gather_functions(executor, self.shacl_graph),
-                'rules': gather_rules(executor, self.shacl_graph),
+                'rules': gather_rules(executor, self.shacl_graph, from_shapes=gather_from_shapes),
             }
             for s in shapes:
                 s.set_advanced(True)
             apply_target_types(target_types)
         else:
             advanced = {}
+
         if isinstance(the_target_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
             named_graphs = [
                 (
@@ -339,8 +341,11 @@ class Validator(PySHACLRunType):
             ]
         else:
             named_graphs = [the_target_graph]
+        if specified_focus_nodes is not None and using_manually_specified_shapes:
+            on_focus_nodes = specified_focus_nodes
+        else:
+            on_focus_nodes = None
         reports = []
-
         non_conformant = False
         aborted = False
         if executor.abort_on_first and self.debug:
@@ -359,13 +364,10 @@ class Validator(PySHACLRunType):
                     if executor.sparql_mode:
                         self.logger.warning("Skipping SHACL Rules because operating in SPARQL Remote Graph Mode.")
                     else:
-                        apply_rules(executor, advanced['rules'], g)
+                        apply_rules(executor, advanced['rules'], g, focus_nodes=on_focus_nodes)
             try:
                 for s in shapes:
-                    if using_manually_specified_shapes and specified_focus_nodes is not None:
-                        _is_conform, _reports = s.validate(executor, g, focus=specified_focus_nodes)
-                    else:
-                        _is_conform, _reports = s.validate(executor, g)
+                    _is_conform, _reports = s.validate(executor, g, focus=on_focus_nodes)
                     non_conformant = non_conformant or (not _is_conform)
                     reports.extend(_reports)
                     if executor.abort_on_first and non_conformant:
@@ -374,7 +376,7 @@ class Validator(PySHACLRunType):
                 if aborted:
                     break
             finally:
-                if advanced:
+                if advanced and advanced['functions']:
                     unapply_functions(advanced['functions'], g)
         v_report, v_text = self.create_validation_report(self.shacl_graph, not non_conformant, reports)
         return (not non_conformant), v_report, v_text

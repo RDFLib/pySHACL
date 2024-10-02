@@ -246,20 +246,18 @@ class RuleExpandRunner(PySHACLRunType):
         else:
             specified_focus_nodes = None
         executor = self.make_executor()
-
         # Special hack, if we are using manually specified shapes, and have
         # manually specified focus nodes, then we need to disable the
         # focus_nodes in the executor, because we apply the specified focus
         # nodes directly to the specified shapes.
         if using_manually_specified_shapes and specified_focus_nodes is not None:
             executor.focus_nodes = None
-
         self.logger.debug("Activating SHACL-AF Features.")
         target_types = gather_target_types(self.shacl_graph)
-        advanced = {
-            'functions': gather_functions(executor, self.shacl_graph),
-            'rules': gather_rules(executor, self.shacl_graph),
-        }
+        gather_from_shapes = None if not using_manually_specified_shapes else [s.node for s in shapes]
+        gathered_functions = gather_functions(executor, self.shacl_graph)
+        gathered_rules = gather_rules(executor, self.shacl_graph, from_shapes=gather_from_shapes)
+
         for s in shapes:
             s.set_advanced(True)
         apply_target_types(target_types)
@@ -274,18 +272,22 @@ class RuleExpandRunner(PySHACLRunType):
             ]
         else:
             named_graphs = [the_target_graph]
+        if specified_focus_nodes is not None and using_manually_specified_shapes:
+            on_focus_nodes = specified_focus_nodes
+        else:
+            on_focus_nodes = None
         if self.debug:
             self.logger.debug(f"Will run SHACL Rules expansion on {len(named_graphs)} named graph/s.")
         for g in named_graphs:
             if self.debug:
                 self.logger.debug(f"Running SHACL Rules on DataGraph named {g.identifier}")
-            if advanced['functions']:
-                apply_functions(executor, advanced['functions'], g)
+            if gathered_functions:
+                apply_functions(executor, gathered_functions, g)
             try:
-                if advanced['rules']:
-                    apply_rules(executor, advanced['rules'], g)
+                if gathered_rules:
+                    apply_rules(executor, gathered_rules, g, focus_nodes=on_focus_nodes)
             finally:
-                if advanced:
-                    unapply_functions(advanced['functions'], g)
+                if gathered_functions:
+                    unapply_functions(gathered_functions, g)
 
         return the_target_graph
