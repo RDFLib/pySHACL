@@ -1,8 +1,9 @@
 # -*- coding: latin-1 -*-
 #
+from .entrypoints import validate
 from .shape import Shape
 from .shapes_graph import ShapesGraph
-from .validate import Validator, validate
+from .validator import Validator
 
 # version compliant with https://www.python.org/dev/peps/pep-0440/
 __version__ = '0.26.0'
