@@ -1,6 +1,7 @@
 # -*- coding: latin-1 -*-
 #
-from .entrypoints import validate
+from .entrypoints import shacl_rules, validate
+from .rule_expand_runner import RuleExpandRunner
 from .shape import Shape
 from .shapes_graph import ShapesGraph
 from .validator import Validator
@@ -9,4 +10,4 @@ from .validator import Validator
 __version__ = '0.26.0'
 # Don't forget to change the version number in pyproject.toml, Dockerfile, and CITATION.cff along with this one
 
-__all__ = ['validate', 'Validator', '__version__', 'Shape', 'ShapesGraph']
+__all__ = ['validate', 'shacl_rules', 'Validator', 'RuleExpandRunner', '__version__', 'Shape', 'ShapesGraph']

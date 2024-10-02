@@ -6,13 +6,15 @@ from io import BufferedIOBase, TextIOBase
 from sys import stderr
 from typing import List, Optional, Tuple, Union
 
-from rdflib import Dataset, Graph, URIRef
+from rdflib import ConjunctiveGraph, Dataset, Graph, Literal, URIRef
 
 from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 from pyshacl.pytypes import GraphLike
 
+from .consts import RDF, SH, RDF_type
 from .monkey import apply_patches, rdflib_bool_patch, rdflib_bool_unpatch
 from .rdfutil import load_from_source
+from .rule_expand_runner import RuleExpandRunner
 from .validator import Validator, assign_baked_in
 from .validator_conformance import check_dash_result
 
@@ -234,3 +236,108 @@ def make_default_logger(name: Union[str, None] = None, debug: bool = False) -> l
     log.setLevel(logging.INFO if not debug else logging.DEBUG)
     log_handler.setLevel(logging.INFO if not debug else logging.DEBUG)
     return log
+
+
+def shacl_rules(
+    data_graph: Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes],
+    *args,
+    shacl_graph: Optional[Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes]] = None,
+    ont_graph: Optional[Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes]] = None,
+    inference: Optional[str] = None,
+    inplace: Optional[bool] = False,
+    focus_nodes: Optional[List[Union[str, URIRef]]] = None,
+    use_shapes: Optional[List[Union[str, URIRef]]] = None,
+    **kwargs,
+) -> Union[str, GraphLike]:
+    """
+    :param data_graph: rdflib.Graph or file path or web url of the data to validate
+    :type data_graph: rdflib.Graph | str | bytes
+    :param args:
+    :type args: list
+    :param shacl_graph: rdflib.Graph or file path or web url of the SHACL Shapes graph to use to
+    validate the data graph
+    :type shacl_graph: rdflib.Graph | str | bytes
+    :param ont_graph: rdflib.Graph or file path or web url of an extra ontology document to mix into the data graph
+    :type ont_graph: rdflib.Graph | str | bytes
+    :param inference: One of "rdfs", "owlrl", "both", "none", or None
+    :type inference: str | None
+    :param inplace: If this is enabled, do not clone the datagraph, manipulate it in-place
+    :type inplace: bool
+    :param focus_nodes: A list of IRIs to validate only those nodes.
+    :type focus_nodes: list | None
+    :param use_shapes: A list of IRIs to use only those shapes from the SHACL ShapesGraph.
+    :type use_shapes: list | None
+    :param kwargs:
+    :return:
+    """
+
+    do_debug = kwargs.get('debug', False)
+    log = make_default_logger(name="pyshacl-rules", debug=do_debug)
+    apply_patches()
+    assign_baked_in()
+    do_owl_imports = kwargs.pop('do_owl_imports', False)
+    data_graph_format = kwargs.pop('data_graph_format', None)
+    if kwargs.get('sparql_mode', None):
+        raise ReportableRuntimeError("The SHACL Rules expander cannot be used in SPARQL Remote Graph Mode.")
+    if isinstance(data_graph, (str, bytes, BufferedIOBase, TextIOBase)):
+        # DataGraph is passed in as Text. It is not a rdflib.Graph
+        # That means we load it into an ephemeral graph at runtime
+        # that means we don't need to make a copy to prevent polluting it.
+        ephemeral = True
+    else:
+        ephemeral = False
+    use_js = kwargs.pop('js', None)
+    # force no owl imports on data_graph
+    loaded_dg = load_from_source(
+        data_graph, rdf_format=data_graph_format, multigraph=True, do_owl_imports=False, logger=log
+    )
+    ont_graph_format = kwargs.pop('ont_graph_format', None)
+    if ont_graph is not None:
+        loaded_og = load_from_source(
+            ont_graph, rdf_format=ont_graph_format, multigraph=True, do_owl_imports=do_owl_imports, logger=log
+        )
+    else:
+        loaded_og = None
+    shacl_graph_format = kwargs.pop('shacl_graph_format', None)
+    if shacl_graph is not None:
+        rdflib_bool_patch()
+        loaded_sg = load_from_source(
+            shacl_graph, rdf_format=shacl_graph_format, multigraph=True, do_owl_imports=do_owl_imports, logger=log
+        )
+        rdflib_bool_unpatch()
+    else:
+        loaded_sg = None
+    iterate_rules = kwargs.pop('iterate_rules', False)
+    runner_options_dict = {
+        'debug': do_debug or False,
+        'inference': inference,
+        'inplace': inplace or ephemeral,
+        'iterate_rules': iterate_rules,
+        'use_js': use_js,
+        'logger': log,
+        'focus_nodes': focus_nodes,
+        'use_shapes': use_shapes,
+    }
+    serialize_expanded_graph = kwargs.get('serialize_expanded_graph', None)
+    try:
+        runner = RuleExpandRunner(
+            loaded_dg,
+            shacl_graph=loaded_sg,
+            ont_graph=loaded_og,
+            options=runner_options_dict,
+        )
+        expanded_graph = runner.run()
+    except ValidationFailure as e:
+        error = "SHACL Rules Expansion Failure - {}".format(e.message)
+        if serialize_expanded_graph:
+            return error
+        else:
+            g = Graph()
+            g.add((URIRef("<urn:rdflib:pyshacl:shacl-rules-error>"), RDF_type, SH.ValidationFailure))
+            g.add((URIRef("<urn:rdflib:pyshacl:shacl-rules-error>"), SH.message, Literal(error)))
+            return g
+    if serialize_expanded_graph:
+        guess_format = "trig" if isinstance(expanded_graph, (Dataset, ConjunctiveGraph)) else "turtle"
+        serialize_format = kwargs.get('serialize_expanded_graph_format', guess_format)
+        return expanded_graph.serialize(format=serialize_format)
+    return expanded_graph

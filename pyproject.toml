@@ -109,6 +109,7 @@ dev-coverage = ["pytest-cov", "coverage", "platformdirs"]
 
 [tool.poetry.scripts]
 pyshacl = "pyshacl.cli:main"
+pyshacl_rules = "pyshacl.cli_rules:main"
 pyshacl_validate = "pyshacl.cli:main"
 pyshacl_server = "pyshacl.http:cli"
 

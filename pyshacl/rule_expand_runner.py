@@ -1,18 +1,13 @@
 # -*- coding: utf-8 -*-
 #
 import logging
-import sys
-from os import getenv, path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from os import getenv
+from typing import Any, Dict, List, Optional, Union
 
 import rdflib
-from rdflib import BNode, Literal, URIRef
+from rdflib import URIRef
 
 from .consts import (
-    RDF_type,
-    SH_conforms,
-    SH_result,
-    SH_ValidationReport,
     env_truths,
 )
 from .errors import ReportableRuntimeError
@@ -20,8 +15,6 @@ from .extras import check_extra_installed
 from .functions import apply_functions, gather_functions, unapply_functions
 from .pytypes import GraphLike, SHACLExecutor
 from .rdfutil import (
-    add_baked_in,
-    clone_blank_node,
     clone_graph,
     inoculate,
     inoculate_dataset,
@@ -36,7 +29,7 @@ from .target import apply_target_types, gather_target_types
 USE_FULL_MIXIN = getenv("PYSHACL_USE_FULL_MIXIN") in env_truths
 
 
-class Validator(PySHACLRunType):
+class RuleExpandRunner(PySHACLRunType):
     def __init__(
         self,
         data_graph: GraphLike,
@@ -54,27 +47,19 @@ class Validator(PySHACLRunType):
         self.pre_inferenced = kwargs.pop('pre_inferenced', False)
         self.inplace = options['inplace']
         if not isinstance(data_graph, rdflib.Graph):
-            raise RuntimeError("data_graph must be a rdflib Graph object")
+            raise RuntimeError("data_graph must be a rdflib Graph-like object")
         self.data_graph = data_graph  # type: GraphLike
         self._target_graph = None
         self.ont_graph = ont_graph  # type: Optional[GraphLike]
         self.data_graph_is_multigraph = isinstance(self.data_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph))
         if self.ont_graph is not None and isinstance(self.ont_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
             self.ont_graph.default_union = True
-        if self.ont_graph is not None and options['sparql_mode']:
-            raise ReportableRuntimeError("Cannot use SPARQL Remote Graph Mode with extra Ontology Graph inoculation.")
         if shacl_graph is None:
-            if options['sparql_mode']:
-                raise ReportableRuntimeError(
-                    "SHACL Shapes Graph must be a separate local graph or file when in SPARQL Remote Graph Mode."
-                )
             shacl_graph = clone_graph(data_graph, identifier='shacl')
         assert isinstance(shacl_graph, rdflib.Graph), "shacl_graph must be a rdflib Graph object"
         self.shacl_graph = ShapesGraph(shacl_graph, self.debug, self.logger)  # type: ShapesGraph
 
         if options['use_js']:
-            if options['sparql_mode']:
-                raise ReportableRuntimeError("Cannot use SHACL-JS in SPARQL Remote Graph Mode.")
             is_js_installed = check_extra_installed('js')
             if is_js_installed:
                 self.shacl_graph.enable_js()
@@ -82,16 +67,10 @@ class Validator(PySHACLRunType):
     @classmethod
     def _load_default_options(cls, options_dict: dict):
         options_dict.setdefault('debug', False)
-        options_dict.setdefault('advanced', False)
         options_dict.setdefault('inference', 'none')
         options_dict.setdefault('inplace', False)
         options_dict.setdefault('use_js', False)
         options_dict.setdefault('iterate_rules', False)
-        options_dict.setdefault('abort_on_first', False)
-        options_dict.setdefault('allow_infos', False)
-        options_dict.setdefault('allow_warnings', False)
-        options_dict.setdefault('sparql_mode', False)
-        options_dict.setdefault('max_validation_depth', 15)
         options_dict.setdefault('focus_nodes', None)
         options_dict.setdefault('use_shapes', None)
         if 'logger' not in options_dict:
@@ -154,43 +133,6 @@ class Validator(PySHACLRunType):
             logger.error("Error while running OWL-RL Deductive Closure")
             raise ReportableRuntimeError("Error while running OWL-RL Deductive Closure\n{}".format(str(e.args[0])))
 
-    @classmethod
-    def create_validation_report(cls, sg, conforms: bool, results: List[Tuple]):
-        v_text = "Validation Report\nConforms: {}\n".format(str(conforms))
-        result_len = len(results)
-        if not conforms and result_len < 1:
-            raise RuntimeError("A Non-Conformant Validation Report must have at least one result.")
-        if result_len > 0:
-            v_text += "Results ({}):\n".format(str(result_len))
-        vg = rdflib.Graph(bind_namespaces='core')
-        for p, n in sg.graph.namespace_manager.namespaces():
-            vg.namespace_manager.bind(p, n)
-        vr = BNode()
-        vg.add((vr, RDF_type, SH_ValidationReport))
-        vg.add((vr, SH_conforms, Literal(conforms)))
-        cloned_nodes: Dict[Tuple[GraphLike, str], Union[BNode, URIRef]] = {}
-        for result in iter(results):
-            _d, _bn, _tr = result
-            v_text += _d
-            vg.add((vr, SH_result, _bn))
-            for tr in iter(_tr):
-                s, p, o = tr
-                if isinstance(o, tuple):
-                    source = o[0]
-                    node = o[1]
-                    if isinstance(node, Literal):
-                        o = node  # No need to clone a literal from the data graph
-                    else:
-                        _id = str(node)
-                        if (source, _id) in cloned_nodes:
-                            o = cloned_nodes[(source, _id)]
-                        elif isinstance(node, BNode):
-                            cloned_nodes[(source, _id)] = o = clone_blank_node(source, node, vg, keepid=True)
-                        else:
-                            cloned_nodes[(source, _id)] = o = URIRef(_id)
-                vg.add((s, p, o))
-        return vg, v_text
-
     @property
     def target_graph(self):
         return self._target_graph
@@ -211,19 +153,20 @@ class Validator(PySHACLRunType):
     def make_executor(self) -> SHACLExecutor:
         return SHACLExecutor(
             validator=self,
-            advanced_mode=bool(self.options.get('advanced', False)),
-            abort_on_first=bool(self.options.get("abort_on_first", False)),
-            allow_infos=bool(self.options.get("allow_infos", False)),
-            allow_warnings=bool(self.options.get("allow_warnings", False)),
+            advanced_mode=True,
+            abort_on_first=False,
+            allow_infos=False,
+            allow_warnings=False,
             iterate_rules=bool(self.options.get("iterate_rules", False)),
-            sparql_mode=bool(self.options.get("sparql_mode", False)),
-            max_validation_depth=self.options.get("max_validation_depth", 15),
+            sparql_mode=False,
+            max_validation_depth=999,
             focus_nodes=self.options.get("focus_nodes", None),
             debug=self.debug,
         )
 
-    def run(self):
+    def run(self) -> GraphLike:
         if self.target_graph is not None:
+            # Target graph is already set up with pre-inferenced and pre-cloned data_graph
             the_target_graph = self.target_graph
         else:
             has_cloned = False
@@ -241,8 +184,6 @@ class Validator(PySHACLRunType):
             if self.inplace and self.debug:
                 self.logger.debug("Skipping DataGraph clone because PySHACL is operating in inplace mode.")
             if inference_option and not self.pre_inferenced and str(inference_option) != "none":
-                if self.options.get('sparql_mode', False):
-                    raise ReportableRuntimeError("Cannot use any pre-inference option in SPARQL Remote Graph Mode.")
                 if not has_cloned and not self.inplace:
                     self.logger.debug("Cloning DataGraph to temporary memory graph before pre-inferencing.")
                     the_target_graph = clone_graph(the_target_graph)
@@ -250,18 +191,15 @@ class Validator(PySHACLRunType):
                 self.logger.debug(f"Running pre-inferencing with option='{inference_option}'.")
                 self._run_pre_inference(the_target_graph, inference_option, logger=self.logger)
                 self.pre_inferenced = True
-            if not has_cloned and not self.inplace and self.options['advanced']:
-                if self.options.get('sparql_mode', False):
-                    raise ReportableRuntimeError("Cannot clone DataGraph in SPARQL Remote Graph Mode.")
+            if not has_cloned and not self.inplace:
                 # We still need to clone in advanced mode, because of triple rules
-                self.logger.debug("Forcing clone of DataGraph because advanced mode is enabled.")
+                self.logger.debug(
+                    "Forcing clone of DataGraph because expanding rules cannot modify the input datagraph."
+                )
                 the_target_graph = clone_graph(the_target_graph)
                 has_cloned = True
-            if not has_cloned and not self.inplace:
-                # No inferencing, no ont_graph, and no advanced mode, now implies inplace mode
-                self.logger.debug("Running validation in-place, without modifying the DataGraph.")
-                self.inplace = True
             self._target_graph = the_target_graph
+
         if self.options.get("use_shapes", None) is not None and len(self.options["use_shapes"]) > 0:
             using_manually_specified_shapes = True
             expanded_use_shapes = []
@@ -316,18 +254,15 @@ class Validator(PySHACLRunType):
         if using_manually_specified_shapes and specified_focus_nodes is not None:
             executor.focus_nodes = None
 
-        if executor.advanced_mode:
-            self.logger.debug("Activating SHACL-AF Features.")
-            target_types = gather_target_types(self.shacl_graph)
-            advanced = {
-                'functions': gather_functions(executor, self.shacl_graph),
-                'rules': gather_rules(executor, self.shacl_graph),
-            }
-            for s in shapes:
-                s.set_advanced(True)
-            apply_target_types(target_types)
-        else:
-            advanced = {}
+        self.logger.debug("Activating SHACL-AF Features.")
+        target_types = gather_target_types(self.shacl_graph)
+        advanced = {
+            'functions': gather_functions(executor, self.shacl_graph),
+            'rules': gather_rules(executor, self.shacl_graph),
+        }
+        for s in shapes:
+            s.set_advanced(True)
+        apply_target_types(target_types)
         if isinstance(the_target_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
             named_graphs = [
                 (
@@ -339,62 +274,18 @@ class Validator(PySHACLRunType):
             ]
         else:
             named_graphs = [the_target_graph]
-        reports = []
-
-        non_conformant = False
-        aborted = False
-        if executor.abort_on_first and self.debug:
-            self.logger.debug(
-                "Abort on first error is enabled. Will exit at end of first Shape that fails validation."
-            )
         if self.debug:
-            self.logger.debug(f"Will run validation on {len(named_graphs)} named graph/s.")
+            self.logger.debug(f"Will run SHACL Rules expansion on {len(named_graphs)} named graph/s.")
         for g in named_graphs:
             if self.debug:
-                self.logger.debug(f"Validating DataGraph named {g.identifier}")
-            if advanced:
-                if advanced['functions']:
-                    apply_functions(executor, advanced['functions'], g)
-                if advanced['rules']:
-                    if executor.sparql_mode:
-                        self.logger.warning("Skipping SHACL Rules because operating in SPARQL Remote Graph Mode.")
-                    else:
-                        apply_rules(executor, advanced['rules'], g)
+                self.logger.debug(f"Running SHACL Rules on DataGraph named {g.identifier}")
+            if advanced['functions']:
+                apply_functions(executor, advanced['functions'], g)
             try:
-                for s in shapes:
-                    if using_manually_specified_shapes and specified_focus_nodes is not None:
-                        _is_conform, _reports = s.validate(executor, g, focus=specified_focus_nodes)
-                    else:
-                        _is_conform, _reports = s.validate(executor, g)
-                    non_conformant = non_conformant or (not _is_conform)
-                    reports.extend(_reports)
-                    if executor.abort_on_first and non_conformant:
-                        aborted = True
-                        break
-                if aborted:
-                    break
+                if advanced['rules']:
+                    apply_rules(executor, advanced['rules'], g)
             finally:
                 if advanced:
                     unapply_functions(advanced['functions'], g)
-        v_report, v_text = self.create_validation_report(self.shacl_graph, not non_conformant, reports)
-        return (not non_conformant), v_report, v_text
 
-
-def assign_baked_in():
-    if getattr(sys, 'frozen', False):
-        # runs in a pyinstaller bundle
-        HERE = sys._MEIPASS
-    else:
-        HERE = path.dirname(__file__)
-    shacl_file = path.join(HERE, "assets", "shacl.pickle")
-    add_baked_in("http://www.w3.org/ns/shacl", shacl_file)
-    add_baked_in("https://www.w3.org/ns/shacl", shacl_file)
-    add_baked_in("http://www.w3.org/ns/shacl.ttl", shacl_file)
-    shacl_shacl_file = path.join(HERE, "assets", "shacl-shacl.pickle")
-    add_baked_in("http://www.w3.org/ns/shacl-shacl", shacl_shacl_file)
-    add_baked_in("https://www.w3.org/ns/shacl-shacl", shacl_shacl_file)
-    add_baked_in("http://www.w3.org/ns/shacl-shacl.ttl", shacl_shacl_file)
-    schema_file = path.join(HERE, "assets", "schema.pickle")
-    add_baked_in("http://datashapes.org/schema", schema_file)
-    add_baked_in("https://datashapes.org/schema", schema_file)
-    add_baked_in("http://datashapes.org/schema.ttl", schema_file)
+        return the_target_graph
