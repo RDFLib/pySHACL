@@ -12,6 +12,7 @@ from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError, ShapeRecursionWarning, ValidationFailure
 from pyshacl.pytypes import GraphLike, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
+from pyshacl.shape import Shape
 
 SH_not = SH["not"]
 SH_and = SH["and"]
@@ -37,7 +38,7 @@ class NotConstraintComponent(ConstraintComponent):
     shape_expecting = True
     list_taking = False
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(NotConstraintComponent, self).__init__(shape)
         not_list = list(self.shape.objects(SH_not))
         if len(not_list) < 1:
@@ -140,7 +141,7 @@ class AndConstraintComponent(ConstraintComponent):
     shape_expecting = True
     list_taking = True
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(AndConstraintComponent, self).__init__(shape)
         and_list = list(self.shape.objects(SH_and))
         if len(and_list) < 1:
@@ -236,7 +237,7 @@ class OrConstraintComponent(ConstraintComponent):
     shape_expecting = True
     list_taking = True
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(OrConstraintComponent, self).__init__(shape)
         or_list = list(self.shape.objects(SH_or))
         if len(or_list) < 1:
@@ -332,7 +333,7 @@ class XoneConstraintComponent(ConstraintComponent):
     shape_expecting = True
     list_taking = True
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(XoneConstraintComponent, self).__init__(shape)
         xone_nodes = list(self.shape.objects(SH_xone))
         if len(xone_nodes) < 1:

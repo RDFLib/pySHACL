@@ -12,6 +12,7 @@ from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError
 from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
+from pyshacl.shape import Shape
 
 XSD_integer = XSD.integer
 SH_minCount = SH.minCount
@@ -32,7 +33,7 @@ class MinCountConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_MinCountConstraintComponent
 
-    def __init__(self, shape, min_count_objects: Optional[List[RDFNode]] = None):
+    def __init__(self, shape: Shape, min_count_objects: Optional[List[RDFNode]] = None) -> None:
         super(MinCountConstraintComponent, self).__init__(shape)
         if min_count_objects is None:
             min_count = list(self.shape.objects(SH_minCount))
@@ -118,7 +119,7 @@ class MaxCountConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_MaxCountConstraintComponent
 
-    def __init__(self, shape, max_count_objects: Optional[List[RDFNode]] = None):
+    def __init__(self, shape: Shape, max_count_objects: Optional[List[RDFNode]] = None) -> None:
         super(MaxCountConstraintComponent, self).__init__(shape)
         if max_count_objects is None:
             max_count = list(self.shape.objects(SH_maxCount))

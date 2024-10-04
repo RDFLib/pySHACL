@@ -12,6 +12,7 @@ from pyshacl.consts import SH, SH_deactivated, SH_message, SH_select
 from pyshacl.errors import ConstraintLoadError, ValidationFailure
 from pyshacl.helper import get_query_helper_cls
 from pyshacl.pytypes import GraphLike, SHACLExecutor
+from pyshacl.shape import Shape
 
 SH_sparql = SH.sparql
 SH_SPARQLConstraintComponent = SH.SPARQLConstraintComponent
@@ -26,7 +27,7 @@ class SPARQLBasedConstraint(ConstraintComponent):
 
     shacl_constraint_component = SH_SPARQLConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(SPARQLBasedConstraint, self).__init__(shape)
         sg = self.shape.sg.graph
         sparql_node_list = set(self.shape.objects(SH_sparql))

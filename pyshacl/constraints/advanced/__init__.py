@@ -25,7 +25,7 @@ if typing.TYPE_CHECKING:
 class ExpressionConstraint(ConstraintComponent):
     shacl_constraint_component = SH_ExpressionConstraintComponent
 
-    def __init__(self, shape: 'Shape'):
+    def __init__(self, shape: 'Shape') -> None:
         super(ExpressionConstraint, self).__init__(shape)
         self.expr_nodes = list(self.shape.objects(SH_expression))
         if len(self.expr_nodes) < 1:

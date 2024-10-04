@@ -2,15 +2,18 @@
 """
 https://www.w3.org/TR/shacl/#core-components-others
 """
-from typing import Dict, List, cast
+import logging
+from typing import Dict, List, Set, Union, cast
 
 import rdflib
+from rdflib.term import IdentifiedNode
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import RDFS, SH, RDF_type, SH_property
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
 from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
+from pyshacl.shape import Shape
 
 SH_InConstraintComponent = SH.InConstraintComponent
 SH_ClosedConstraintComponent = SH.ClosedConstraintComponent
@@ -34,24 +37,29 @@ class InConstraintComponent(ConstraintComponent):
     shape_expecting = False
     list_taking = True
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(InConstraintComponent, self).__init__(shape)
-        in_vals = list(self.shape.objects(SH_in))
-        if len(in_vals) < 1:
+        in_val_lists: List[IdentifiedNode] = list(self.shape.objects(SH_in))
+        if len(in_val_lists) < 1:
             raise ConstraintLoadError(
                 "InConstraintComponent must have at least one sh:in predicate.",
                 "https://www.w3.org/TR/shacl/#InConstraintComponent",
             )
-        elif len(in_vals) > 1:
+        elif len(in_val_lists) > 1:
             raise ConstraintLoadError(
                 "InConstraintComponent must have at most one sh:in predicate.",
                 "https://www.w3.org/TR/shacl/#InConstraintComponent",
             )
-        self.in_list = in_vals[0]
+        self.in_list: IdentifiedNode = in_val_lists[0]
         sg = self.shape.sg.graph
 
-        in_vals = set(sg.items(self.in_list))
-        self.in_vals = in_vals
+        self.in_vals: Set[RDFNode] = set()
+        for item in sg.items(self.in_list):
+            if not isinstance(item, (rdflib.BNode, rdflib.Literal, rdflib.URIRef)):
+                logging.debug("item = %r.", item)
+                logging.debug("type(item) = %r.", type(item))
+                raise TypeError("item in sh:in predicate is neither URIRef, BNode, or Literal.")
+            self.in_vals.add(item)
 
     @classmethod
     def constraint_parameters(cls) -> List[rdflib.URIRef]:
@@ -100,7 +108,7 @@ class ClosedConstraintComponent(ConstraintComponent):
 
     ALWAYS_IGNORE = {(RDF_type, RDFS.Resource)}
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(ClosedConstraintComponent, self).__init__(shape)
         sg = self.shape.sg.graph
         closed_vals = list(self.shape.objects(SH_closed))
@@ -122,11 +130,17 @@ class ClosedConstraintComponent(ConstraintComponent):
             )
         assert isinstance(closed_vals[0], rdflib.Literal), "sh:closed must take a xsd:boolean literal."
         self.is_closed = bool(closed_vals[0].value)
-        self.ignored_props = set()
+        self.ignored_props: Set[Union[rdflib.BNode, rdflib.Literal, rdflib.URIRef]] = set()
         for i in ignored_vals:
             try:
                 items = set(sg.items(i))
                 for list_item in items:
+                    if not isinstance(list_item, (rdflib.BNode, rdflib.Literal, rdflib.URIRef)):
+                        logging.debug("list_item = %r.", list_item)
+                        logging.debug("type(list_item) = %r.", type(list_item))
+                        raise TypeError(
+                            "sh:ignoredProperties linked something that is neither URIRef, BNode, or Literal."
+                        )
                     self.ignored_props.add(list_item)
             except ValueError:
                 continue
@@ -269,7 +283,7 @@ class HasValueConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_HasValueConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(HasValueConstraintComponent, self).__init__(shape)
         has_value_set = set(self.shape.objects(SH_hasValue))
         if len(has_value_set) < 1:

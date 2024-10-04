@@ -58,7 +58,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
 
     shacl_constraint_component: URIRef = URIRef("urn:notimplemented")
 
-    def __init__(self, shape: 'Shape'):
+    def __init__(self, shape: 'Shape') -> None:
         """
 
         :param shape:
