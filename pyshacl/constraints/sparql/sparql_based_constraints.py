@@ -85,7 +85,7 @@ class SPARQLBasedConstraint(ConstraintComponent):
         return [SH_sparql]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "SPARQLConstraintComponent"
 
     def evaluate(

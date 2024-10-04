@@ -109,7 +109,7 @@ class BoundSHACLTargetType(ConstraintComponent):
         return []
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "SPARQLTargetType"
 
     @classmethod

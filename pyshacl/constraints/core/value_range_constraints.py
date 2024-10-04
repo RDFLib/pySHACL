@@ -49,7 +49,7 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
         return [SH_minExclusive]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "MinExclusiveConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -139,7 +139,7 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
         return [SH_minInclusive]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "MinInclusiveConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -229,7 +229,7 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
         return [SH_maxExclusive]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "MaxExclusiveConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -319,7 +319,7 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
         return [SH_maxInclusive]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "MaxInclusiveConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
