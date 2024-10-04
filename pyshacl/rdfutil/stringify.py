@@ -148,7 +148,7 @@ def stringify_node(
     node: RDFNode,
     ns_manager: Optional[Union[NamespaceManager, rdflib.Graph]] = None,
     recursion: int = 0,
-):
+) -> str:
     if ns_manager is None:
         ns_manager = graph.namespace_manager
     if isinstance(ns_manager, rdflib.Graph):
