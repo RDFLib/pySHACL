@@ -3,7 +3,7 @@
 https://www.w3.org/TR/shacl/#core-components-others
 """
 import logging
-from typing import Dict, List, Set, cast
+from typing import Dict, List, Set, Union, cast
 
 import rdflib
 from rdflib.term import IdentifiedNode
@@ -108,7 +108,7 @@ class ClosedConstraintComponent(ConstraintComponent):
 
     ALWAYS_IGNORE = {(RDF_type, RDFS.Resource)}
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(ClosedConstraintComponent, self).__init__(shape)
         sg = self.shape.sg.graph
         closed_vals = list(self.shape.objects(SH_closed))
@@ -130,11 +130,17 @@ class ClosedConstraintComponent(ConstraintComponent):
             )
         assert isinstance(closed_vals[0], rdflib.Literal), "sh:closed must take a xsd:boolean literal."
         self.is_closed = bool(closed_vals[0].value)
-        self.ignored_props = set()
+        self.ignored_props: Set[Union[rdflib.BNode, rdflib.Literal, rdflib.URIRef]] = set()
         for i in ignored_vals:
             try:
                 items = set(sg.items(i))
                 for list_item in items:
+                    if not isinstance(list_item, (rdflib.BNode, rdflib.Literal, rdflib.URIRef)):
+                        logging.debug("list_item = %r.", list_item)
+                        logging.debug("type(list_item) = %r.", type(list_item))
+                        raise TypeError(
+                            "sh:ignoredProperties linked something that is neither URIRef, BNode, or Literal."
+                        )
                     self.ignored_props.add(list_item)
             except ValueError:
                 continue
