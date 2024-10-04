@@ -58,7 +58,7 @@ class InConstraintComponent(ConstraintComponent):
         return [SH_in]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "InConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -137,7 +137,7 @@ class ClosedConstraintComponent(ConstraintComponent):
         return [SH_closed, SH_ignoredProperties]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "ClosedConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -284,7 +284,7 @@ class HasValueConstraintComponent(ConstraintComponent):
         return [SH_hasValue]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "HasValueConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:

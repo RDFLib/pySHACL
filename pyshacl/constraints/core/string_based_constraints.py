@@ -47,7 +47,7 @@ class StringBasedConstraintBase(ConstraintComponent):
         raise NotImplementedError()
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         raise NotImplementedError()
 
     @classmethod
@@ -136,7 +136,7 @@ class MinLengthConstraintComponent(StringBasedConstraintBase):
         return [SH_minLength]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "MinLengthConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -216,7 +216,7 @@ class MaxLengthConstraintComponent(StringBasedConstraintBase):
         return [SH_maxLength]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "MaxLengthConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -284,7 +284,7 @@ class PatternConstraintComponent(StringBasedConstraintBase):
         return [SH_pattern]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "PatternConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -362,7 +362,7 @@ class LanguageInConstraintComponent(StringBasedConstraintBase):
         return [SH_languageIn]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "LanguageInConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -456,7 +456,7 @@ class UniqueLangConstraintComponent(StringBasedConstraintBase):
         return [SH_uniqueLang]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "UniqueLangConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:

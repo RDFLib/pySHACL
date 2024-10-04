@@ -74,7 +74,7 @@ class ClassConstraintComponent(ConstraintComponent):
         return [SH_class]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "ClassConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
@@ -188,7 +188,7 @@ class DatatypeConstraintComponent(ConstraintComponent):
         return [SH_datatype]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "DatatypeConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
@@ -296,7 +296,7 @@ class NodeKindConstraintComponent(ConstraintComponent):
         return [SH_nodeKind]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "NodeKindConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:

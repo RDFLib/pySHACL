@@ -52,7 +52,7 @@ class NotConstraintComponent(ConstraintComponent):
         return [SH_not]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "NotConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -155,7 +155,7 @@ class AndConstraintComponent(ConstraintComponent):
         return [SH_and]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "AndConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -251,7 +251,7 @@ class OrConstraintComponent(ConstraintComponent):
         return [SH_or]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "OrConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -347,7 +347,7 @@ class XoneConstraintComponent(ConstraintComponent):
         return [SH_xone]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "XoneConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:

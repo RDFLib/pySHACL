@@ -50,7 +50,7 @@ class EqualsConstraintComponent(ConstraintComponent):
         return [SH_equals]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "EqualsConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -177,7 +177,7 @@ class DisjointConstraintComponent(ConstraintComponent):
         return [SH_disjoint]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "DisjointConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -302,7 +302,7 @@ class LessThanConstraintComponent(ConstraintComponent):
         return [SH_lessThan]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "LessThanConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -453,7 +453,7 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
         return [SH_lessThanOrEquals]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "LessThanOrEqualsConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:

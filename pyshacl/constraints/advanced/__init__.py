@@ -39,7 +39,7 @@ class ExpressionConstraint(ConstraintComponent):
         return [SH_expression]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "ExpressionConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:

@@ -39,7 +39,7 @@ class BoundJSTargetType(BoundSHACLTargetType):
         return []
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "JSTargetType"
 
     @classmethod

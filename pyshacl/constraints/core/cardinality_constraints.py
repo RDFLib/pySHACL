@@ -70,7 +70,7 @@ class MinCountConstraintComponent(ConstraintComponent):
         return [SH_minCount]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "MinCountConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
@@ -157,7 +157,7 @@ class MaxCountConstraintComponent(ConstraintComponent):
         return [SH_maxCount]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "MaxCountConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:

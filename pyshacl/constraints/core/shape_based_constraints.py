@@ -65,7 +65,7 @@ class PropertyConstraintComponent(ConstraintComponent):
         return [SH_property]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "PropertyConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -159,7 +159,7 @@ class NodeConstraintComponent(ConstraintComponent):
         return [SH_node]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "NodeConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -320,7 +320,7 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
         return [SH_qualifiedValueShape, SH_qualifiedMinCount, SH_qualifiedValueShapesDisjoint, SH_qualifiedMaxCount]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "QualifiedValueShapeConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
