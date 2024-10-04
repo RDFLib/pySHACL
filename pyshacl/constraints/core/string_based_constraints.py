@@ -392,15 +392,15 @@ class LanguageInConstraintComponent(StringBasedConstraintBase):
                 try:
                     if not isinstance(lang_in, rdflib.Literal) or not isinstance(lang_in.value, str):
                         raise ReportableRuntimeError(
-                            "All languages in sh:LanugageIn must be a Literal with type xsd:string"
+                            "All languages in sh:lanugageIn must be a Literal with type xsd:string"
                         )
                 except (AssertionError, AttributeError):
                     raise ReportableRuntimeError(
-                        "All languages in sh:LanugageIn must be a Literal with type xsd:string"
+                        "All languages in sh:lanugageIn must be a Literal with type xsd:string"
                     )
                 languages_need.add(str(lang_in.value).lower())
         except (KeyError, AttributeError, ValueError):
-            raise ReportableRuntimeError("Value of sh:LanguageIn must be a RDF List")
+            raise ReportableRuntimeError("Value of sh:languageIn must be a RDF List")
         wildcard = False
         if '*' in languages_need:
             wildcard = True
