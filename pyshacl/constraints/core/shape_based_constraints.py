@@ -61,7 +61,7 @@ class PropertyConstraintComponent(ConstraintComponent):
         self.property_shapes = property_shapes
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_property]
 
     @classmethod
@@ -155,7 +155,7 @@ class NodeConstraintComponent(ConstraintComponent):
         self.node_shapes = node_shapes
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_node]
 
     @classmethod
@@ -316,7 +316,7 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
         self.is_disjoint = is_disjoint
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_qualifiedValueShape, SH_qualifiedMinCount, SH_qualifiedValueShapesDisjoint, SH_qualifiedMaxCount]
 
     @classmethod

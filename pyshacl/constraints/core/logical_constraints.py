@@ -48,7 +48,7 @@ class NotConstraintComponent(ConstraintComponent):
         self.not_list = not_list
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_not]
 
     @classmethod
@@ -151,7 +151,7 @@ class AndConstraintComponent(ConstraintComponent):
         self.and_list = and_list
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_and]
 
     @classmethod
@@ -247,7 +247,7 @@ class OrConstraintComponent(ConstraintComponent):
         self.or_list = or_list
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_or]
 
     @classmethod
@@ -343,7 +343,7 @@ class XoneConstraintComponent(ConstraintComponent):
         self.xone_nodes = xone_nodes
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_xone]
 
     @classmethod

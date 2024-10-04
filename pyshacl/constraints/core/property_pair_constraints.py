@@ -46,7 +46,7 @@ class EqualsConstraintComponent(ConstraintComponent):
         self.property_compare_set = property_compare_set
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_equals]
 
     @classmethod
@@ -173,7 +173,7 @@ class DisjointConstraintComponent(ConstraintComponent):
         self.property_compare_set = property_compare_set
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_disjoint]
 
     @classmethod
@@ -298,7 +298,7 @@ class LessThanConstraintComponent(ConstraintComponent):
         self.property_compare_set = property_compare_set
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_lessThan]
 
     @classmethod
@@ -449,7 +449,7 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
         self.property_compare_set = property_compare_set
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_lessThanOrEquals]
 
     @classmethod

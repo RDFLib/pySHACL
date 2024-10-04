@@ -45,7 +45,7 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
         self.min_vals = min_vals
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_minExclusive]
 
     @classmethod
@@ -135,7 +135,7 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
         self.min_vals = min_vals
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_minInclusive]
 
     @classmethod
@@ -225,7 +225,7 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
         self.max_vals = max_vals
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_maxExclusive]
 
     @classmethod
@@ -315,7 +315,7 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
         self.max_vals = max_vals
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_maxInclusive]
 
     @classmethod
