@@ -68,7 +68,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
 
     @classmethod
     @abc.abstractmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         raise NotImplementedError()  # pragma: no cover
 
     @classmethod

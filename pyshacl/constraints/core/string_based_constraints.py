@@ -43,7 +43,7 @@ class StringBasedConstraintBase(ConstraintComponent):
         self.allow_multi_rules = True
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         raise NotImplementedError()
 
     @classmethod
@@ -132,7 +132,7 @@ class MinLengthConstraintComponent(StringBasedConstraintBase):
         self.string_rules = patterns_found
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_minLength]
 
     @classmethod
@@ -212,7 +212,7 @@ class MaxLengthConstraintComponent(StringBasedConstraintBase):
         self.string_rules = patterns_found
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_maxLength]
 
     @classmethod
@@ -280,7 +280,7 @@ class PatternConstraintComponent(StringBasedConstraintBase):
             self.flags = None
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_pattern]
 
     @classmethod
@@ -358,7 +358,7 @@ class LanguageInConstraintComponent(StringBasedConstraintBase):
         self.string_rules = language_ins_found
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_languageIn]
 
     @classmethod
@@ -452,7 +452,7 @@ class UniqueLangConstraintComponent(StringBasedConstraintBase):
         self.string_rules = {is_unique_lang.value}
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_uniqueLang]
 
     @classmethod

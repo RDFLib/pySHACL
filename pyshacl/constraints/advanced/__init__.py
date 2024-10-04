@@ -7,7 +7,7 @@ https://www.w3.org/TR/shacl-af/#ExpressionConstraintComponent
 import typing
 from typing import Dict, List
 
-from rdflib import Literal
+from rdflib import Literal, URIRef
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH, SH_message
@@ -35,7 +35,7 @@ class ExpressionConstraint(ConstraintComponent):
             )
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         return [SH_expression]
 
     @classmethod

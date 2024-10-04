@@ -5,6 +5,7 @@ https://www.w3.org/TR/shacl/#sparql-constraints
 from typing import Dict, List
 
 import rdflib
+from rdflib import URIRef
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH, SH_deactivated, SH_message, SH_select
@@ -81,7 +82,7 @@ class SPARQLBasedConstraint(ConstraintComponent):
         self.sparql_constraints = sparql_constraints
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         return [SH_sparql]
 
     @classmethod

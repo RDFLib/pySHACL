@@ -3,7 +3,7 @@
 import typing
 from typing import Dict, List
 
-from rdflib import Literal
+from rdflib import Literal, URIRef
 
 from pyshacl.constraints import ConstraintComponent
 from pyshacl.consts import SH, SH_js, SH_message
@@ -70,7 +70,7 @@ class JSConstraint(ConstraintComponent):
         self.js_impls = [JSConstraintImpl(shape.sg, j) for j in js_decls]
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         return [SH_js]
 
     @classmethod

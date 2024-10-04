@@ -3,7 +3,7 @@
 import typing
 from typing import Any, Dict, List, Tuple, Union
 
-from rdflib import Literal
+from rdflib import Literal, URIRef
 
 from pyshacl.constraints import ConstraintComponent
 from pyshacl.constraints.constraint_component import CustomConstraintComponent
@@ -65,7 +65,7 @@ class BoundShapeJSValidatorComponent(ConstraintComponent):
         self.param_bind_map = bind_map
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         # TODO:coverage: this is never used for this constraint?
         return []
 

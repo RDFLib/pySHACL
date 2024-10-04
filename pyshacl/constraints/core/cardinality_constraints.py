@@ -5,7 +5,7 @@ https://www.w3.org/TR/shacl/#core-components-count
 from typing import Dict, List, Optional
 
 from rdflib.namespace import XSD
-from rdflib.term import Literal
+from rdflib.term import Literal, URIRef
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
@@ -66,7 +66,7 @@ class MinCountConstraintComponent(ConstraintComponent):
             )
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         return [SH_minCount]
 
     @classmethod
@@ -153,7 +153,7 @@ class MaxCountConstraintComponent(ConstraintComponent):
             )
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         return [SH_maxCount]
 
     @classmethod

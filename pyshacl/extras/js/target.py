@@ -35,7 +35,7 @@ class BoundJSTargetType(BoundSHACLTargetType):
         self.params_kv = params_kv  # type: dict
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         return []
 
     @classmethod

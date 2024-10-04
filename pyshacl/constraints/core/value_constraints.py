@@ -8,7 +8,7 @@ from typing import Dict, List
 
 import rdflib
 from rdflib.namespace import XSD
-from rdflib.term import Literal
+from rdflib.term import Literal, URIRef
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import (
@@ -70,7 +70,7 @@ class ClassConstraintComponent(ConstraintComponent):
         self.class_rules = class_rules
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         return [SH_class]
 
     @classmethod
@@ -184,7 +184,7 @@ class DatatypeConstraintComponent(ConstraintComponent):
         self.datatype_rule = datatype_rules[0]
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         return [SH_datatype]
 
     @classmethod
@@ -292,7 +292,7 @@ class NodeKindConstraintComponent(ConstraintComponent):
         self.nodekind_rule = nodekind_rules[0]
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         return [SH_nodeKind]
 
     @classmethod

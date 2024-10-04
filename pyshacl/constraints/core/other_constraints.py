@@ -54,7 +54,7 @@ class InConstraintComponent(ConstraintComponent):
         self.in_vals = in_vals
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_in]
 
     @classmethod
@@ -133,7 +133,7 @@ class ClosedConstraintComponent(ConstraintComponent):
         self.property_shapes = list(self.shape.objects(SH_property))
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_closed, SH_ignoredProperties]
 
     @classmethod
@@ -280,7 +280,7 @@ class HasValueConstraintComponent(ConstraintComponent):
         self.has_value_set = has_value_set
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_hasValue]
 
     @classmethod
