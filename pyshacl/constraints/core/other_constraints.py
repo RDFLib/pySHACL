@@ -2,9 +2,11 @@
 """
 https://www.w3.org/TR/shacl/#core-components-others
 """
-from typing import Dict, List, cast
+import logging
+from typing import Dict, List, Set, cast
 
 import rdflib
+from rdflib.term import IdentifiedNode
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import RDFS, SH, RDF_type, SH_property
@@ -35,24 +37,29 @@ class InConstraintComponent(ConstraintComponent):
     shape_expecting = False
     list_taking = True
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(InConstraintComponent, self).__init__(shape)
-        in_vals = list(self.shape.objects(SH_in))
-        if len(in_vals) < 1:
+        in_val_lists: List[IdentifiedNode] = list(self.shape.objects(SH_in))
+        if len(in_val_lists) < 1:
             raise ConstraintLoadError(
                 "InConstraintComponent must have at least one sh:in predicate.",
                 "https://www.w3.org/TR/shacl/#InConstraintComponent",
             )
-        elif len(in_vals) > 1:
+        elif len(in_val_lists) > 1:
             raise ConstraintLoadError(
                 "InConstraintComponent must have at most one sh:in predicate.",
                 "https://www.w3.org/TR/shacl/#InConstraintComponent",
             )
-        self.in_list = in_vals[0]
+        self.in_list: IdentifiedNode = in_val_lists[0]
         sg = self.shape.sg.graph
 
-        in_vals = set(sg.items(self.in_list))
-        self.in_vals = in_vals
+        self.in_vals: Set[RDFNode] = set()
+        for item in sg.items(self.in_list):
+            if not isinstance(item, (rdflib.BNode, rdflib.Literal, rdflib.URIRef)):
+                logging.debug("item = %r.", item)
+                logging.debug("type(item) = %r.", type(item))
+                raise TypeError("item in sh:in predicate is neither URIRef, BNode, or Literal.")
+            self.in_vals.add(item)
 
     @classmethod
     def constraint_parameters(cls):
