@@ -29,6 +29,7 @@ from pyshacl.consts import (
 from pyshacl.errors import ConstraintLoadError
 from pyshacl.pytypes import GraphLike, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
+from pyshacl.shape import Shape
 
 RDF_langString = RDF.langString
 RDFS_Datatype = RDFS.Datatype
@@ -59,7 +60,7 @@ class ClassConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_ClassConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(ClassConstraintComponent, self).__init__(shape)
         class_rules = list(self.shape.objects(SH_class))
         if len(class_rules) < 1:
@@ -168,7 +169,7 @@ class DatatypeConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_DatatypeConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(DatatypeConstraintComponent, self).__init__(shape)
         datatype_rules = list(self.shape.objects(SH_datatype))
         if len(datatype_rules) < 1:
@@ -276,7 +277,7 @@ class NodeKindConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_NodeKindConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(NodeKindConstraintComponent, self).__init__(shape)
         nodekind_rules = list(self.shape.objects(SH_nodeKind))
         if len(nodekind_rules) < 1:

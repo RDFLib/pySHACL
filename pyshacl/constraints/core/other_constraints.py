@@ -11,6 +11,7 @@ from pyshacl.consts import RDFS, SH, RDF_type, SH_property
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
 from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
+from pyshacl.shape import Shape
 
 SH_InConstraintComponent = SH.InConstraintComponent
 SH_ClosedConstraintComponent = SH.ClosedConstraintComponent
@@ -269,7 +270,7 @@ class HasValueConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_HasValueConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(HasValueConstraintComponent, self).__init__(shape)
         has_value_set = set(self.shape.objects(SH_hasValue))
         if len(has_value_set) < 1:

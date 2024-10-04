@@ -13,6 +13,7 @@ from pyshacl.consts import RDF, SH, XSD_WHOLE_INTEGERS
 from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
 from pyshacl.pytypes import GraphLike, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
+from pyshacl.shape import Shape
 
 RDF_langString = RDF.langString
 XSD_string = XSD.string
@@ -98,7 +99,7 @@ class MinLengthConstraintComponent(StringBasedConstraintBase):
 
     shacl_constraint_component = SH_MinLengthConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(MinLengthConstraintComponent, self).__init__(shape)
         self.allow_multi_rules = False
         patterns_found = list(self.shape.objects(SH_minLength))
@@ -179,7 +180,7 @@ class MaxLengthConstraintComponent(StringBasedConstraintBase):
 
     shacl_constraint_component = SH_MaxLengthConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(MaxLengthConstraintComponent, self).__init__(shape)
         self.allow_multi_rules = False
         patterns_found = list(self.shape.objects(SH_maxLength))
@@ -257,7 +258,7 @@ class PatternConstraintComponent(StringBasedConstraintBase):
 
     shacl_constraint_component = SH_PatternConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(PatternConstraintComponent, self).__init__(shape)
         patterns_found = list(self.shape.objects(SH_pattern))
         if len(patterns_found) < 1:
@@ -341,7 +342,7 @@ class LanguageInConstraintComponent(StringBasedConstraintBase):
     shape_expecting = False
     list_taking = True
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(LanguageInConstraintComponent, self).__init__(shape)
         self.allow_multi_rules = False
         language_ins_found = list(self.shape.objects(SH_languageIn))
@@ -424,7 +425,7 @@ class UniqueLangConstraintComponent(StringBasedConstraintBase):
 
     shacl_constraint_component = SH_UniqueLangConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(UniqueLangConstraintComponent, self).__init__(shape)
         self.allow_multi_rules = False
         is_unique_lang = set(self.shape.objects(SH_uniqueLang))
