@@ -99,7 +99,7 @@ class ClosedConstraintComponent(ConstraintComponent):
     """
     The RDF data model offers a huge amount of flexibility. Any node can in principle have values for any property. However, in some cases it makes sense to specify conditions on which properties can be applied to nodes. The SHACL Core language includes a property called sh:closed that can be used to specify the condition that each value node has values only for those properties that have been explicitly enumerated via the property shapes specified for the shape via sh:property.
     Link:
-    https://www.w3.org/TR/shacl/#InConstraintComponent
+    https://www.w3.org/TR/shacl/#ClosedConstraintComponent
     Textual Definition:
     If $closed is true then there is a validation result for each triple that has a value node as its subject and a predicate that is not explicitly enumerated as a value of sh:path in any of the property shapes declared via sh:property at the current shape. If $ignoredProperties has a value then the properties enumerated as members of this SHACL list are also permitted for the value node. The validation result MUST have the predicate of the triple as its sh:resultPath, and the object of the triple as its sh:value.
     """
