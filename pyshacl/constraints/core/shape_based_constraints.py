@@ -3,7 +3,7 @@
 https://www.w3.org/TR/shacl/#core-components-shape
 """
 from textwrap import indent
-from typing import Dict, List
+from typing import Dict, List, Optional
 from warnings import warn
 
 import rdflib
@@ -26,6 +26,7 @@ from pyshacl.errors import (
 )
 from pyshacl.pytypes import GraphLike, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
+from pyshacl.shape import Shape
 
 SH_QualifiedValueCountConstraintComponent = SH.QualifiedValueConstraintComponent
 SH_QualifiedMaxCountConstraintComponent = SH.QualifiedMaxCountConstraintComponent
@@ -50,7 +51,7 @@ class PropertyConstraintComponent(ConstraintComponent):
     shape_expecting = True
     list_taking = False
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(PropertyConstraintComponent, self).__init__(shape)
         property_shapes = list(self.shape.objects(SH_property))
         if len(property_shapes) < 1:
@@ -144,7 +145,7 @@ class NodeConstraintComponent(ConstraintComponent):
     shape_expecting = True
     list_taking = False
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(NodeConstraintComponent, self).__init__(shape)
         node_shapes = list(self.shape.objects(SH_node))
         if len(node_shapes) < 1:
@@ -251,7 +252,7 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
     shape_expecting = True
     list_taking = False
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(QualifiedValueShapeConstraintComponent, self).__init__(shape)
         if not shape.is_property_shape:
             # Note, this no longer throws an error, this constraint is simply ignored on NodeShapes.
@@ -266,39 +267,42 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
                 "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent",
             )
         self.value_shapes = value_shapes
-        min_count = set(self.shape.objects(SH_qualifiedMinCount))
-        if len(min_count) < 1:
+        min_count: Optional[int]
+        min_counts = set(self.shape.objects(SH_qualifiedMinCount))
+        if len(min_counts) < 1:
             min_count = None
-        elif len(min_count) > 1:
+        elif len(min_counts) > 1:
             raise ConstraintLoadError(
                 "QualifiedMinCountConstraintComponent must have at most one sh:qualifiedMinCount predicate.",
                 "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent",
             )
         else:
-            min_count = next(iter(min_count))
-            if not isinstance(min_count, rdflib.Literal) or not isinstance(min_count.value, int):
+            min_count_literal = next(iter(min_counts))
+            if not isinstance(min_count_literal, rdflib.Literal) or not isinstance(min_count_literal.value, int):
                 raise ConstraintLoadError(
                     "QualifiedMinCountConstraintComponent sh:qualifiedMinCount must be a Literal with Int.",
                     "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent",
                 )
-            min_count = min_count.value
+            min_count = min_count_literal.value
 
-        max_count = set(self.shape.objects(SH_qualifiedMaxCount))
-        if len(max_count) < 1:
+        max_count: Optional[int]
+        max_counts = set(self.shape.objects(SH_qualifiedMaxCount))
+        if len(max_counts) < 1:
             max_count = None
-        elif len(max_count) > 1:
+        elif len(max_counts) > 1:
             raise ConstraintLoadError(
                 "QualifiedMaxCountConstraintComponent must have at most one sh:qualifiedMaxCount predicate.",
                 "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent",
             )
         else:
-            max_count = next(iter(max_count))
-            if not isinstance(max_count, rdflib.Literal) or not isinstance(max_count.value, int):
+            max_count_literal = next(iter(max_counts))
+            if not isinstance(max_count_literal, rdflib.Literal) or not isinstance(max_count_literal.value, int):
                 raise ConstraintLoadError(
                     "QualifiedMaxCountConstraintComponent sh:qualifiedMaxCount must be a Literal with Int.",
                     "https://www.w3.org/TR/shacl/#QualifiedValueShapeConstraintComponent",
                 )
-            max_count = max_count.value
+            max_count = max_count_literal.value
+
         if min_count is None and max_count is None:
             raise ConstraintLoadError(
                 "QualifiedValueShapeConstraintComponent must have at lease one sh:qualifiedMinCount or "
