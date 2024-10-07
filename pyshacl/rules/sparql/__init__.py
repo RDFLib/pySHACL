@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Sequence, Union
 
 import rdflib
 from rdflib import Literal
@@ -13,7 +13,7 @@ from pyshacl.rdfutil import clone_graph
 from ..shacl_rule import SHACLRule
 
 if TYPE_CHECKING:
-    from pyshacl.pytypes import GraphLike, SHACLExecutor
+    from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
     from pyshacl.shape import Shape
 
 XSD_string = XSD.string
@@ -49,8 +49,25 @@ class SPARQLRule(SHACLRule):
         query_helper.collect_prefixes()
         self._qh = query_helper
 
-    def apply(self, data_graph: 'GraphLike') -> int:
-        focus_nodes = self.shape.focus_nodes(data_graph)  # uses target nodes to find focus nodes
+    def apply(
+        self,
+        data_graph: 'GraphLike',
+        focus_nodes: Union[Sequence['RDFNode'], None] = None,
+    ) -> int:
+        focus_list: Sequence['RDFNode']
+        if focus_nodes is not None:
+            focus_list = list(focus_nodes)
+        else:
+            focus_list = list(self.shape.focus_nodes(data_graph))
+        if self.executor.focus_nodes is not None and len(self.executor.focus_nodes) > 0:
+            filtered_focus_nodes: List[Union[rdflib.URIRef]] = []
+            for _fo in focus_list:  # type: RDFNode
+                if isinstance(_fo, rdflib.URIRef) and _fo in self.executor.focus_nodes:
+                    filtered_focus_nodes.append(_fo)
+            len_filtered_focus = len(filtered_focus_nodes)
+            if len_filtered_focus < 1:
+                return 0
+            focus_list = filtered_focus_nodes
         all_added = 0
         SPARQLQueryHelper = get_query_helper_cls()
         iterate_limit = 100
@@ -59,7 +76,7 @@ class SPARQLRule(SHACLRule):
                 raise ReportableRuntimeError("Local SPARQLRule iteration exceeded iteration limit of 100.")
             iterate_limit -= 1
             added = 0
-            applicable_nodes = self.filter_conditions(focus_nodes, data_graph)
+            applicable_nodes = self.filter_conditions(focus_list, data_graph)
             construct_graphs = set()
             for a in applicable_nodes:
                 for c in self._constructs:

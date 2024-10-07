@@ -26,7 +26,7 @@ from pyshacl.pytypes import GraphLike, RDFNode
 from pyshacl.rdfutil import compare_blank_node, compare_node, order_graph_literal, stringify_node
 
 if TYPE_CHECKING:
-    from pyshacl.validate import Validator
+    from pyshacl.validator import Validator
 
 
 def clean_validation_reports(actual_graph, actual_report, expected_graph, expected_report):

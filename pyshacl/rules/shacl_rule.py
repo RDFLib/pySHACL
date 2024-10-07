@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from decimal import Decimal
+from typing import Sequence, Union
 
 from rdflib import RDF, Literal
 
 from pyshacl.consts import SH_condition, SH_deactivated, SH_order
 from pyshacl.errors import RuleLoadError
-from pyshacl.pytypes import SHACLExecutor
+from pyshacl.pytypes import RDFNode, SHACLExecutor
 
 RDF_first = RDF.first
 
@@ -96,7 +97,7 @@ class SHACLRule(object):
                 conditions.append(condition)
         return conditions
 
-    def filter_conditions(self, focus_nodes, data_graph):
+    def filter_conditions(self, focus_nodes: Sequence[RDFNode], data_graph):
         conditions = self.get_conditions()
         applicable_focus_nodes = []
         for f in focus_nodes:
@@ -108,5 +109,9 @@ class SHACLRule(object):
                 applicable_focus_nodes.append(f)
         return applicable_focus_nodes
 
-    def apply(self, data_graph):
+    def apply(
+        self,
+        data_graph,
+        focus_nodes: Union[Sequence[RDFNode], None] = None,
+    ):
         raise NotImplementedError()

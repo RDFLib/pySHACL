@@ -1,6 +1,9 @@
 #
 #
 import typing
+from typing import List, Sequence, Union
+
+import rdflib
 
 from pyshacl.consts import SH
 from pyshacl.errors import ReportableRuntimeError
@@ -9,7 +12,8 @@ from pyshacl.rules.shacl_rule import SHACLRule
 from .js_executable import JSExecutable
 
 if typing.TYPE_CHECKING:
-    from pyshacl.pytypes import GraphLike, SHACLExecutor
+
+    from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
     from pyshacl.shape import Shape
     from pyshacl.shapes_graph import ShapesGraph
 
@@ -24,8 +28,25 @@ class JSRule(SHACLRule):
         shapes_graph: 'ShapesGraph' = shape.sg
         self.js_exe = JSExecutable(shapes_graph, rule_node)
 
-    def apply(self, data_graph: 'GraphLike') -> int:
-        focus_nodes = self.shape.focus_nodes(data_graph)  # uses target nodes to find focus nodes
+    def apply(
+        self,
+        data_graph: 'GraphLike',
+        focus_nodes: Union[Sequence['RDFNode'], None] = None,
+    ) -> int:
+        focus_list: Sequence['RDFNode']
+        if focus_nodes is not None:
+            focus_list = list(focus_nodes)
+        else:
+            focus_list = list(self.shape.focus_nodes(data_graph))
+        if self.executor.focus_nodes is not None and len(self.executor.focus_nodes) > 0:
+            filtered_focus_nodes: List[Union[rdflib.URIRef]] = []
+            for _fo in focus_list:  # type: RDFNode
+                if isinstance(_fo, rdflib.URIRef) and _fo in self.executor.focus_nodes:
+                    filtered_focus_nodes.append(_fo)
+            len_filtered_focus = len(filtered_focus_nodes)
+            if len_filtered_focus < 1:
+                return 0
+            focus_list = filtered_focus_nodes
         all_added = 0
         iterate_limit = 100
         while True:
@@ -33,7 +54,7 @@ class JSRule(SHACLRule):
                 raise ReportableRuntimeError("Local rule iteration exceeded iteration limit of 100.")
             iterate_limit -= 1
             added = 0
-            applicable_nodes = self.filter_conditions(focus_nodes, data_graph)
+            applicable_nodes = self.filter_conditions(focus_list, data_graph)
             sets_to_add = []
             for a in applicable_nodes:
                 args_map = {"this": a}

@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Sequence, Tuple, Type, Union
+
+from rdflib import BNode, URIRef
 
 from pyshacl.consts import RDF_type, SH_rule, SH_SPARQLRule, SH_TripleRule
 from pyshacl.errors import ReportableRuntimeError, RuleLoadError
-from pyshacl.pytypes import GraphLike, SHACLExecutor
+from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
 from pyshacl.rules.sparql import SPARQLRule
 from pyshacl.rules.triple import TripleRule
 
@@ -15,7 +17,11 @@ if TYPE_CHECKING:
     from .shacl_rule import SHACLRule
 
 
-def gather_rules(executor: SHACLExecutor, shacl_graph: 'ShapesGraph') -> Dict['Shape', List['SHACLRule']]:
+def gather_rules(
+    executor: SHACLExecutor,
+    shacl_graph: 'ShapesGraph',
+    from_shapes: Union[Sequence[Union[URIRef, BNode]], None] = None,
+) -> Dict['Shape', List['SHACLRule']]:
     """
     :param executor:
     :type executor: SHACLExecutor
@@ -55,6 +61,9 @@ def gather_rules(executor: SHACLExecutor, shacl_graph: 'ShapesGraph') -> Dict['S
     used_rules = shacl_graph.subject_objects(SH_rule)
     ret_rules = defaultdict(list)
     for sub, obj in used_rules:
+        if from_shapes is not None and sub not in from_shapes:
+            # Skipping rule that is not in the whitelist of Shapes to use
+            continue
         try:
             shape: Shape = shacl_graph.lookup_shape_from_node(sub)
         except (AttributeError, KeyError):
@@ -77,7 +86,12 @@ def gather_rules(executor: SHACLExecutor, shacl_graph: 'ShapesGraph') -> Dict['S
     return ret_rules
 
 
-def apply_rules(executor: SHACLExecutor, shapes_rules: Dict, data_graph: GraphLike) -> int:
+def apply_rules(
+    executor: SHACLExecutor,
+    shapes_rules: Dict,
+    data_graph: GraphLike,
+    focus_nodes: Union[Sequence[RDFNode], None] = None,
+) -> int:
     # short the shapes dict by shapes sh:order before execution
     sorted_shapes_rules: List[Tuple[Any, Any]] = sorted(shapes_rules.items(), key=lambda x: x[0].order)
     total_modified = 0
@@ -93,7 +107,7 @@ def apply_rules(executor: SHACLExecutor, shapes_rules: Dict, data_graph: GraphLi
             for r in rules:
                 if r.deactivated:
                     continue
-                n_modified = r.apply(data_graph)
+                n_modified = r.apply(data_graph, focus_nodes=focus_nodes)
                 this_modified += n_modified
             if this_modified > 0:
                 total_modified += this_modified

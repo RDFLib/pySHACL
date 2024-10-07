@@ -4,12 +4,9 @@ import os
 import platform
 import subprocess
 import sys
-
 from os import getenv, path
 from sys import stderr
 
-
-print(os.environ, file=stderr)
 PATH = getenv("PATH", "")
 PP = getenv('PYTHONPATH', "")
 here_dir = path.abspath(path.dirname(__file__))
@@ -37,7 +34,6 @@ if in_test_dir:
     ENV_VARS["PYTHONPATH"] = ':'.join((lib_dir, PP))
 
 it = ENV_VARS["PYTHONPATH"].split(":")
-print(it, file=stderr, flush=True)
 scr_dir = "scripts-{}.{}".format(sys.version_info[0], sys.version_info[1])
 if in_test_dir:
     scr_dir = path.join('..', scr_dir)
@@ -131,9 +127,11 @@ def test_cmdline_table():
     args = [graph_file, '-s', shacl_file, '-f', 'table']
     res = subprocess.run(pyshacl_command + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=ENV_VARS)
     output_table = res.stdout.decode('utf-8')
-    assert "+-----+-----------+---------------------------+---------------------------+" \
-           "---------------------------+--------------------------+---------------------------+" \
-           "---------------------------+" in output_table
+    assert (
+        "+-----+-----------+---------------------------+---------------------------+"
+        "---------------------------+--------------------------+---------------------------+"
+        "---------------------------+" in output_table
+    )
     assert "| 1   | Violation | http://example.com/ex#Hum | http://example.com/exOnt# " in output_table
 
 
