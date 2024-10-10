@@ -54,6 +54,7 @@ include = [
     { path = "Makefile", format = "sdist" },
     { path = "*.md" },
     { path = "*.txt" },
+    { path = "pyshacl/py.typed" },
     { path = "pyshacl/assets/*.pickle" },
     { path = "pyshacl/*.spec" }
 ]
@@ -63,7 +64,6 @@ python = "^3.8.1"  # Poetry doesn't read from [project.requires-python]
 # Note, 3.8.0 is not supported, only 3.8.1 or above. See:
 # https://github.com/RDFLib/rdflib/blob/3bee979cd0e5b6efc57296b4fc43dd8ede8cf375/CHANGELOG.md?plain=1#L53
 rdflib = {version=">=6.3.2,<8.0", python = ">=3.8.1"}
-html5lib = ">=1.1,<2"
 owlrl = ">=6.0.2,<7"
 prettytable = [
     {version=">=3.5.0", python = ">=3.8,<3.12"},
