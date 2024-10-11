@@ -1,6 +1,6 @@
 FROM docker.io/library/python:3.11-alpine
 LABEL org.opencontainers.image.base.name="docker.io/library/python:3.11-alpine"
-LABEL org.opencontainers.image.base.digest="sha256:caafba876f841774905f73df0fcaf7fe3f55aaf9cb48a9e369a41077f860d4a7"
+LABEL org.opencontainers.image.base.digest="sha256:004b4029670f2964bb102d076571c9d750c2a43b51c13c768e443c95a71aa9f3"
 LABEL org.opencontainers.image.source="https://github.com/RDFLib/pySHACL"
 LABEL maintainer="ashleysommer@gmail.com"
 RUN apk add --no-cache --update tini-static cython
