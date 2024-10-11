@@ -1223,4 +1223,4 @@ js = ["pyduktape2"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.1"
-content-hash = "6417310d16d76f60ca4466e85e8d7584d84a9c1918dd3368761d944409a26747"
+content-hash = "4e3209528b3b32bf8ab4da09f3fe2d5f0caf7c904a7b048fd292ef7103500ad6"
