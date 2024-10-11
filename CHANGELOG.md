@@ -6,6 +6,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 ## [Unreleased]
 
+
+## [0.27.0] - 2024-10-11
 ### Added
 - SHACL Rules Expander Mode
   - A new alternative Run Mode for PySHACL
@@ -44,6 +46,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 - Fixed SHACL Path generation where sh:inversePath is wrapping a different kind of SHACL Path.
   -  This probably fixes lots of unreported sh:inversePath bugs
   -  Fixes #227
+- Fixed generic message generation when there are multiple sh:and, sh:or, or sh:xone constraints on a Shape.
+  - Fixes #220
 - Fix logic determining if a datagraph is ephemeral.
 
 
@@ -1147,7 +1151,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.26.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.27.0...HEAD
+[0.27.0]: https://github.com/RDFLib/pySHACL/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/RDFLib/pySHACL/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/RDFLib/pySHACL/compare/v0.24.1...v0.25.0
 [0.24.1]: https://github.com/RDFLib/pySHACL/compare/v0.24.0...v0.24.1
