@@ -93,7 +93,13 @@ parser.add_argument(
     default=False,
     help="Run Shape's SHACL Rules iteratively until the data_graph reaches a steady state.",
 )
-parser.add_argument('--abort', dest='abort', action='store_true', default=False, help='Abort on first invalid data.')
+parser.add_argument(
+    '--abort', 
+    dest='abort', 
+    action='store_true', 
+    default=False, 
+    help='Abort on first invalid data.'
+)
 parser.add_argument(
     '--allow-info',
     '--allow-infos',
