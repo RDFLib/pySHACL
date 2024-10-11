@@ -1,0 +1,34 @@
+@prefix ex: <http://example.org/ontology/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix sh-ex: <http://example.org/shapes/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+sh-ex:TwoXorThing-shape
+	a sh:NodeShape ;
+	sh:targetClass ex:TwoXorThing ;
+	sh:xone
+		(
+			[
+				a sh:NodeShape ;
+				sh:class ex:ThingC ;
+			]
+			[
+				a sh:NodeShape ;
+				sh:class ex:ThingD ;
+			]
+		) ,
+		(
+			[
+				a sh:NodeShape ;
+				sh:class ex:ThingE ;
+			]
+			[
+				a sh:NodeShape ;
+				sh:class ex:ThingF ;
+			]
+		)
+		;
+	.
