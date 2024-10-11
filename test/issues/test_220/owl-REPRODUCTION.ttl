@@ -1,0 +1,63 @@
+@prefix ex: <http://example.org/ontology/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:OneXorThing
+	a owl:Class ;
+	owl:disjointUnionOf (
+		ex:ThingA
+		ex:ThingB
+	) ;
+	.
+
+ex:ThingA
+	a owl:Class ;
+	rdfs:subClassOf ex:OneXorThing ;
+	owl:disjointWith ex:ThingB ;
+	.
+
+ex:ThingB
+	a owl:Class ;
+	rdfs:subClassOf ex:OneXorThing ;
+	owl:disjointWith ex:ThingA ;
+	.
+
+ex:ThingC
+	a owl:Class ;
+	rdfs:subClassOf ex:TwoXorThing ;
+	owl:disjointWith ex:ThingD ;
+	.
+
+ex:ThingD
+	a owl:Class ;
+	rdfs:subClassOf ex:TwoXorThing ;
+	owl:disjointWith ex:ThingC ;
+	.
+
+ex:ThingE
+	a owl:Class ;
+	rdfs:subClassOf ex:TwoXorThing ;
+	owl:disjointWith ex:ThingF ;
+	.
+
+ex:ThingF
+	a owl:Class ;
+	rdfs:subClassOf ex:TwoXorThing ;
+	owl:disjointWith ex:ThingE ;
+	.
+
+ex:TwoXorThing
+	a owl:Class ;
+	owl:disjointUnionOf
+		(
+			ex:ThingC
+			ex:ThingD
+		) ,
+		(
+			ex:ThingE
+			ex:ThingF
+		)
+		;
+	.
