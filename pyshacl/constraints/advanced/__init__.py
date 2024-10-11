@@ -7,7 +7,7 @@ https://www.w3.org/TR/shacl-af/#ExpressionConstraintComponent
 import typing
 from typing import Dict, List
 
-from rdflib import Literal
+from rdflib import Literal, URIRef
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH, SH_message
@@ -25,7 +25,7 @@ if typing.TYPE_CHECKING:
 class ExpressionConstraint(ConstraintComponent):
     shacl_constraint_component = SH_ExpressionConstraintComponent
 
-    def __init__(self, shape: 'Shape'):
+    def __init__(self, shape: 'Shape') -> None:
         super(ExpressionConstraint, self).__init__(shape)
         self.expr_nodes = list(self.shape.objects(SH_expression))
         if len(self.expr_nodes) < 1:
@@ -35,11 +35,11 @@ class ExpressionConstraint(ConstraintComponent):
             )
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         return [SH_expression]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "ExpressionConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:

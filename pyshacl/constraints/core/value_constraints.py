@@ -8,7 +8,7 @@ from typing import Dict, List
 
 import rdflib
 from rdflib.namespace import XSD
-from rdflib.term import Literal
+from rdflib.term import Literal, URIRef
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import (
@@ -29,6 +29,7 @@ from pyshacl.consts import (
 from pyshacl.errors import ConstraintLoadError
 from pyshacl.pytypes import GraphLike, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
+from pyshacl.shape import Shape
 
 RDF_langString = RDF.langString
 RDFS_Datatype = RDFS.Datatype
@@ -59,7 +60,7 @@ class ClassConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_ClassConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(ClassConstraintComponent, self).__init__(shape)
         class_rules = list(self.shape.objects(SH_class))
         if len(class_rules) < 1:
@@ -70,11 +71,11 @@ class ClassConstraintComponent(ConstraintComponent):
         self.class_rules = class_rules
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         return [SH_class]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "ClassConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
@@ -168,7 +169,7 @@ class DatatypeConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_DatatypeConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(DatatypeConstraintComponent, self).__init__(shape)
         datatype_rules = list(self.shape.objects(SH_datatype))
         if len(datatype_rules) < 1:
@@ -184,11 +185,11 @@ class DatatypeConstraintComponent(ConstraintComponent):
         self.datatype_rule = datatype_rules[0]
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         return [SH_datatype]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "DatatypeConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
@@ -276,7 +277,7 @@ class NodeKindConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_NodeKindConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(NodeKindConstraintComponent, self).__init__(shape)
         nodekind_rules = list(self.shape.objects(SH_nodeKind))
         if len(nodekind_rules) < 1:
@@ -292,11 +293,11 @@ class NodeKindConstraintComponent(ConstraintComponent):
         self.nodekind_rule = nodekind_rules[0]
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         return [SH_nodeKind]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "NodeKindConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:

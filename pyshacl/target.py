@@ -2,6 +2,8 @@ import typing
 from typing import List, Sequence, Type, Union
 from warnings import warn
 
+from rdflib import URIRef
+
 from .constraints import ConstraintComponent
 from .consts import SH, RDF_type, RDFS_subClassOf, SH_parameter, SH_select, SH_SPARQLTargetType
 from .errors import ConstraintLoadError, ShapeLoadError
@@ -105,11 +107,11 @@ class BoundSHACLTargetType(ConstraintComponent):
         self.param_vals = param_vals
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         return []
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "SPARQLTargetType"
 
     @classmethod

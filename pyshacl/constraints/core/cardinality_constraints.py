@@ -5,13 +5,14 @@ https://www.w3.org/TR/shacl/#core-components-count
 from typing import Dict, List, Optional
 
 from rdflib.namespace import XSD
-from rdflib.term import Literal
+from rdflib.term import Literal, URIRef
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
 from pyshacl.errors import ConstraintLoadError
 from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
+from pyshacl.shape import Shape
 
 XSD_integer = XSD.integer
 SH_minCount = SH.minCount
@@ -32,7 +33,7 @@ class MinCountConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_MinCountConstraintComponent
 
-    def __init__(self, shape, min_count_objects: Optional[List[RDFNode]] = None):
+    def __init__(self, shape: Shape, min_count_objects: Optional[List[RDFNode]] = None) -> None:
         super(MinCountConstraintComponent, self).__init__(shape)
         if min_count_objects is None:
             min_count = list(self.shape.objects(SH_minCount))
@@ -66,11 +67,11 @@ class MinCountConstraintComponent(ConstraintComponent):
             )
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         return [SH_minCount]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "MinCountConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
@@ -118,7 +119,7 @@ class MaxCountConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_MaxCountConstraintComponent
 
-    def __init__(self, shape, max_count_objects: Optional[List[RDFNode]] = None):
+    def __init__(self, shape: Shape, max_count_objects: Optional[List[RDFNode]] = None) -> None:
         super(MaxCountConstraintComponent, self).__init__(shape)
         if max_count_objects is None:
             max_count = list(self.shape.objects(SH_maxCount))
@@ -153,11 +154,11 @@ class MaxCountConstraintComponent(ConstraintComponent):
             )
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         return [SH_maxCount]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "MaxCountConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:

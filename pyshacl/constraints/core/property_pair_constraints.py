@@ -12,6 +12,7 @@ from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
 from pyshacl.helper.path_helper import shacl_path_to_sparql_path
 from pyshacl.pytypes import GraphLike, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
+from pyshacl.shape import Shape
 
 SH_equals = SH.equals
 SH_disjoint = SH.disjoint
@@ -35,7 +36,7 @@ class EqualsConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_EqualsConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(EqualsConstraintComponent, self).__init__(shape)
         property_compare_set = set(self.shape.objects(SH_equals))
         if len(property_compare_set) < 1:
@@ -46,11 +47,11 @@ class EqualsConstraintComponent(ConstraintComponent):
         self.property_compare_set = property_compare_set
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_equals]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "EqualsConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -162,7 +163,7 @@ class DisjointConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_DisjointConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(DisjointConstraintComponent, self).__init__(shape)
         property_compare_set = set(self.shape.objects(SH_disjoint))
         if len(property_compare_set) < 1:
@@ -173,11 +174,11 @@ class DisjointConstraintComponent(ConstraintComponent):
         self.property_compare_set = property_compare_set
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_disjoint]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "DisjointConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -282,7 +283,7 @@ class LessThanConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_LessThanConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(LessThanConstraintComponent, self).__init__(shape)
         property_compare_set = set(self.shape.objects(SH_lessThan))
         if len(property_compare_set) < 1:
@@ -298,11 +299,11 @@ class LessThanConstraintComponent(ConstraintComponent):
         self.property_compare_set = property_compare_set
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_lessThan]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "LessThanConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
@@ -433,7 +434,7 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_LessThanOrEqualsConstraintComponent
 
-    def __init__(self, shape):
+    def __init__(self, shape: Shape) -> None:
         super(LessThanOrEqualsConstraintComponent, self).__init__(shape)
         property_compare_set = set(self.shape.objects(SH_lessThanOrEquals))
         if len(property_compare_set) < 1:
@@ -449,11 +450,11 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
         self.property_compare_set = property_compare_set
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_lessThanOrEquals]
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "LessThanOrEqualsConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:

@@ -58,7 +58,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
 
     shacl_constraint_component: URIRef = URIRef("urn:notimplemented")
 
-    def __init__(self, shape: 'Shape'):
+    def __init__(self, shape: 'Shape') -> None:
         """
 
         :param shape:
@@ -68,12 +68,12 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
 
     @classmethod
     @abc.abstractmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[URIRef]:
         raise NotImplementedError()  # pragma: no cover
 
     @classmethod
     @abc.abstractmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         raise NotImplementedError()  # pragma: no cover
 
     @abc.abstractmethod
@@ -85,7 +85,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
         return []
 
-    def __str__(self):
+    def __str__(self) -> str:
         c_name = str(self.__class__.__name__)
         shape_id = str(self.shape)
         return "<{} on {}>".format(c_name, shape_id)

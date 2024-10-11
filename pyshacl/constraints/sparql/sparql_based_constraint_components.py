@@ -47,12 +47,12 @@ class BoundShapeValidatorComponent(ConstraintComponent):
         self.query_helper.collect_prefixes()
 
     @classmethod
-    def constraint_parameters(cls):
+    def constraint_parameters(cls) -> List[rdflib.URIRef]:
         # TODO:coverage: this is never used for this constraint?
         return []
 
     @classmethod
-    def constraint_name(cls):
+    def constraint_name(cls) -> str:
         return "ConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
