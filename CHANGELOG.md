@@ -7,6 +7,11 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]
 
 ### Added
+- SHACL Rules Expander Mode
+  - A new alternative Run Mode for PySHACL
+  - PySHACL will not validate the DataGraph against Shapes and Constraints, instead it will simply run all SHACL-AF Rules to expand the DataGraph.
+  - By default it will output a new graph containing the existing DataGraph Triples plus the expanded triples
+  - Run with inplace mode to expand the new triples directly into the input DataGraph
 - Focus Node Filtering
   - You can now pass in a list of focus nodes to the validator, and it will only validate those focus nodes.
   - Note, you still need to pass in a SHACL Shapes Graph, and the shapes still need to target the focus nodes.
@@ -19,6 +24,9 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
   - If you give the validator a list of Shapes to use, and a list of focus nodes, the validator will operate in
     a highly-targeted mode, it feeds those focus nodes directly into those given Shapes for validation.
   - In this mode, the selected SHACL Shape does not need to specify any focus-targeting mechanisms of its own.
+- Combined Rules Expander Mode with Shape Selection
+  - The combination of SHACL Rules Expander Mode and Shape Selection will allow specialised workflows.
+  - For example, you can run specific expansion rules from a SHACL Shapes File, based on the new triples required.
 
 ### Changed
 - Don't make a clone of the DataGraph if the input data graph is ephemeral.

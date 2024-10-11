@@ -217,6 +217,13 @@ parser.add_argument(
     default=sys.stdout,
 )
 parser.add_argument(
+    '--rules',
+    help='Ignore validation options, run PySHACL in Rules Expansion mode. Same as `pyshacl_rules`.',
+    action='store_true',
+    dest='do_rules',
+    default=False,
+)
+parser.add_argument(
     '--server',
     help='Ignore all the rest of the options, start the HTTP Server. Same as `pyshacl_server`.',
     action='store_true',
@@ -240,6 +247,11 @@ def main(prog: Union[str, None] = None) -> None:
 
         # http_main calls sys.exit(0) and never returns
         http_main()
+    if args.do_rules:
+        from pyshacl.cli_rules import main as rules_main
+
+        # rules_main calls sys.exit(0) and never returns
+        rules_main()
     if not args.data:
         # No datafile give, and not starting in server mode.
         sys.stderr.write('Input Error. No DataGraph file or endpoint supplied.\n')

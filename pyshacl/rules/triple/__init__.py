@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import itertools
-from typing import TYPE_CHECKING, Tuple, cast
+from typing import TYPE_CHECKING, List, Sequence, Tuple, Union, cast
 
 import rdflib
 
@@ -10,9 +10,8 @@ from pyshacl.helper.expression_helper import nodes_from_node_expression
 from pyshacl.rules.shacl_rule import SHACLRule
 
 if TYPE_CHECKING:
-    from rdflib.term import Node
 
-    from pyshacl.pytypes import GraphLike, SHACLExecutor
+    from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
     from pyshacl.shape import Shape
 
 
@@ -50,9 +49,27 @@ class TripleRule(SHACLRule):
             raise RuntimeError("Too many sh:object")
         self.o = next(iter(my_object_nodes))
 
-    def apply(self, data_graph: 'GraphLike') -> int:
-        focus_nodes = self.shape.focus_nodes(data_graph)  # uses target nodes to find focus nodes
-        applicable_nodes = self.filter_conditions(focus_nodes, data_graph)
+    def apply(
+        self,
+        data_graph: 'GraphLike',
+        focus_nodes: Union[Sequence['RDFNode'], None] = None,
+    ) -> int:
+        focus_list: Sequence['RDFNode']
+        if focus_nodes is not None:
+            focus_list = list(focus_nodes)
+        else:
+            focus_list = list(self.shape.focus_nodes(data_graph))
+        if self.executor.focus_nodes is not None and len(self.executor.focus_nodes) > 0:
+            filtered_focus_nodes: List[Union[rdflib.URIRef]] = []
+            for _fo in focus_list:  # type: RDFNode
+                if isinstance(_fo, rdflib.URIRef) and _fo in self.executor.focus_nodes:
+                    filtered_focus_nodes.append(_fo)
+            len_filtered_focus = len(filtered_focus_nodes)
+            if len_filtered_focus < 1:
+                return 0
+            focus_list = filtered_focus_nodes
+        # uses target nodes to find focus nodes
+        applicable_nodes = self.filter_conditions(focus_list, data_graph)
         all_added = 0
         iterate_limit = 100
         while True:
@@ -75,7 +92,7 @@ class TripleRule(SHACLRule):
                     added += 1
             if added > 0:
                 for i in to_add:
-                    data_graph.add(cast(Tuple['Node', 'Node', 'Node'], i))
+                    data_graph.add(cast(Tuple['RDFNode', 'RDFNode', 'RDFNode'], i))
                 all_added += added
                 if self.iterate:
                     continue  # Jump up to iterate
