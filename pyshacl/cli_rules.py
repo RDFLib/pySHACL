@@ -54,28 +54,12 @@ parser.add_argument(
     help='Choose a type of inferencing to run against the Data Graph before validating.',
 )
 parser.add_argument(
-    '-m',
-    '--metashacl',
-    dest='metashacl',
-    action='store_true',
-    default=False,
-    help='Validate the SHACL Shapes graph against the shacl-shacl Shapes Graph before validating the Data Graph.',
-)
-parser.add_argument(
     '-im',
     '--imports',
     dest='imports',
     action='store_true',
     default=False,
     help='Allow import of sub-graphs defined in statements with owl:imports.',
-)
-parser.add_argument(
-    '-a',
-    '--advanced',
-    dest='advanced',
-    action='store_true',
-    default=False,
-    help='Enable features from the SHACL Advanced Features specification.',
 )
 parser.add_argument(
     '-j',
@@ -92,38 +76,6 @@ parser.add_argument(
     action='store_true',
     default=False,
     help="Run Shape's SHACL Rules iteratively until the data_graph reaches a steady state.",
-)
-parser.add_argument(
-    '--abort', 
-    dest='abort', 
-    action='store_true', 
-    default=False, 
-    help='Abort on first invalid data.'
-)
-parser.add_argument(
-    '--allow-info',
-    '--allow-infos',
-    dest='allow_infos',
-    action='store_true',
-    default=False,
-    help='Shapes marked with severity of Info will not cause result to be invalid.',
-)
-parser.add_argument(
-    '-w',
-    '--allow-warning',
-    '--allow-warnings',
-    dest='allow_warnings',
-    action='store_true',
-    default=False,
-    help='Shapes marked with severity of Warning or Info will not cause result to be invalid.',
-)
-parser.add_argument(
-    '--max-depth',
-    dest='max_depth',
-    action='store',
-    nargs='?',
-    type=int,
-    help="The maximum number of SHACL shapes \"deep\" that the validator can go before reaching an \"endpoint\" constraint.",
 )
 parser.add_argument(
     '-d',
