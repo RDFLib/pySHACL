@@ -1,0 +1,29 @@
+@prefix ex: <http://example.org/ontology/> .
+@prefix kb: <http://example.org/kb/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+kb:thing-PASS-1
+	a ex:ThingA ;
+	rdfs:comment "This should raise no validation results."@en ;
+	.
+
+kb:thing-PASS-2
+	a
+		ex:ThingC ,
+		ex:ThingE
+		;
+	rdfs:comment "This should raise no validation results."@en ;
+	.
+
+kb:thing-XFAIL-1
+	a ex:OneXorThing ;
+	rdfs:comment "This should raise a validation result, due to not being more specifically a ThingA or ThingB as the SHACL requires when reviewing the OWL disjoint union definition of OneXorThing."@en ;
+	.
+
+kb:thing-XFAIL-2
+	a ex:ThingC ;
+	rdfs:comment "This should raise a validation result, due to not being a ThingE or ThingF as the SHACL requires when reviewing the entailed superclass TwoXorThing."@en ;
+	.

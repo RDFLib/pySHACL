@@ -160,10 +160,19 @@ class AndConstraintComponent(ConstraintComponent):
         return "AndConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
-        and_list = " , ".join(
-            stringify_node(self.shape.sg.graph, a_c) for a in self.and_list for a_c in self.shape.sg.graph.items(a)
-        )
-        m = "Node {} must conform to all shapes in {}".format(stringify_node(datagraph, value_node), and_list)
+        if len(self.and_list) < 2:
+            and_node_string = " , ".join(
+                stringify_node(self.shape.sg.graph, a_c) for a_c in self.shape.sg.graph.items(self.and_list[0])
+            )
+        else:
+            and_node_strings = []
+            for a in self.and_list:
+                and_node_string1 = " , ".join(
+                    stringify_node(self.shape.sg.graph, a_c) for a_c in self.shape.sg.graph.items(a)
+                )
+                and_node_strings.append(f"({and_node_string1})")
+            and_node_string = " and ".join(and_node_strings)
+        m = "Node {} must conform to all shapes in {}".format(stringify_node(datagraph, value_node), and_node_string)
         return [rdflib.Literal(m)]
 
     def evaluate(
@@ -256,10 +265,21 @@ class OrConstraintComponent(ConstraintComponent):
         return "OrConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
-        or_list = " , ".join(
-            stringify_node(self.shape.sg.graph, o_c) for o in self.or_list for o_c in self.shape.sg.graph.items(o)
+        if len(self.or_list) < 2:
+            or_node_string = " , ".join(
+                stringify_node(self.shape.sg.graph, o_c) for o_c in self.shape.sg.graph.items(self.or_list[0])
+            )
+        else:
+            or_node_strings = []
+            for a in self.or_list:
+                or_node_string1 = " , ".join(
+                    stringify_node(self.shape.sg.graph, a_c) for a_c in self.shape.sg.graph.items(a)
+                )
+                or_node_strings.append(f"({or_node_string1})")
+            or_node_string = " and ".join(or_node_strings)
+        m = "Node {} must conform to one or more shapes in {}".format(
+            stringify_node(datagraph, value_node), or_node_string
         )
-        m = "Node {} must conform to one or more shapes in {}".format(stringify_node(datagraph, value_node), or_list)
         return [rdflib.Literal(m)]
 
     def evaluate(
@@ -352,10 +372,21 @@ class XoneConstraintComponent(ConstraintComponent):
         return "XoneConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
-        xone_list = " , ".join(
-            stringify_node(self.shape.sg.graph, a_c) for a in self.xone_nodes for a_c in self.shape.sg.graph.items(a)
+        if len(self.xone_nodes) < 2:
+            xone_node_string = " , ".join(
+                stringify_node(self.shape.sg.graph, a_c) for a_c in self.shape.sg.graph.items(self.xone_nodes[0])
+            )
+        else:
+            xone_node_strings = []
+            for a in self.xone_nodes:
+                xone_node_string1 = " , ".join(
+                    stringify_node(self.shape.sg.graph, a_c) for a_c in self.shape.sg.graph.items(a)
+                )
+                xone_node_strings.append(f"({xone_node_string1})")
+            xone_node_string = " and ".join(xone_node_strings)
+        m = "Node {} must conform to exactly one shape in {}".format(
+            stringify_node(datagraph, value_node), xone_node_string
         )
-        m = "Node {} must conform to exactly one shape in {}".format(stringify_node(datagraph, value_node), xone_list)
         return [rdflib.Literal(m)]
 
     def evaluate(
