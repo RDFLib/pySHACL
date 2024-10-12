@@ -5,6 +5,8 @@ LABEL org.opencontainers.image.source="https://github.com/RDFLib/pySHACL"
 LABEL maintainer="ashleysommer@gmail.com"
 RUN apk add --no-cache --update tini-static cython
 RUN apk add --no-cache --update --virtual build-dependencies build-base libffi-dev python3-dev py3-cffi
+# Update to latest setuptools and pip in /usr/local/lib to mitigate CVE-2024-6345
+RUN pip3 install -U pip setuptools
 WORKDIR /home/pyshacl
 RUN addgroup -g 1000 -S pyshacl &&\
     adduser --disabled-password --gecos "" --home "$(pwd)" --ingroup "pyshacl" --no-create-home --uid 1000 pyshacl
