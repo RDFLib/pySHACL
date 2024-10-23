@@ -3,6 +3,9 @@
 import pytest
 from os import path, walk
 import glob
+
+import rdflib
+
 import pyshacl
 from pyshacl.errors import ReportableRuntimeError
 
@@ -31,6 +34,10 @@ for x in walk(path.join(dash_files_dir, 'core')):
 
 @pytest.mark.parametrize('target_file, shacl_file', dash_core_files)
 def test_dash_validate_all_core(target_file, shacl_file):
+    # Literals in the data graph should be exactly the same as literals in the shapes graph
+    # When the validator parses the shapes graph, it does it with NORMALIZE_LITERALS disabled
+    # So we must also disable NORMALIZE_LITERALS when parsing the data graph
+    rdflib.NORMALIZE_LITERALS = False
     try:
         val, _, v_text = pyshacl.validate(
             target_file, shacl_graph=shacl_file, inference='rdfs', check_dash_result=True, debug=True, meta_shacl=False)
@@ -44,6 +51,10 @@ def test_dash_validate_all_core(target_file, shacl_file):
 
 @pytest.mark.parametrize('target_file, shacl_file', dash_core_files)
 def test_dash_validate_all_core_sparql_mode(target_file, shacl_file):
+    # Literals in the data graph should be exactly the same as literals in the shapes graph
+    # When the validator parses the shapes graph, it does it with NORMALIZE_LITERALS disabled
+    # So we must also disable NORMALIZE_LITERALS when parsing the data graph
+    rdflib.NORMALIZE_LITERALS = False
     try:
         if shacl_file is None:
             # shacl_file cannot be None in SPARQL Remote Graph Mode
@@ -54,8 +65,8 @@ def test_dash_validate_all_core_sparql_mode(target_file, shacl_file):
         print(e)
         val = False
         v_text = ""
-    assert val
     print(v_text)
+    assert val
 
 
 for x in walk(path.join(dash_files_dir, 'sparql')):
@@ -64,6 +75,10 @@ for x in walk(path.join(dash_files_dir, 'sparql')):
 
 @pytest.mark.parametrize('target_file, shacl_file', dash_sparql_files)
 def test_dash_validate_all_sparql(target_file, shacl_file):
+    # Literals in the data graph should be exactly the same as literals in the shapes graph
+    # When the validator parses the shapes graph, it does it with NORMALIZE_LITERALS disabled
+    # So we must also disable NORMALIZE_LITERALS when parsing the data graph
+    rdflib.NORMALIZE_LITERALS = False
     try:
         val, _, v_text = pyshacl.validate(
             target_file, shacl_graph=shacl_file, inference='rdfs', check_dash_result=True, debug=True, meta_shacl=False)
@@ -76,6 +91,10 @@ def test_dash_validate_all_sparql(target_file, shacl_file):
 
 @pytest.mark.parametrize('target_file, shacl_file', dash_sparql_files)
 def test_dash_validate_all_sparql_sparql_mode(target_file, shacl_file):
+    # Literals in the data graph should be exactly the same as literals in the shapes graph
+    # When the validator parses the shapes graph, it does it with NORMALIZE_LITERALS disabled
+    # So we must also disable NORMALIZE_LITERALS when parsing the data graph
+    rdflib.NORMALIZE_LITERALS = False
     try:
         if shacl_file is None:
             # shacl_file cannot be None in SPARQL Remote Graph Mode
