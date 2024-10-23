@@ -124,7 +124,7 @@ def stringify_literal(graph: rdflib.Graph, node: rdflib.Literal, ns_manager: Opt
     return node_string
 
 
-def find_node_named_graph(dataset, node):
+def find_node_named_graph(dataset: Union[rdflib.Dataset, rdflib.ConjunctiveGraph], node):
     """
     Search through each graph in a dataset for one node, when it finds it, returns the graph it is in
     :param dataset:
@@ -133,14 +133,16 @@ def find_node_named_graph(dataset, node):
     """
     if isinstance(node, rdflib.Literal):
         raise RuntimeError("Cannot search for a Literal node in a dataset.")
-    for g in iter(dataset.contexts()):
-        try:
-            # This will issue StopIteration if node is not found in g, and continue to the next graph
-            _ = next(iter(g.predicate_objects(node)))
-            return g
-        except StopIteration:
-            continue
-    raise RuntimeError(f"Cannot find node {node} in any named graph.")
+
+    # Check if node is a subject in any graph
+    for q in iter(dataset.quads((node, None, None, None))):
+        s, p, o, g = q
+        return dataset.get_context(g)
+    # Now check if node is a object in any graph
+    for q in iter(dataset.quads((None, None, node, None))):
+        s, p, o, g = q
+        return dataset.get_context(g)
+    raise LookupError(f"Cannot find node {node} in any named graph.")
 
 
 def stringify_node(
