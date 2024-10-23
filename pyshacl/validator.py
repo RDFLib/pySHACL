@@ -400,3 +400,7 @@ def assign_baked_in():
     add_baked_in("http://datashapes.org/schema", schema_file)
     add_baked_in("https://datashapes.org/schema", schema_file)
     add_baked_in("http://datashapes.org/schema.ttl", schema_file)
+    dash_file = path.join(HERE, "assets", "dash.pickle")
+    add_baked_in("http://datashapes.org/dash", dash_file)
+    add_baked_in("https://datashapes.org/dash", dash_file)
+    add_baked_in("http://datashapes.org/dash.ttl", dash_file)
