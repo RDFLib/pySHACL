@@ -282,6 +282,24 @@ class PatternConstraintComponent(StringBasedConstraintBase):
         else:
             self.flags = None
 
+        re_flags = 0
+        if self.flags:
+            flags = str(self.flags.value).lower()
+            case_insensitive = 'i' in flags
+            if case_insensitive:
+                re_flags |= re.I
+            m = 'm' in flags
+            if m:
+                re_flags |= re.M
+        self.compiled_cache = {}
+        for p in patterns_found:
+            if p.value is not None and len(p.value) > 1:
+                re_pattern = str(p.value)
+            else:
+                re_pattern = str(p)
+            re_matcher = re.compile(re_pattern, re_flags)
+            self.compiled_cache[p] = re_matcher
+
     @classmethod
     def constraint_parameters(cls) -> List[rdflib.URIRef]:
         return [SH_pattern]
@@ -311,18 +329,9 @@ class PatternConstraintComponent(StringBasedConstraintBase):
     def _evaluate_string_rule(self, r, target_graph, f_v_dict):
         reports = []
         non_conformant = False
-        assert isinstance(r, rdflib.Literal)
-        re_flags = 0
-        if self.flags:
-            flags = str(self.flags.value).lower()
-            case_insensitive = 'i' in flags
-            if case_insensitive:
-                re_flags |= re.I
-            m = 'm' in flags
-            if m:
-                re_flags |= re.M
-        re_pattern = str(r.value)
-        re_matcher = re.compile(re_pattern, re_flags)
+        re_matcher = self.compiled_cache.get(r, None)
+        if re_matcher is None:
+            raise RuntimeError(f"No compiled regex for {r}")
         for f, value_nodes in f_v_dict.items():
             for v in value_nodes:
                 match = False
@@ -379,7 +388,7 @@ class LanguageInConstraintComponent(StringBasedConstraintBase):
         return "LanguageInConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
-        m = "String language is not in {}".format(stringify_node(datagraph, self.string_rules[0]))
+        m = "String language is not in {}".format(stringify_node(self.shape.sg.graph, self.string_rules[0]))
         return [rdflib.Literal(m)]
 
     def _evaluate_string_rule(self, r, target_graph, f_v_dict):
