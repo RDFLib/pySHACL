@@ -5,6 +5,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
 ## [Unreleased]
+- Nothing yet
+
+## [0.28.0] - 2024-10-23
+### Added
+- owl:imports now works with bnode values, where it contains the following:
+  - schema:url is the string where to find the imported ontology
+  - schema:url (again) with a "file://" path, to a local copy of the ontology
+  - schema:identifier that is the canonical name to use for the ontology at load time (this is the publicID)
+- RDFUtil.loader `load_from_source` function now supports `identifier` that is akin to the publicID of the file being
+  loaded, and that is passed to RDFLib parser to correctly do relative URIs, etc.
+
+### Changed
+- Big change to how Milti-graph datasets (ie, rdflib.ConjunctiveGraph and rdflib.Dataset) are handled.
+  - Instead of validating each named graph individually, PySHACL now sets `defaultUnion=True` and
+  now validates the entire Dataset at once.
+  - This allows you to logically segment your dataset as desired into many individual named graphs, and validation
+  will still work as you expect it to.
+  - This is in preparation for another big upcoming change in pySHACL that will allow OWL-RL inferencing to place
+  inferred triples into a separate named graph, and SHACL Rules to place inferred triples into a separate named graph,
+  and validation will still work as expected because validation is now against a union of the whole dataset.
+- Pre-Compile Regexs in sh:Pattern constraints. This allows faster re-use of the constraint, if is applied to
+  many different targets.
+
+### Fixed
+- Attempting to stringify a focus_node ar a value_node from the datagraph, where that node doesn't actually exist in
+  the datagraph, no longer crashes, it falls back to a different method.
 
 
 ## [0.27.0] - 2024-10-11
@@ -1151,7 +1177,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.27.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.28.0...HEAD
+[0.28.0]: https://github.com/RDFLib/pySHACL/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/RDFLib/pySHACL/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/RDFLib/pySHACL/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/RDFLib/pySHACL/compare/v0.24.1...v0.25.0
