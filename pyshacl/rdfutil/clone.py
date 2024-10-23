@@ -357,5 +357,5 @@ def clone_node(
                         cloned_o = clone_node(graph, o, target_graph, recursion=recursion + 1, deep_clone=deep_clone)
                     target_graph.add((new_node, cloned_p, cloned_o))
     else:
-        new_node = rdflib.term.Identifier(str(node))
+        raise ValueError(f"Cannot clone node of type {type(node)}")
     return new_node
