@@ -163,7 +163,7 @@ def load_from_source(
     source_as_filename: Optional[str] = None
     source_as_bytes: Optional[bytes] = None
     filename = None
-    identifier: Optional[str] = identifier  # This is our passed-in id (formerly public_id)
+    identifier = str(identifier)  # This is our passed-in id (formerly public_id)
     _maybe_id: Optional[str] = None  # For default-graph identifier
     base_uri: Optional[str] = None  # Base URI for relative URIs
     uri_prefix = None  # URI Prefix to bind to public ID
@@ -310,7 +310,7 @@ def load_from_source(
         if source_is_graph:
             target_g: Union[rdflib.Graph, rdflib.ConjunctiveGraph, rdflib.Dataset] = source  # type: ignore
         else:
-            default_graph_base: Union[str, None] = str(identifier) if identifier else None
+            default_graph_base: Union[str, None] = identifier if identifier else None
             if multigraph:
                 target_ds = rdflib.Dataset(default_graph_base=default_graph_base, default_union=True)
                 target_ds.namespace_manager = NamespaceManager(target_ds, 'core')
@@ -377,20 +377,21 @@ def load_from_source(
                 line = _source.readline()
                 line = None if line is None else line.lstrip()
                 line_len = len(line) if line is not None else 0
-            if line_len > 15:
-                line = line[:15]
-            line = line.lower()
-            if line.startswith(b"<!doctype html") or line.startswith(b"<html"):
-                raise RuntimeError("Attempted to load a HTML document as RDF.")
-            if line.startswith(b"<?xml") or line.startswith(b"<xml") or line.startswith(b"<rdf:"):
-                rdf_format = "xml"
-            if (
-                line.startswith(b"@prefix ")
-                or line.startswith(b"PREFIX ")
-                or line.startswith(b"@base ")
-                or line.startswith(b"# baseURI:")
-            ):
-                rdf_format = "turtle"
+            if line is not None:
+                if line_len > 15:
+                    line = line[:15]
+                line = line.lower()
+                if line.startswith(b"<!doctype html") or line.startswith(b"<html"):
+                    raise RuntimeError("Attempted to load a HTML document as RDF.")
+                if line.startswith(b"<?xml") or line.startswith(b"<xml") or line.startswith(b"<rdf:"):
+                    rdf_format = "xml"
+                if (
+                    line.startswith(b"@prefix ")
+                    or line.startswith(b"PREFIX ")
+                    or line.startswith(b"@base ")
+                    or line.startswith(b"# baseURI:")
+                ):
+                    rdf_format = "turtle"
             try:
                 _source.seek(0)
             except (AttributeError, UnsupportedOperation):
@@ -453,7 +454,7 @@ def load_from_source(
         use_base_uri = base_uri if base_uri else (identifier if identifier else _maybe_id)
         if isinstance(target_g, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
             if identifier:
-                dest_g = target_g.graph(identifier)
+                dest_g = target_g.get_context(identifier)
                 dest_g.base = use_base_uri
             else:
                 dest_g = target_g.default_context
@@ -550,7 +551,9 @@ def chain_load_owl_imports(
             if isinstance(_i, rdflib.BNode):
                 urls = list(target_g.objects(_i, SCHEMA.url))
                 prioritized_urls = []  # Tuples of (priority, url_str)
-                for url_i in sorted(urls):
+                # Value of type variable "SupportsRichComparisonT" of "sorted" cannot be "Node"
+                # Maybe we need to add "SupportsRichComparisonT" to Node in RDFLib?
+                for url_i in sorted(urls):  # type: ignore[type-var]
                     url_str = str(url_i)
                     if url_str.startswith("file:"):
                         prioritized_urls.append((1, url_str))
@@ -584,7 +587,7 @@ def chain_load_owl_imports(
         owl_imports = list(target_g.objects(root_id, rdflib.OWL.imports))
         if len(owl_imports) > 0:
             import_chain.append(str(root_id))
-            _done_imports = _load_from_imports_nodes(owl_imports)
+            _done_imports = _load_from_imports_nodes(owl_imports)  # type: ignore[arg-type]
             if _done_imports < 1:
                 import_chain.pop()
             else:
@@ -594,7 +597,7 @@ def chain_load_owl_imports(
         owl_imports = list(target_g.objects(public_id_uri, rdflib.OWL.imports))
         if len(owl_imports) > 0:
             import_chain.append(str(public_id_uri))
-            _done_imports = _load_from_imports_nodes(owl_imports)
+            _done_imports = _load_from_imports_nodes(owl_imports)  # type: ignore[arg-type]
             if _done_imports < 1:
                 import_chain.pop()
             else:
@@ -610,7 +613,7 @@ def chain_load_owl_imports(
             owl_imports = list(target_g.objects(ont, rdflib.OWL.imports))
             if len(owl_imports) > 0:
                 import_chain.append(ont_str)
-                _done_imports = _load_from_imports_nodes(owl_imports)
+                _done_imports = _load_from_imports_nodes(owl_imports)  # type: ignore[arg-type]
                 if _done_imports < 1:
                     import_chain.pop()
                 else:

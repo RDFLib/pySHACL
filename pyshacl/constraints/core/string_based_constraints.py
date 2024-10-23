@@ -4,7 +4,7 @@ https://www.w3.org/TR/shacl/#core-components-string
 """
 import logging
 import re
-from typing import Dict, List
+from typing import Dict, List, cast
 
 import rdflib
 from rdflib.namespace import XSD
@@ -261,7 +261,7 @@ class PatternConstraintComponent(StringBasedConstraintBase):
 
     def __init__(self, shape: Shape) -> None:
         super(PatternConstraintComponent, self).__init__(shape)
-        patterns_found: List[RDFNode] = []
+        patterns_found: List[rdflib.Literal] = []
         for pattern_found in self.shape.objects(SH_pattern):
             if not isinstance(pattern_found, rdflib.Literal):
                 raise ConstraintLoadError(
@@ -274,7 +274,7 @@ class PatternConstraintComponent(StringBasedConstraintBase):
                 "PatternConstraintComponent must have at least one sh:pattern predicate.",
                 "https://www.w3.org/TR/shacl/#PatternConstraintComponent",
             )
-        self.string_rules = patterns_found
+        self.string_rules = cast(List[RDFNode], patterns_found)
         flags_found = set(self.shape.objects(SH_flags))
         if len(flags_found) > 0:
             # Just get the first found flags

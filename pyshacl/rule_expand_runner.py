@@ -48,7 +48,7 @@ class RuleExpandRunner(PySHACLRunType):
         if not isinstance(data_graph, rdflib.Graph):
             raise RuntimeError("data_graph must be a rdflib Graph-like object")
         self.data_graph = data_graph  # type: GraphLike
-        self._target_graph = None
+        self._target_graph: Union[GraphLike, None] = None
         self.ont_graph = ont_graph  # type: Optional[GraphLike]
         self.data_graph_is_multigraph = isinstance(self.data_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph))
         if self.ont_graph is not None and isinstance(self.ont_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
@@ -78,7 +78,7 @@ class RuleExpandRunner(PySHACLRunType):
                 options_dict['logger'].setLevel(logging.DEBUG)
 
     @property
-    def target_graph(self):
+    def target_graph(self) -> Union[GraphLike, None]:
         return self._target_graph
 
     def mix_in_ontology(self):
@@ -109,7 +109,7 @@ class RuleExpandRunner(PySHACLRunType):
         )
 
     def run(self) -> GraphLike:
-        datagraph: GraphLike = self.target_graph
+        datagraph: Union[GraphLike, None] = self.target_graph
         if datagraph is not None:
             # Target graph is already set up with pre-inferenced and pre-cloned data_graph
             self._target_graph = datagraph
@@ -144,7 +144,7 @@ class RuleExpandRunner(PySHACLRunType):
                 datagraph = clone_graph(datagraph)
                 has_cloned = True
             self._target_graph = datagraph
-
+        assert self._target_graph is not None
         if self.options.get("use_shapes", None) is not None and len(self.options["use_shapes"]) > 0:
             using_manually_specified_shapes = True
             expanded_use_shapes = []
@@ -182,7 +182,7 @@ class RuleExpandRunner(PySHACLRunType):
                     expanded_focus_nodes.append(URIRef(f))
                 else:
                     try:
-                        expanded_focus_node = self.target_graph.namespace_manager.expand_curie(f)
+                        expanded_focus_node = self._target_graph.namespace_manager.expand_curie(f)
                     except ValueError:
                         expanded_focus_node = URIRef(f)
                     expanded_focus_nodes.append(expanded_focus_node)

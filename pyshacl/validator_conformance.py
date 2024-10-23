@@ -290,6 +290,7 @@ def check_dash_result(
         gv_res = None
     if len(inf_test_cases_set) > 0:
         data_graph = validator.target_graph
+        assert data_graph is not None
         if isinstance(data_graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
             named_graphs = list(data_graph.contexts())
         else:
@@ -311,6 +312,7 @@ def check_dash_result(
     if len(fn_test_cases_set) > 0:
         executor = validator.make_executor()
         data_graph = validator.target_graph
+        assert data_graph is not None
         fns = gather_functions(executor, validator.shacl_graph)
         apply_functions(executor, fns, data_graph)
         fn_res: Union[bool, None] = True
