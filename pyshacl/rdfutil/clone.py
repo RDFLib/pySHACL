@@ -125,6 +125,8 @@ def mix_datasets(
         for i in base_ds.store.contexts(None)
     ]
     if isinstance(base_ds, rdflib.Dataset) and len(base_named_graphs) < 1:
+        # rdflib.Dataset always includes the DEFAULT_GRAPH_ID named graph
+        # but a conjunctive graph does not. It _could_ return no graphs.
         base_named_graphs = [
             rdflib.Graph(base_ds.store, DATASET_DEFAULT_GRAPH_ID, namespace_manager=base_ds.namespace_manager)
         ]
@@ -355,5 +357,5 @@ def clone_node(
                         cloned_o = clone_node(graph, o, target_graph, recursion=recursion + 1, deep_clone=deep_clone)
                     target_graph.add((new_node, cloned_p, cloned_o))
     else:
-        new_node = rdflib.term.Identifier(str(node))
+        raise ValueError(f"Cannot clone node of type {type(node)}")
     return new_node

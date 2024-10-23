@@ -4,7 +4,7 @@ https://www.w3.org/TR/shacl/#core-components-string
 """
 import logging
 import re
-from typing import Dict, List
+from typing import Dict, List, cast
 
 import rdflib
 from rdflib.namespace import XSD
@@ -261,7 +261,7 @@ class PatternConstraintComponent(StringBasedConstraintBase):
 
     def __init__(self, shape: Shape) -> None:
         super(PatternConstraintComponent, self).__init__(shape)
-        patterns_found: List[RDFNode] = []
+        patterns_found: List[rdflib.Literal] = []
         for pattern_found in self.shape.objects(SH_pattern):
             if not isinstance(pattern_found, rdflib.Literal):
                 raise ConstraintLoadError(
@@ -274,13 +274,31 @@ class PatternConstraintComponent(StringBasedConstraintBase):
                 "PatternConstraintComponent must have at least one sh:pattern predicate.",
                 "https://www.w3.org/TR/shacl/#PatternConstraintComponent",
             )
-        self.string_rules = patterns_found
+        self.string_rules = cast(List[RDFNode], patterns_found)
         flags_found = set(self.shape.objects(SH_flags))
         if len(flags_found) > 0:
             # Just get the first found flags
             self.flags = next(iter(flags_found))
         else:
             self.flags = None
+
+        re_flags = 0
+        if self.flags:
+            flags = str(self.flags.value).lower()
+            case_insensitive = 'i' in flags
+            if case_insensitive:
+                re_flags |= re.I
+            m = 'm' in flags
+            if m:
+                re_flags |= re.M
+        self.compiled_cache = {}
+        for p in patterns_found:
+            if p.value is not None and len(p.value) > 1:
+                re_pattern = str(p.value)
+            else:
+                re_pattern = str(p)
+            re_matcher = re.compile(re_pattern, re_flags)
+            self.compiled_cache[p] = re_matcher
 
     @classmethod
     def constraint_parameters(cls) -> List[rdflib.URIRef]:
@@ -311,18 +329,9 @@ class PatternConstraintComponent(StringBasedConstraintBase):
     def _evaluate_string_rule(self, r, target_graph, f_v_dict):
         reports = []
         non_conformant = False
-        assert isinstance(r, rdflib.Literal)
-        re_flags = 0
-        if self.flags:
-            flags = str(self.flags.value).lower()
-            case_insensitive = 'i' in flags
-            if case_insensitive:
-                re_flags |= re.I
-            m = 'm' in flags
-            if m:
-                re_flags |= re.M
-        re_pattern = str(r.value)
-        re_matcher = re.compile(re_pattern, re_flags)
+        re_matcher = self.compiled_cache.get(r, None)
+        if re_matcher is None:
+            raise RuntimeError(f"No compiled regex for {r}")
         for f, value_nodes in f_v_dict.items():
             for v in value_nodes:
                 match = False
@@ -379,7 +388,7 @@ class LanguageInConstraintComponent(StringBasedConstraintBase):
         return "LanguageInConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
-        m = "String language is not in {}".format(stringify_node(datagraph, self.string_rules[0]))
+        m = "String language is not in {}".format(stringify_node(self.shape.sg.graph, self.string_rules[0]))
         return [rdflib.Literal(m)]
 
     def _evaluate_string_rule(self, r, target_graph, f_v_dict):

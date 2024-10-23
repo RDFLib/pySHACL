@@ -10,7 +10,6 @@ from rdflib import URIRef
 from .consts import (
     env_truths,
 )
-from .errors import ReportableRuntimeError
 from .extras import check_extra_installed
 from .functions import apply_functions, gather_functions, unapply_functions
 from .pytypes import GraphLike, SHACLExecutor
@@ -49,7 +48,7 @@ class RuleExpandRunner(PySHACLRunType):
         if not isinstance(data_graph, rdflib.Graph):
             raise RuntimeError("data_graph must be a rdflib Graph-like object")
         self.data_graph = data_graph  # type: GraphLike
-        self._target_graph = None
+        self._target_graph: Union[GraphLike, None] = None
         self.ont_graph = ont_graph  # type: Optional[GraphLike]
         self.data_graph_is_multigraph = isinstance(self.data_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph))
         if self.ont_graph is not None and isinstance(self.ont_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
@@ -78,63 +77,8 @@ class RuleExpandRunner(PySHACLRunType):
             if options_dict['debug']:
                 options_dict['logger'].setLevel(logging.DEBUG)
 
-    @classmethod
-    def _run_pre_inference(
-        cls, target_graph: GraphLike, inference_option: str, logger: Optional[logging.Logger] = None
-    ):
-        """
-        Note, this is the OWL/RDFS pre-inference,
-        it is not the Advanced Spec SHACL-Rule inferencing step.
-        :param target_graph:
-        :type target_graph: rdflib.Graph|rdflib.ConjunctiveGraph|rdflib.Dataset
-        :param inference_option:
-        :type inference_option: str
-        :return:
-        :rtype: NoneType
-        """
-        # Lazy import owlrl
-        import owlrl
-
-        from .inference import CustomRDFSOWLRLSemantics, CustomRDFSSemantics
-
-        if logger is None:
-            logger = logging.getLogger(__name__)
-        try:
-            if inference_option == 'rdfs':
-                inferencer = owlrl.DeductiveClosure(CustomRDFSSemantics)
-            elif inference_option == 'owlrl':
-                inferencer = owlrl.DeductiveClosure(owlrl.OWLRL_Semantics)
-            elif inference_option == 'both' or inference_option == 'all' or inference_option == 'rdfsowlrl':
-                inferencer = owlrl.DeductiveClosure(CustomRDFSOWLRLSemantics)
-            else:
-                raise ReportableRuntimeError("Don't know how to do '{}' type inferencing.".format(inference_option))
-        except Exception as e:  # pragma: no cover
-            logger.error("Error during creation of OWL-RL Deductive Closure")
-            if isinstance(e, ReportableRuntimeError):
-                raise e
-            raise ReportableRuntimeError(
-                "Error during creation of OWL-RL Deductive Closure\n{}".format(str(e.args[0]))
-            )
-        if isinstance(target_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
-            named_graphs = []
-            for i in target_graph.store.contexts(None):
-                if isinstance(i, rdflib.Graph):
-                    named_graphs.append(i)
-                else:
-                    named_graphs.append(
-                        rdflib.Graph(target_graph.store, i, namespace_manager=target_graph.namespace_manager)
-                    )
-        else:
-            named_graphs = [target_graph]
-        try:
-            for g in named_graphs:
-                inferencer.expand(g)
-        except Exception as e:  # pragma: no cover
-            logger.error("Error while running OWL-RL Deductive Closure")
-            raise ReportableRuntimeError("Error while running OWL-RL Deductive Closure\n{}".format(str(e.args[0])))
-
     @property
-    def target_graph(self):
+    def target_graph(self) -> Union[GraphLike, None]:
         return self._target_graph
 
     def mix_in_ontology(self):
@@ -165,9 +109,10 @@ class RuleExpandRunner(PySHACLRunType):
         )
 
     def run(self) -> GraphLike:
-        if self.target_graph is not None:
+        datagraph: Union[GraphLike, None] = self.target_graph
+        if datagraph is not None:
             # Target graph is already set up with pre-inferenced and pre-cloned data_graph
-            the_target_graph = self.target_graph
+            self._target_graph = datagraph
         else:
             has_cloned = False
             if self.ont_graph is not None:
@@ -176,30 +121,30 @@ class RuleExpandRunner(PySHACLRunType):
                 else:
                     self.logger.debug("Cloning DataGraph to temporary memory graph, to add ontology definitions.")
                 # creates a copy of self.data_graph, doesn't modify it
-                the_target_graph = self.mix_in_ontology()
+                datagraph = self.mix_in_ontology()
                 has_cloned = True
             else:
-                the_target_graph = self.data_graph
+                datagraph = self.data_graph
             inference_option = self.options.get('inference', 'none')
             if self.inplace and self.debug:
                 self.logger.debug("Skipping DataGraph clone because PySHACL is operating in inplace mode.")
             if inference_option and not self.pre_inferenced and str(inference_option) != "none":
                 if not has_cloned and not self.inplace:
                     self.logger.debug("Cloning DataGraph to temporary memory graph before pre-inferencing.")
-                    the_target_graph = clone_graph(the_target_graph)
+                    datagraph = clone_graph(datagraph)
                     has_cloned = True
                 self.logger.debug(f"Running pre-inferencing with option='{inference_option}'.")
-                self._run_pre_inference(the_target_graph, inference_option, logger=self.logger)
+                self._run_pre_inference(datagraph, inference_option, logger=self.logger)
                 self.pre_inferenced = True
             if not has_cloned and not self.inplace:
                 # We still need to clone in advanced mode, because of triple rules
                 self.logger.debug(
                     "Forcing clone of DataGraph because expanding rules cannot modify the input datagraph."
                 )
-                the_target_graph = clone_graph(the_target_graph)
+                datagraph = clone_graph(datagraph)
                 has_cloned = True
-            self._target_graph = the_target_graph
-
+            self._target_graph = datagraph
+        assert self._target_graph is not None
         if self.options.get("use_shapes", None) is not None and len(self.options["use_shapes"]) > 0:
             using_manually_specified_shapes = True
             expanded_use_shapes = []
@@ -237,7 +182,7 @@ class RuleExpandRunner(PySHACLRunType):
                     expanded_focus_nodes.append(URIRef(f))
                 else:
                     try:
-                        expanded_focus_node = self.target_graph.namespace_manager.expand_curie(f)
+                        expanded_focus_node = self._target_graph.namespace_manager.expand_curie(f)
                     except ValueError:
                         expanded_focus_node = URIRef(f)
                     expanded_focus_nodes.append(expanded_focus_node)
@@ -261,33 +206,25 @@ class RuleExpandRunner(PySHACLRunType):
         for s in shapes:
             s.set_advanced(True)
         apply_target_types(target_types)
-        if isinstance(the_target_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
-            named_graphs = [
-                (
-                    rdflib.Graph(the_target_graph.store, i, namespace_manager=the_target_graph.namespace_manager)  # type: ignore[arg-type]
-                    if not isinstance(i, rdflib.Graph)
-                    else i
-                )
-                for i in the_target_graph.store.contexts(None)
-            ]
-        else:
-            named_graphs = [the_target_graph]
+        if isinstance(self._target_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+            self._target_graph.default_union = True
+
+        g = self._target_graph
+
         if specified_focus_nodes is not None and using_manually_specified_shapes:
             on_focus_nodes: Union[Sequence[URIRef], None] = specified_focus_nodes
         else:
             on_focus_nodes = None
-        if self.debug:
-            self.logger.debug(f"Will run SHACL Rules expansion on {len(named_graphs)} named graph/s.")
-        for g in named_graphs:
-            if self.debug:
-                self.logger.debug(f"Running SHACL Rules on DataGraph named {g.identifier}")
-            if gathered_functions:
-                apply_functions(executor, gathered_functions, g)
-            try:
-                if gathered_rules:
-                    apply_rules(executor, gathered_rules, g, focus_nodes=on_focus_nodes)
-            finally:
-                if gathered_functions:
-                    unapply_functions(gathered_functions, g)
 
-        return the_target_graph
+        if self.debug:
+            self.logger.debug(f"Running SHACL Rules on DataGraph named {g.identifier}")
+        if gathered_functions:
+            apply_functions(executor, gathered_functions, g)
+        try:
+            if gathered_rules:
+                apply_rules(executor, gathered_rules, g, focus_nodes=on_focus_nodes)
+        finally:
+            if gathered_functions:
+                unapply_functions(gathered_functions, g)
+
+        return g

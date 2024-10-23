@@ -228,7 +228,7 @@ commands_pre =
 
 commands =
     - poetry show
-    poetry run pytest --cov=pyshacl test/
+    poetry run pytest -v --log-level=INFO --cov=pyshacl test/
     - poetry run coverage combine --append
     poetry run coverage report -m
     poetry run coverage html -i

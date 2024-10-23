@@ -57,11 +57,16 @@ class NotConstraintComponent(ConstraintComponent):
         return "NotConstraintComponent"
 
     def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+        try:
+            value_node_str = stringify_node(datagraph, value_node)
+        except (LookupError, ValueError):
+            # value node doesn't exist in the datagraph.
+            value_node_str = str(value_node)
         if len(self.not_list) == 1:
-            m = f"Node {stringify_node(datagraph, value_node)} must not conform to shape {stringify_node(self.shape.sg.graph, self.not_list[0])}"
+            m = f"Node {value_node_str} must not conform to shape {stringify_node(self.shape.sg.graph, self.not_list[0])}"
         else:
             nots_list = " , ".join(stringify_node(self.shape.sg.graph, n) for n in self.not_list)
-            m = f"Node {stringify_node(datagraph, value_node)} must not conform to any shapes in {nots_list}"
+            m = f"Node {value_node_str} must not conform to any shapes in {nots_list}"
         return [rdflib.Literal(m)]
 
     def evaluate(self, executor: SHACLExecutor, datagraph: GraphLike, focus_value_nodes: Dict, _evaluation_path: List):
@@ -172,7 +177,12 @@ class AndConstraintComponent(ConstraintComponent):
                 )
                 and_node_strings.append(f"({and_node_string1})")
             and_node_string = " and ".join(and_node_strings)
-        m = "Node {} must conform to all shapes in {}".format(stringify_node(datagraph, value_node), and_node_string)
+        try:
+            value_node_str = stringify_node(datagraph, value_node)
+        except (LookupError, ValueError):
+            # value node doesn't exist in the datagraph.
+            value_node_str = str(value_node)
+        m = f"Node {value_node_str} must conform to all shapes in {and_node_string}"
         return [rdflib.Literal(m)]
 
     def evaluate(
@@ -277,9 +287,12 @@ class OrConstraintComponent(ConstraintComponent):
                 )
                 or_node_strings.append(f"({or_node_string1})")
             or_node_string = " and ".join(or_node_strings)
-        m = "Node {} must conform to one or more shapes in {}".format(
-            stringify_node(datagraph, value_node), or_node_string
-        )
+        try:
+            value_node_str = stringify_node(datagraph, value_node)
+        except (LookupError, ValueError):
+            # value node doesn't exist in the datagraph.
+            value_node_str = str(value_node)
+        m = f"Node {value_node_str} must conform to one or more shapes in {or_node_string}"
         return [rdflib.Literal(m)]
 
     def evaluate(
@@ -384,9 +397,12 @@ class XoneConstraintComponent(ConstraintComponent):
                 )
                 xone_node_strings.append(f"({xone_node_string1})")
             xone_node_string = " and ".join(xone_node_strings)
-        m = "Node {} must conform to exactly one shape in {}".format(
-            stringify_node(datagraph, value_node), xone_node_string
-        )
+        try:
+            value_node_str = stringify_node(datagraph, value_node)
+        except (LookupError, ValueError):
+            # value node doesn't exist in the datagraph.
+            value_node_str = str(value_node)
+        m = f"Node {value_node_str} must conform to exactly one shape in {xone_node_string}"
         return [rdflib.Literal(m)]
 
     def evaluate(
