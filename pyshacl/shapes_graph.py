@@ -72,7 +72,7 @@ class ShapesGraph(object):
 
     def _add_system_triples(self):
         if isinstance(self.graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
-            g = next(iter(self.graph.contexts()))
+            g = self.graph.default_context
         else:
             g = self.graph
         for t in self.system_triples:
