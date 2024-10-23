@@ -125,6 +125,8 @@ def mix_datasets(
         for i in base_ds.store.contexts(None)
     ]
     if isinstance(base_ds, rdflib.Dataset) and len(base_named_graphs) < 1:
+        # rdflib.Dataset always includes the DEFAULT_GRAPH_ID named graph
+        # but a conjunctive graph does not. It _could_ return no graphs.
         base_named_graphs = [
             rdflib.Graph(base_ds.store, DATASET_DEFAULT_GRAPH_ID, namespace_manager=base_ds.namespace_manager)
         ]
