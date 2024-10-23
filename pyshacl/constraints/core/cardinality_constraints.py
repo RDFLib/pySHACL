@@ -78,9 +78,12 @@ class MinCountConstraintComponent(ConstraintComponent):
         p = self.shape.path()
         if p:
             p = stringify_node(self.shape.sg.graph, p)
-            m = "Less than {} values on {}->{}".format(
-                str(self.min_count.value), stringify_node(datagraph, focus_node), p
-            )
+            try:
+                focus_string = stringify_node(datagraph, focus_node)
+            except (LookupError, ValueError):
+                # focus node doesn't exist in the datagraph. We can deal.
+                focus_string = str(focus_node)
+            m = "Less than {} values on {}->{}".format(str(self.min_count.value), focus_string, p)
         else:
             m = "Less than {} values on {}".format(str(self.min_count.value), stringify_node(datagraph, focus_node))
         return [Literal(m)]

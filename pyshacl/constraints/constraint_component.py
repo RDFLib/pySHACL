@@ -166,7 +166,11 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
             severity_desc = "Validation Result"
         source_shape_text = stringify_node(sg, self.shape.node)
         severity_node_text = stringify_node(sg, severity)
-        focus_node_text = stringify_node(datagraph or sg, focus_node)
+        try:
+            focus_node_text = stringify_node(datagraph or sg, focus_node)
+        except (LookupError, ValueError):
+            # focus node doesn't exist in the datagraph. We can deal.
+            focus_node_text = str(focus_node)
         desc = "{} in {} ({}):\n\tSeverity: {}\n\tSource Shape: {}\n\tFocus Node: {}\n".format(
             severity_desc,
             constraint_name,
@@ -176,7 +180,11 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
             focus_node_text,
         )
         if value_node is not None:
-            val_node_string = stringify_node(datagraph or sg, value_node)
+            try:
+                val_node_string = stringify_node(datagraph or sg, value_node)
+            except (LookupError, ValueError):
+                # value node doesn't exist in the datagraph.
+                val_node_string = str(value_node)
             desc += "\tValue Node: {}\n".format(val_node_string)
         if result_path is None and self.shape.is_property_shape:
             result_path = self.shape.path()
