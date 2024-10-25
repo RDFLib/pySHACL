@@ -7,6 +7,11 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]
 - Nothing yet
 
+## [0.28.1] - 2024-10-25
+
+### Fixed
+- PySHACL no longer overwrites the Python `root` logger and removes all its handlers. How Rude.
+
 ## [0.28.0] - 2024-10-23
 ### Added
 - owl:imports now works with bnode values, where it contains the following:
@@ -1177,7 +1182,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.28.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.28.1...HEAD
+[0.28.1]: https://github.com/RDFLib/pySHACL/compare/v0.28.0...v0.28.1
 [0.28.0]: https://github.com/RDFLib/pySHACL/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/RDFLib/pySHACL/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/RDFLib/pySHACL/compare/v0.25.0...v0.26.0

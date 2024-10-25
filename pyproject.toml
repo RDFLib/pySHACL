@@ -9,7 +9,7 @@ requires-python = ">=3.8.1"
 
 [tool.poetry]
 name = "pyshacl"
-version = "0.28.0"
+version = "0.28.1"
 # Don't forget to change the version number in __init__.py, Dockerfile, and CITATION.cff along with this one
 description = "Python SHACL Validator"
 license = "Apache-2.0"
@@ -211,7 +211,7 @@ toxworkdir={env:TOX_WORK_DIR:.tox}
 
 [testenv]
 deps =
-    poetry>=1.8.2
+    poetry>=1.8.4
 passenv =
     DBUS_SESSION_BUS_ADDRESS
     PIP_KEYRING_PROVIDER

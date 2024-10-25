@@ -227,11 +227,12 @@ def meta_validate(shacl_graph: Union[GraphLike, str], inference: Optional[str] =
     return validate(shacl_graph, shacl_graph=shacl_shacl_graph, inference=inference, **kwargs)
 
 
-def make_default_logger(name: Union[str, None] = None, debug: bool = False) -> logging.Logger:
+def make_default_logger(name: Union[str, None] = None, debug: bool = False, clear_handlers: bool = True) -> logging.Logger:
     log_handler = logging.StreamHandler(stderr)
-    log = logging.getLogger()
-    for h in log.handlers:
-        log.removeHandler(h)  # pragma:no cover
+    log = logging.getLogger(name)
+    if clear_handlers:
+        for h in log.handlers:
+            log.removeHandler(h)  # pragma:no cover
     log.addHandler(log_handler)
     log.setLevel(logging.INFO if not debug else logging.DEBUG)
     log_handler.setLevel(logging.INFO if not debug else logging.DEBUG)
