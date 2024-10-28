@@ -169,6 +169,7 @@ WHERE {
     .
 '''
 
+
 def test_170_2() -> None:
     data_g = rdflib.Graph()
     data_g.parse(data=data_file, format="turtle")
@@ -183,6 +184,7 @@ def test_170_2() -> None:
     ont_2.parse(data=ont_file2, format="turtle")
     conforms, report, message = validate(data_g, shacl_graph=shapes, ont_graph=ont_2, inference="rdfs", debug=True)
     assert not conforms
+
 
 shacl_file_no_sparql_prefixes = '''# baseURI: urn:exShapes
 @prefix exShapes: <urn:exShapes#> .
@@ -214,6 +216,8 @@ WHERE {
     ] ;
     .
 '''
+
+
 def test_170_3() -> None:
     # The vcard prefix does not exist in the DataFile, only in the Ontology file.
     # It is defacto behaviour that PySHACL now copies any unknown prefixes from the ontology file into the data file.
@@ -229,6 +233,7 @@ def test_170_3() -> None:
     ont_2.parse(data=ont_file2, format="turtle")
     conforms, report, message = validate(data_g, shacl_graph=shapes, ont_graph=ont_2, inference="rdfs", debug=True)
     assert not conforms
+
 
 if __name__ == "__main__":
     test_170()

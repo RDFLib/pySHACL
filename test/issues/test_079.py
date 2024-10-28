@@ -5,6 +5,7 @@ https://github.com/RDFLib/pySHACL/issues/79
 """
 import rdflib
 import pyshacl
+
 shapes_data = """\
 @prefix ex: <https://example.com#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
@@ -28,16 +29,21 @@ ex:Shape a sh:NodeShape ;
 
 def test_079():
     shape_g = rdflib.Graph().parse(data=shapes_data, format='turtle')
-    data_g = rdflib.Graph().parse(data="""
+    data_g = rdflib.Graph().parse(
+        data="""
     @prefix ex: <https://example.com#> .
 
     ex:aaa a ex:AAA.
     ex:aaa a ex:BBB.
     ex:aaa a ex:CCC.
-    """, format='turtle')
+    """,
+        format='turtle',
+    )
 
     conforms, results_graph, results_text = pyshacl.validate(
-        data_g, shacl_graph=shape_g, debug=True,
+        data_g,
+        shacl_graph=shape_g,
+        debug=True,
     )
     assert not conforms
 

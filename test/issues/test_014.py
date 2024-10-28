@@ -84,19 +84,31 @@ ex:Pet1 rdf:type ex:Lizard ;
 
 
 def test_014_fail():
-    res = validate(data_file_text, shacl_graph=shacl_file_text, data_graph_format='turtle',
-                   shacl_graph_format='turtle', inference='both', debug=True)
+    res = validate(
+        data_file_text,
+        shacl_graph=shacl_file_text,
+        data_graph_format='turtle',
+        shacl_graph_format='turtle',
+        inference='both',
+        debug=True,
+    )
     conforms, graph, string = res
     assert not conforms
 
 
 def test_014_pass():
-    res = validate(data_file_text, shacl_graph=shacl_file_text, data_graph_format='turtle',
-                   shacl_graph_format='turtle', ont_graph=ontology_file_text,
-                   ont_graph_format="turtle", inference='both', debug=True)
+    res = validate(
+        data_file_text,
+        shacl_graph=shacl_file_text,
+        data_graph_format='turtle',
+        shacl_graph_format='turtle',
+        ont_graph=ontology_file_text,
+        ont_graph_format="turtle",
+        inference='both',
+        debug=True,
+    )
     conforms, graph, string = res
     assert conforms
-
 
 
 if __name__ == "__main__":

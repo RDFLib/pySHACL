@@ -41,11 +41,7 @@ for m in manifests_with_entries:
 
 tests_found_in_manifests = OrderedDict(sorted(tests_found_in_manifests.items()))
 
-tests_base_index = [
-    (base, i)
-    for base, tests in tests_found_in_manifests.items()
-    for i, t in enumerate(tests)
-]
+tests_base_index = [(base, i) for base, tests in tests_found_in_manifests.items() for i, t in enumerate(tests)]
 
 
 """
@@ -63,6 +59,7 @@ tests_base_index = [
 """
 
 assertions = {}
+
 
 def make_assertion(base, index):
     assertion = list()
@@ -95,9 +92,14 @@ def make_assertion(base, index):
         print("testing: {}".format(label))
     try:
         val, _, v_text = pyshacl.validate(
-            data_file, shacl_graph=shacl_file, inference='rdfs',
-            check_sht_result=True, sht_validate=sht_validate,
-            debug=True, meta_shacl=False)
+            data_file,
+            shacl_graph=shacl_file,
+            inference='rdfs',
+            check_sht_result=True,
+            sht_validate=sht_validate,
+            debug=True,
+            meta_shacl=False,
+        )
     except (NotImplementedError, ReportableRuntimeError) as e:
         print(e)
         info_text = rdflib.Literal(str(e.args[0]), lang="en")

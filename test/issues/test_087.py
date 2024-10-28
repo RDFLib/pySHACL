@@ -52,8 +52,8 @@ mixed_file_text = """
     :prop :s3 .
 """
 
+
 def test_087():
     res1 = validate(mixed_file_text, data_graph_format='turtle', shacl_graph_format='turtle', debug=True)
     conforms, graph, string = res1
     assert conforms
-

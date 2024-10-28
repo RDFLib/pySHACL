@@ -13,6 +13,7 @@ def test_146() -> None:
         warnings.simplefilter("always")
         # Import pyshacl, which should not trigger any warnings
         import pyshacl
+
         # Verify some things
         assert len(warning_context) == 0
 

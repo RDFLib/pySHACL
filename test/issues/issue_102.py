@@ -284,6 +284,7 @@ ex:obs1 a qb:Observation ;
 
 '''
 
+
 def test_102():
     g_shacl = Graph().parse(data=qb_shacl, format="turtle")
     g_data = Graph().parse(data=qb_data, format="turtle")
@@ -291,6 +292,7 @@ def test_102():
     conforms, a, b = pyshacl.validate(g_data, shacl_graph=g_shacl, debug=True)
     print(a)
     assert conforms
+
 
 if __name__ == "__main__":
     test_102()

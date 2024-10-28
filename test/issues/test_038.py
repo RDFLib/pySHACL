@@ -9,7 +9,8 @@ from rdflib import Graph
 from pyshacl import validate
 
 shapes = Graph()
-shapes.parse(data="""
+shapes.parse(
+    data="""
     @prefix sh: <http://www.w3.org/ns/shacl#> .
     @prefix owl: <http://www.w3.org/2002/07/owl#> .
     @prefix ex: <http://example.org/ns#> .
@@ -25,17 +26,21 @@ shapes.parse(data="""
           sh:path ex:name ;
           sh:minCount 1 ;
         .
-""",format="ttl")
+""",
+    format="ttl",
+)
 
 data = Graph()
-data.parse(data="""
+data.parse(
+    data="""
     @prefix ex: <http://example.org/ns#> .
 
     ex:Bob
           a ex:Person ;
     .
-""",format="ttl")
-
+""",
+    format="ttl",
+)
 
 
 def test_038():

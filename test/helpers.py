@@ -4,6 +4,7 @@ import platform
 from os import path, walk
 import rdflib
 from rdflib.namespace import Namespace, RDF, RDFS
+
 MF = Namespace('http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#')
 SHT = Namespace('http://www.w3.org/ns/shacl-test#')
 
@@ -27,6 +28,7 @@ class SHTValidate(object):
         self.shapes_graph = shapes_graph
         self.label = label
         self.status = status
+
 
 class Manifest(object):
     def __init__(self, base, sht_graph, node, includes, entries=None, label=None):
@@ -133,7 +135,7 @@ def load_manifest(filename, recursion=0):
             href = str(i)
             if platform.system() == "Windows":
                 if href.startswith("file:///"):
-                    child_mf = load_manifest(href[8:], recursion=recursion+1)
+                    child_mf = load_manifest(href[8:], recursion=recursion + 1)
                 else:
                     raise RuntimeError("Manifest can only include file:/// uris")
             else:
@@ -182,7 +184,6 @@ def flatten_manifests(root_manifest, only_with_entries=False, recursion=0):
     else:
         m_list.append(root_manifest)
     for i in includes:
-        f = flatten_manifests(i, only_with_entries=only_with_entries,
-                              recursion=recursion+1)
+        f = flatten_manifests(i, only_with_entries=only_with_entries, recursion=recursion + 1)
         m_list.extend(f)
     return m_list

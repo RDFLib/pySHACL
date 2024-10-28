@@ -232,11 +232,20 @@ Testsparql:hasResource
 .
 '''
 
+
 def test_008():
-    res1 = validate(mixed_file_text, data_graph_format='turtle', shacl_graph_format='turtle', inference='both', debug=True)
+    res1 = validate(
+        mixed_file_text, data_graph_format='turtle', shacl_graph_format='turtle', inference='both', debug=True
+    )
     conforms, graph, string = res1
     assert not conforms
-    res2 = validate(data_file_text, shacl_graph=shacl_file_text, data_graph_format='turtle', shacl_graph_format='turtle', inference='both', debug=True)
+    res2 = validate(
+        data_file_text,
+        shacl_graph=shacl_file_text,
+        data_graph_format='turtle',
+        shacl_graph_format='turtle',
+        inference='both',
+        debug=True,
+    )
     conforms, graph, string = res2
     assert not conforms
-

@@ -41,10 +41,16 @@ data_file_text_jsonld = """\
 }
 """
 
+
 def test_036_jsonld():
-    res = validate(data_file_text_jsonld, shacl_graph=shacl_file_text,
-                   data_graph_format='json-ld', shacl_graph_format='json-ld',
-                   inference='rdfs', debug=True)
+    res = validate(
+        data_file_text_jsonld,
+        shacl_graph=shacl_file_text,
+        data_graph_format='json-ld',
+        shacl_graph_format='json-ld',
+        inference='rdfs',
+        debug=True,
+    )
     conforms, graph, string = res
     assert not conforms
 

@@ -1,5 +1,6 @@
 from rdflib import Graph
 from pyshacl import validate
+
 shapes_graph = '''\
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -96,11 +97,13 @@ exdata:SquareRectangle
 
 '''
 
+
 def test_js_function():
     s1 = Graph().parse(data=shapes_graph, format="turtle")
     g1 = Graph().parse(data=data_graph, format="turtle")
     conforms, result_graph, result_text = validate(g1, shacl_graph=s1, advanced=True, debug=True, js=True)
     assert not conforms
+
 
 if __name__ == "__main__":
     test_js_function()
