@@ -5,6 +5,7 @@ https://github.com/RDFLib/pySHACL/issues/79
 """
 import rdflib
 import pyshacl
+
 shapes_data = """\
 @prefix ex: <https://example.com#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
@@ -58,7 +59,9 @@ def test_w3_list1():
     data_g = rdflib.Graph().parse(data=target_data, format='turtle')
 
     conforms, results_graph, results_text = pyshacl.validate(
-        data_g, shacl_graph=shape_g, debug=False,
+        data_g,
+        shacl_graph=shape_g,
+        debug=False,
     )
     print(results_text)
     assert conforms

@@ -32,15 +32,23 @@ hei:hei_cust_1281 a hei:Hei_customer ;
     hei:Ship_to_street "Industrieweg" .
 """
 
+
 def test_012_text():
-    res = validate(data_file_text, shacl_graph=shacl_file_text,
-                   data_graph_format='turtle', shacl_graph_format='turtle',
-                   inference='both', debug=True)
+    res = validate(
+        data_file_text,
+        shacl_graph=shacl_file_text,
+        data_graph_format='turtle',
+        shacl_graph_format='turtle',
+        inference='both',
+        debug=True,
+    )
     conforms, graph, string = res
     assert not conforms
 
+
 def test_012_graph():
     from rdflib import Graph
+
     g = Graph()
     g.parse(data=data_file_text, format='turtle')
     sg = Graph()

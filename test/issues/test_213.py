@@ -51,7 +51,10 @@ def test_213():
     shape_g = rdflib.Graph().parse(data=shapes_data, format='turtle')
     data_g = rdflib.Graph().parse(data=data_g_text, format="turtle")
     conforms, results_graph, results_text = pyshacl.validate(
-        data_g, shacl_graph=shape_g, debug=True, meta_shacl=False,
+        data_g,
+        shacl_graph=shape_g,
+        debug=True,
+        meta_shacl=False,
     )
     assert not conforms
     assert "QualifiedValueShapeConstraintComponent" in results_text

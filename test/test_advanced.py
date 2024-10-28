@@ -131,12 +131,14 @@ ex:Jenny
 .
 '''
 
+
 def test_advanced():
     d = Graph().parse(data=data_graph, format="turtle")
     s = Graph().parse(data=shacl_file, format="turtle")
     conforms, report, message = validate(d, shacl_graph=s, advanced=True, debug=False)
     print(message)
     assert not conforms
+
 
 if __name__ == "__main__":
     exit(test_advanced())

@@ -80,17 +80,29 @@ data_file_text_jsonld = """
 }
 """
 
+
 def test_026_trig():
-    res = validate(data_file_text_trig, shacl_graph=shacl_file_text,
-                   data_graph_format='trig', shacl_graph_format='turtle',
-                   inference='both', debug=True)
+    res = validate(
+        data_file_text_trig,
+        shacl_graph=shacl_file_text,
+        data_graph_format='trig',
+        shacl_graph_format='turtle',
+        inference='both',
+        debug=True,
+    )
     conforms, graph, string = res
     assert not conforms
 
+
 def test_026_jsonld():
-    res = validate(data_file_text_jsonld, shacl_graph=shacl_file_text,
-                   data_graph_format='json-ld', shacl_graph_format='turtle',
-                   inference='both', debug=True)
+    res = validate(
+        data_file_text_jsonld,
+        shacl_graph=shacl_file_text,
+        data_graph_format='json-ld',
+        shacl_graph_format='turtle',
+        inference='both',
+        debug=True,
+    )
     conforms, graph, string = res
     assert not conforms
 

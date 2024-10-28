@@ -40,6 +40,7 @@ mixed_file_text = """
     :prop "fail" .
 """
 
+
 def test_96():
     res1 = validate(mixed_file_text, data_graph_format='turtle', shacl_graph_format='turtle', debug=True)
     conforms, _, _ = res1

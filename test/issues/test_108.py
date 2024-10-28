@@ -30,6 +30,7 @@ dash:toString a sh:JSFunction,
     sh:select "SELECT (xsd:string($arg) AS ?result) WHERE { }" .
 """
 
+
 def test_108():
     res = validate(shacl_file_text, advanced=True, js=True)
     conforms, graph, string = res

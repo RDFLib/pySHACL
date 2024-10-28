@@ -1,5 +1,6 @@
 from rdflib import Graph
 from pyshacl import validate
+
 shapes_graph = '''\
 @prefix dash: <http://datashapes.org/dash#> .
 @prefix ex: <http://datashapes.org/sh/tests/js/target/jsTarget-001.test#> .
@@ -70,11 +71,13 @@ exdata:ValidInstance1
 
 '''
 
+
 def test_js_target():
     s1 = Graph().parse(data=shapes_graph, format="turtle")
     g1 = Graph().parse(data=data_graph, format="turtle")
     conforms, result_graph, result_text = validate(g1, shacl_graph=s1, advanced=True, debug=True, js=True)
     assert not conforms
+
 
 if __name__ == "__main__":
     test_js_target()

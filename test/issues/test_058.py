@@ -26,19 +26,19 @@ ex:termShape a sh:NodeShape ;
 """
 
 
-
 def test_058():
     dataGraph = rdflib.Graph().parse(data=data, format='ttl')
     shaclGraph = rdflib.Graph().parse(data=shaclData, format='ttl')
     exc = None
     try:
-        conforms, g, s = validate(dataGraph, shacl_graph=shaclGraph, abort_on_first=False, meta_shacl=False, debug=False, advanced=True)
+        conforms, g, s = validate(
+            dataGraph, shacl_graph=shaclGraph, abort_on_first=False, meta_shacl=False, debug=False, advanced=True
+        )
     except Exception as e:
         assert isinstance(e, ConstraintLoadError)
         exc = e
     assert exc is not None
     assert "ignoredProperties" in str(exc)
-
 
 
 if __name__ == "__main__":

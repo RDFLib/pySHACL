@@ -46,20 +46,25 @@ ex:TestClass3
 
 def test_199():
     shape_g = rdflib.Graph().parse(data=shapes_data, format='turtle')
-    data_g = rdflib.Graph().parse(data="""
+    data_g = rdflib.Graph().parse(
+        data="""
     @prefix ex: <https://example.com#> .
     @prefix sh: <http://www.w3.org/ns/shacl#> .
 
     ex:A a ex:TestClass1 .
     ex:B a ex:TestClass2 .
     ex:C a ex:TestClass3 .
-    """, format='turtle')
+    """,
+        format='turtle',
+    )
 
     conforms, results_graph, results_text = pyshacl.validate(
-        data_g, shacl_graph=shape_g, debug=True,
+        data_g,
+        shacl_graph=shape_g,
+        debug=True,
     )
     assert not conforms
-    assert len(list(results_graph[:SH.result])) == 3
+    assert len(list(results_graph[: SH.result])) == 3
 
 
 if __name__ == "__main__":
