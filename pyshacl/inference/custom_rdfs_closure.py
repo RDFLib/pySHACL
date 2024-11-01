@@ -55,8 +55,9 @@ class CustomRDFSOWLRLSemantics(CustomRDFSSemantics, OWLRL_Semantics):
     ]
 
     def __init__(self, graph, axioms, daxioms, rdfs: bool = True, destination: Optional['Graph'] = None):
-        OWLRL_Semantics.__init__(self, graph, axioms, daxioms, rdfs=rdfs, destination=destination)
-        CustomRDFSSemantics.__init__(self, graph, axioms, daxioms, rdfs=rdfs, destination=destination)
+        # MyPy thinks this is object.__init__ and says the kwargs are incorrect for __init__
+        OWLRL_Semantics.__init__(self, graph, axioms, daxioms, rdfs=rdfs, destination=destination)  # type: ignore[arg-type, call-arg]
+        CustomRDFSSemantics.__init__(self, graph, axioms, daxioms, rdfs=rdfs, destination=destination)  # type: ignore[arg-type, call-arg]
         self.rdfs = True
 
     # noinspection PyMethodMayBeStatic

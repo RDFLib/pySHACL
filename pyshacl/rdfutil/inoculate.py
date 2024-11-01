@@ -32,8 +32,8 @@ def inoculate(data_graph: rdflib.Graph, ontology: GraphLike) -> rdflib.Graph:
     data_graph_ns = data_graph.namespace_manager
 
     if isinstance(ontology, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
-        # always set default context true on the ontology DS
-        ontology.default_context = True
+        # always set default_union true on the ontology DS
+        ontology.default_union = True
     # Bind any missing ontology namespaces in the DataGraph NS manager.
     if ontology_ns is not data_graph_ns:
         data_graph_prefixes = {p: n for (p, n) in data_graph_ns.namespaces()}
