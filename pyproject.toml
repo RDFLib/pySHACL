@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 [project]
 name = "pyshacl"
 # Black and Ruff both now read target-version from [project.requires-python]
-requires-python = ">=3.8.1"
+requires-python = ">=3.9"
 
 [tool.poetry]
 name = "pyshacl"
@@ -60,11 +60,10 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8.1"  # Poetry doesn't read from [project.requires-python]
-# Note, 3.8.0 is not supported, only 3.8.1 or above. See:
-# https://github.com/RDFLib/rdflib/blob/3bee979cd0e5b6efc57296b4fc43dd8ede8cf375/CHANGELOG.md?plain=1#L53
-rdflib = {version=">=6.3.2,<8.0", python = ">=3.8.1", extras=["html"]}
-owlrl = ">=6.0.2,<7"
+# The <4 is reauired for compatiblity with OWL-RL that requdires Python <4
+python = ">=3.9,<4"  # Poetry doesn't read from [project.requires-python]
+rdflib = {version=">=7.1.1,<8.0", extras=["html"]}
+owlrl = ">=7.1.2,<8"
 prettytable = [
     {version=">=3.5.0", python = ">=3.8,<3.12"},
     {version=">=3.7.0", python = ">=3.12"}
@@ -206,7 +205,7 @@ testpaths = [
 legacy_tox_ini = """
 [tox]
 skipsdist = true
-envlist = py38, py39, py310, py311, py312, lint, type-checking
+envlist = py39, py310, py311, py312, lint, type-checking
 toxworkdir={env:TOX_WORK_DIR:.tox}
 
 [testenv]
@@ -259,6 +258,5 @@ python =
     3.11 = py311
     3.10 = py310
     3.9 = py39
-    3.8 = py38
 
 """
