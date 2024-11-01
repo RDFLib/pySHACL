@@ -14,6 +14,7 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
   a separate named graph, to avoid polluting the datagraph.
 - When using SHACL Triple Rules from SHACL-AF spec, PySHACL will now add the expressed triples into
   a separate named graph. This allows you to more easily get the expanded triples back out again afterward.
+  - This is implemented for TripleRules, SPARQLRules and JSRules
 
 ### Changed
 - PySHACL no longer supports older RDFLib versions
