@@ -7,6 +7,8 @@ import rdflib
 from pyshacl.errors import ReportableRuntimeError
 
 if TYPE_CHECKING:
+    from rdflib.term import URIRef
+
     from pyshacl.pytypes import GraphLike
 
 
@@ -19,7 +21,11 @@ class PySHACLRunType(metaclass=ABCMeta):
 
     @classmethod
     def _run_pre_inference(
-        cls, target_graph: 'GraphLike', inference_option: str, logger: Optional[logging.Logger] = None
+        cls,
+        target_graph: 'GraphLike',
+        inference_option: str,
+        destination_graph_identifier: Optional['URIRef'] = None,
+        logger: Optional[logging.Logger] = None,
     ):
         """
         Note, this is the OWL/RDFS pre-inference,
@@ -55,21 +61,16 @@ class PySHACLRunType(metaclass=ABCMeta):
                 "Error during creation of OWL-RL Deductive Closure\n{}".format(str(e.args[0]))
             )
         if isinstance(target_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
-            named_graphs = []
-            for i in target_graph.store.contexts(None):
-                if isinstance(i, rdflib.Graph):
-                    named_graphs.append(i)
-                else:
-                    named_graphs.append(
-                        rdflib.Graph(target_graph.store, i, namespace_manager=target_graph.namespace_manager)
-                    )
+            target_graph.default_union = True
+            if destination_graph_identifier is not None:
+                destination_graph = target_graph.get_context(destination_graph_identifier)
+            else:
+                destination_graph = target_graph.default_context
         else:
-            named_graphs = [target_graph]
+            destination_graph = None
         try:
-            # I'd prefer to not have to infer every namged graph individually, but OWL-RL doesn't
-            # support doing inference on a Dataset/ConjunctiveGraph yet. (New release will be soon?)
-            for g in named_graphs:
-                inferencer.expand(g)
+            inferencer.expand(target_graph, destination=destination_graph)
         except Exception as e:  # pragma: no cover
+            raise
             logger.error("Error while running OWL-RL Deductive Closure")
             raise ReportableRuntimeError("Error while running OWL-RL Deductive Closure\n{}".format(str(e.args[0])))

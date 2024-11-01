@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from typing import TYPE_CHECKING, Optional
+
 try:
     from owlrl import OWL
 
@@ -25,6 +27,9 @@ except ImportError:
 from owlrl.OWLRL import OWLRL_Semantics
 from owlrl.RDFSClosure import RDFS_Semantics as OrigRDFSSemantics
 
+if TYPE_CHECKING:
+    from rdflib.graph import Graph
+
 
 class CustomRDFSSemantics(OrigRDFSSemantics):
     def one_time_rules(self):
@@ -49,9 +54,9 @@ class CustomRDFSOWLRLSemantics(CustomRDFSSemantics, OWLRL_Semantics):
         (OWL.DataRange, OWL.equivalentClass, RDFS.Datatype),
     ]
 
-    def __init__(self, graph, axioms, daxioms, rdfs=True):
-        OWLRL_Semantics.__init__(self, graph, axioms, daxioms, rdfs)
-        CustomRDFSSemantics.__init__(self, graph, axioms, daxioms, rdfs)
+    def __init__(self, graph, axioms, daxioms, rdfs: bool = True, destination: Optional['Graph'] = None):
+        OWLRL_Semantics.__init__(self, graph, axioms, daxioms, rdfs=rdfs, destination=destination)
+        CustomRDFSSemantics.__init__(self, graph, axioms, daxioms, rdfs=rdfs, destination=destination)
         self.rdfs = True
 
     # noinspection PyMethodMayBeStatic

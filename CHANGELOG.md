@@ -7,6 +7,24 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]
 - Nothing yet
 
+## [0.29.0] - 2024-11-01
+
+### Added
+- When validating a Dataset instead of a bare Graph, PySHACL will now expand RDFS and OWL-RL inferences into
+  a separate named graph, to avoid polluting the datagraph.
+- When using SHACL Triple Rules from SHACL-AF spec, PySHACL will now add the expressed triples into
+  a separate named graph. This allows you to more easily get the expanded triples back out again afterward.
+
+### Changed
+- PySHACL no longer supports older RDFLib versions
+  - PySHACL relies on the latest OWL-RL version, that in-turn relies on the latest RDFLib version
+  - Therefore PySHACL now requires RDFLib v7.1.1 or newer
+- Dropped Python 3.8 support.
+  - Python developers discontinued Python 3.8 last month
+  - The next version of RDFLib and OWL-RL will not support Python 3.8
+  - Removed Python 3.8 from the RDFLib test suite
+  - Python 3.9-specific typing changes will be incrementally introduced
+
 ## [0.28.1] - 2024-10-25
 
 ### Fixed
@@ -1182,7 +1200,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.28.1...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.29.0...HEAD
+[0.29.0]: https://github.com/RDFLib/pySHACL/compare/v0.28.1...v0.29.0
 [0.28.1]: https://github.com/RDFLib/pySHACL/compare/v0.28.0...v0.28.1
 [0.28.0]: https://github.com/RDFLib/pySHACL/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/RDFLib/pySHACL/compare/v0.26.0...v0.27.0

@@ -307,7 +307,7 @@ def test_blank_node_string_generation():
     )
     conforms, graph, string = res
     assert not conforms
-    rx = r"^\s*Focus Node\:\s+\[.+rdf:type\s+.+exOnt\:PreschoolTeacher.*\]$"
+    rx = r"^\s*Focus Node\:\s+\[.+rdf:type\s+exOnt\:PreschoolTeacher.*\]$"
     matches = re.search(rx, string, flags=re.MULTILINE)
     assert matches
 

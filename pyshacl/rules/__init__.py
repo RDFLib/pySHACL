@@ -86,6 +86,9 @@ def gather_rules(
     return ret_rules
 
 
+RULES_ITERATE_LIMIT = 100
+
+
 def apply_rules(
     executor: SHACLExecutor,
     shapes_rules: Dict,
@@ -98,11 +101,13 @@ def apply_rules(
     for shape, rules in sorted_shapes_rules:
         # sort the rules by the sh:order before execution
         rules = sorted(rules, key=lambda x: x.order)
-        iterate_limit = 100
+        _iterate_limit = int(RULES_ITERATE_LIMIT)
         while True:
-            if iterate_limit < 1:
-                raise ReportableRuntimeError("SHACL Shape Rule iteration exceeded iteration limit of 100.")
-            iterate_limit -= 1
+            if _iterate_limit < 1:
+                raise ReportableRuntimeError(
+                    f"SHACL Shape Rule iteration exceeded iteration limit of {RULES_ITERATE_LIMIT}."
+                )
+            _iterate_limit -= 1
             this_modified = 0
             for r in rules:
                 if r.deactivated:

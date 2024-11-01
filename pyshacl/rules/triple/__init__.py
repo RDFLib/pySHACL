@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import itertools
-from typing import TYPE_CHECKING, List, Sequence, Tuple, Union, cast
+from typing import TYPE_CHECKING, List, Optional, Sequence, Tuple, Union, cast
 
 import rdflib
 
@@ -10,9 +10,12 @@ from pyshacl.helper.expression_helper import nodes_from_node_expression
 from pyshacl.rules.shacl_rule import SHACLRule
 
 if TYPE_CHECKING:
+    from rdflib.term import URIRef
 
     from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
     from pyshacl.shape import Shape
+
+TRIPLE_RULE_ITERATE_LIMIT = 100
 
 
 class TripleRule(SHACLRule):
@@ -52,7 +55,8 @@ class TripleRule(SHACLRule):
     def apply(
         self,
         data_graph: 'GraphLike',
-        focus_nodes: Union[Sequence['RDFNode'], None] = None,
+        focus_nodes: Optional[Sequence['RDFNode']] = None,
+        target_graph_identifier: Optional['URIRef'] = None,
     ) -> int:
         focus_list: Sequence['RDFNode']
         if focus_nodes is not None:
@@ -71,10 +75,12 @@ class TripleRule(SHACLRule):
         # uses target nodes to find focus nodes
         applicable_nodes = self.filter_conditions(focus_list, data_graph)
         all_added = 0
-        iterate_limit = 100
+        iterate_limit = int(TRIPLE_RULE_ITERATE_LIMIT)
         while True:
             if iterate_limit < 1:
-                raise ReportableRuntimeError("sh:rule iteration exceeded iteration limit of 100.")
+                raise ReportableRuntimeError(
+                    f"sh:rule iteration exceeded iteration limit of {TRIPLE_RULE_ITERATE_LIMIT}."
+                )
             iterate_limit -= 1
             added = 0
             to_add = []
@@ -91,8 +97,15 @@ class TripleRule(SHACLRule):
                 if this_added:
                     added += 1
             if added > 0:
+                if isinstance(data_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+                    if target_graph_identifier is not None:
+                        target_graph = data_graph.get_context(target_graph_identifier)
+                    else:
+                        target_graph = data_graph.default_context
+                else:
+                    target_graph = data_graph
                 for i in to_add:
-                    data_graph.add(cast(Tuple['RDFNode', 'RDFNode', 'RDFNode'], i))
+                    target_graph.add(cast(Tuple['RDFNode', 'RDFNode', 'RDFNode'], i))
                 all_added += added
                 if self.iterate:
                     continue  # Jump up to iterate
