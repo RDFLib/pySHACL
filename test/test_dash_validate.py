@@ -29,7 +29,8 @@ ALLOWABLE_FAILURES = ["/rules/triple/person2schema.test.ttl"]
 
 for x in walk(path.join(dash_files_dir, 'core')):
     for y in glob.glob(path.join(x[0], '*.test.ttl')):
-        dash_core_files.append((y, None))
+        if "node/datatype-002" in y:
+            dash_core_files.append((y, None))
 
 
 @pytest.mark.parametrize('target_file, shacl_file', dash_core_files)

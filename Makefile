@@ -56,9 +56,9 @@ endif
 .PHONY: type-check
 type-check: venvcheck	## Validate with MyPy in check-only mode
 ifeq ("$(FilePath)", "")
-	poetry run python3 -m mypy --ignore-missing-imports pyshacl
+	poetry run python3 -m mypy --python-version 3.9 --ignore-missing-imports pyshacl
 else
-	poetry run python3 -m mypy --ignore-missing-imports "$(FilePath)"
+	poetry run python3 -m mypy --python-version 3.9 --ignore-missing-imports "$(FilePath)"
 endif
 
 .PHONY: upgrade

@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 [project]
 name = "pyshacl"
 # Black and Ruff both now read target-version from [project.requires-python]
-requires-python = ">=3.8.1"
+requires-python = ">=3.9"
 
 [tool.poetry]
 name = "pyshacl"
@@ -60,11 +60,10 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8.1"  # Poetry doesn't read from [project.requires-python]
-# Note, 3.8.0 is not supported, only 3.8.1 or above. See:
-# https://github.com/RDFLib/rdflib/blob/3bee979cd0e5b6efc57296b4fc43dd8ede8cf375/CHANGELOG.md?plain=1#L53
-rdflib = {version=">=6.3.2,<8.0", python = ">=3.8.1", extras=["html"]}
-owlrl = ">=6.0.2,<7"
+# The <4 is reauired for compatiblity with OWL-RL that requdires Python <4
+python = ">=3.9,<4"  # Poetry doesn't read from [project.requires-python]
+rdflib = {version=">=7.1.1,<8.0", extras=["html"]}
+owlrl = ">=7.1.2,<8"
 prettytable = [
     {version=">=3.5.0", python = ">=3.8,<3.12"},
     {version=">=3.7.0", python = ">=3.12"}
@@ -77,10 +76,7 @@ sanic-ext = {version=">=23.3, <23.6", optional=true} #For the HTTP service
 sanic-cors = {version="2.2.0", optional=true} #For the HTTP service
 ruff = {version="^0.1.5", optional=true}
 black = {version="24.3.0", optional=true}
-mypy = [
-    {version=">=0.812,<0.900", optional=true, python = "<3.10"},
-    {version=">=0.900,<0.1000", optional=true, python = ">=3.10"}
-    ]
+mypy = {version=">=1.13.0", optional=true}
 types-setuptools = {version="*", optional=true}
 platformdirs = {version="*", optional=true}
 coverage = {version=">6,<7,!=6.0.*,!=6.1,!=6.1.1", optional=true}
@@ -92,10 +88,7 @@ coverage = {version=">6,<7,!=6.0.*,!=6.1,!=6.1.1", optional=true}
 pytest-cov = {version="^2.8.1", optional=true}
 ruff = {version="^0.1.5", optional=true}
 black = {version="24.3.0", optional=true}
-mypy = [
-    {version=">=0.812,<0.900", optional=true, python = "<3.10"},
-    {version=">=0.900,<0.1000", optional=true, python = ">=3.10"}
-    ]
+mypy = {version=">=1.13.0", optional=true}
 types-setuptools = {version="*", optional=true}
 platformdirs = {version="*", optional=true}
 
@@ -206,7 +199,7 @@ testpaths = [
 legacy_tox_ini = """
 [tox]
 skipsdist = true
-envlist = py38, py39, py310, py311, py312, lint, type-checking
+envlist = py39, py310, py311, py312, lint, type-checking
 toxworkdir={env:TOX_WORK_DIR:.tox}
 
 [testenv]
@@ -250,7 +243,7 @@ commands_pre =
     poetry run pip3 install "mypy>=0.812" "types-setuptools"
 commands =
     - poetry show
-    poetry run python3 -m mypy --ignore-missing-imports pyshacl
+    poetry run python3 -m mypy --python-version 3.9 --ignore-missing-imports pyshacl
 
 [gh]
 # Don't include lint or type-checking in gh-actions matrix
@@ -259,6 +252,5 @@ python =
     3.11 = py311
     3.10 = py310
     3.9 = py39
-    3.8 = py38
 
 """

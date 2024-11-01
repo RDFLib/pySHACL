@@ -92,7 +92,12 @@ class RuleExpandRunner(PySHACLRunType):
             else:
                 to_graph = clone_graph(self.data_graph, identifier=self.data_graph.identifier)
             return inoculate(to_graph, self.ont_graph)
-        return inoculate_dataset(self.data_graph, self.ont_graph, self.data_graph if self.inplace else None)
+        return inoculate_dataset(
+            self.data_graph,
+            self.ont_graph,
+            self.data_graph if self.inplace else None,
+            URIRef("urn:pyshacl:inoculation"),
+        )
 
     def make_executor(self) -> SHACLExecutor:
         return SHACLExecutor(
@@ -134,7 +139,9 @@ class RuleExpandRunner(PySHACLRunType):
                     datagraph = clone_graph(datagraph)
                     has_cloned = True
                 self.logger.debug(f"Running pre-inferencing with option='{inference_option}'.")
-                self._run_pre_inference(datagraph, inference_option, logger=self.logger)
+                self._run_pre_inference(
+                    datagraph, inference_option, URIRef("urn:pyshacl:inference"), logger=self.logger
+                )
                 self.pre_inferenced = True
             if not has_cloned and not self.inplace:
                 # We still need to clone in advanced mode, because of triple rules

@@ -1,7 +1,6 @@
 #
 #
-import typing
-from typing import List, Sequence, Union
+from typing import TYPE_CHECKING, List, Optional, Sequence, Union
 
 import rdflib
 
@@ -11,13 +10,17 @@ from pyshacl.rules.shacl_rule import SHACLRule
 
 from .js_executable import JSExecutable
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
+
+    from rdflib.term import URIRef
 
     from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
     from pyshacl.shape import Shape
     from pyshacl.shapes_graph import ShapesGraph
 
 SH_JSRule = SH.JSRule
+
+JS_RULE_ITERATE_LIMIT = 100
 
 
 class JSRule(SHACLRule):
@@ -32,6 +35,7 @@ class JSRule(SHACLRule):
         self,
         data_graph: 'GraphLike',
         focus_nodes: Union[Sequence['RDFNode'], None] = None,
+        target_graph_identifier: Optional['URIRef'] = None,
     ) -> int:
         focus_list: Sequence['RDFNode']
         if focus_nodes is not None:
@@ -48,10 +52,10 @@ class JSRule(SHACLRule):
                 return 0
             focus_list = filtered_focus_nodes
         all_added = 0
-        iterate_limit = 100
+        iterate_limit = int(JS_RULE_ITERATE_LIMIT)
         while True:
             if iterate_limit < 1:
-                raise ReportableRuntimeError("Local rule iteration exceeded iteration limit of 100.")
+                raise ReportableRuntimeError(f"JS rule iteration exceeded iteration limit of {JS_RULE_ITERATE_LIMIT}.")
             iterate_limit -= 1
             added = 0
             applicable_nodes = self.filter_conditions(focus_list, data_graph)
@@ -72,10 +76,17 @@ class JSRule(SHACLRule):
                 if this_added:
                     added += 1
             if added > 0:
-                all_added += added
+                if isinstance(data_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+                    if target_graph_identifier is not None:
+                        target_graph = data_graph.get_context(target_graph_identifier)
+                    else:
+                        target_graph = data_graph.default_context
+                else:
+                    target_graph = data_graph
                 for s in sets_to_add:
                     for t in s:
-                        data_graph.add(t)
+                        target_graph.add(t)
+                all_added += added
                 if self.iterate:
                     continue  # Jump up to iterate
                 else:

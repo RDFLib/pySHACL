@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import TYPE_CHECKING, List, Sequence, Union
+from typing import TYPE_CHECKING, List, Optional, Sequence, Union
 
 import rdflib
 from rdflib import Literal
@@ -13,10 +13,14 @@ from pyshacl.rdfutil import clone_graph
 from ..shacl_rule import SHACLRule
 
 if TYPE_CHECKING:
+    from rdflib.term import URIRef
+
     from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
     from pyshacl.shape import Shape
 
 XSD_string = XSD.string
+
+SPARQL_RULE_ITERATE_LIMIT = 100
 
 
 class SPARQLRule(SHACLRule):
@@ -52,7 +56,8 @@ class SPARQLRule(SHACLRule):
     def apply(
         self,
         data_graph: 'GraphLike',
-        focus_nodes: Union[Sequence['RDFNode'], None] = None,
+        focus_nodes: Optional[Sequence['RDFNode']] = None,
+        target_graph_identifier: Optional['URIRef'] = None,
     ) -> int:
         focus_list: Sequence['RDFNode']
         if focus_nodes is not None:
@@ -70,10 +75,12 @@ class SPARQLRule(SHACLRule):
             focus_list = filtered_focus_nodes
         all_added = 0
         SPARQLQueryHelper = get_query_helper_cls()
-        iterate_limit = 100
+        iterate_limit = int(SPARQL_RULE_ITERATE_LIMIT)
         while True:
             if iterate_limit < 1:
-                raise ReportableRuntimeError("Local SPARQLRule iteration exceeded iteration limit of 100.")
+                raise ReportableRuntimeError(
+                    f"Local SPARQLRule iteration exceeded iteration limit of {SPARQL_RULE_ITERATE_LIMIT}."
+                )
             iterate_limit -= 1
             added = 0
             applicable_nodes = self.filter_conditions(focus_list, data_graph)
@@ -101,8 +108,15 @@ class SPARQLRule(SHACLRule):
                         added += 1
                         construct_graphs.add(result_graph)
             if added > 0:
+                if isinstance(data_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+                    if target_graph_identifier is not None:
+                        target_graph = data_graph.get_context(target_graph_identifier)
+                    else:
+                        target_graph = data_graph.default_context
+                else:
+                    target_graph = data_graph
                 for g in construct_graphs:
-                    data_graph = clone_graph(g, target_graph=data_graph)
+                    data_graph = clone_graph(g, target_graph=target_graph)
                 all_added += added
                 if self.iterate:
                     continue  # Jump up to iterate

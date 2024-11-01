@@ -416,7 +416,8 @@ celerybeat-schedule
 # Environments
 .env
 .venv/
-.venv38/
+.venv39/
+.venv311/
 env/
 venv/
 ENV/
