@@ -50,7 +50,7 @@ Where
  - `-f` is the ValidationReport output format (`human` = human-readable validation report)
  - `-m` enable the meta-shacl feature
  - `-a` enable SHACL Advanced Features
- - `-j` enable SHACL-JS Features (if `pyhsacl[js]` is installed)
+ - `-j` enable SHACL-JS Features (if `pyshacl[js]` is installed)
 
 System exit codes are:
 `0` = DataGraph is Conformant
