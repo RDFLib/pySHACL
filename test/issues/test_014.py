@@ -19,7 +19,7 @@ ex:Animal a rdfs:Class ;
 ex:Human a rdfs:Class ;
     rdfs:comment "A Human being"@en ;
     rdfs:subClassOf ex:Animal .
-    
+
 ex:Pet a rdfs:Class ;
     rdfs:comment "An animal owned by a human"@en ;
     rdfs:subClassOf ex:Animal .
@@ -27,11 +27,11 @@ ex:Pet a rdfs:Class ;
 ex:hasPet a rdf:Property ;
     rdfs:domain ex:Human ;
     rdfs:range ex:Pet .
-    
-ex:nlegs a rdf:Property ;
+
+ex:nLegs a rdf:Property ;
     rdfs:domain ex:Animal ;
     rdfs:range xsd:integer .
-    
+
 ex:Lizard a rdfs:Class ;
     rdfs:subClassOf ex:Pet .
 """
@@ -56,7 +56,7 @@ ex:HumanShape a sh:NodeShape ;
         sh:minInclusive 2 ;
     ] ;
     sh:targetClass ex:Human .
-    
+
 ex:AnimalShape a sh:NodeShape ;
     sh:property [
         sh:datatype xsd:integer ;
@@ -64,7 +64,7 @@ ex:AnimalShape a sh:NodeShape ;
         sh:maxInclusive 4 ;
         sh:minInclusive 1 ;
     ] ;
-    sh:targetClass ex:Animal .  
+    sh:targetClass ex:Animal .
 """
 
 data_file_text = """
