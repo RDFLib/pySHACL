@@ -38,7 +38,7 @@ exOnt:hasPet a rdf:Property ;
     rdfs:domain exOnt:Human ;
     rdfs:range exOnt:Pet .
 
-exOnt:nlegs a rdf:Property ;
+exOnt:nLegs a rdf:Property ;
     rdfs:domain exOnt:Animal ;
     rdfs:range xsd:integer .
 
@@ -86,7 +86,7 @@ exOnt:hasPet a rdf:Property ;
     rdfs:domain exOnt:Human ;
     rdfs:range exOnt:Pet .
 
-exOnt:nlegs a rdf:Property ;
+exOnt:nLegs a rdf:Property ;
     rdfs:domain exOnt:Animal ;
     rdfs:range xsd:integer .
 
