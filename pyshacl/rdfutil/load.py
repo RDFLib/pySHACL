@@ -119,19 +119,21 @@ def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
 # The BaseURI usually ends with a filename (eg, https://example.com/validators/shapes)
 # BaseURI can sometimes end with a / if URIs are relative to a directory.
 # You will rarely see a BaseURI with a # on the end.
-# The PublicID is the Identifier of a Graph. It is the canonical name of the graph,
-# regardless of its hosted location. It is used to refer to the graph in a Dataset
+# The PublicID is a concept inherited from the XML specificaion
+# RDFLib uses PublicID for the Identifier of a Graph. It is the canonical name of the graph,
+# regardless of its hosted location. It is also used to refer to a Named Graph in a Dataset
 # and this is the name referenced in the owl:imports [ schema:name <publicID> ] statement.
 # PublicID is not found in the Turtle file, it is known outside the file only.
 # PublicID can end with a / or a # if you want consistency with the graph's base prefix.
 # Alternatively, PublicID may not have a symbol at the end.
+# Note, PublicID is now called "Identifier" in the load_from_source function.
 
 
 def load_from_source(
     source: Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes],
     g: Optional[GraphLike] = None,
     rdf_format: Optional[str] = None,
-    identifier: Optional[str] = None,
+    identifier: Optional[Union[rdflib.URIRef, str]] = None,
     multigraph: bool = False,
     do_owl_imports: Union[bool, int] = False,
     import_chain: Optional[List[Union[rdflib.URIRef, str]]] = None,
@@ -146,8 +148,8 @@ def load_from_source(
     :type rdf_format: str | None
     :param multigraph:
     :type multigraph: bool
-    :param identifier: formerly "public_id"
-    :type identifier: str | None
+    :param identifier: Identifier for the Named Graph being loaded. formerly "public_id"
+    :type identifier: str | URIRef | None
     :param do_owl_imports:
     :type do_owl_imports: bool|int
     :param import_chain:
@@ -163,7 +165,7 @@ def load_from_source(
     source_as_filename: Optional[str] = None
     source_as_bytes: Optional[bytes] = None
     filename = None
-    identifier = str(identifier)  # This is our passed-in id (formerly public_id)
+    identifier = None if identifier is None else str(identifier)  # This is our passed-in id (formerly public_id)
     _maybe_id: Optional[str] = None  # For default-graph identifier
     base_uri: Optional[str] = None  # Base URI for relative URIs
     uri_prefix = None  # URI Prefix to bind to public ID

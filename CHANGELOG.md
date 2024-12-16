@@ -7,6 +7,18 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]
 - Nothing yet
 
+## [0.29.1] - 2024-12-16
+
+### Added
+- Two new basic examples in the Examples folder.
+  - "sparql_assert_datatype.py" shows how to use SPARQL-based Constraints to assert a datatype on a literal.
+  - "remote_sparql.py" shows how to use SparqlConnector store to validate data on a remote SPARQL endpoint.
+
+### Fixed
+- Fixed a bug where the `identifier` would become "None" (string) in the `load_from_source` function.
+- Typos in the example Ontology files in the test suite.
+
+
 ## [0.29.0] - 2024-11-01
 
 ### Added
@@ -1201,7 +1213,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.29.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.29.1...HEAD
+[0.29.0]: https://github.com/RDFLib/pySHACL/compare/v0.29.0...v0.29.1
 [0.29.0]: https://github.com/RDFLib/pySHACL/compare/v0.28.1...v0.29.0
 [0.28.1]: https://github.com/RDFLib/pySHACL/compare/v0.28.0...v0.28.1
 [0.28.0]: https://github.com/RDFLib/pySHACL/compare/v0.27.0...v0.28.0
