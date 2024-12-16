@@ -128,6 +128,7 @@ def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
 # Alternatively, PublicID may not have a symbol at the end.
 # Note, PublicID is now called "Identifier" in the load_from_source function.
 
+
 def load_from_source(
     source: Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes],
     g: Optional[GraphLike] = None,
