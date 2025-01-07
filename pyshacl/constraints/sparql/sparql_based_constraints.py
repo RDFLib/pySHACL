@@ -6,7 +6,7 @@ from typing import Dict, List
 
 import rdflib
 from rdflib import URIRef
-
+from rdflib.plugins.stores.memory import Memory, SimpleMemory
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH, SH_deactivated, SH_message, SH_select
 from pyshacl.errors import ConstraintLoadError, ValidationFailure
@@ -105,12 +105,12 @@ class SPARQLBasedConstraint(ConstraintComponent):
         for query_helper in self.sparql_constraints:
             if query_helper.deactivated:
                 continue
-            _nc, _r = self._evaluate_sparql_constraint(query_helper, target_graph, focus_value_nodes)
+            _nc, _r = self._evaluate_sparql_constraint(query_helper, target_graph, focus_value_nodes, executor)
             non_conformant = non_conformant or _nc
             reports.extend(_r)
         return (not non_conformant), reports
 
-    def _evaluate_sparql_constraint(self, sparql_constraint, target_graph, f_v_dict):
+    def _evaluate_sparql_constraint(self, sparql_constraint, target_graph, f_v_dict, executor: SHACLExecutor):
         reports = []
         non_conformant = False
         extra_messages = sparql_constraint.messages or None
@@ -119,6 +119,13 @@ class SPARQLBasedConstraint(ConstraintComponent):
             # we don't use value_nodes in the sparql constraint
             # All queries are done on the corresponding focus node.
             init_binds, sparql_text = sparql_constraint.pre_bind_variables(f)
+            if "this" in init_binds and isinstance(f, rdflib.BNode):
+                if executor.sparql_mode:
+                    # If focus node is a blank node, we technically can't use it in the sparql pre-binding.
+                    raise ValidationFailure("Focus Node cannot be a BlankNode, when running in SPARQL mode.")
+                elif not isinstance(target_graph.store, (Memory, SimpleMemory)):
+                    raise ValidationFailure(
+                        "Can only use BlankNode as target node when using RDFLib in-memory store.")
             sparql_text = sparql_constraint.apply_prefixes(sparql_text)
 
             try:

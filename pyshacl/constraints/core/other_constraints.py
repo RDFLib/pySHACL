@@ -6,11 +6,11 @@ import logging
 from typing import Dict, List, Set, Union, cast
 
 import rdflib
-from rdflib.term import IdentifiedNode
+from rdflib.term import IdentifiedNode, BNode
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import RDFS, SH, RDF_type, SH_property
-from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
+from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
 from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 from pyshacl.shape import Shape
@@ -207,6 +207,8 @@ class ClosedConstraintComponent(ConstraintComponent):
                 filter_template = ""
             for i, f in enumerate(focus_value_nodes.keys()):
                 for j, v in enumerate(focus_value_nodes[f]):
+                    if isinstance(v, BNode):
+                        raise ValidationFailure("ClosedConstraint cannot bind ValueNode as a BlankNode in SPARQL-mode.")
                     select_vars_string += f"?p{i}_{j} ?o{i}_{j} "
                     bgp_line = f"OPTIONAL {{ $v{i}_{j} ?p{i}_{j} ?o{i}_{j} . }}"
                     bgp_list.append(bgp_line)

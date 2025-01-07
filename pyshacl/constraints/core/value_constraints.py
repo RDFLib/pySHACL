@@ -8,7 +8,7 @@ from typing import Dict, List
 
 import rdflib
 from rdflib.namespace import XSD
-from rdflib.term import Literal, URIRef
+from rdflib.term import Literal, URIRef, BNode
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import (
@@ -26,7 +26,7 @@ from pyshacl.consts import (
     SH_Literal,
     SH_nodeKind,
 )
-from pyshacl.errors import ConstraintLoadError
+from pyshacl.errors import ConstraintLoadError, ValidationFailure
 from pyshacl.pytypes import GraphLike, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
 from pyshacl.shape import Shape
@@ -68,7 +68,19 @@ class ClassConstraintComponent(ConstraintComponent):
                 "ClassConstraintComponent must have at least one sh:class predicate.",
                 "https://www.w3.org/TR/shacl/#ClassConstraintComponent",
             )
+        for c in class_rules:
+            if isinstance(c, Literal):
+                raise ConstraintLoadError(
+                    f"sh:class must be a IRI. Got a Literal: {c.n3()}",
+                    "https://www.w3.org/TR/shacl/#ClassConstraintComponent",
+                )
+            elif isinstance(c, BNode):
+                raise ConstraintLoadError(
+                    f"sh:class must be a IRI. Got a BlankNode: {str(c)}",
+                    "https://www.w3.org/TR/shacl/#ClassConstraintComponent",
+                )
         self.class_rules = class_rules
+
 
     @classmethod
     def constraint_parameters(cls) -> List[URIRef]:
@@ -121,6 +133,8 @@ class ClassConstraintComponent(ConstraintComponent):
                         "Class Constraint won't work with Literals. "
                         "Attempting to match Literal node {} to class of {} will fail.".format(v, class_rule)
                     )
+                elif isinstance(v, BNode):
+                    raise ValidationFailure("Cannot bind BlankNode Value to ?this in SPARQL-mode.")
                 else:
                     resp = target_graph.query(sparql_ask, initBindings={"value": v, "class": class_rule})
                     found = resp.askAnswer

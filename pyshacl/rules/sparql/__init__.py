@@ -2,7 +2,7 @@
 from typing import TYPE_CHECKING, List, Optional, Sequence, Union
 
 import rdflib
-from rdflib import Literal
+from rdflib import Literal, BNode
 from rdflib.namespace import XSD
 
 from pyshacl.consts import SH_construct
@@ -90,6 +90,8 @@ class SPARQLRule(SHACLRule):
                     init_bindings = {}
                     found_this = SPARQLQueryHelper.bind_this_regex.search(c)
                     if found_this:
+                        if isinstance(a, BNode):
+                            raise ReportableRuntimeError("SPARQLRule cannot bind ValueNode ?this as a BlankNode.")
                         init_bindings['this'] = a
                     c = self._qh.apply_prefixes(c)
                     results = data_graph.query(c, initBindings=init_bindings)

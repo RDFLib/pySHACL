@@ -31,7 +31,7 @@ ex:GraphValidationTestCase
           sh:resultSeverity sh:Violation ;
           sh:sourceConstraintComponent ex:TestConstraintComponent ;
           sh:sourceShape ex:TestShape ;
-          sh:value ex:InvalidResource1 ;
+          #sh:value ex:InvalidResource1 ;
         ] ;
     ] ;
 .

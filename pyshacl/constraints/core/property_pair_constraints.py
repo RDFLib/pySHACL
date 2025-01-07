@@ -8,7 +8,7 @@ import rdflib
 
 from pyshacl.constraints.constraint_component import ConstraintComponent
 from pyshacl.consts import SH
-from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError
+from pyshacl.errors import ConstraintLoadError, ReportableRuntimeError, ValidationFailure
 from pyshacl.helper.path_helper import shacl_path_to_sparql_path
 from pyshacl.pytypes import GraphLike, SHACLExecutor
 from pyshacl.rdfutil import stringify_node
@@ -98,6 +98,8 @@ class EqualsConstraintComponent(ConstraintComponent):
         init_bindings = {}
         f_eq_results = {}
         for i, f in enumerate(f_v_dict.keys()):
+            if isinstance(f, rdflib.BNode):
+                raise ValidationFailure("EqualsConstraint cannot bind FocusNode ?f as a BlankNode in SPARQL-mode.")
             eq_lookup_query += f"OPTIONAL {{ $f{i} {eq_path} ?v{i} . }}\n"
             init_bindings[f"f{i}"] = f
             f_eq_results[f] = set()
@@ -225,6 +227,9 @@ class DisjointConstraintComponent(ConstraintComponent):
         init_bindings = {}
         f_dj_results = {}
         for i, f in enumerate(f_v_dict.keys()):
+            if isinstance(f, rdflib.BNode):
+                raise ValidationFailure(
+                    "DisjointConstraint cannot bind FocusNode ?f as a BlankNode in SPARQL-mode.")
             dj_lookup_query += f"OPTIONAL {{ $f{i} {dj_path} ?v{i} . }}\n"
             init_bindings[f"f{i}"] = f
             f_dj_results[f] = set()
@@ -387,6 +392,8 @@ class LessThanConstraintComponent(ConstraintComponent):
         init_bindings = {}
         f_lt_results = {}
         for i, f in enumerate(f_v_dict.keys()):
+            if isinstance(f, rdflib.BNode):
+                raise ValidationFailure("LessThanConstraint cannot bind FocusNode ?f as a BlankNode in SPARQL-mode.")
             lt_lookup_query += f"OPTIONAL {{ $f{i} {lt_path} ?v{i} . }}\n"
             init_bindings[f"f{i}"] = f
             f_lt_results[f] = set()
@@ -538,6 +545,9 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
         init_bindings = {}
         f_ltoe_results = {}
         for i, f in enumerate(f_v_dict.keys()):
+            if isinstance(f, rdflib.BNode):
+                raise ValidationFailure(
+                    "LessThanOrEqualsConstraint cannot bind FocusNode ?f as a BlankNode in SPARQL-mode.")
             ltoe_lookup_query += f"OPTIONAL {{ $f{i} {ltoe_path} ?v{i} . }}\n"
             init_bindings[f"f{i}"] = f
             f_ltoe_results[f] = set()

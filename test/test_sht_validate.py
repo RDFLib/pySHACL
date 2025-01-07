@@ -29,24 +29,42 @@ for m in manifests_with_entries:
     tests = m.collect_tests()
     tests_found_in_manifests[m.base].extend(tests)
 
-tests_found_in_manifests = OrderedDict(sorted(tests_found_in_manifests.items()))
-test_index_map = [[base, i] for base, tests in tests_found_in_manifests.items() for i, t in enumerate(tests)]
-
 # There are some tests we know will fail, but we don't want to stop deployment
 # if we hit them. List them here:
 ALLOWABLE_FAILURES = ["/sparql/pre-binding/shapesGraph-001"]
 
+ALLOWABLE_FAILURES_SPARQL_MODE = ["/sparql/pre-binding/shapesGraph-001"]
 
-@pytest.mark.parametrize("base, index", test_index_map)
-def test_sht_all(base, index, caplog) -> None:
+tests_found_in_manifests = OrderedDict(sorted(tests_found_in_manifests.items()))
+
+def make_parameters_with_marks_for_failures(allowable_failures: list):
+    test_params = []
+    for base, tests in tests_found_in_manifests.items():
+        for i, t in enumerate(tests):
+            if platform.system() == "Windows":
+                test_id = str(t.node).replace("file:///", "")
+            else:
+                test_id = str(t.node).replace("file://", "")
+            marks = []
+            if test_id in allowable_failures:
+                marks.append(pytest.mark.xfail(reason="Allowable failure"))
+            test_params.append(pytest.param(base, i, test_id, marks=marks))
+    return test_params
+#[base, i] for base, tests in tests_found_in_manifests.items() for i, t in enumerate(tests)]
+
+
+
+
+@pytest.mark.parametrize("base, index, test_id", make_parameters_with_marks_for_failures(ALLOWABLE_FAILURES))
+def test_sht_all(base, index, test_id, caplog) -> None:
     caplog.set_level(logging.DEBUG)
     tests = tests_found_in_manifests[base]
     test = tests[index]
     run_sht_test(test, {"inference": 'rdfs', "debug": True, "meta_shacl": False})
 
 
-@pytest.mark.parametrize("base, index", test_index_map)
-def test_sht_all_sparql_mode(base, index, caplog) -> None:
+@pytest.mark.parametrize("base, index, test_id", make_parameters_with_marks_for_failures(ALLOWABLE_FAILURES_SPARQL_MODE))
+def test_sht_all_sparql_mode(base, index, test_id, caplog) -> None:
     caplog.set_level(logging.DEBUG)
     tests = tests_found_in_manifests[base]
     test = tests[index]
@@ -55,10 +73,7 @@ def test_sht_all_sparql_mode(base, index, caplog) -> None:
 
 def run_sht_test(sht_test, validate_args: dict) -> None:
     logger = logging.getLogger()  # pytest uses the root logger with a capturing handler
-    if platform.system() == "Windows":
-        test_id = str(sht_test.node).replace("file:///", "")
-    else:
-        test_id = str(sht_test.node).replace("file://", "")
+
     label = sht_test.label
     data_file = sht_test.data_graph
     shacl_file = sht_test.shapes_graph
@@ -77,12 +92,5 @@ def run_sht_test(sht_test, validate_args: dict) -> None:
     else:
         passes = check_sht_result(r_graph, sht_test.sht_graph, sht_test.sht_result, log=logger)
     logger.info(r_text)
-    try:
-        assert passes
-    except AssertionError as ae:
-        for af in ALLOWABLE_FAILURES:
-            if test_id.endswith(af):
-                logger.warning("Allowing failure in test: {}".format(test_id))
-                break
-        else:
-            raise ae
+    assert passes
+
