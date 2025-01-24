@@ -2,6 +2,7 @@
 """
 https://www.w3.org/TR/shacl/#core-components-others
 """
+
 import logging
 from typing import Dict, List, Set, Union, cast
 

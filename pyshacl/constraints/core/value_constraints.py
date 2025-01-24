@@ -2,6 +2,7 @@
 """
 https://www.w3.org/TR/shacl/#core-components-value-type
 """
+
 from datetime import date, datetime, time
 from decimal import Decimal
 from typing import Dict, List

@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 name = "pyshacl"
 # Don't forget to change the version number in __init__.py, Dockerfile, and CITATION.cff along with this one
 version = "0.29.1"
-# Black and Ruff both now read target-version from [project.requires-python]
+# Ruff and Poetry both now read target-version from [project.requires-python]
 # The <4 is reauired for compatiblity with OWL-RL that requdires Python <4
 requires-python = ">=3.9,<4"
 description = "Python SHACL Validator"
@@ -72,8 +72,7 @@ http = [
     "sanic-cors==2.2.0"
 ]
 dev-lint = [
-    "ruff>=0.9.1",
-    "black==24.3.0",
+    "ruff<0.10,>=0.9.3",
     "platformdirs"
 ]
 dev-type-checking = [
@@ -120,8 +119,7 @@ include = [
 pytest = "^7.2"
 coverage = {version=">6,<7,!=6.0.*,!=6.1,!=6.1.1", optional=true}
 pytest-cov = {version="^2.8.1", optional=true}
-ruff = {version="^0.9.1", optional=true}
-black = {version="24.3.0", optional=true}
+ruff = {version="<0.10,>=0.9.3", optional=true}
 mypy = {version=">=1.13.0", optional=true}
 types-setuptools = {version="*", optional=true}
 platformdirs = {version="*", optional=true}
@@ -130,37 +128,7 @@ platformdirs = {version="*", optional=true}
 from = {format = "poetry", path = "pyproject.toml"}
 to = {format = "setuppy", path = "setup.py"}
 
-[tool.black]
-required-version = "24.3.0"
-line-length = "119"
-skip-string-normalization = true
-include = '\.pyi?$'
-exclude = '''
-(
-  /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
-    | \.hg
-    | \.mypy_cache
-    | \.ruff_cache
-    | \.pytest_cache
-    | \.tox
-    | \.venv
-    | _build
-    | htmlcov
-    | benchmarks
-    | examples
-    | pyshacl.egg-info
-    | buck-out
-    | build
-    | dist
-    | venv
-  )/
-)
-'''
-
 [tool.ruff]
-
 # Exclude a variety of commonly ignored directories.
 exclude = [
     ".bzr",
@@ -189,8 +157,10 @@ exclude = [
     "node_modules",
     "venv",
 ]
-# Same as Black.
 line-length = 119
+
+[tool.ruff.format]
+quote-style = "preserve"
 
 [lint]
 # Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
@@ -256,7 +226,7 @@ commands =
     - poetry show
     poetry run ruff check ./pyshacl
     poetry run ruff check --select I ./pyshacl #isort
-    poetry run black --check --verbose --config ./pyproject.toml pyshacl
+    poetry run ruff format --check --no-preview --target-version py39 pyshacl #black
 
 [testenv:type-checking]
 commands_pre =

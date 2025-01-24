@@ -29,9 +29,7 @@ def get_js_from_web(url: str):
     :type url: str
     :return:
     """
-    headers = {
-        'Accept': 'application/javascript, text/javascript, application/ecmascript, text/ecmascript,' 'text/plain'
-    }
+    headers = {'Accept': 'application/javascript, text/javascript, application/ecmascript, text/ecmascript,text/plain'}
     r = request.Request(url, headers=headers)
     resp = request.urlopen(r)
     code = resp.getcode()

@@ -171,8 +171,9 @@ def compare_validation_reports(
     for expected_focus, expected_value, expected_path in expected_results_dict.keys():
         if (expected_focus, expected_value, expected_path) not in report_results_dict:
             log.error(
-                "Expected result not found in Validation Report.\n"
-                "Expected focus: {}, value: {}, path: {}.".format(expected_focus, expected_value, expected_path)
+                "Expected result not found in Validation Report.\nExpected focus: {}, value: {}, path: {}.".format(
+                    expected_focus, expected_value, expected_path
+                )
             )
             not_found_results += 1
     if not_found_results > 0:
@@ -344,7 +345,9 @@ def check_dash_result(
                     eargs_str_list = [a.strip() for a in sargs.split(',')]
                 eargs = []
                 for e in eargs_str_list:
-                    eargs.append(from_n3(e, None, expected_result_graph.store, expected_result_graph.namespace_manager))  # type: ignore[arg-type]
+                    eargs.append(
+                        from_n3(e, None, expected_result_graph.store, expected_result_graph.namespace_manager)  # type: ignore[arg-type]
+                    )
             find_uri = from_n3(expression, None, expected_result_graph.store, expected_result_graph.namespace_manager)  # type: ignore[arg-type]
             if find_uri is None or not isinstance(find_uri, (str, URIRef, Literal, BNode)):
                 raise ReportableRuntimeError("Cannot execute function {}.\nBad declaration format.".format(find_uri))

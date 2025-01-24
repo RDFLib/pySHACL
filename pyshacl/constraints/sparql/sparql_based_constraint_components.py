@@ -2,6 +2,7 @@
 """
 https://www.w3.org/TR/shacl/#sparql-constraint-components
 """
+
 import typing
 from typing import Dict, List, Tuple, Type, Union
 

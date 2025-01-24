@@ -2,6 +2,7 @@
 """
 https://www.w3.org/TR/shacl/#sparql-constraints
 """
+
 import re
 
 import rdflib

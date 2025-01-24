@@ -2,6 +2,7 @@
 """
 https://www.w3.org/TR/shacl/#core-components-string
 """
+
 import logging
 import re
 from typing import Dict, List, cast

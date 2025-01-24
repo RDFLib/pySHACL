@@ -2,6 +2,7 @@
 """
 https://www.w3.org/TR/shacl/#core-components-shape
 """
+
 from textwrap import indent
 from typing import Dict, List, Optional
 from warnings import warn

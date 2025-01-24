@@ -2,6 +2,7 @@
 """
 https://www.w3.org/TR/shacl/#core-components-count
 """
+
 from typing import Dict, List, Optional
 
 from rdflib.namespace import XSD

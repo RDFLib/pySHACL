@@ -175,7 +175,7 @@ parser.add_argument(
     '--format',
     dest='format',
     action='store',
-    help='Choose an output format. Default is \"human\".',
+    help='Choose an output format. Default is "human".',
     default='human',
     choices=('human', 'table', 'turtle', 'xml', 'json-ld', 'nt', 'n3'),
 )
@@ -184,7 +184,7 @@ parser.add_argument(
     '--data-file-format',
     dest='data_file_format',
     action='store',
-    help='Explicitly state the RDF File format of the input DataGraph file. Default=\"auto\".',
+    help='Explicitly state the RDF File format of the input DataGraph file. Default="auto".',
     default='auto',
     choices=('auto', 'turtle', 'xml', 'json-ld', 'nt', 'n3'),
 )
@@ -193,7 +193,7 @@ parser.add_argument(
     '--shacl-file-format',
     dest='shacl_file_format',
     action='store',
-    help='Explicitly state the RDF File format of the input SHACL file. Default=\"auto\".',
+    help='Explicitly state the RDF File format of the input SHACL file. Default="auto".',
     default='auto',
     choices=('auto', 'turtle', 'xml', 'json-ld', 'nt', 'n3'),
 )
@@ -202,7 +202,7 @@ parser.add_argument(
     '--ont-file-format',
     dest='ont_file_format',
     action='store',
-    help='Explicitly state the RDF File format of the extra ontology file. Default=\"auto\".',
+    help='Explicitly state the RDF File format of the extra ontology file. Default="auto".',
     default='auto',
     choices=('auto', 'turtle', 'xml', 'json-ld', 'nt', 'n3'),
 )

@@ -4,6 +4,7 @@
 SHACL-AF Advanced Constraints
 https://www.w3.org/TR/shacl-af/#ExpressionConstraintComponent
 """
+
 import typing
 from typing import Dict, List
 

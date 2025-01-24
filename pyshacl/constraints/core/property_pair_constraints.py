@@ -2,6 +2,7 @@
 """
 https://www.w3.org/TR/shacl/#core-components-property-pairs
 """
+
 from typing import Dict, List
 
 import rdflib
@@ -94,7 +95,7 @@ class EqualsConstraintComponent(ConstraintComponent):
         non_conformant = False
         prefixes = dict(target_graph.namespaces())
         eq_path = shacl_path_to_sparql_path(self.shape.sg, eq, prefixes=prefixes)
-        eq_lookup_query = f"SELECT DISTINCT {' '.join(f'?v{i}' for i,_ in enumerate(f_v_dict))} WHERE {{\n"
+        eq_lookup_query = f"SELECT DISTINCT {' '.join(f'?v{i}' for i, _ in enumerate(f_v_dict))} WHERE {{\n"
         init_bindings = {}
         f_eq_results = {}
         for i, f in enumerate(f_v_dict.keys()):
@@ -221,7 +222,7 @@ class DisjointConstraintComponent(ConstraintComponent):
         non_conformant = False
         prefixes = dict(target_graph.namespaces())
         dj_path = shacl_path_to_sparql_path(self.shape.sg, dj, prefixes=prefixes)
-        dj_lookup_query = f"SELECT DISTINCT {' '.join(f'?v{i}' for i,_ in enumerate(f_v_dict))} WHERE {{\n"
+        dj_lookup_query = f"SELECT DISTINCT {' '.join(f'?v{i}' for i, _ in enumerate(f_v_dict))} WHERE {{\n"
         init_bindings = {}
         f_dj_results = {}
         for i, f in enumerate(f_v_dict.keys()):
@@ -383,7 +384,7 @@ class LessThanConstraintComponent(ConstraintComponent):
         non_conformant = False
         prefixes = dict(target_graph.namespaces())
         lt_path = shacl_path_to_sparql_path(self.shape.sg, lt, prefixes=prefixes)
-        lt_lookup_query = f"SELECT DISTINCT {' '.join(f'?v{i}' for i,_ in enumerate(f_v_dict))} WHERE {{\n"
+        lt_lookup_query = f"SELECT DISTINCT {' '.join(f'?v{i}' for i, _ in enumerate(f_v_dict))} WHERE {{\n"
         init_bindings = {}
         f_lt_results = {}
         for i, f in enumerate(f_v_dict.keys()):
@@ -534,7 +535,7 @@ class LessThanOrEqualsConstraintComponent(ConstraintComponent):
         non_conformant = False
         prefixes = dict(target_graph.namespaces())
         ltoe_path = shacl_path_to_sparql_path(self.shape.sg, ltoe, prefixes=prefixes)
-        ltoe_lookup_query = f"SELECT DISTINCT {' '.join(f'?v{i}' for i,_ in enumerate(f_v_dict))} WHERE {{\n"
+        ltoe_lookup_query = f"SELECT DISTINCT {' '.join(f'?v{i}' for i, _ in enumerate(f_v_dict))} WHERE {{\n"
         init_bindings = {}
         f_ltoe_results = {}
         for i, f in enumerate(f_v_dict.keys()):

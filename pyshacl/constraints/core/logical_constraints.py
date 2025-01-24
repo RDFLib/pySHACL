@@ -2,6 +2,7 @@
 """
 https://www.w3.org/TR/shacl/#core-components-logical
 """
+
 from typing import Dict, List
 from warnings import warn
 

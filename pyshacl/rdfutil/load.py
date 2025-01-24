@@ -206,7 +206,7 @@ def load_from_source(
             g = source
         else:
             raise RuntimeError(
-                "Cannot pass in both source=rdflib.Graph/Dataset and g=graph."
+                "Cannot pass in both source=rdflib.Graph/Dataset and g=graph. "
                 "Source and dest cannot be the same graph."
             )
     elif isinstance(source, (BufferedIOBase, TextIOBase)):
@@ -446,7 +446,7 @@ def load_from_source(
                 except AssertionError:
                     break
                 # Strip line from start
-                while len(line) > 0 and line[0:1] in b' \t\n\r\x0B\x0C\x85\xA0':
+                while len(line) > 0 and line[0:1] in b' \t\n\r\x0b\x0c\x85\xa0':
                     line = line[1:]
                 # We reached the end of the line, check the next line
                 if len(line) < 1:
@@ -455,23 +455,23 @@ def load_from_source(
                 if not line[0:1] == b'#':
                     break
                 # Strip from start again, but now removing hashes too.
-                while len(line) > 0 and line[0:1] in b'# \t\xA0':
+                while len(line) > 0 and line[0:1] in b'# \t\xa0':
                     line = line[1:]
                 # Strip line from end
-                while len(line) > 0 and line[-1:] in b' \t\n\r\x0B\x0C\x85\xA0':
+                while len(line) > 0 and line[-1:] in b' \t\n\r\x0b\x0c\x85\xa0':
                     line = line[:-1]
                 spl = line.split(b':', 1)
                 if len(spl) < 2:
                     continue
                 keyword = spl[0].lower()
                 # Strip keyword end
-                while len(keyword) > 0 and keyword[-1:] in b' \t\n\r\x0B\x0C\x85\xA0':
+                while len(keyword) > 0 and keyword[-1:] in b' \t\n\r\x0b\x0c\x85\xa0':
                     keyword = keyword[:-1]
                 if len(keyword) < 1:
                     continue
                 wordval = spl[1]
                 # Strip wordval start
-                while len(wordval) > 0 and wordval[0:1] in b' \t\n\r\x0B\x0C\x85\xA0':
+                while len(wordval) > 0 and wordval[0:1] in b' \t\n\r\x0b\x0c\x85\xa0':
                     wordval = wordval[1:]
                 if len(wordval) < 1:
                     continue

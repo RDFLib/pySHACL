@@ -385,7 +385,7 @@ class Shape(object):
         if debug:
             t2 = perf_counter()
             elapsed = t2 - t1
-            self.logger.debug(f"Milliseconds to find focus nodes: {elapsed*1000.0:.3f}ms")
+            self.logger.debug(f"Milliseconds to find focus nodes: {elapsed * 1000.0:.3f}ms")
         return found_node_targets
 
     @classmethod
@@ -534,7 +534,7 @@ class Shape(object):
         if debug:
             t2 = perf_counter()
             elapsed = t2 - t1
-            self.logger.debug(f"Milliseconds to find focus nodes: {elapsed*1000.0:.3f}ms")
+            self.logger.debug(f"Milliseconds to find focus nodes: {elapsed * 1000.0:.3f}ms")
         return found_node_targets
 
     def value_nodes(self, target_graph, focus, sparql_mode: bool = False, debug: bool = False):
@@ -571,7 +571,7 @@ class Shape(object):
             else:
                 prefixes = dict(target_graph.namespace_manager.namespaces())
                 sparql_path = shacl_path_to_sparql_path(self.sg, path_val, prefixes=prefixes)
-            values_query = f"SELECT {' '.join(f'?v{i}' for i,_ in enumerate(focus))} WHERE {{\n"
+            values_query = f"SELECT {' '.join(f'?v{i}' for i, _ in enumerate(focus))} WHERE {{\n"
             init_bindings = {}
             for i, f in enumerate(focus):
                 focus_dict[f] = set()
@@ -598,7 +598,7 @@ class Shape(object):
         if debug:
             t2 = perf_counter()
             elapsed = t2 - t1
-            self.logger.debug(f"Milliseconds to find value nodes for focus nodes: {elapsed*1000.0:.3f}ms")
+            self.logger.debug(f"Milliseconds to find value nodes for focus nodes: {elapsed * 1000.0:.3f}ms")
         return focus_dict
 
     def find_custom_constraints(self):
@@ -815,6 +815,6 @@ class Shape(object):
         if collect_stats:
             t2 = perf_counter()
             elapsed = t2 - t1
-            self.logger.debug(f"Milliseconds to evaluate shape {str(self)}: {elapsed*1000.0:.3f}ms")
+            self.logger.debug(f"Milliseconds to evaluate shape {str(self)}: {elapsed * 1000.0:.3f}ms")
         # print(_evaluation_path, "Passes" if not non_conformant else "Fails")
         return (not non_conformant), reports

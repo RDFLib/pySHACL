@@ -11,7 +11,6 @@ from pyshacl.rules.shacl_rule import SHACLRule
 from .js_executable import JSExecutable
 
 if TYPE_CHECKING:
-
     from rdflib.term import URIRef
 
     from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor

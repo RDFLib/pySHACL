@@ -3,6 +3,7 @@
 """
 https://www.w3.org/TR/shacl/#core-components-value-type
 """
+
 import abc
 import re
 import typing

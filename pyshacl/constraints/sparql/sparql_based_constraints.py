@@ -2,6 +2,7 @@
 """
 https://www.w3.org/TR/shacl/#sparql-constraints
 """
+
 from typing import Dict, List
 
 import rdflib
@@ -71,8 +72,7 @@ class SPARQLBasedConstraint(ConstraintComponent):
                 deactivated = next(iter(deactivated_node_list))
                 if not (isinstance(deactivated, rdflib.Literal) and isinstance(deactivated.value, bool)):
                     raise ConstraintLoadError(
-                        "SPARQLConstraintComponent value for sh:deactivated must be "
-                        "a Literal with type xsd:boolean.",
+                        "SPARQLConstraintComponent value for sh:deactivated must be a Literal with type xsd:boolean.",
                         "https://www.w3.org/TR/shacl/#SPARQLConstraintComponent",
                     )
                 deact = bool(deactivated.value)
