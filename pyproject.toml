@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 [project]
 name = "pyshacl"
 # Don't forget to change the version number in __init__.py, Dockerfile, and CITATION.cff along with this one
-version = "0.29.1"
+version = "0.30.0"
 # Ruff and Poetry both now read target-version from [project.requires-python]
 # The <4 is reauired for compatiblity with OWL-RL that requdires Python <4
 requires-python = ">=3.9,<4"

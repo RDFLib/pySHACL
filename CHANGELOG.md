@@ -7,6 +7,20 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]
 - Nothing yet
 
+## [0.30.0] - 2025-01-24
+
+### Fixed
+- Finalize the decoupling of `base_uri` from graph `identifier`.
+  - Blame the conflated naming of `publicID` in RDFLib for that confusion. 
+- `load_from_source` will now correctly detect and use the BaseURI of files passed in, for relative URIs.
+  - Fixes #281
+
+### Changed
+- Update to Poetry v2.0 and new pyproject.toml format.
+- Removed "Black", switched to "Ruff" for formatting as well as linting.
+- Switched to parsing `file:` IRIs in line with the RDF spec, and allow (base-less, or root-less) relative `file:` IRIs (as per the RDF spec).
+  - But "<file:>" IRIs in Turtle files are now _not_ made relative to BaseURI, because they are relative to the CWD.
+
 ## [0.29.1] - 2024-12-16
 
 ### Added
@@ -1213,7 +1227,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.29.1...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.30.0...HEAD
+[0.30.0]: https://github.com/RDFLib/pySHACL/compare/v0.29.1...v0.30.0
 [0.29.1]: https://github.com/RDFLib/pySHACL/compare/v0.29.0...v0.29.1
 [0.29.0]: https://github.com/RDFLib/pySHACL/compare/v0.28.1...v0.29.0
 [0.28.1]: https://github.com/RDFLib/pySHACL/compare/v0.28.0...v0.28.1

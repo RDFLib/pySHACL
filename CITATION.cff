@@ -8,7 +8,7 @@ authors:
   given-names: "Nicholas"
   orcid: "http://orcid.org/0000-0002-8742-7730"
 title: "pySHACL"
-version: 0.29.1
+version: 0.30.0
 doi: 10.5281/zenodo.4750840
 license: Apache-2.0
 date-released: 2024-11-01
