@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 #
 import logging
-import platform
 from collections import OrderedDict, defaultdict
 from os import path
 from test.helpers import flatten_manifests, load_manifest
@@ -20,8 +19,7 @@ MF = Namespace('http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#')
 SHT = Namespace('http://www.w3.org/ns/shacl-test#')
 
 main_manifest = load_manifest(sht_main_manifest)
-manifests_with_entries = flatten_manifests(main_manifest, True)
-
+manifests_with_entries = flatten_manifests(main_manifest,True)
 
 tests_found_in_manifests = defaultdict(lambda: [])
 
@@ -55,10 +53,12 @@ def test_sht_all_sparql_mode(base, index, caplog) -> None:
 
 def run_sht_test(sht_test, validate_args: dict) -> None:
     logger = logging.getLogger()  # pytest uses the root logger with a capturing handler
-    if platform.system() == "Windows":
+    if sht_test.node.startswith("file:///"):
         test_id = str(sht_test.node).replace("file:///", "")
-    else:
+    elif sht_test.node.startswith("file://"):
         test_id = str(sht_test.node).replace("file://", "")
+    elif sht_test.node.startswith("file:"):
+        test_id = str(sht_test.node).replace("file:", "")
     label = sht_test.label
     data_file = sht_test.data_graph
     shacl_file = sht_test.shapes_graph

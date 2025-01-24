@@ -24,7 +24,7 @@ ex:hasMaxLength
 		Their string value is accessed via the .lex and .uri attributes.
 		The function returns true if no violation has been found.
 		""" ;
-	sh:jsLibrary [ sh:jsLibraryURL "file://test/resources/js/hasMaxLength.js"^^xsd:anyURI ] ;
+	sh:jsLibrary [ sh:jsLibraryURL "file:./test/resources/js/hasMaxLength.js"^^xsd:anyURI ] ;
 	sh:jsFunctionName "hasMaxLength" .
 
 ex:TestShape

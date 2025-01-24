@@ -1,0 +1,6 @@
+@prefix ex: <https://example.com/> .
+@prefix schema: <https://schema.org/> .
+
+ex:exampleSoftware a schema:SoftwareSourceCode ;
+    schema:codeRepository "https://gitea.example.com/example/example-software.git"^^schema:URL ;
+    .
