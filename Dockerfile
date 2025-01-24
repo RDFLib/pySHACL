@@ -16,7 +16,7 @@ COPY . .
 RUN chown -R pyshacl:pyshacl /home/pyshacl /app && chmod -R 775 /home/pyshacl /app
 USER pyshacl
 ENV PATH="/home/pyshacl/.local/bin:$PATH"
-RUN pip3 install "poetry>=1.8.4,<2.0"
+RUN pip3 install "poetry<3.0,>=2.0"
 RUN poetry install --no-dev --extras "js http"
 USER root
 RUN apk del build-dependencies

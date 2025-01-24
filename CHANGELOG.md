@@ -1214,7 +1214,7 @@ just leaves the files open. Now it is up to the command-line client to close the
 - Initial version, limited functionality
 
 [Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.29.1...HEAD
-[0.29.0]: https://github.com/RDFLib/pySHACL/compare/v0.29.0...v0.29.1
+[0.29.1]: https://github.com/RDFLib/pySHACL/compare/v0.29.0...v0.29.1
 [0.29.0]: https://github.com/RDFLib/pySHACL/compare/v0.28.1...v0.29.0
 [0.28.1]: https://github.com/RDFLib/pySHACL/compare/v0.28.0...v0.28.1
 [0.28.0]: https://github.com/RDFLib/pySHACL/compare/v0.27.0...v0.28.0
