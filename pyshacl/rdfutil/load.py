@@ -212,7 +212,10 @@ def load_from_source(
     elif isinstance(source, (BufferedIOBase, TextIOBase)):
         if hasattr(source, 'name'):
             filename = source.name  # type: ignore
-            file_uri = Path(filename).resolve().as_uri()
+            # Note, we _could_ preserve the relative file URI for the BaseURI
+            # but the Turtle parser converts a relative BaseURI to absolute anyway
+            # So just make it absolute here so we have a consistent reference to it.
+            file_uri = Path(filename).absolute().as_uri()
             _maybe_id = file_uri
             base_uri = file_uri
         if isinstance(source, TextIOBase):
@@ -236,9 +239,11 @@ def load_from_source(
             filename = "/dev/stdin"
             source_as_filename = filename
         if source.startswith('file:'):
-            filename = str(path_from_uri(source, relative_to=None if not base_uri else Path(base_uri)))
-            _maybe_id = source
-            base_uri = source
+            # Make this abosolute, because the Turtle parser converts a relative BaseURI to absolute anyway
+            # So just make it absolute here so we have a consistent reference to it.
+            _path = path_from_uri(source, relative_to=None).absolute()
+            filename = str(_path)
+            _maybe_id = base_uri = _path.as_uri()
             source_as_filename = filename
         elif source.startswith('http:') or source.startswith('https:'):
             # It can be tricky to guess public_id from a web URL.
@@ -615,7 +620,7 @@ def chain_load_owl_imports(
             if imp_str in import_chain:
                 continue
             if imp_str.startswith('file:'):
-                imp_str = str(path_from_uri(imp_str, relative_to=None if not graph_base else Path(graph_base)))
+                imp_str = str(path_from_uri(imp_str, relative_to=None))
             load_from_source(
                 imp_str,
                 g=target_g,

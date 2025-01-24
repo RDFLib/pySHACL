@@ -44,4 +44,5 @@ def test_281_b():
 
 
 if __name__ == "__main__":
-    sys.exit(test_281())
+    test_281_a()
+    sys.exit(test_281_b())
