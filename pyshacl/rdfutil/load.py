@@ -53,7 +53,6 @@ def path_from_uri(uri: Union[str, URIRef], relative_to: Union[PurePath, None] = 
         return Path(relative_to).joinpath(path)
 
 
-
 def add_baked_in(url, graph_path):
     baked_in[url] = graph_path
 
@@ -337,8 +336,7 @@ def load_from_source(
         if source_is_graph:
             target_g: Union[rdflib.Graph, rdflib.ConjunctiveGraph, rdflib.Dataset] = source  # type: ignore
         else:
-            default_graph_base: Union[str, None] = base_uri if base_uri else \
-                (identifier if identifier else None)
+            default_graph_base: Union[str, None] = base_uri if base_uri else (identifier if identifier else None)
             if multigraph:
                 target_ds = rdflib.Dataset(default_graph_base=default_graph_base, default_union=True)
                 target_ds.namespace_manager = NamespaceManager(target_ds, 'core')
@@ -567,7 +565,9 @@ def load_from_source(
                 dest_g = target_g.default_context
         else:
             dest_g = target_g
-        return chain_load_owl_imports(dest_g.identifier, dest_g.base, target_g, import_chain, do_owl_imports, multigraph)
+        return chain_load_owl_imports(
+            dest_g.identifier, dest_g.base, target_g, import_chain, do_owl_imports, multigraph
+        )
     return target_g
 
 

@@ -1,9 +1,9 @@
 #
 #
 import typing
+from pathlib import Path
 from urllib import request
 
-from pathlib import Path
 from pyshacl.rdfutil.load import path_from_uri
 
 try:
