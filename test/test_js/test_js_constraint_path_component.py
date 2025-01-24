@@ -19,7 +19,7 @@ ex:MaxCountConstraintComponent
 ex:hasMaxCount
 	a sh:JSValidator ;
 	sh:message "Path has more than {$maxCount} values." ;
-	sh:jsLibrary [ sh:jsLibraryURL "file://test/resources/js/hasMaxCount.js"^^xsd:anyURI ] ;
+	sh:jsLibrary [ sh:jsLibraryURL "file:./test/resources/js/hasMaxCount.js"^^xsd:anyURI ] ;
 	sh:jsFunctionName "hasMaxCount" .
 
 ex:TestShape

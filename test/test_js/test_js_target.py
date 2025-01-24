@@ -38,7 +38,7 @@ ex:TestShape
   sh:target [
       rdf:type sh:JSTarget ;
 	  sh:jsFunctionName "findThings" ;
-	  sh:jsLibrary [ sh:jsLibraryURL "file://test/resources/js/findThings.js"^^xsd:anyURI ] ;
+	  sh:jsLibrary [ sh:jsLibraryURL "file:./test/resources/js/findThings.js"^^xsd:anyURI ] ;
     ] ;
 .
 

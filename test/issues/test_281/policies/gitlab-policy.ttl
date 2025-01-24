@@ -1,0 +1,18 @@
+@prefix ex: <https://example.com/> .
+@prefix schema: <https://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+ex:hostingOnGitLabRequired a sh:NodeShape ;
+    sh:targetClass schema:SoftwareSourceCode ;
+
+    sh:property [
+        sh:name "Hosted on Example GitLab" ;
+        sh:description "Example GitLab must be used to host the repository." ;
+
+        sh:path schema:codeRepository ;
+        sh:datatype schema:URL ;
+        sh:pattern "^https://gitlab.example.com/.*" ;
+        sh:minCount 1 ;
+    ] ;
+
+    .

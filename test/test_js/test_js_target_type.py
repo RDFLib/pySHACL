@@ -71,7 +71,7 @@ ex:PeopleBornInCountryTarget
 		sh:nodeKind sh:IRI ;
 	] ;
 	sh:jsFunctionName "findBornIn" ;
-	sh:jsLibrary [ sh:jsLibraryURL "file://test/resources/js/findBornIn.js"^^xsd:anyURI ] ;
+	sh:jsLibrary [ sh:jsLibraryURL "file:./test/resources/js/findBornIn.js"^^xsd:anyURI ] ;
 .
 
 ex:GermanCitizenShape

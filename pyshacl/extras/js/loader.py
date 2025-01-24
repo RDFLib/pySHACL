@@ -1,7 +1,10 @@
 #
 #
 import typing
+from pathlib import Path
 from urllib import request
+
+from pyshacl.rdfutil.load import path_from_uri
 
 try:
     import regex
@@ -38,9 +41,11 @@ def get_js_from_web(url: str):
 
 
 def get_js_from_file(filepath: str):
-    if filepath.startswith("file://"):
-        filepath = filepath[7:]
-    f = open(filepath, "rb")
+    if filepath.startswith("file:"):
+        _file_path = path_from_uri(filepath)
+    else:
+        _file_path = Path(filepath)
+    f = open(_file_path, "rb")
     return f
 
 
