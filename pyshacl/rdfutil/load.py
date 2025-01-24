@@ -7,13 +7,15 @@ import platform
 import sys
 from io import BufferedIOBase, BytesIO, TextIOBase, UnsupportedOperation
 from logging import WARNING, Logger, getLogger
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import IO, List, Optional, Union, cast
 from urllib import request
 from urllib.error import HTTPError
+from urllib.parse import unquote_to_bytes
 
 import rdflib
 from rdflib.namespace import SDO, NamespaceManager
+from rdflib.term import URIRef
 
 from .clone import clone_dataset, clone_graph
 
@@ -27,11 +29,36 @@ MAX_OWL_IMPORT_DEPTH = 3
 baked_in = {}
 
 
+def path_from_uri(uri: Union[str, URIRef], relative_to: Union[PurePath, None] = None) -> Path:
+    """Return a new path from the given 'file' URI."""
+    if not uri.startswith('file:'):
+        raise ValueError(f"File URI does not start with 'file:': {uri!r}")
+    path: str = str(uri)[5:]
+    if path[:3] == '///':
+        # Remove empty authority
+        path = path[2:]
+    elif path[:12] == '//localhost/':
+        # Remove 'localhost' authority
+        path = path[11:]
+    if path[:3] == '///' or (path[:1] == '/' and path[2:3] in ':|'):
+        # Remove slash before DOS device/UNC path
+        path = path[1:]
+    if path[1:2] == '|':
+        # Replace bar with colon in DOS drive
+        path = path[:1] + ':' + path[2:]
+    path = Path(os.fsdecode(unquote_to_bytes(path)))
+    if relative_to is None:
+        return path
+    else:
+        return Path(relative_to).joinpath(path)
+
+
+
 def add_baked_in(url, graph_path):
     baked_in[url] = graph_path
 
 
-def get_rdf_from_web(url: Union[rdflib.URIRef, str]):
+def get_rdf_from_web(url: Union[URIRef, str]):
     """
 
     :param url:
@@ -133,10 +160,10 @@ def load_from_source(
     source: Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes],
     g: Optional[GraphLike] = None,
     rdf_format: Optional[str] = None,
-    identifier: Optional[Union[rdflib.URIRef, str]] = None,
+    identifier: Optional[Union[URIRef, str]] = None,
     multigraph: bool = False,
     do_owl_imports: Union[bool, int] = False,
-    import_chain: Optional[List[Union[rdflib.URIRef, str]]] = None,
+    import_chain: Optional[List[Union[URIRef, str]]] = None,
     logger: Optional[Logger] = None,
 ):
     """
@@ -165,6 +192,7 @@ def load_from_source(
     source_as_filename: Optional[str] = None
     source_as_bytes: Optional[bytes] = None
     filename = None
+    # (Note, identifier is always first converted to a str, even if it is passes in as a URIRef)
     identifier = None if identifier is None else str(identifier)  # This is our passed-in id (formerly public_id)
     _maybe_id: Optional[str] = None  # For default-graph identifier
     base_uri: Optional[str] = None  # Base URI for relative URIs
@@ -187,6 +215,7 @@ def load_from_source(
             filename = source.name  # type: ignore
             file_uri = Path(filename).resolve().as_uri()
             _maybe_id = file_uri
+            base_uri = file_uri
         if isinstance(source, TextIOBase):
             buf = getattr(source, "buffer")  # type: BufferedIOBase
             source_as_file = source = buf
@@ -207,20 +236,16 @@ def load_from_source(
             # Don't set base_uri, it is not used for /dev/stdin
             filename = "/dev/stdin"
             source_as_filename = filename
-        elif is_windows and source.startswith('file:///'):
-            # A local file name cannot end with # or with /, so
-            # identifier always has no symbol at the end.
+        if source.startswith('file:'):
+            filename = str(path_from_uri(source, relative_to=None if not base_uri else Path(base_uri)))
             _maybe_id = source
-            filename = source[8:]
-            source_as_filename = filename
-        elif not is_windows and source.startswith('file://'):
-            _maybe_id = source  # See local file comment above
-            filename = source[7:]
+            base_uri = source
             source_as_filename = filename
         elif source.startswith('http:') or source.startswith('https:'):
             # It can be tricky to guess public_id from a web URL.
             # In this case we will always simply use the URL as the public_id as given.
             _maybe_id = source
+            base_uri = source
             try:
                 resp, resp_filename, web_format, raw_fp = get_rdf_from_web(source)
             except HTTPError:
@@ -288,7 +313,7 @@ def load_from_source(
             source_as_bytes = source = source.encode('utf-8')
     elif isinstance(source, bytes):
         if source.startswith(b'file:') or source.startswith(b'http:') or source.startswith(b'https:'):
-            raise ValueError("file:// and http:// strings should be given as str, not bytes.")
+            raise ValueError("file: and http: strings should be given as str, not bytes.")
         first_char_b: bytes = source[0:1]
         if (
             first_char_b == b'#'
@@ -312,23 +337,30 @@ def load_from_source(
         if source_is_graph:
             target_g: Union[rdflib.Graph, rdflib.ConjunctiveGraph, rdflib.Dataset] = source  # type: ignore
         else:
-            default_graph_base: Union[str, None] = identifier if identifier else None
+            default_graph_base: Union[str, None] = base_uri if base_uri else \
+                (identifier if identifier else None)
             if multigraph:
                 target_ds = rdflib.Dataset(default_graph_base=default_graph_base, default_union=True)
                 target_ds.namespace_manager = NamespaceManager(target_ds, 'core')
                 if identifier:  # if identifier is explicitly given, use that as a new named graph id
                     old_default_context = target_ds.default_context
-                    named_g = target_ds.graph(default_graph_base)
-                    named_g.base = default_graph_base
-                    target_ds.default_context = named_g
-                    target_ds.remove_graph(old_default_context)
+                    if str(old_default_context.identifier) != identifier:
+                        named_g = target_ds.graph(URIRef(identifier))
+                        named_g.base = default_graph_base
+                        target_ds.default_context = named_g
+                        target_ds.remove_graph(old_default_context)
                 else:
                     target_ds.default_context.namespace_manager = target_ds.namespace_manager
                     default_g = target_ds.default_context
                     target_ds.graph(default_g)
                 target_g = target_ds
             else:
-                target_g = rdflib.Graph(bind_namespaces='core', base=default_graph_base)
+                target_g = rdflib.Graph(
+                    bind_namespaces='core',
+                    base=default_graph_base,
+                    identifier=None if not identifier else URIRef(identifier),
+                )
+
     else:
         if not isinstance(g, (rdflib.Graph, rdflib.Dataset, rdflib.ConjunctiveGraph)):
             raise RuntimeError("Passing in 'g' must be a rdflib Graph or Dataset.")
@@ -453,18 +485,18 @@ def load_from_source(
                 raise RuntimeError("File closed while pre-parsing Turtle File.")
 
         # use base_uri if it is set, otherwise use identifier or _maybe_id
-        use_base_uri = base_uri if base_uri else (identifier if identifier else _maybe_id)
+        parser_base_uri: Union[str, None] = base_uri if base_uri else (identifier if identifier else _maybe_id)
         if isinstance(target_g, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
             if identifier:
-                dest_g = target_g.get_context(identifier)
-                dest_g.base = use_base_uri
+                dest_g = target_g.get_context(URIRef(identifier))
+                dest_g.base = parser_base_uri
             else:
                 dest_g = target_g.default_context
-                dest_g.base = use_base_uri
+                dest_g.base = parser_base_uri
             # parsing uses base_uri as the public_id, because it is used for relative URIs
-            dest_g.parse(source=cast(IO[bytes], _source), format=rdf_format, publicID=use_base_uri)
+            dest_g.parse(source=cast(IO[bytes], _source), format=rdf_format, publicID=parser_base_uri)
         else:
-            target_g.parse(source=cast(IO[bytes], _source), format=rdf_format, publicID=use_base_uri)
+            target_g.parse(source=cast(IO[bytes], _source), format=rdf_format, publicID=parser_base_uri)
         # If the target was open to begin with, leave it open.
         if not source_was_open:
             _source.close()
@@ -488,8 +520,8 @@ def load_from_source(
         elif isinstance(target_g, (rdflib.Dataset, rdflib.ConjunctiveGraph)) and isinstance(source, rdflib.Graph):
             _temp_target = rdflib.Graph(
                 store=target_g.store,
-                identifier=identifier,
-                base=base_uri,
+                identifier=source.identifier if not identifier else URIRef(identifier),
+                base=source.base if not base_uri else base_uri,
                 namespace_manager=target_g.namespace_manager,
             )
             clone_graph(source, _temp_target)
@@ -528,24 +560,32 @@ def load_from_source(
 
         if import_chain is None:
             import_chain = []
-        return chain_load_owl_imports(identifier, target_g, import_chain, do_owl_imports, multigraph)
+        if isinstance(target_g, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+            if identifier:
+                dest_g = target_g.get_context(URIRef(identifier))
+            else:
+                dest_g = target_g.default_context
+        else:
+            dest_g = target_g
+        return chain_load_owl_imports(dest_g.identifier, dest_g.base, target_g, import_chain, do_owl_imports, multigraph)
     return target_g
 
 
 def chain_load_owl_imports(
-    parent_id: Union[str, None],
+    graph_id: Union[URIRef, rdflib.BNode, None],
+    graph_base: Union[str, None],
     target_g: GraphLike,
-    import_chain: List[Union[rdflib.URIRef, str]],
+    import_chain: List[Union[URIRef, str]],
     load_iter: int,
     multigraph: bool,
 ) -> GraphLike:
-    if parent_id and (parent_id.endswith('#') or parent_id.endswith('/')):
-        root_id: Union[rdflib.URIRef, None] = rdflib.URIRef(parent_id[:-1])
+    if graph_base and (graph_base.endswith('#') or graph_base.endswith('/')):
+        root_id: Union[URIRef, None] = URIRef(graph_base[:-1])
     else:
-        root_id = rdflib.URIRef(parent_id) if parent_id else None
+        root_id = URIRef(graph_base) if graph_base else None
     done_imports = 0
 
-    def _load_from_imports_nodes(imports_nodes: List[Union[rdflib.URIRef, rdflib.BNode]]) -> int:
+    def _load_from_imports_nodes(imports_nodes: List[Union[URIRef, rdflib.BNode]]) -> int:
         nonlocal target_g, multigraph, import_chain, load_iter
         _done_imports = 0
         for _i in imports_nodes:
@@ -569,6 +609,8 @@ def chain_load_owl_imports(
                 imp_str = str(_i)
             if imp_str in import_chain:
                 continue
+            if imp_str.startswith('file:'):
+                imp_str = str(path_from_uri(imp_str, relative_to=None if not graph_base else Path(graph_base)))
             load_from_source(
                 imp_str,
                 g=target_g,
@@ -594,11 +636,19 @@ def chain_load_owl_imports(
                 import_chain.pop()
             else:
                 done_imports += _done_imports
-    if done_imports < 1 and parent_id is not None and root_id != parent_id:
-        public_id_uri = rdflib.URIRef(parent_id)
-        owl_imports = list(target_g.objects(public_id_uri, rdflib.OWL.imports))
+    if done_imports < 1 and graph_base is not None and str(root_id) != graph_base:
+        owl_imports = list(target_g.objects(URIRef(graph_base), rdflib.OWL.imports))
         if len(owl_imports) > 0:
-            import_chain.append(str(public_id_uri))
+            import_chain.append(graph_base)
+            _done_imports = _load_from_imports_nodes(owl_imports)  # type: ignore[arg-type]
+            if _done_imports < 1:
+                import_chain.pop()
+            else:
+                done_imports += _done_imports
+    if done_imports < 1 and graph_id is not None and root_id != graph_id:
+        owl_imports = list(target_g.objects(graph_id, rdflib.OWL.imports))
+        if len(owl_imports) > 0:
+            import_chain.append(str(graph_id))
             _done_imports = _load_from_imports_nodes(owl_imports)  # type: ignore[arg-type]
             if _done_imports < 1:
                 import_chain.pop()
@@ -607,10 +657,10 @@ def chain_load_owl_imports(
     if done_imports < 1:
         ontologies = target_g.subjects(rdflib.RDF.type, rdflib.OWL.Ontology)
         for ont in ontologies:
-            if ont == root_id or ont == parent_id:
+            if ont == root_id or ont == graph_id:
                 continue
             ont_str = str(ont)
-            if ont_str in import_chain:
+            if ont_str == graph_base or ont_str in import_chain:
                 continue
             owl_imports = list(target_g.objects(ont, rdflib.OWL.imports))
             if len(owl_imports) > 0:
