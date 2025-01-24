@@ -46,11 +46,11 @@ def path_from_uri(uri: Union[str, URIRef], relative_to: Union[PurePath, None] = 
     if path[1:2] == '|':
         # Replace bar with colon in DOS drive
         path = path[:1] + ':' + path[2:]
-    path = Path(os.fsdecode(unquote_to_bytes(path)))
+    path_ret = Path(os.fsdecode(unquote_to_bytes(path)))
     if relative_to is None:
-        return path
+        return path_ret
     else:
-        return Path(relative_to).joinpath(path)
+        return Path(relative_to).joinpath(path_ret)
 
 
 def add_baked_in(url, graph_path):
@@ -566,7 +566,12 @@ def load_from_source(
         else:
             dest_g = target_g
         return chain_load_owl_imports(
-            dest_g.identifier, dest_g.base, target_g, import_chain, do_owl_imports, multigraph
+            cast(Union[URIRef, rdflib.BNode], dest_g.identifier),
+            dest_g.base,
+            target_g,
+            import_chain,
+            do_owl_imports,
+            multigraph,
         )
     return target_g
 
