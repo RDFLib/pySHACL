@@ -416,7 +416,12 @@ class ShapesGraph(object):
                     for _p in has_shape_expecting_p.keys():
                         property_entries = list(g.objects(s, _p))
                         for p_e in property_entries:
-                            if isinstance(p_e, rdflib.BNode):
+                            if _p in (SH_or, SH_xone, SH_and):
+                                # These are list-expecting variants of shape-expecting constraints.
+                                for item in g.items(p_e):
+                                    if isinstance(item, rdflib.BNode):
+                                        _found_child_bnodes.append(item)
+                            elif isinstance(p_e, rdflib.BNode):
                                 _found_child_bnodes.append(p_e)
                 if len(_found_child_bnodes) > 0:
                     _gather_shapes(_found_child_bnodes, recurse_depth=recurse_depth + 1)

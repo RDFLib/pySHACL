@@ -84,10 +84,11 @@ exShape:HumanShape a sh:NodeShape ;
 
 exShape:AnimalShape a sh:NodeShape ;
     sh:property [
-        sh:datatype xsd:integer ;
         sh:path exOnt:nLegs ;
-        sh:maxInclusive 4 ;
-        sh:minInclusive 1 ;
+        sh:or (
+            [ sh:datatype xsd:integer ; sh:minInclusive 0 ; sh:maxInclusive 0 ]
+            [ sh:datatype xsd:integer ; sh:minInclusive 1 ; sh:maxInclusive 8 ]
+        ) ;
     ] ;
     sh:targetClass exOnt:Animal .
 """
@@ -195,6 +196,21 @@ def test_validate_fail_manual_targeting_shape():
     assert "Results (2)" in string
     assert not conforms
 
+def test_validate_fail_manual_targeting_shape_or():
+    res = validate(
+        data_file_text_bad,
+        shacl_graph=shacl_file_text,
+        data_graph_format='turtle',
+        shacl_graph_format='turtle',
+        ont_graph=ontology_file_text,
+        ont_graph_format="turtle",
+        inference='rdfs',
+        use_shapes=["exShape:AnimalShape"],
+        debug=True,
+    )
+    conforms, graph, string = res
+    assert "Results (2)" in string
+    assert not conforms
 
 def test_validate_fail_manual_targeting_focus_with_shape():
     res = validate(
