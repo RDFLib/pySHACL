@@ -30,6 +30,8 @@ test: venvcheck		## Run the TOX tests in a TOX environment
 .PHONY: dev-test
 dev-test: venvcheck		## Run the tests in dev environment
 	poetry run pytest --cov=pyshacl test/
+	poetry run pytest test/issues/
+
 
 .PHONY: format
 format: venvcheck	## Run Ruff and isort Formatters
