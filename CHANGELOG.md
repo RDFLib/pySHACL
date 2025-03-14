@@ -7,6 +7,13 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ## [Unreleased]
 - Nothing yet
 
+## [0.30.1] - 2025-03-15
+
+### Fixed
+- Fixed a bug in SHACL Shape Targeting feature, BNode shapes that are referenced by a shape in `sh:or`, `sh:and` or `sh:xone` were not getting selected.
+  - Fixes #280
+
+
 ## [0.30.0] - 2025-01-24
 
 ### Fixed
@@ -1227,7 +1234,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.30.0...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.30.1...HEAD
+[0.30.1]: https://github.com/RDFLib/pySHACL/compare/v0.30.0...v0.30.1
 [0.30.0]: https://github.com/RDFLib/pySHACL/compare/v0.29.1...v0.30.0
 [0.29.1]: https://github.com/RDFLib/pySHACL/compare/v0.29.0...v0.29.1
 [0.29.0]: https://github.com/RDFLib/pySHACL/compare/v0.28.1...v0.29.0

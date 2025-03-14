@@ -46,7 +46,7 @@ jobs:
       run: |
           python3 -m venv venv
           source venv/bin/activate
-          python -m pip install poetry
+          python -m pip install poetry>=2.1
           make dev
 
     - name: Run linting checks
