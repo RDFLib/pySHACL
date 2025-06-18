@@ -339,18 +339,21 @@ See the [CONTRIBUTORS file](https://github.com/RDFLib/pySHACL/blob/master/CONTRI
 DOI: [10.5281/zenodo.4750840](https://doi.org/10.5281/zenodo.4750840) (For all versions/latest version)
 
 ## Contacts
-Project Lead:
-**Nicholas Car**
-*Senior Experimental Scientist*
-CSIRO Land & Water, Environmental Informatics Group
-Brisbane, Qld, Australia
-<nicholas.car@csiro.au>
-<http://orcid.org/0000-0002-8742-7730>
 
-Lead Developer:
-**Ashley Sommer**
-*Informatics Software Engineer*
-CSIRO Land & Water, Environmental Informatics Group
-Brisbane, Qld, Australia
-<Ashley.Sommer@csiro.au>
+### Lead Developer
+
+**Ashley Sommer**  
+*Software Engineer*  
+[Department of Climate Change, Energy, the Environment and Water](https://www.dcceew.gov.au)  
+Brisbane, Qld, Australia  
+<Ashley.Sommer@dcceew.gov.au>  
 <https://orcid.org/0000-0003-0590-0131>
+
+### Support developer
+
+**Nicholas Car**  
+*Data Architect*  
+[KurrawongAI](https://kurrawong.ai)  
+Brisbane, Qld, Australia  
+<nick@kurrawong.ai>  
+<http://orcid.org/0000-0002-8742-7730>
