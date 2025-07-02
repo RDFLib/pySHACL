@@ -59,6 +59,13 @@ class SPARQLRule(SHACLRule):
         focus_nodes: Optional[Sequence['RDFNode']] = None,
         target_graph_identifier: Optional['URIRef'] = None,
     ) -> int:
+        if isinstance(data_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+            if target_graph_identifier is not None:
+                target_graph = data_graph.get_context(target_graph_identifier)
+            else:
+                target_graph = data_graph.default_context
+        else:
+            target_graph = data_graph
         focus_list: Sequence['RDFNode']
         if focus_nodes is not None:
             focus_list = list(focus_nodes)
@@ -100,7 +107,7 @@ class SPARQLRule(SHACLRule):
                     if result_graph is None:
                         raise ReportableRuntimeError("Query executed by a SHACL SPARQLRule did not return a Graph.")
                     for i in result_graph:
-                        if not this_added and i not in data_graph:
+                        if not this_added and i not in target_graph:
                             this_added = True
                             # We only need to know at least one triple was added, then break!
                             break
@@ -108,13 +115,6 @@ class SPARQLRule(SHACLRule):
                         added += 1
                         construct_graphs.add(result_graph)
             if added > 0:
-                if isinstance(data_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
-                    if target_graph_identifier is not None:
-                        target_graph = data_graph.get_context(target_graph_identifier)
-                    else:
-                        target_graph = data_graph.default_context
-                else:
-                    target_graph = data_graph
                 for g in construct_graphs:
                     data_graph = clone_graph(g, target_graph=target_graph)
                 all_added += added
