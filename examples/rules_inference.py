@@ -1,6 +1,6 @@
 # This example uses PySHACL's SHACL Rules executor to add triples to a
 # given data graph. The rules, contained below in both TripleRule and
-# SPARQLRule form calculate grandparents and great-grandparents, based on
+# SPARQLRule form, calculate grandparents and great-grandparents, based on
 # chains of hasParent predicates.
 #
 # This demo uses the graph parsing and graph difference functions from
