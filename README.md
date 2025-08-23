@@ -236,7 +236,7 @@ _**PySHACL now has a built-in SPARQL Remote Graph Mode, which allows you to vali
     - All SHACL-JS features are disabled (this is not safe when operating on a remote graph)
     - "inplace" mode is disabled (actually all operations on the remote data graph are inherently performed in-place)
 
-## Inference
+## Inference and Rules
 PySHACL can perform inference - creation of new data using rules - according to the [SHACL Advanced Features - Rules specification](https://www.w3.org/TR/shacl-af/#rules).
 
 The `shacl_rules` function can be used like this:
