@@ -3,7 +3,7 @@
 # SPARQLRule form calculate grandparents and great-grandparents, based on
 # chains of hasParent predicates.
 #
-# This demo uses the graph parsing and graph different functions from
+# This demo uses the graph parsing and graph difference functions from
 # RDFLib, as well as PySHACL's rules executor which implements the
 # SHACL Rules of the SHACL Advanced Features specification, see
 # https://www.w3.org/TR/shacl-af/#rules
