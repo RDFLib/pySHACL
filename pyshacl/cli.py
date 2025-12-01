@@ -421,17 +421,14 @@ def main(prog: Union[str, None] = None) -> None:
                 t2.add_row(['', '', '', '', '', '', '', ''])
             args.output.write(str(t2))
     else:
-        # If the serialized output is bytes → it's a binary RDF format (e.g., Jelly)
         if isinstance(v_graph, bytes):
             if args.output is not None and args.output != sys.stdout:
-                args.output.close()  # close text wrapper
+                args.output.close()
                 with open(args.output.name, "wb") as f:
                     f.write(v_graph)
             else:
                 sys.stdout.buffer.write(v_graph)
             sys.exit(0 if is_conform else 1)
-
-        # Otherwise it's a text format → normal path
         args.output.write(v_graph)
 
 
