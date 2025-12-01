@@ -108,7 +108,7 @@ parser.add_argument(
     action='store',
     help='Choose an output format. Default is "trig" for Datasets and "turtle" for Graphs.',
     default='auto',
-    choices=('auto', 'turtle', 'xml', 'trig', 'json-ld', 'nt', 'n3', 'nquads'),
+    choices=('auto', 'turtle', 'xml', 'trig', 'json-ld', 'nt', 'n3', 'nquads', 'jelly'),
 )
 parser.add_argument(
     '-df',
@@ -117,7 +117,7 @@ parser.add_argument(
     action='store',
     help='Explicitly state the RDF File format of the input DataGraph file. Default="auto".',
     default='auto',
-    choices=('auto', 'turtle', 'xml', 'trig', 'json-ld', 'nt', 'n3', 'nquads'),
+    choices=('auto', 'turtle', 'xml', 'trig', 'json-ld', 'nt', 'n3', 'nquads', 'jelly'),
 )
 parser.add_argument(
     '-sf',
@@ -126,7 +126,7 @@ parser.add_argument(
     action='store',
     help='Explicitly state the RDF File format of the input SHACL file. Default="auto".',
     default='auto',
-    choices=('auto', 'turtle', 'xml', 'trig', 'json-ld', 'nt', 'n3', 'nquads'),
+    choices=('auto', 'turtle', 'xml', 'trig', 'json-ld', 'nt', 'n3', 'nquads', 'jelly'),
 )
 parser.add_argument(
     '-ef',
@@ -135,7 +135,7 @@ parser.add_argument(
     action='store',
     help='Explicitly state the RDF File format of the extra ontology file. Default="auto".',
     default='auto',
-    choices=('auto', 'turtle', 'xml', 'trig', 'json-ld', 'nt', 'n3', 'nquads'),
+    choices=('auto', 'turtle', 'xml', 'trig', 'json-ld', 'nt', 'n3', 'nquads', 'jelly'),
 )
 parser.add_argument('-V', '--version', action=ShowVersion, help='Show PySHACL version and exit.')
 parser.add_argument(

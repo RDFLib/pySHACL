@@ -71,6 +71,9 @@ http = [
     "sanic-ext<23.6,>=23.3",
     "sanic-cors==2.2.0"
 ]
+jelly = [
+    "pyjelly>=0.6.2"
+]
 dev-lint = [
     "ruff<0.10,>=0.9.3",
     "platformdirs"
