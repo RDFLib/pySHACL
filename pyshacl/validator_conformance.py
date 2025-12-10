@@ -1,8 +1,10 @@
 import logging
+from io import StringIO
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
 
 import rdflib
-from rdflib import BNode, Literal, URIRef
+from rdflib import BNode, Literal, Namespace, URIRef
+from rdflib.query import Result
 from rdflib.util import from_n3
 
 from pyshacl.consts import (
@@ -17,16 +19,22 @@ from pyshacl.consts import (
     SH_result,
     SH_resultMessage,
     SH_resultPath,
+    SH_select,
     SH_ValidationReport,
     SH_value,
 )
 from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 from pyshacl.functions import apply_functions, gather_functions
+from pyshacl.helper.sparql_query_helper import SPARQLQueryHelper
 from pyshacl.pytypes import GraphLike, RDFNode
 from pyshacl.rdfutil import compare_blank_node, compare_node, order_graph_literal, stringify_node
+from pyshacl.shape import Shape
+from pyshacl.shapes_graph import ShapesGraph
 
 if TYPE_CHECKING:
     from pyshacl.validator import Validator
+
+DASH = Namespace("http://datashapes.org/dash#")
 
 
 def clean_validation_reports(actual_graph, actual_report, expected_graph, expected_report):
@@ -251,16 +259,148 @@ def compare_inferencing_reports(data_graph: GraphLike, expected_graph: GraphLike
     return all_good
 
 
+def extract_query_and_expected_result(
+    test_case: RDFNode, graph: GraphLike, log: Optional[logging.Logger] = None
+) -> Tuple[str, Result]:
+    """
+    Extract the SPARQL SELECT query and expected result from a DASH QueryTestCase node.
+
+    :param test_case: The DASH QueryTestCase node to extract from.
+    :param graph: The RDF graph containing the test case.
+    :param log: Optional logger for error messages.
+    :return: A tuple containing the SPARQL SELECT query string and the expected result
+    as a rdflib.query.Result object (type 'SELECT').
+    """
+    # Get the query string
+    select_query_literal = graph.value(test_case, SH_select)
+    if select_query_literal is None:
+        err_msg = f"QueryTestCase {test_case} missing sh:select property."
+        if log:
+            log.error(err_msg)
+        raise ReportableRuntimeError(err_msg)
+    query_str = str(select_query_literal).strip()
+
+    # Use SPARQLQueryHelper to collect prefixes and apply them to the query
+    # using a dummy shape object as needed by SPARQLQueryHelper
+    dummy_shape = Shape(ShapesGraph(graph), None)
+    helper = SPARQLQueryHelper(dummy_shape, test_case, query_str)
+    helper.collect_prefixes()
+    query_str = helper.apply_prefixes(query_str)
+
+    # Load the expected result
+    expected_result_literal = graph.value(test_case, DASH.expectedResult)
+    if expected_result_literal is None:
+        err_msg = f"QueryTestCase {test_case} missing dash:expectedResult property."
+        if log:
+            log.error(err_msg)
+        raise ReportableRuntimeError(err_msg)
+    expected_result_json = str(expected_result_literal).strip()
+    try:
+        # Parse the expected result as a SPARQL Results JSON using rdflib.query.Result
+        expected_result = Result.parse(StringIO(expected_result_json), format="json")
+    except Exception as e:
+        err_msg = f"Failed to parse dash:expectedResult for QueryTestCase {test_case} as SPARQL Results JSON: {e}"
+        if log:
+            log.error(err_msg)
+        raise ReportableRuntimeError(err_msg)
+    return query_str, expected_result
+
+
+def check_query_result(
+    query_graph: GraphLike,
+    query_str: str,
+    expected_result: Result,
+    log: Optional[logging.Logger] = None,
+) -> Tuple[bool, Optional[str]]:
+    """
+    Execute the SPARQL SELECT query against the given RDF graph and compare the result to the expected result.
+
+    :param query_graph: The RDF graph to query.
+    :param query_str: The SPARQL SELECT query string.
+    :param expected_result: The expected result as a rdflib.query.Result object (type 'SELECT').
+    :param log: Optional logger for error messages.
+    :return: A tuple (matches, message):
+        - matches (bool): True if the actual query result matches the expected result, False otherwise.
+        - message (str or None): An error message describing the mismatch if matches is False, otherwise None.
+    """
+    try:
+        actual_result = query_graph.query(query_str)
+    except Exception as e:
+        if log:
+            log.error(f"SPARQL query execution failed: {e}")
+        raise ReportableRuntimeError(f"QueryTestCase SPARQL query execution failed: {e}")
+
+    # Check both are rdflib.query.Result and SELECT type
+    if not (isinstance(expected_result, Result) and expected_result.type == "SELECT"):
+        if log:
+            log.error("Expected result is not a rdflib.query.Result of type SELECT.")
+        raise ReportableRuntimeError("Expected result is not a rdflib.query.Result of type SELECT.")
+
+    if not (isinstance(actual_result, Result) and actual_result.type == "SELECT"):
+        if log:
+            log.error("Actual result is not a rdflib.query.Result of type SELECT.")
+        raise ReportableRuntimeError("Actual result is not a rdflib.query.Result of type SELECT.")
+
+    # Compare variable lists
+    actual_result_vars = set(actual_result.vars)
+    expected_result_vars = set(expected_result.vars)
+    if actual_result_vars != expected_result_vars:
+        msg = (
+            "SPARQL result variable lists differ: expected "
+            + f"{', '.join(var.n3() for var in expected_result_vars)}, "
+            + f"got {', '.join(var.n3() for var in actual_result_vars)}."
+        )
+        if log:
+            log.error(msg)
+        return False, msg
+
+    # Compare number of result rows
+    if len(actual_result) != len(expected_result):
+        if log:
+            log.error(f"SPARQL result length mismatch: expected {len(expected_result)}, got {len(actual_result)}.")
+            return False
+
+    # Compare rows
+    expected_rows = [row.asdict() for row in expected_result]
+    actual_rows = [row.asdict() for row in actual_result]
+
+    if expected_rows != actual_rows:
+        msg = f"SPARQL SELECT result rows differ.\nExpected rows: {expected_rows}\nActual rows: {actual_rows}"
+        if log:
+            log.error(msg)
+        return False, msg
+
+    return True, None
+
+
+def evaluate_query_testcase(
+    query_graph: GraphLike, test_case: RDFNode, log: Optional[logging.Logger] = None
+) -> Tuple[bool, Optional[str]]:
+    """
+    Check conformance of a DASH QueryTestCase against a query graph.
+    The test_case is assumed to exist in the query_graph.
+
+    :param query_graph: The RDF graph to query.
+    :param test_case: The DASH QueryTestCase node.
+    :param log: Optional logger for error messages.
+    :return: A tuple (matches, message):
+        - matches (bool): True if the actual query result matches the expected result, False otherwise.
+        - message (str or None): An error message describing the mismatch if matches is False, otherwise None.
+    """
+    query_str, expected_result = extract_query_and_expected_result(test_case, query_graph, log=log)
+    return check_query_result(query_graph, query_str, expected_result, log=log)
+
+
 def check_dash_result(
     validator: 'Validator',
     report_graph: GraphLike,
     expected_result_graph: GraphLike,
     log: Union[logging.Logger, None] = None,
 ):
-    DASH = rdflib.namespace.Namespace('http://datashapes.org/dash#')
     DASH_GraphValidationTestCase = DASH.GraphValidationTestCase
     DASH_InferencingTestCase = DASH.InferencingTestCase
     DASH_FunctionTestCase = DASH.FunctionTestCase
+    DASH_QueryTestCase = DASH.QueryTestCase
     DASH_expectedResult = DASH.expectedResult
     DASH_expression = DASH.expression
     was_default_union = None
@@ -275,6 +415,8 @@ def check_dash_result(
     inf_test_cases_set = set(inf_test_cases)
     fn_test_cases = expected_result_graph.subjects(RDF_type, DASH_FunctionTestCase)
     fn_test_cases_set = set(fn_test_cases)
+    query_test_cases = expected_result_graph.subjects(RDF_type, DASH_QueryTestCase)
+    query_test_cases_set = set(query_test_cases)
     if len(gv_test_cases_set) > 0:
         test_case = next(iter(gv_test_cases_set))
         expected_results = expected_result_graph.objects(test_case, DASH_expectedResult)
@@ -362,13 +504,33 @@ def check_dash_result(
 
     else:
         fn_res = None
+
+    # Run DASH QueryTestCases if present
+    if len(query_test_cases_set) > 0:
+        query_res: Union[bool, None] = True
+        for test_case in query_test_cases_set:
+            # The query graph is the expected_result_graph (which includes imports)
+            try:
+                res, _ = evaluate_query_testcase(expected_result_graph, test_case, log)
+            except Exception as e:
+                log.error(f"QueryTestCase failed: {e}")
+                res = False
+            query_res = query_res and res
+    else:
+        query_res = None
+
     if was_default_union is not None:
         expected_result_graph.default_union = was_default_union
-    if gv_res is None and inf_res is None and fn_res is None:  # pragma: no cover
+    if gv_res is None and inf_res is None and fn_res is None and query_res is None:  # pragma: no cover
         raise ReportableRuntimeError(
-            "Cannot check the expected result, the given expected result graph does not have a GraphValidationTestCase or InferencingTestCase."
+            "Cannot check the expected result, the given expected result graph does not have a GraphValidationTestCase, InferencingTestCase, FunctionTestCase, or QueryTestCase."
         )
-    return (gv_res or gv_res is None) and (inf_res or inf_res is None) and (fn_res or fn_res is None)
+    return (
+        (gv_res or gv_res is None)
+        and (inf_res or inf_res is None)
+        and (fn_res or fn_res is None)
+        and (query_res or query_res is None)
+    )
 
 
 def check_sht_result(

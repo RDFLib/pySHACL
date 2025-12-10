@@ -1,0 +1,61 @@
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix ex: <http://datashapes.org/sh/tests/query/passing-001.test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://datashapes.org/sh/tests/query/passing-001.test>
+  rdf:type owl:Ontology ;
+  rdfs:label "Valid QueryTestCase using sh:prefixes" ;
+  owl:imports <http://datashapes.org/dash> ;
+.
+
+ex:Person1
+  rdf:type ex:Person ;
+  ex:name "Alice" ;
+  ex:age 30 ;
+.
+
+ex:Person2
+  rdf:type ex:Person ;
+  ex:name "Bob" ;
+  ex:age 25 ;
+.
+
+ex:Person
+  rdf:type rdfs:Class ;
+  rdfs:label "Person" ;
+.
+
+ex:ValidQueryTest
+  rdf:type dash:QueryTestCase ;
+  sh:select """
+    SELECT ?name ?age
+    WHERE {
+      ?person a ex:Person ;
+              ex:name ?name ;
+              ex:age ?age .
+    }
+    ORDER BY ?name
+  """ ;
+  dash:expectedResult """
+{
+  "head": { "vars": ["name", "age"] },
+  "results": {
+    "bindings": [
+      {
+        "name": { "type": "literal", "value": "Alice" },
+        "age": { "type": "literal", "value": "30", "datatype": "http://www.w3.org/2001/XMLSchema#integer" }
+      },
+      {
+        "name": { "type": "literal", "value": "Bob" },
+        "age": { "type": "literal", "value": "25", "datatype": "http://www.w3.org/2001/XMLSchema#integer" }
+      }
+    ]
+  }
+}
+""" ;
+  sh:conforms true ;  # Not part of the test case- just used to flag that this test is expected to pass
+.
