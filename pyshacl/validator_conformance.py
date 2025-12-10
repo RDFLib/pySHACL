@@ -260,7 +260,7 @@ def compare_inferencing_reports(data_graph: GraphLike, expected_graph: GraphLike
 
 
 def extract_query_and_expected_result(
-    test_case: RDFNode, graph: GraphLike, log: Optional[logging.Logger] = None
+    test_case: Union[URIRef, BNode], graph: GraphLike, log: Optional[logging.Logger] = None
 ) -> Tuple[str, Result]:
     """
     Extract the SPARQL SELECT query and expected result from a DASH QueryTestCase node.
@@ -282,7 +282,7 @@ def extract_query_and_expected_result(
 
     # Use SPARQLQueryHelper to collect prefixes and apply them to the query
     # using a dummy shape object as needed by SPARQLQueryHelper
-    dummy_shape = Shape(ShapesGraph(graph), None)
+    dummy_shape = Shape(ShapesGraph(graph), test_case)
     helper = SPARQLQueryHelper(dummy_shape, test_case, query_str)
     helper.collect_prefixes()
     query_str = helper.apply_prefixes(query_str)
@@ -342,8 +342,8 @@ def check_query_result(
         raise ReportableRuntimeError("Actual result is not a rdflib.query.Result of type SELECT.")
 
     # Compare variable lists
-    actual_result_vars = set(actual_result.vars)
-    expected_result_vars = set(expected_result.vars)
+    actual_result_vars = set(actual_result.vars) if actual_result.vars else set()
+    expected_result_vars = set(expected_result.vars) if expected_result.vars else set()
     if actual_result_vars != expected_result_vars:
         msg = (
             "SPARQL result variable lists differ: expected "
@@ -356,13 +356,15 @@ def check_query_result(
 
     # Compare number of result rows
     if len(actual_result) != len(expected_result):
+        msg = f"SPARQL result length mismatch: expected {len(expected_result)}, got {len(actual_result)}."
         if log:
-            log.error(f"SPARQL result length mismatch: expected {len(expected_result)}, got {len(actual_result)}.")
-            return False
+            log.error(msg)
+            return False, msg
 
     # Compare rows
-    expected_rows = [row.asdict() for row in expected_result]
-    actual_rows = [row.asdict() for row in actual_result]
+    # NOTE: As the query must be SELECT, rows will be ResultRows and no other type in the union
+    expected_rows = [row.asdict() for row in expected_result]  # type: ignore[union-attr]
+    actual_rows = [row.asdict() for row in actual_result]  # type: ignore[union-attr]
 
     if expected_rows != actual_rows:
         msg = f"SPARQL SELECT result rows differ.\nExpected rows: {expected_rows}\nActual rows: {actual_rows}"
@@ -374,7 +376,7 @@ def check_query_result(
 
 
 def evaluate_query_testcase(
-    query_graph: GraphLike, test_case: RDFNode, log: Optional[logging.Logger] = None
+    query_graph: GraphLike, test_case: Union[URIRef, BNode], log: Optional[logging.Logger] = None
 ) -> Tuple[bool, Optional[str]]:
     """
     Check conformance of a DASH QueryTestCase against a query graph.
@@ -509,6 +511,8 @@ def check_dash_result(
     if len(query_test_cases_set) > 0:
         query_res: Union[bool, None] = True
         for test_case in query_test_cases_set:
+            if not isinstance(test_case, (URIRef, BNode)):
+                raise ReportableRuntimeError(f"Graph Query Test Case must be a URI or BNode, got literal: {test_case}")
             # The query graph is the expected_result_graph (which includes imports)
             try:
                 res, _ = evaluate_query_testcase(expected_result_graph, test_case, log)
