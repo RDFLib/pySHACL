@@ -1,14 +1,14 @@
 @prefix dash: <http://datashapes.org/dash#> .
-@prefix ex: <http://datashapes.org/sh/tests/query/failing-001.test#> .
+@prefix ex: <http://datashapes.org/sh/tests/query/failing-003.test#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<http://datashapes.org/sh/tests/query/failing-001.test>
+<http://datashapes.org/sh/tests/query/failing-003.test>
   rdf:type owl:Ontology ;
-  rdfs:label "QueryTestCase that fails" ;
+  rdfs:label "QueryTestCase that fails - bindings are in opposite order" ;
   owl:imports <http://datashapes.org/dash> ;
 .
 
@@ -36,8 +36,7 @@ ex:QueryErrorTest
     WHERE {
       ?person a ex:Person ;
               ex:name ?name ;
-              ex:age ?age ;
-              ex:nonexistentProperty ?value .
+              ex:age ?age .
     }
     ORDER BY ?name
   """ ;
@@ -47,12 +46,12 @@ ex:QueryErrorTest
   "results": {
     "bindings": [
       {
-        "name": { "type": "literal", "value": "Alice" },
-        "age": { "type": "literal", "value": "30", "datatype": "http://www.w3.org/2001/XMLSchema#integer" }
-      },
-      {
         "name": { "type": "literal", "value": "Bob" },
         "age": { "type": "literal", "value": "25", "datatype": "http://www.w3.org/2001/XMLSchema#integer" }
+      },
+      {
+        "name": { "type": "literal", "value": "Alice" },
+        "age": { "type": "literal", "value": "30", "datatype": "http://www.w3.org/2001/XMLSchema#integer" }
       }
     ]
   }
