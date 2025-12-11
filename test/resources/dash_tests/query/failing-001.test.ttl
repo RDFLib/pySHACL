@@ -8,7 +8,7 @@
 
 <http://datashapes.org/sh/tests/query/failing-001.test>
   rdf:type owl:Ontology ;
-  rdfs:label "QueryTestCase that fails" ;
+  rdfs:label "QueryTestCase that fails - query results don't match" ;
   owl:imports <http://datashapes.org/dash> ;
 .
 

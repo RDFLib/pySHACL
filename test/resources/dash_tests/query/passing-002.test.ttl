@@ -8,7 +8,7 @@
 
 <http://datashapes.org/sh/tests/query/passing-002.test>
   rdf:type owl:Ontology ;
-  rdfs:label "Valid QueryTestCase" ;
+  rdfs:label "Valid QueryTestCase using sh:prefixes" ;
   owl:imports <http://datashapes.org/dash> ;
   sh:declare  [
     sh:prefix "foo" ;
