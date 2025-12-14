@@ -177,7 +177,7 @@ parser.add_argument(
     action='store',
     help='Choose an output format. Default is "human".',
     default='human',
-    choices=('human', 'table', 'turtle', 'xml', 'json-ld', 'nt', 'n3'),
+    choices=('human', 'table', 'turtle', 'xml', 'json-ld', 'nt', 'n3', 'jelly'),
 )
 parser.add_argument(
     '-df',
@@ -186,7 +186,7 @@ parser.add_argument(
     action='store',
     help='Explicitly state the RDF File format of the input DataGraph file. Default="auto".',
     default='auto',
-    choices=('auto', 'turtle', 'xml', 'json-ld', 'nt', 'n3'),
+    choices=('auto', 'turtle', 'xml', 'json-ld', 'nt', 'n3', 'jelly'),
 )
 parser.add_argument(
     '-sf',
@@ -195,7 +195,7 @@ parser.add_argument(
     action='store',
     help='Explicitly state the RDF File format of the input SHACL file. Default="auto".',
     default='auto',
-    choices=('auto', 'turtle', 'xml', 'json-ld', 'nt', 'n3'),
+    choices=('auto', 'turtle', 'xml', 'json-ld', 'nt', 'n3', 'jelly'),
 )
 parser.add_argument(
     '-ef',
@@ -204,7 +204,7 @@ parser.add_argument(
     action='store',
     help='Explicitly state the RDF File format of the extra ontology file. Default="auto".',
     default='auto',
-    choices=('auto', 'turtle', 'xml', 'json-ld', 'nt', 'n3'),
+    choices=('auto', 'turtle', 'xml', 'json-ld', 'nt', 'n3', 'jelly'),
 )
 parser.add_argument('-V', '--version', action=ShowVersion, help='Show PySHACL version and exit.')
 parser.add_argument(
@@ -422,10 +422,14 @@ def main(prog: Union[str, None] = None) -> None:
             args.output.write(str(t2))
     else:
         if isinstance(v_graph, bytes):
-            v_graph = v_graph.decode('utf-8')
+            if args.output is not None and args.output != sys.stdout:
+                args.output.close()
+                with open(args.output.name, "wb") as f:
+                    f.write(v_graph)
+            else:
+                sys.stdout.buffer.write(v_graph)
+            sys.exit(0 if is_conform else 1)
         args.output.write(v_graph)
-    args.output.close()
-    sys.exit(0 if is_conform else 1)
 
 
 if __name__ == "__main__":

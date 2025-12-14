@@ -41,6 +41,7 @@ class InputRDFFormat(Enum):
     JSONLD = "json-ld"
     NT = "nt"
     N3 = "n3"
+    JELLY = "jelly"
 
 
 @dataclass
