@@ -5,7 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
 ## [Unreleased]
-- Nothing yet
+### Added
+- Support for validating multiple target data graphs.
+  - Default "combine" mode loads all given data graphs into a single Dataset and validates once.
+  - New "validate-each" mode validates each data graph independently and returns multiple results.
+  - CLI now accepts multiple data graph paths and adds a `--validate-each` flag.
+  - New `validate_each()` entrypoint for per-graph validation in library code.
 
 ## [0.30.1] - 2025-03-15
 
