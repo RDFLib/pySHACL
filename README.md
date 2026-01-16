@@ -43,11 +43,20 @@ _(these example commandline instructions are for a Linux/Unix based OS)_
 ```bash
 $ pyshacl -s /path/to/shapesGraph.ttl -m -i rdfs -a -j -f human /path/to/dataGraph.ttl
 ```
+To validate multiple data graphs in combine mode (default):
+```bash
+$ pyshacl -s /path/to/shapesGraph.ttl /path/to/dataGraph1.ttl /path/to/dataGraph2.ttl
+```
+To validate multiple data graphs independently:
+```bash
+$ pyshacl --validate-each -s /path/to/shapesGraph.ttl /path/to/dataGraph1.ttl /path/to/dataGraph2.ttl
+```
 Where
  - `-s` is an (optional) path to the shapes graph to use
  - `-e` is an (optional) path to an extra ontology graph to import
  - `-i` is the pre-inferencing option
  - `-f` is the ValidationReport output format (`human` = human-readable validation report)
+ - `--validate-each` validates each data graph independently when multiple inputs are provided
  - `-m` enable the meta-shacl feature
  - `-a` enable SHACL Advanced Features
  - `-j` enable SHACL-JS Features (if `pyshacl[js]` is installed)
@@ -64,18 +73,18 @@ $ pyshacl -h
 $ python3 -m pyshacl -h
 usage: pyshacl [-h] [-s [SHACL]] [-e [ONT]] [-i {none,rdfs,owlrl,both}] [-m]
                [-im] [-a] [-j] [-it] [--abort] [--allow-info] [-w]
-               [--max-depth [MAX_DEPTH]] [-d]
+               [--max-depth [MAX_DEPTH]] [-d] [--validate-each]
                [-f {human,table,turtle,xml,json-ld,nt,n3}]
                [-df {auto,turtle,xml,json-ld,nt,n3}]
                [-sf {auto,turtle,xml,json-ld,nt,n3}]
                [-ef {auto,turtle,xml,json-ld,nt,n3}] [-V] [-o [OUTPUT]]
                [--server]
-               DataGraph
+               DataGraph [DataGraph ...]
 
 PySHACL 0.27.0 command line tool.
 
 positional arguments:
-  DataGraph             The file containing the Target Data Graph.
+  DataGraph             The file(s) containing the Target Data Graph.
 
 optional arguments:
   --server              Ignore all the rest of the options, start the HTTP Server.
@@ -110,6 +119,8 @@ optional arguments:
                         validator can go before reaching an "endpoint"
                         constraint.
   -d, --debug           Output additional verbose runtime messages.
+  --validate-each       Validate each data graph independently when multiple
+                        inputs are provided.
   --focus [FOCUS]       Optional IRIs of focus nodes from the DataGraph, the shapes will
                         validate only these node. Comma-separated list.
   --shape [SHAPE]       Optional IRIs of a NodeShape or PropertyShape from the SHACL
@@ -157,8 +168,26 @@ r = validate(data_graph,
 conforms, results_graph, results_text = r
 ```
 
+To validate multiple data graphs in combine mode (default):
+```python
+from pyshacl import validate
+
+data_graphs = ["data1.ttl", "data2.ttl", "data3.ttl"]
+conforms, results_graph, results_text = validate(data_graphs, shacl_graph="shapes.ttl")
+```
+
+To validate each data graph independently:
+```python
+from pyshacl import validate_each
+
+data_graphs = ["data1.ttl", "data2.ttl", "data3.ttl"]
+results = validate_each(data_graphs, shacl_graph="shapes.ttl")
+for graph_id, (conforms, results_graph, results_text) in results.items():
+    print(graph_id, conforms)
+```
+
 Where:
-* `data_graph` is an rdflib `Graph` object or file path of the graph to be validated
+* `data_graph` is an rdflib `Graph` object, file path, or a sequence of those to be validated
 * `shacl_graph` is an rdflib `Graph` object or file path or Web URL of the graph containing the SHACL shapes to validate with, or None if the SHACL shapes are included in the data_graph.
 * `ont_graph` is an rdflib `Graph` object or file path or Web URL a graph containing extra ontological information, or None if not required. RDFS and OWL definitions from this are used to inoculate the DataGraph.
 * `inference` is a Python string value to indicate whether or not to perform OWL inferencing expansion of the `data_graph` before validation.
@@ -179,6 +208,7 @@ Some other optional keyword variables available on the `validate` function:
 * `do_owl_imports`: Enable the feature to allow the import of subgraphs using `owl:imports` for the shapes graph and the ontology graph. Note, you explicitly cannot use this on the target data graph.
 * `serialize_report_graph`: Convert the report results_graph into a serialised representation (for example, 'turtle')
 * `check_dash_result`: Check the validation result against the given expected DASH test suite result.
+* `multi_data_graphs_mode`: When passing a sequence of data graphs, choose `"combine"` or `"validate_each"`.
 
 Return value:
 * a three-component `tuple` containing:

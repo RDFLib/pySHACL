@@ -1,10 +1,11 @@
 import logging
 import os
 import sys
+from collections.abc import Sequence
 from functools import wraps
 from io import BufferedIOBase, TextIOBase
 from sys import stderr
-from typing import List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from rdflib import ConjunctiveGraph, Dataset, Graph, Literal, URIRef
 
@@ -19,11 +20,34 @@ from .validator import Validator, assign_baked_in
 from .validator_conformance import check_dash_result
 
 
+DataGraphInput = Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes]
+MultiDataGraphInput = Sequence[DataGraphInput]
+
+
+def _is_multi_data_graph_input(data_graph: object) -> bool:
+    if isinstance(data_graph, (str, bytes, BufferedIOBase, TextIOBase, Graph, Dataset, ConjunctiveGraph)):
+        return False
+    return isinstance(data_graph, (tuple, list, set, frozenset, Sequence))
+
+
+def _multi_data_graph_key(source: DataGraphInput) -> Union[str, URIRef]:
+    if isinstance(source, (Graph, Dataset, ConjunctiveGraph)):
+        return source.identifier
+    if isinstance(source, (BufferedIOBase, TextIOBase)):
+        return getattr(source, "name", repr(source))
+    if isinstance(source, bytes):
+        try:
+            return source.decode("utf-8")
+        except UnicodeDecodeError:
+            return repr(source)
+    return str(source)
+
+
 def validate(
-    data_graph: Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes],
+    data_graph: Union[DataGraphInput, MultiDataGraphInput],
     *args,
-    shacl_graph: Optional[Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes]] = None,
-    ont_graph: Optional[Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes]] = None,
+    shacl_graph: Optional[DataGraphInput] = None,
+    ont_graph: Optional[DataGraphInput] = None,
     advanced: Optional[bool] = False,
     inference: Optional[str] = None,
     inplace: Optional[bool] = False,
@@ -34,11 +58,12 @@ def validate(
     sparql_mode: Optional[bool] = False,
     focus_nodes: Optional[List[Union[str, URIRef]]] = None,
     use_shapes: Optional[List[Union[str, URIRef]]] = None,
+    multi_data_graphs_mode: Optional[str] = None,
     **kwargs,
 ):
     """
-    :param data_graph: rdflib.Graph or file path or web url of the data to validate
-    :type data_graph: rdflib.Graph | str | bytes
+    :param data_graph: rdflib.Graph, file path, web URL, or a array-like sequence of those to validate
+    :type data_graph: rdflib.Graph | str | bytes | Sequence
     :param args:
     :type args: list
     :param shacl_graph: rdflib.Graph or file path or web url of the SHACL Shapes graph to use to
@@ -66,6 +91,8 @@ def validate(
     :type focus_nodes: list | None
     :param use_shapes: A list of IRIs to use only those shapes from the SHACL ShapesGraph.
     :type use_shapes: list | None
+    :param multi_data_graphs_mode: "combine" or "validate_each" for multiple data graphs
+    :type multi_data_graphs_mode: str | None
     :param kwargs:
     :return:
     """
@@ -74,6 +101,51 @@ def validate(
     log = make_default_logger(name="pyshacl-validate", debug=do_debug)
     apply_patches()
     assign_baked_in()
+    if _is_multi_data_graph_input(data_graph):
+        data_graphs = list(data_graph)  # type: ignore[arg-type]
+        if len(data_graphs) < 1:
+            raise ReportableRuntimeError("No data graphs were provided for validation.")
+        if sparql_mode and len(data_graphs) > 1:
+            raise ReportableRuntimeError("SPARQL Remote Graph Mode does not support multiple data graphs.")
+        resolved_mode = (multi_data_graphs_mode or "combine").lower()
+        if resolved_mode not in ("combine", "validate_each"):
+            raise ReportableRuntimeError(
+                f"Unknown multi_data_graphs_mode '{multi_data_graphs_mode}'. Expected 'combine' or 'validate_each'."
+            )
+        if resolved_mode == "validate_each":
+            return validate_each(
+                data_graphs,
+                *args,
+                shacl_graph=shacl_graph,
+                ont_graph=ont_graph,
+                advanced=advanced,
+                inference=inference,
+                inplace=inplace,
+                abort_on_first=abort_on_first,
+                allow_infos=allow_infos,
+                allow_warnings=allow_warnings,
+                max_validation_depth=max_validation_depth,
+                sparql_mode=sparql_mode,
+                focus_nodes=focus_nodes,
+                use_shapes=use_shapes,
+                multi_data_graphs_mode=resolved_mode,
+                **kwargs,
+            )
+        if len(data_graphs) == 1:
+            data_graph = data_graphs[0]
+        else:
+            data_graph_format = kwargs.get('data_graph_format', None)
+            combined_dataset = Dataset(default_union=True)
+            for source in data_graphs:
+                load_from_source(
+                    source,
+                    g=combined_dataset,
+                    rdf_format=data_graph_format,
+                    multigraph=True,
+                    do_owl_imports=False,
+                    logger=log,
+                )
+            data_graph = combined_dataset
     do_check_dash_result = kwargs.pop('check_dash_result', False)  # type: bool
     if kwargs.get('meta_shacl', False):
         to_meta_val = shacl_graph or data_graph
@@ -189,6 +261,61 @@ def validate(
             do_serialize_report_graph = 'turtle'
         report_graph = report_graph.serialize(None, encoding='utf-8', format=do_serialize_report_graph)
     return conforms, report_graph, report_text
+
+
+def validate_each(
+    data_graphs: MultiDataGraphInput,
+    *args,
+    shacl_graph: Optional[DataGraphInput] = None,
+    ont_graph: Optional[DataGraphInput] = None,
+    advanced: Optional[bool] = False,
+    inference: Optional[str] = None,
+    inplace: Optional[bool] = False,
+    abort_on_first: Optional[bool] = False,
+    allow_infos: Optional[bool] = False,
+    allow_warnings: Optional[bool] = False,
+    max_validation_depth: Optional[int] = None,
+    sparql_mode: Optional[bool] = False,
+    focus_nodes: Optional[List[Union[str, URIRef]]] = None,
+    use_shapes: Optional[List[Union[str, URIRef]]] = None,
+    multi_data_graphs_mode: Optional[str] = None,
+    **kwargs,
+) -> Dict[Union[str, URIRef], Tuple[bool, Union[GraphLike, bytes, ValidationFailure], str]]:
+    """
+    :param data_graphs: Sequence of data graphs or sources to validate independently
+    :type data_graphs: Sequence
+    :param multi_data_graphs_mode: Optional mode hint for compatibility with validate()
+    :type multi_data_graphs_mode: str | None
+    :return: dict mapping each input graph identifier to its validation results
+    """
+
+    if not _is_multi_data_graph_input(data_graphs):
+        raise ReportableRuntimeError("validate_each expects a sequence of data graphs to validate.")
+    data_graph_list = list(data_graphs)
+    if len(data_graph_list) < 1:
+        raise ReportableRuntimeError("No data graphs were provided for validate_each.")
+    results: Dict[Union[str, URIRef], Tuple[bool, Union[GraphLike, bytes, ValidationFailure], str]] = {}
+    for data_graph in data_graph_list:
+        result = validate(
+            data_graph,
+            *args,
+            shacl_graph=shacl_graph,
+            ont_graph=ont_graph,
+            advanced=advanced,
+            inference=inference,
+            inplace=inplace,
+            abort_on_first=abort_on_first,
+            allow_infos=allow_infos,
+            allow_warnings=allow_warnings,
+            max_validation_depth=max_validation_depth,
+            sparql_mode=sparql_mode,
+            focus_nodes=focus_nodes,
+            use_shapes=use_shapes,
+            multi_data_graphs_mode=multi_data_graphs_mode,
+            **kwargs,
+        )
+        results[_multi_data_graph_key(data_graph)] = result
+    return results
 
 
 def with_metashacl_shacl_graph_cache(f):

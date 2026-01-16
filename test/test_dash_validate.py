@@ -180,15 +180,20 @@ def test_dash_validate_all_sparql_rules(target_file, shacl_file):
 # Get all triple-rules tests.
 for x in walk(path.join(dash_files_dir, 'rules', 'triple')):
     for y in glob.glob(path.join(x[0], '*.test.ttl')):
-        dash_triple_rules_files.append((y, None))
+        # Special rule for person2schema.test.ttl, which has a data graph separate from the shapes graph
+        if "person2schema.test.ttl" in y:
+            data_file = y.replace("person2schema.test.ttl", "person.ttl")
+            dash_triple_rules_files.append((data_file, y))
+        else:
+            dash_triple_rules_files.append((y, None))
 
 
-@pytest.mark.parametrize('target_file, shacl_file', dash_triple_rules_files)
-def test_dash_validate_all_triple_rules(target_file, shacl_file):
-    test_name = shacl_file or target_file
+@pytest.mark.parametrize('data_file, shacl_file', dash_triple_rules_files)
+def test_dash_validate_all_triple_rules(data_file, shacl_file):
+    test_name = shacl_file or data_file
     try:
         val, _, v_text = pyshacl.validate(
-            target_file,
+            data_file,
             shacl_graph=shacl_file,
             advanced=True,
             inference='rdfs',
