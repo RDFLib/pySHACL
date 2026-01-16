@@ -33,7 +33,11 @@ class SPARQLQueryHelper(object):
     bind_sg_regex = re.compile(r"([\s{}()])[\$\?]shapesGraph", flags=re.M)
     bind_cs_regex = re.compile(r"([\s{}()])[\$\?]currentShape", flags=re.M)
     has_minus_regex = re.compile(r"^(?:[^#]*|M)(?!#)#?[^\?\$\#]M?INUS[\s\{]", flags=re.M | re.I)
-    has_values_regex = re.compile(r"^(?:[^#]*|V)(?!#)#?[^\?\$\#]V?ALUES[\s\{]", flags=re.M | re.I)
+    # Match keyword VALUES without catching predicate names like ex:allowedValues
+    # Supports VALUES(?x), VALUES ?x, and VALUES { ... }
+    has_values_regex = re.compile(
+        r"^(?!\s*#).*?(?<![\w\-\:])VALUES\b(?:\s*(?:\(|[\?\$]\w+|\{|\w|\s))", flags=re.M | re.I
+    )
     has_service_regex = re.compile(r"^(?:[^#]*|S)(?!#)#?[^\?\$\#]S?ERVICE[\s\<]", flags=re.M | re.I)
     has_nested_select_regex = re.compile(
         r"SELECT[\s\(\)\$\?\a-z]*\{[^\}]*SELECT\s+((?:(?:[\?\$]\w+\s+)|(?:\*\s+))+)", flags=re.M | re.I
