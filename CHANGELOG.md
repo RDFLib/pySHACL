@@ -12,6 +12,10 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
   - CLI now accepts multiple data graph paths and adds a `--validate-each` flag.
   - New `validate_each()` entrypoint for per-graph validation in library code.
 
+### Fixed
+- SPARQL constraint validation no longer misidentifies `VALUES` in property paths or predicate names.
+  - Fixes #301
+
 ## [0.30.1] - 2025-03-15
 
 ### Fixed
