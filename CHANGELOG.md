@@ -15,6 +15,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 ### Fixed
 - SPARQL constraint validation no longer misidentifies `VALUES` in property paths or predicate names.
   - Fixes #301
+- Validation report text output is now deterministic.
+  - Fixes #304
 
 ## [0.30.1] - 2025-03-15
 

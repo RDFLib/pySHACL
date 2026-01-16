@@ -114,9 +114,12 @@ class Validator(PySHACLRunType):
         vg.add((vr, RDF_type, SH_ValidationReport))
         vg.add((vr, SH_conforms, Literal(conforms)))
         cloned_nodes: Dict[Tuple[GraphLike, str], Union[BNode, URIRef]] = {}
-        for result in iter(results):
+        text_results = sorted(results, key=lambda r: r[0])
+        for result in iter(text_results):
             _d, _bn, _tr = result
             v_text += _d
+        for result in iter(results):
+            _d, _bn, _tr = result
             vg.add((vr, SH_result, _bn))
             for tr in iter(_tr):
                 s, p, o = tr
