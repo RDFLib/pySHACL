@@ -438,8 +438,11 @@ def check_dash_result(
         assert data_graph is not None
         if isinstance(data_graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
             named_graphs = list(data_graph.contexts())
+            was_union: Union[bool, None] = data_graph.default_union
+            data_graph.default_union = True
         else:
             named_graphs = [data_graph]
+            was_union = None
         inf_res: Union[bool, None] = True
         for test_case in inf_test_cases_set:
             expected_results = expected_result_graph.objects(test_case, DASH_expectedResult)
@@ -451,7 +454,13 @@ def check_dash_result(
             found = False
             for g in named_graphs:
                 found = found or compare_inferencing_reports(g, expected_result_graph, expected_results_set)
+            if not found and len(named_graphs) > 1:
+                # If the expected result is not found in any of the named graphs, but there are multiple named graphs,
+                # then we need to check the UNION of the named graphs and the default graph
+                found = compare_inferencing_reports(data_graph, expected_result_graph, expected_results_set)
             inf_res = inf_res and found
+            if was_union is not None:
+                data_graph.default_union = was_union
     else:
         inf_res = None
     if len(fn_test_cases_set) > 0:
