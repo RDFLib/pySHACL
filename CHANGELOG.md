@@ -5,9 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Python PEP 440 Versioning](https://www.python.org/dev/peps/pep-0440/).
 
 ## [Unreleased]
+
+## [0.31.0] - 2026-01-16
+
 ### Added
 - Support for validating multiple target data graphs.
-  - Default "combine" mode loads all given data graphs into a single Dataset and validates once.
+  - Default "combine" mode loads all given data graphs into a single Dataset and validates all at once.
   - New "validate-each" mode validates each data graph independently and returns multiple results.
   - CLI now accepts multiple data graph paths and adds a `--validate-each` flag.
   - New `validate_each()` entrypoint for per-graph validation in library code.
@@ -1247,7 +1250,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.30.1...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.31.0...HEAD
+[0.31.0]: https://github.com/RDFLib/pySHACL/compare/v0.31.1...v0.31.0
 [0.30.1]: https://github.com/RDFLib/pySHACL/compare/v0.30.0...v0.30.1
 [0.30.0]: https://github.com/RDFLib/pySHACL/compare/v0.29.1...v0.30.0
 [0.29.1]: https://github.com/RDFLib/pySHACL/compare/v0.29.0...v0.29.1

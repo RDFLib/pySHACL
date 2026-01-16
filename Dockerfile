@@ -2,7 +2,7 @@ FROM docker.io/library/python:3.11-alpine
 LABEL org.opencontainers.image.base.name="docker.io/library/python:3.11-alpine"
 LABEL org.opencontainers.image.base.digest="sha256:d5e2fc72296647869f5eeb09e7741088a1841195059de842b05b94cb9d3771bb"
 LABEL org.opencontainers.image.source="https://github.com/RDFLib/pySHACL"
-LABEL org.opencontainers.image.version="0.30.1"
+LABEL org.opencontainers.image.version="0.31.0"
 LABEL maintainer="ashleysommer@gmail.com"
 RUN apk add --no-cache --update tini-static cython
 RUN apk add --no-cache --update --virtual build-dependencies build-base libffi-dev python3-dev py3-cffi
