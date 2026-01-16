@@ -177,6 +177,8 @@ class ClosedConstraintComponent(ConstraintComponent):
 
         working_shapes = set()
         for p_shape in self.property_shapes:
+            if self.shape.sg.is_filtered_out_shape(p_shape):
+                continue
             property_shape = self.shape.get_other_shape(p_shape)
             if not property_shape or not property_shape.is_property_shape:
                 raise ReportableRuntimeError(

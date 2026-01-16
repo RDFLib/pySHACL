@@ -82,6 +82,8 @@ class NotConstraintComponent(ConstraintComponent):
         potentially_recursive = self.recursion_triggers(_evaluation_path)
 
         for not_c in self.not_list:
+            if self.shape.sg.is_filtered_out_shape(not_c):
+                continue
             _nc, _r = self._evaluate_not_constraint(
                 executor, not_c, datagraph, focus_value_nodes, potentially_recursive, _evaluation_path
             )
@@ -101,19 +103,20 @@ class NotConstraintComponent(ConstraintComponent):
         """
         _reports = []
         _non_conformant = False
-        not_shape = self.shape.get_other_shape(not_c)
-        if not not_shape:
+        found_not_shape = self.shape.get_other_shape(not_c)
+        if not found_not_shape:
             raise ReportableRuntimeError(
                 "Shape pointed to by sh:not does not exist or is not a well-formed SHACL Shape."
+                f"Please check if the shape '{not_c}' is defined."
             )
-        if potentially_recursive and not_shape in potentially_recursive:
+        if potentially_recursive and found_not_shape in potentially_recursive:
             warn(ShapeRecursionWarning(_evaluation_path))
             return _non_conformant, _reports
         upstream_reports = []
         for f, value_nodes in focus_value_nodes.items():
             for v in value_nodes:
                 try:
-                    _is_conform, _r = not_shape.validate(
+                    _is_conform, _r = found_not_shape.validate(
                         executor, datagraph, focus=v, _evaluation_path=_evaluation_path[:]
                     )
                 except ValidationFailure as e:
@@ -213,12 +216,17 @@ class AndConstraintComponent(ConstraintComponent):
             raise ReportableRuntimeError("The list associated with sh:and is not a valid RDF list.")
         and_shapes = set()
         for a in and_list:
+            if self.shape.sg.is_filtered_out_shape(a):
+                continue
             and_shape = self.shape.get_other_shape(a)
             if not and_shape:
                 raise ReportableRuntimeError(
                     "Shape pointed to by sh:and does not exist or is not a well-formed SHACL Shape."
                 )
             and_shapes.add(and_shape)
+        if not and_shapes:
+            # All filtered out, no reports to send
+            return _non_conformant, _reports
         upstream_reports = []
         for f, value_nodes in focus_value_nodes.items():
             for v in value_nodes:
@@ -323,12 +331,16 @@ class OrConstraintComponent(ConstraintComponent):
             raise ReportableRuntimeError("The list associated with sh:or is not a valid RDF list.")
         or_shapes = set()
         for o in or_list:
+            if self.shape.sg.is_filtered_out_shape(o):
+                continue
             or_shape = self.shape.get_other_shape(o)
             if not or_shape:
                 raise ReportableRuntimeError(
                     "Shape pointed to by sh:or does not exist or is not a well-formed SHACL Shape."
                 )
             or_shapes.add(or_shape)
+        if not or_shapes:
+            return _non_conformant, _reports
         upstream_reports = []
         for f, value_nodes in focus_value_nodes.items():
             for v in value_nodes:
@@ -435,12 +447,16 @@ class XoneConstraintComponent(ConstraintComponent):
             raise ReportableRuntimeError("The list associated with sh:xone is not a valid RDF list.")
         xone_shapes = list()
         for x in xone_list:
+            if self.shape.sg.is_filtered_out_shape(x):
+                continue
             xone_shape = self.shape.get_other_shape(x)
             if not xone_shape:
                 raise ReportableRuntimeError(
                     "Shape pointed to by sh:xone does not exist or is not a well-formed SHACL Shape."
                 )
             xone_shapes.append(xone_shape)
+        if not xone_shapes:
+            return _non_conformant, _reports
         upstream_reports = []
         for f, value_nodes in focus_value_nodes.items():
             for v in value_nodes:
