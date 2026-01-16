@@ -6,6 +6,7 @@ import os
 import sys
 from io import BufferedReader
 from typing import List, Union, cast
+
 from prettytable import PrettyTable
 
 from pyshacl import __version__, validate, validate_each
@@ -424,6 +425,7 @@ def _col_widther(s, w):
         i += w
     return '\n'.join(s2)
 
+
 def write_validation_output(args, is_conform: bool, v_graph, v_text: str) -> None:
     if args.format == 'human':
         args.output.write(v_text)
@@ -467,6 +469,7 @@ def write_validation_output(args, is_conform: bool, v_graph, v_text: str) -> Non
     if isinstance(v_graph, bytes):
         v_graph = v_graph.decode('utf-8')
     args.output.write(v_graph)
+
 
 if __name__ == "__main__":
     main()

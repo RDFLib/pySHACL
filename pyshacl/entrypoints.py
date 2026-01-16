@@ -19,7 +19,6 @@ from .rule_expand_runner import RuleExpandRunner
 from .validator import Validator, assign_baked_in
 from .validator_conformance import check_dash_result
 
-
 DataGraphInput = Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes]
 MultiDataGraphInput = Sequence[DataGraphInput]
 
