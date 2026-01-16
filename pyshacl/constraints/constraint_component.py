@@ -196,7 +196,8 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
             sc_text = stringify_node(sg, source_constraint)
             desc += "\tSource Constraint: {}\n".format(sc_text)
         if extra_messages:
-            for m in iter(extra_messages):
+            sorted_extra_messages = sorted(extra_messages, key=lambda m: str(m))
+            for m in iter(sorted_extra_messages):
                 if m in messages:
                     continue
                 if isinstance(m, Literal):
@@ -206,7 +207,8 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
                     desc += "\tMessage: {}\n".format(msg)
                 else:  # pragma: no cover
                     desc += "\tMessage: {}\n".format(str(m))
-        for m in messages:
+        sorted_messages = sorted(messages, key=lambda m: str(m))
+        for m in sorted_messages:
             if isinstance(m, Literal):
                 msg = str(m.value)
                 if bound_vars is not None:
