@@ -17,6 +17,8 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
   - Fixes #301
 - Validation report text output is now deterministic.
   - Fixes #304
+- `use_shapes` filtering no longer fails when omitted PropertyShapes are referenced by included shapes.
+  - Fixes #298
 
 ## [0.30.1] - 2025-03-15
 

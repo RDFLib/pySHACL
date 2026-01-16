@@ -130,6 +130,8 @@ class Shape(object):
         self._advanced = bool(val)
 
     def get_other_shape(self, shape_node):
+        if self.sg.is_filtered_out_shape(shape_node):
+            return None
         try:
             return self.sg.lookup_shape_from_node(shape_node)
         except (KeyError, AttributeError):

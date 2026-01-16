@@ -59,5 +59,4 @@ def test_301():
 
 
 if __name__ == "__main__":
-    test_301()
     sys.exit(test_301())

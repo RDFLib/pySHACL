@@ -60,6 +60,7 @@ class ShapesGraph(object):
         self._custom_constraints = None
         self._shacl_functions: Dict[str, tuple] = {}
         self._shacl_target_types: Dict[str, 'RDFNode'] = {}
+        self._filtered_out_shapes: set = set()
         self._use_js = False
         self._add_system_triples()
 
@@ -182,6 +183,9 @@ class ShapesGraph(object):
             self._build_node_shape_cache_from_list(shapes_uris)
         return [self._node_shape_cache[s] for s in shapes_uris]
 
+    def is_filtered_out_shape(self, node) -> bool:
+        return isinstance(node, rdflib.URIRef) and node in self._filtered_out_shapes
+
     def lookup_shape_from_node(self, node) -> Shape:
         # This will throw a KeyError if it is not found. This is intentionally not caught here.
         return self._node_shape_cache[node]
@@ -201,6 +205,7 @@ class ShapesGraph(object):
         :rtype: NoneType
         """
         g = self.graph
+        self._filtered_out_shapes = set()
         defined_node_shapes = set(g.subjects(RDF_type, SH_NodeShape))
         if self.debug:
             self.logger.debug(f"Found {len(defined_node_shapes)} SHACL Shapes defined with type sh:NodeShape.")
@@ -427,6 +432,18 @@ class ShapesGraph(object):
                     _gather_shapes(_found_child_bnodes, recurse_depth=recurse_depth + 1)
 
         _gather_shapes(shapes_list)
+
+        allowed_shapes = set(gathered_node_shapes).union(set(gathered_prop_shapes))
+        allowed_shape_uris = {s for s in allowed_shapes if isinstance(s, rdflib.URIRef)}
+        referenced_shape_uris = set()
+        for _p in (SH_property, SH_node, SH_not, SH_qualifiedValueShape):
+            referenced_shape_uris.update(o for o in g.objects(None, _p) if isinstance(o, rdflib.URIRef))
+        for _p in (SH_and, SH_or, SH_xone):
+            for list_node in g.objects(None, _p):
+                for item in g.items(list_node):
+                    if isinstance(item, rdflib.URIRef):
+                        referenced_shape_uris.add(item)
+        self._filtered_out_shapes = referenced_shape_uris.difference(allowed_shape_uris)
 
         for s in gathered_node_shapes:
             path_vals = list(g.objects(s, SH_path))

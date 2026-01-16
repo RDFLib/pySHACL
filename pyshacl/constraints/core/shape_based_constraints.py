@@ -96,6 +96,8 @@ class PropertyConstraintComponent(ConstraintComponent):
         potentially_recursive = self.recursion_triggers(_evaluation_path)
 
         for p_shape in self.property_shapes:
+            if self.shape.sg.is_filtered_out_shape(p_shape):
+                continue
             _nc, _r = self._evaluate_property_shape(
                 executor, p_shape, target_graph, focus_value_nodes, potentially_recursive, _evaluation_path
             )
@@ -108,16 +110,16 @@ class PropertyConstraintComponent(ConstraintComponent):
     ):
         _reports = []
         _non_conformant = False
-        prop_shape = self.shape.get_other_shape(prop_shape)
-        if potentially_recursive and prop_shape in potentially_recursive:
+        found_prop_shape = self.shape.get_other_shape(prop_shape)
+        if potentially_recursive and found_prop_shape in potentially_recursive:
             warn(ShapeRecursionWarning(_evaluation_path))
             return _non_conformant, _reports
-        if not prop_shape:
+        if not found_prop_shape:
             raise ReportableRuntimeError(
                 f"SHACL PropertyShape not found: The shape referenced by sh:property does not exist. "
                 f"Please check if the shape '{prop_shape}' is defined."
             )
-        elif not prop_shape.is_property_shape:
+        elif not found_prop_shape.is_property_shape:
             raise ReportableRuntimeError(
                 f"'{prop_shape}' exists but is not a well-formed SHACL PropertyShape. "
                 f"Ensure it has the correct type (sh:PropertyShape) and all required properties."
@@ -125,7 +127,7 @@ class PropertyConstraintComponent(ConstraintComponent):
 
         for f, value_nodes in focus_value_nodes.items():
             for v in value_nodes:
-                _is_conform, _r = prop_shape.validate(
+                _is_conform, _r = found_prop_shape.validate(
                     executor, target_graph, focus=v, _evaluation_path=_evaluation_path[:]
                 )
                 _non_conformant = _non_conformant or (not _is_conform)
@@ -195,6 +197,8 @@ class NodeConstraintComponent(ConstraintComponent):
         potentially_recursive = self.recursion_triggers(_evaluation_path)
 
         for n_shape in self.node_shapes:
+            if self.shape.sg.is_filtered_out_shape(n_shape):
+                continue
             _nc, _r = self._evaluate_node_shape(
                 executor, n_shape, target_graph, focus_value_nodes, potentially_recursive, _evaluation_path
             )
@@ -207,17 +211,20 @@ class NodeConstraintComponent(ConstraintComponent):
     ):
         _reports = []
         _non_conformant = False
-        node_shape = self.shape.get_other_shape(node_shape)
-        if potentially_recursive and node_shape in potentially_recursive:
+        found_node_shape = self.shape.get_other_shape(node_shape)
+        if potentially_recursive and found_node_shape in potentially_recursive:
             warn(ShapeRecursionWarning(_evaluation_path))
             return _non_conformant, _reports
-        if not node_shape or node_shape.is_property_shape:
+        if not found_node_shape:
             raise ReportableRuntimeError(
-                "Shape pointed to by sh:node does not exist or is not a well-formed SHACL NodeShape."
+                f"SHACL Shape not found: The shape referenced by sh:node does not exist. "
+                f"Please check if the shape '{node_shape}' is defined."
             )
+        elif found_node_shape.is_property_shape:
+            raise ReportableRuntimeError("Shape pointed to by sh:node is not a well-formed SHACL NodeShape.")
         for f, value_nodes in focus_value_nodes.items():
             for v in value_nodes:
-                _is_conform, _r = node_shape.validate(
+                _is_conform, _r = found_node_shape.validate(
                     executor, target_graph, focus=v, _evaluation_path=_evaluation_path[:]
                 )
                 # Create a failure for this constraint component if any failures exist
@@ -363,6 +370,8 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
         potentially_recursive = self.recursion_triggers(_evaluation_path)
 
         for v_shape in self.value_shapes:
+            if self.shape.sg.is_filtered_out_shape(v_shape):
+                continue
             _nc, _r = self._evaluate_value_shape(
                 executor, v_shape, target_graph, focus_value_nodes, potentially_recursive, _evaluation_path
             )
@@ -398,6 +407,7 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
                         sibling_shapes.add(sibling)
 
             sibling_shapes = set(self.shape.get_other_shape(s) for s in sibling_shapes)
+            sibling_shapes = {s for s in sibling_shapes if s is not None}
         else:
             sibling_shapes = set()
         upstream_reports = []

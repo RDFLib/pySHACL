@@ -112,3 +112,6 @@ def test_304():
     assert "Results (" in out_a
     assert out_a == out_b
     assert out_a == out_c
+
+if __name__ == "__main__":
+    sys.exit(test_304())
