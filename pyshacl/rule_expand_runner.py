@@ -15,6 +15,7 @@ from .functions import apply_functions, gather_functions, unapply_functions
 from .pytypes import GraphLike, SHACLExecutor
 from .rdfutil import (
     clone_graph,
+    get_default_graph,
     inoculate,
     inoculate_dataset,
     mix_datasets,
@@ -224,7 +225,8 @@ class RuleExpandRunner(PySHACLRunType):
             on_focus_nodes = None
 
         if self.debug:
-            self.logger.debug(f"Running SHACL Rules on DataGraph named {g.identifier}")
+            graph_id = get_default_graph(g).identifier
+            self.logger.debug(f"Running SHACL Rules on DataGraph named {graph_id}")
         if gathered_functions:
             apply_functions(executor, gathered_functions, g)
         try:

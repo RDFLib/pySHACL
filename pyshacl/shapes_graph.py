@@ -28,6 +28,7 @@ from .consts import (
     SH_targetSubjectsOf,
 )
 from .errors import ShapeLoadError
+from .rdfutil import get_default_graph
 from .shape import Shape
 
 if TYPE_CHECKING:
@@ -72,10 +73,7 @@ class ShapesGraph(object):
         return bool(self._use_js)
 
     def _add_system_triples(self):
-        if isinstance(self.graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
-            g = self.graph.default_context
-        else:
-            g = self.graph
+        g = get_default_graph(self.graph)
         for t in self.system_triples:
             g.add(t)
 

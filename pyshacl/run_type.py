@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Optional
 import rdflib
 
 from pyshacl.errors import ReportableRuntimeError
+from pyshacl.rdfutil import get_default_graph
 
 if TYPE_CHECKING:
     from rdflib.term import URIRef
@@ -65,7 +66,7 @@ class PySHACLRunType(metaclass=ABCMeta):
             if destination_graph_identifier is not None:
                 destination_graph = target_graph.get_context(destination_graph_identifier)
             else:
-                destination_graph = target_graph.default_context
+                destination_graph = get_default_graph(target_graph)
         else:
             destination_graph = None
         try:

@@ -23,6 +23,7 @@ from .rdfutil import (
     add_baked_in,
     clone_blank_node,
     clone_graph,
+    get_default_graph,
     inoculate,
     inoculate_dataset,
     mix_datasets,
@@ -113,7 +114,7 @@ class Validator(PySHACLRunType):
         vr = BNode()
         vg.add((vr, RDF_type, SH_ValidationReport))
         vg.add((vr, SH_conforms, Literal(conforms)))
-        cloned_nodes: Dict[Tuple[GraphLike, str], Union[BNode, URIRef]] = {}
+        cloned_nodes: Dict[Tuple[int, str], Union[BNode, URIRef]] = {}
         text_results = sorted(results, key=lambda r: r[0])
         for result in iter(text_results):
             _d, _bn, _tr = result
@@ -130,12 +131,13 @@ class Validator(PySHACLRunType):
                         o = node  # No need to clone a literal from the data graph
                     else:
                         _id = str(node)
-                        if (source, _id) in cloned_nodes:
-                            o = cloned_nodes[(source, _id)]
+                        source_key = (id(source), _id)
+                        if source_key in cloned_nodes:
+                            o = cloned_nodes[source_key]
                         elif isinstance(node, BNode):
-                            cloned_nodes[(source, _id)] = o = clone_blank_node(source, node, vg, keepid=True)
+                            cloned_nodes[source_key] = o = clone_blank_node(source, node, vg, keepid=True)
                         else:
-                            cloned_nodes[(source, _id)] = o = URIRef(_id)
+                            cloned_nodes[source_key] = o = URIRef(_id)
                 vg.add((s, p, o))
         return vg, v_text
 
@@ -302,9 +304,10 @@ class Validator(PySHACLRunType):
             self._target_graph.default_union = True
 
         g = self._target_graph
+        graph_id = get_default_graph(g).identifier
 
         if self.debug:
-            self.logger.debug(f"Validating DataGraph named {g.identifier}")
+            self.logger.debug(f"Validating DataGraph named {graph_id}")
         if advanced:
             if advanced['functions']:
                 apply_functions(executor, advanced['functions'], g)

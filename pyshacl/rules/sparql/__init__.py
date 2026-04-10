@@ -8,7 +8,7 @@ from rdflib.namespace import XSD
 from pyshacl.consts import SH_construct
 from pyshacl.errors import ReportableRuntimeError, RuleLoadError
 from pyshacl.helper import get_query_helper_cls
-from pyshacl.rdfutil import clone_graph
+from pyshacl.rdfutil import clone_graph, get_default_graph
 
 from ..shacl_rule import SHACLRule
 
@@ -112,7 +112,7 @@ class SPARQLRule(SHACLRule):
                     if target_graph_identifier is not None:
                         target_graph = data_graph.get_context(target_graph_identifier)
                     else:
-                        target_graph = data_graph.default_context
+                        target_graph = get_default_graph(data_graph)
                 else:
                     target_graph = data_graph
                 for g in construct_graphs:

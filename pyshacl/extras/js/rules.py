@@ -6,6 +6,7 @@ import rdflib
 
 from pyshacl.consts import SH
 from pyshacl.errors import ReportableRuntimeError
+from pyshacl.rdfutil import get_default_graph
 from pyshacl.rules.shacl_rule import SHACLRule
 
 from .js_executable import JSExecutable
@@ -79,7 +80,7 @@ class JSRule(SHACLRule):
                     if target_graph_identifier is not None:
                         target_graph = data_graph.get_context(target_graph_identifier)
                     else:
-                        target_graph = data_graph.default_context
+                        target_graph = get_default_graph(data_graph)
                 else:
                     target_graph = data_graph
                 for s in sets_to_add:

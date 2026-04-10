@@ -38,7 +38,7 @@ def schema_org():
     # print(dataGraph.serialize(format='ttl').decode('utf8'))
 
     shaclDS = rdflib.Dataset()
-    shaclGraph = shaclDS.default_context
+    shaclGraph = shaclDS.default_graph
     shaclDS.graph(shaclGraph)
     shaclGraph.parse(data=shacl, format='ttl')
 

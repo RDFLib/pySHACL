@@ -5,6 +5,7 @@ import rdflib
 
 from .clone import clone_blank_node, clone_dataset, clone_node
 from .consts import OWL, RDF, ConjunctiveLike, GraphLike, OWL_classes, OWL_properties, RDFS_classes, RDFS_properties
+from .graph import get_default_graph
 
 if TYPE_CHECKING:
     from rdflib import BNode
@@ -146,7 +147,7 @@ def inoculate_dataset(
     if target_graph_identifier:
         dest_graph = target_ds.get_context(target_graph_identifier)
     else:
-        dest_graph = target_ds.default_context
+        dest_graph = get_default_graph(target_ds)
 
     # inoculate() routine will set default_union on the ontology_ds if it is a Dataset
     inoculate(dest_graph, ontology_ds)

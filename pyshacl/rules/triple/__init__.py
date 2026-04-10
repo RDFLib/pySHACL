@@ -7,6 +7,7 @@ import rdflib
 from pyshacl.consts import SH_object, SH_predicate, SH_subject
 from pyshacl.errors import ReportableRuntimeError
 from pyshacl.helper.expression_helper import nodes_from_node_expression
+from pyshacl.rdfutil import get_default_graph
 from pyshacl.rules.shacl_rule import SHACLRule
 
 if TYPE_CHECKING:
@@ -101,7 +102,7 @@ class TripleRule(SHACLRule):
                     if target_graph_identifier is not None:
                         target_graph = data_graph.get_context(target_graph_identifier)
                     else:
-                        target_graph = data_graph.default_context
+                        target_graph = get_default_graph(data_graph)
                 else:
                     target_graph = data_graph
                 for i in to_add:

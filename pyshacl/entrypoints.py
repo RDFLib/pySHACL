@@ -14,7 +14,7 @@ from pyshacl.pytypes import GraphLike
 
 from .consts import SH, RDF_type
 from .monkey import apply_patches, rdflib_bool_patch, rdflib_bool_unpatch
-from .rdfutil import load_from_source
+from .rdfutil import get_default_graph, load_from_source
 from .rule_expand_runner import RuleExpandRunner
 from .validator import Validator, assign_baked_in
 from .validator_conformance import check_dash_result
@@ -31,7 +31,7 @@ def _is_multi_data_graph_input(data_graph: object) -> bool:
 
 def _multi_data_graph_key(source: DataGraphInput) -> Union[str, URIRef]:
     if isinstance(source, (Graph, Dataset, ConjunctiveGraph)):
-        return source.identifier
+        return get_default_graph(source).identifier
     if isinstance(source, (BufferedIOBase, TextIOBase)):
         return getattr(source, "name", repr(source))
     if isinstance(source, bytes):

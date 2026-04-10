@@ -18,6 +18,7 @@ from rdflib.namespace import SDO, NamespaceManager
 from rdflib.term import URIRef
 
 from .clone import clone_dataset, clone_graph
+from .graph import get_default_graph, set_default_graph
 
 SCHEMA = SDO
 
@@ -346,15 +347,15 @@ def load_from_source(
                 target_ds = rdflib.Dataset(default_graph_base=default_graph_base, default_union=True)
                 target_ds.namespace_manager = NamespaceManager(target_ds, 'core')
                 if identifier:  # if identifier is explicitly given, use that as a new named graph id
-                    old_default_context = target_ds.default_context
+                    old_default_context = get_default_graph(target_ds)
                     if str(old_default_context.identifier) != identifier:
                         named_g = target_ds.graph(URIRef(identifier))
                         named_g.base = default_graph_base
-                        target_ds.default_context = named_g
+                        set_default_graph(target_ds, named_g)
                         target_ds.remove_graph(old_default_context)
                 else:
-                    target_ds.default_context.namespace_manager = target_ds.namespace_manager
-                    default_g = target_ds.default_context
+                    get_default_graph(target_ds).namespace_manager = target_ds.namespace_manager
+                    default_g = get_default_graph(target_ds)
                     target_ds.graph(default_g)
                 target_g = target_ds
             else:
@@ -494,7 +495,7 @@ def load_from_source(
                 dest_g = target_g.get_context(URIRef(identifier))
                 dest_g.base = parser_base_uri
             else:
-                dest_g = target_g.default_context
+                dest_g = get_default_graph(target_g)
                 dest_g.base = parser_base_uri
             # parsing uses base_uri as the public_id, because it is used for relative URIs
             dest_g.parse(source=cast(IO[bytes], _source), format=rdf_format, publicID=parser_base_uri)
@@ -512,7 +513,7 @@ def load_from_source(
                 # The parser closed our file!
                 pass
         source_is_graph = True
-    elif source_is_graph and (target_g != source):
+    elif source_is_graph and (target_g is not source):
         # clone source into g
         if isinstance(target_g, (rdflib.Dataset, rdflib.ConjunctiveGraph)) and isinstance(
             source, (rdflib.Dataset, rdflib.ConjunctiveGraph)
@@ -567,7 +568,7 @@ def load_from_source(
             if identifier:
                 dest_g = target_g.get_context(URIRef(identifier))
             else:
-                dest_g = target_g.default_context
+                dest_g = get_default_graph(target_g)
         else:
             dest_g = target_g
         return chain_load_owl_imports(

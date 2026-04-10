@@ -437,7 +437,9 @@ def check_dash_result(
         data_graph = validator.target_graph
         assert data_graph is not None
         if isinstance(data_graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
-            named_graphs = list(data_graph.contexts())
+            named_graphs = (
+                list(data_graph.graphs()) if isinstance(data_graph, rdflib.Dataset) else list(data_graph.contexts())
+            )
             was_union: Union[bool, None] = data_graph.default_union
             data_graph.default_union = True
         else:
