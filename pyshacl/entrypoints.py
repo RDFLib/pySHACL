@@ -7,39 +7,27 @@ from io import BufferedIOBase, TextIOBase
 from sys import stderr
 from typing import Dict, List, Optional, Tuple, Union
 
-from rdflib import ConjunctiveGraph, Dataset, Graph, Literal, URIRef
+from rdflib import Dataset, Graph, Literal, URIRef
 
 from pyshacl.errors import ReportableRuntimeError, ValidationFailure
 from pyshacl.pytypes import GraphLike
 
 from .consts import SH, RDF_type
+from .graph_abstraction import DataGraph, has_oxigraph, ox_Store
 from .monkey import apply_patches, rdflib_bool_patch, rdflib_bool_unpatch
 from .rdfutil import load_from_source
 from .rule_expand_runner import RuleExpandRunner
 from .validator import Validator, assign_baked_in
 from .validator_conformance import check_dash_result
 
-DataGraphInput = Union[GraphLike, BufferedIOBase, TextIOBase, str, bytes]
+DataGraphInput = Union[DataGraph, GraphLike, BufferedIOBase, TextIOBase, str, bytes]
 MultiDataGraphInput = Sequence[DataGraphInput]
 
 
 def _is_multi_data_graph_input(data_graph: object) -> bool:
-    if isinstance(data_graph, (str, bytes, BufferedIOBase, TextIOBase, Graph, Dataset, ConjunctiveGraph)):
+    if isinstance(data_graph, (str, bytes, DataGraph, BufferedIOBase, TextIOBase, Graph, Dataset)):
         return False
     return isinstance(data_graph, (tuple, list, set, frozenset, Sequence))
-
-
-def _multi_data_graph_key(source: DataGraphInput) -> Union[str, URIRef]:
-    if isinstance(source, (Graph, Dataset, ConjunctiveGraph)):
-        return source.identifier
-    if isinstance(source, (BufferedIOBase, TextIOBase)):
-        return getattr(source, "name", repr(source))
-    if isinstance(source, bytes):
-        try:
-            return source.decode("utf-8")
-        except UnicodeDecodeError:
-            return repr(source)
-    return str(source)
 
 
 def validate(
@@ -127,12 +115,12 @@ def validate(
                 sparql_mode=sparql_mode,
                 focus_nodes=focus_nodes,
                 use_shapes=use_shapes,
-                multi_data_graphs_mode=resolved_mode,
                 **kwargs,
             )
         if len(data_graphs) == 1:
             data_graph = data_graphs[0]
         else:
+            # Combined mode, load all the sources into a single dataset
             data_graph_format = kwargs.get('data_graph_format', None)
             combined_dataset = Dataset(default_union=True)
             for source in data_graphs:
@@ -145,7 +133,7 @@ def validate(
                     logger=log,
                 )
             data_graph = combined_dataset
-    do_check_dash_result = kwargs.pop('check_dash_result', False)  # type: bool
+    do_check_dash_result: bool = kwargs.pop('check_dash_result', False)
     if kwargs.get('meta_shacl', False):
         to_meta_val = shacl_graph or data_graph
         conforms, v_r, v_t = meta_validate(to_meta_val, inference=inference, **kwargs)
@@ -173,8 +161,6 @@ def validate(
             raise ReportableRuntimeError("Cannot use SPARQL Remote Graph Mode with extra Ontology Graph inoculation.")
         if isinstance(data_graph, bytes):
             data_graph = data_graph.decode('utf-8')
-        else:
-            data_graph = data_graph
         ephemeral = False
         inplace = True
     if (
@@ -195,11 +181,19 @@ def validate(
             auth = None
         store = SPARQLStore(query_endpoint=query_endpoint, auth=auth, method=method)
         loaded_dg = Dataset(store=store, default_union=True)
+        dg = DataGraph.from_rdflib_dataset(loaded_dg)
+    elif isinstance(data_graph, DataGraph):
+        loaded_dg = data_graph.impl
+        dg = data_graph
+    elif has_oxigraph and isinstance(data_graph, ox_Store):
+        loaded_dg = data_graph
+        dg = DataGraph.from_oxigraph_store(loaded_dg)
     else:
         # force no owl imports on data_graph
         loaded_dg = load_from_source(
             data_graph, rdf_format=data_graph_format, multigraph=True, do_owl_imports=False, logger=log
         )
+        dg = DataGraph.from_rdflib(loaded_dg)
     ont_graph_format = kwargs.pop('ont_graph_format', None)
     if ont_graph is not None:
         loaded_og = load_from_source(
@@ -241,7 +235,7 @@ def validate(
     validator = None
     try:
         validator = Validator(
-            loaded_dg,
+            dg,
             shacl_graph=loaded_sg,
             ont_graph=loaded_og,
             options=validator_options_dict,
@@ -252,7 +246,7 @@ def validate(
         report_graph = e
         report_text = "Validation Failure - {}".format(e.message)
     if do_check_dash_result and validator is not None:
-        passes = check_dash_result(validator, report_graph, loaded_sg or loaded_dg)
+        passes = check_dash_result(validator, report_graph, loaded_sg or dg)
         return passes, report_graph, report_text
     do_serialize_report_graph = kwargs.pop('serialize_report_graph', False)
     if do_serialize_report_graph and isinstance(report_graph, Graph):
@@ -277,15 +271,14 @@ def validate_each(
     sparql_mode: Optional[bool] = False,
     focus_nodes: Optional[List[Union[str, URIRef]]] = None,
     use_shapes: Optional[List[Union[str, URIRef]]] = None,
-    multi_data_graphs_mode: Optional[str] = None,
     **kwargs,
-) -> Dict[Union[str, URIRef], Tuple[bool, Union[GraphLike, bytes, ValidationFailure], str]]:
+) -> Dict[int, Tuple[bool, Union[GraphLike, bytes, ValidationFailure], str]]:
     """
     :param data_graphs: Sequence of data graphs or sources to validate independently
     :type data_graphs: Sequence
     :param multi_data_graphs_mode: Optional mode hint for compatibility with validate()
     :type multi_data_graphs_mode: str | None
-    :return: dict mapping each input graph identifier to its validation results
+    :return: dict mapping each input graph index to its validation results
     """
 
     if not _is_multi_data_graph_input(data_graphs):
@@ -293,8 +286,8 @@ def validate_each(
     data_graph_list = list(data_graphs)
     if len(data_graph_list) < 1:
         raise ReportableRuntimeError("No data graphs were provided for validate_each.")
-    results: Dict[Union[str, URIRef], Tuple[bool, Union[GraphLike, bytes, ValidationFailure], str]] = {}
-    for data_graph in data_graph_list:
+    results: Dict[int, Tuple[bool, Union[GraphLike, bytes, ValidationFailure], str]] = {}
+    for datagraph_i, data_graph in enumerate(data_graph_list):
         result = validate(
             data_graph,
             *args,
@@ -310,10 +303,9 @@ def validate_each(
             sparql_mode=sparql_mode,
             focus_nodes=focus_nodes,
             use_shapes=use_shapes,
-            multi_data_graphs_mode=multi_data_graphs_mode,
             **kwargs,
         )
-        results[_multi_data_graph_key(data_graph)] = result
+        results[datagraph_i] = result
     return results
 
 
@@ -416,10 +408,18 @@ def shacl_rules(
     else:
         ephemeral = False
     use_js = kwargs.pop('js', None)
-    # force no owl imports on data_graph
-    loaded_dg = load_from_source(
-        data_graph, rdf_format=data_graph_format, multigraph=True, do_owl_imports=False, logger=log
-    )
+    if isinstance(data_graph, DataGraph):
+        loaded_dg = data_graph.impl
+        dg = data_graph
+    elif has_oxigraph and isinstance(data_graph, ox_Store):
+        loaded_dg = data_graph
+        dg = DataGraph.from_oxigraph_store(loaded_dg)
+    else:
+        # force no owl imports on data_graph
+        loaded_dg = load_from_source(
+            data_graph, rdf_format=data_graph_format, multigraph=True, do_owl_imports=False, logger=log
+        )
+        dg = DataGraph.from_rdflib(loaded_dg)
     ont_graph_format = kwargs.pop('ont_graph_format', None)
     if ont_graph is not None:
         loaded_og = load_from_source(
@@ -450,7 +450,7 @@ def shacl_rules(
     serialize_expanded_graph = kwargs.get('serialize_expanded_graph', None)
     try:
         runner = RuleExpandRunner(
-            loaded_dg,
+            dg,
             shacl_graph=loaded_sg,
             ont_graph=loaded_og,
             options=runner_options_dict,
@@ -466,7 +466,7 @@ def shacl_rules(
             g.add((URIRef("<urn:rdflib:pyshacl:shacl-rules-error>"), SH.message, Literal(error)))
             return g
     if serialize_expanded_graph:
-        guess_format = "trig" if isinstance(expanded_graph, (Dataset, ConjunctiveGraph)) else "turtle"
+        guess_format = "trig" if isinstance(expanded_graph, Dataset) else "turtle"
         serialize_format = kwargs.get('serialize_expanded_graph_format', guess_format)
         return expanded_graph.serialize(format=serialize_format)
     return expanded_graph

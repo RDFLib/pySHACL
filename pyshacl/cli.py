@@ -322,6 +322,8 @@ def main(prog: Union[str, None] = None) -> None:
         validator_kwargs['allow_infos'] = True
     if args.allow_warnings:
         validator_kwargs['allow_warnings'] = True
+    if args.max_depth is not None:
+        validator_kwargs['max_validation_depth'] = args.max_depth
     if args.shacl_file_format:
         _f: str = args.shacl_file_format
         if _f != "auto":

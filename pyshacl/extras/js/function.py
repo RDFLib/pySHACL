@@ -1,17 +1,29 @@
 #
 #
-import typing
+from __future__ import annotations
 
-from rdflib.plugins.sparql.operators import register_custom_function, unregister_custom_function
+import functools
+import typing
+from typing import Dict, Union
+
 from rdflib.plugins.sparql.sparql import SPARQLError
 
-from pyshacl.errors import ReportableRuntimeError
-from pyshacl.functions.shacl_function import SHACLFunction
-
+from ...errors import ReportableRuntimeError
+from ...functions.shacl_function import SHACLFunction
+from ...graph_abstraction import has_oxigraph, to_ox, to_rdf
 from .js_executable import JSExecutable
 
 if typing.TYPE_CHECKING:
-    from pyshacl.shapes_graph import ShapesGraph
+    from ...graph_abstraction import DataGraph
+    from ...shapes_graph import ShapesGraph
+if has_oxigraph:
+    from pyoxigraph import BlankNode as ox_BlankNode
+    from pyoxigraph import NamedNode as ox_NamedNode
+    from pyoxigraph import Triple as ox_Triple
+else:
+    ox_BlankNode = None
+    ox_NamedNode = None
+    ox_Triple = None
 
 
 class JSFunction(SHACLFunction):
@@ -56,10 +68,59 @@ class JSFunction(SHACLFunction):
         res = results['_result']
         return res
 
-    def apply(self, g):
-        super(JSFunction, self).apply(g)
-        register_custom_function(self.node, self.execute_from_sparql, True, True)
+    def execute_oxigraph(
+        self,
+        g: 'DataGraph',
+        args_map: Dict[str, Union[ox_NamedNode, ox_BlankNode, ox_Triple]],
+    ):
+        """Run the SHACL-JS function body and return a pyoxigraph term."""
+        rdf_args_map = {k: to_rdf(v) if v is not None else None for k, v in args_map.items()}
+        results = self.js_exe.execute(g, rdf_args_map, mode="function", return_type=self.rtype)
+        res = results['_result']
+        if res is None:
+            return None
+        return to_ox(res)
 
-    def unapply(self, g):
+    def execute_from_sparql_oxigraph(
+        self,
+        g: 'DataGraph',
+        *args: Union[ox_NamedNode, ox_BlankNode, ox_Triple],
+    ):
+        """Oxigraph custom-function callback: evaluated argument terms in, one RDF term out."""
+        if not g.is_oxigraph:
+            raise ReportableRuntimeError("execute_from_sparql_oxigraph requires an Oxigraph-backed DataGraph.")
+        params = self.get_params_in_order()
+        num_params = len(params)
+        num_args = len(args)
+        if num_args > num_params:
+            raise ValueError("Too many parameters passed to JSFunction {}.".format(self.node))
+        if num_args < num_params:
+            raise ValueError("Too few parameters passed to JSFunction {}.".format(self.node))
+        args_map: Dict[str, Union[ox_NamedNode, ox_BlankNode, ox_Triple]] = {}
+        for i, p in enumerate(params):
+            ox_arg = args[i]
+            ln = p.localname
+            if ox_arg is None and p.optional is False:
+                raise ReportableRuntimeError("Got NoneType for Non-optional argument {}.".format(ln))
+            args_map[ln] = ox_arg
+        return self.execute_oxigraph(g, args_map)
+
+    def apply(self, g: 'DataGraph'):
+        super(JSFunction, self).apply(g)
+        if has_oxigraph:
+            g.register_custom_function(
+                self.node,
+                self.execute_from_sparql,
+                functools.partial(self.execute_from_sparql_oxigraph, g),
+                True,
+                True,
+            )
+        else:
+            g.register_custom_function(self.node, self.execute_from_sparql, None, True, True)
+
+    def unapply(self, g: 'DataGraph'):
         super(JSFunction, self).unapply(g)
-        unregister_custom_function(self.node, self.execute_from_sparql)
+        if has_oxigraph:
+            g.unregister_custom_function(self.node, self.execute_from_sparql, self.execute_from_sparql_oxigraph)
+        else:
+            g.unregister_custom_function(self.node, self.execute_from_sparql, None)

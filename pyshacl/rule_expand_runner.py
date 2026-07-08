@@ -12,11 +12,9 @@ from .consts import (
 )
 from .extras import check_extra_installed
 from .functions import apply_functions, gather_functions, unapply_functions
+from .graph_abstraction import DataGraph, clone_oxigraph_store, has_oxigraph, ox_Store
 from .pytypes import GraphLike, SHACLExecutor
 from .rdfutil import (
-    clone_graph,
-    inoculate,
-    inoculate_dataset,
     mix_datasets,
     mix_graphs,
 )
@@ -29,9 +27,18 @@ USE_FULL_MIXIN = getenv("PYSHACL_USE_FULL_MIXIN") in env_truths
 
 
 class RuleExpandRunner(PySHACLRunType):
+    data_graph: DataGraph
+    ont_graph: Optional[GraphLike]
+    shacl_graph: ShapesGraph
+    logger: logging.Logger
+    debug: bool
+    pre_inferenced: bool
+    inplace: bool
+    options: Dict[str, Any]
+
     def __init__(
         self,
-        data_graph: GraphLike,
+        data_graph: DataGraph,
         *args,
         shacl_graph: Optional[GraphLike] = None,
         ont_graph: Optional[GraphLike] = None,
@@ -41,20 +48,25 @@ class RuleExpandRunner(PySHACLRunType):
         options = options or {}
         self._load_default_options(options)
         self.options = options  # type: dict
-        self.logger = options['logger']  # type: logging.Logger
+        self.logger = options['logger']
         self.debug = options['debug']
         self.pre_inferenced = kwargs.pop('pre_inferenced', False)
         self.inplace = options['inplace']
-        if not isinstance(data_graph, rdflib.Graph):
-            raise RuntimeError("data_graph must be a rdflib Graph-like object")
-        self.data_graph = data_graph  # type: GraphLike
+        if not isinstance(data_graph, DataGraph):
+            raise RuntimeError("data_graph must be a DataGraph object")
+        self.data_graph: DataGraph = data_graph
         self._target_graph: Union[GraphLike, None] = None
-        self.ont_graph = ont_graph  # type: Optional[GraphLike]
-        self.data_graph_is_multigraph = isinstance(self.data_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph))
-        if self.ont_graph is not None and isinstance(self.ont_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+        self.ont_graph = ont_graph
+        self.data_graph_is_multigraph = self.data_graph.is_multigraph()
+        if self.ont_graph is not None and isinstance(self.ont_graph, rdflib.Dataset):
             self.ont_graph.default_union = True
         if shacl_graph is None:
-            shacl_graph = clone_graph(data_graph, identifier='shacl')
+            if has_oxigraph and isinstance(data_graph.impl, ox_Store):
+                ox2 = clone_oxigraph_store(data_graph.impl)
+                shacl_graph = DataGraph.from_oxigraph_store(ox2)
+                shacl_graph.default_union = True
+            else:
+                shacl_graph = data_graph.clone(identifier='shacl')
         assert isinstance(shacl_graph, rdflib.Graph), "shacl_graph must be a rdflib Graph object"
         self.shacl_graph = ShapesGraph(shacl_graph, self.debug, self.logger)  # type: ShapesGraph
 
@@ -86,11 +98,14 @@ class RuleExpandRunner(PySHACLRunType):
             if not self.data_graph_is_multigraph:
                 return mix_graphs(self.data_graph, self.ont_graph, "inplace" if self.inplace else None)
             return mix_datasets(self.data_graph, self.ont_graph, "inplace" if self.inplace else None)
+        # Lazy import to avoid circular import
+        from .rdfutil.inoculate import inoculate, inoculate_dataset
+
         if not self.data_graph_is_multigraph:
             if self.inplace:
                 to_graph = self.data_graph
             else:
-                to_graph = clone_graph(self.data_graph, identifier=self.data_graph.identifier)
+                to_graph = self.data_graph.clone()
             return inoculate(to_graph, self.ont_graph)
         return inoculate_dataset(
             self.data_graph,
@@ -113,8 +128,8 @@ class RuleExpandRunner(PySHACLRunType):
             debug=self.debug,
         )
 
-    def run(self) -> GraphLike:
-        datagraph: Union[GraphLike, None] = self.target_graph
+    def run(self) -> DataGraph:
+        datagraph: Union[DataGraph, None] = self.target_graph
         if datagraph is not None:
             # Target graph is already set up with pre-inferenced and pre-cloned data_graph
             self._target_graph = datagraph
@@ -136,7 +151,7 @@ class RuleExpandRunner(PySHACLRunType):
             if inference_option and not self.pre_inferenced and str(inference_option) != "none":
                 if not has_cloned and not self.inplace:
                     self.logger.debug("Cloning DataGraph to temporary memory graph before pre-inferencing.")
-                    datagraph = clone_graph(datagraph)
+                    datagraph = datagraph.clone()
                     has_cloned = True
                 self.logger.debug(f"Running pre-inferencing with option='{inference_option}'.")
                 self._run_pre_inference(
@@ -148,7 +163,7 @@ class RuleExpandRunner(PySHACLRunType):
                 self.logger.debug(
                     "Forcing clone of DataGraph because expanding rules cannot modify the input datagraph."
                 )
-                datagraph = clone_graph(datagraph)
+                datagraph = datagraph.clone()
                 has_cloned = True
             self._target_graph = datagraph
         assert self._target_graph is not None
@@ -213,10 +228,10 @@ class RuleExpandRunner(PySHACLRunType):
         for s in shapes:
             s.set_advanced(True)
         apply_target_types(target_types)
-        if isinstance(self._target_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+        if self._target_graph.is_multigraph():
             self._target_graph.default_union = True
 
-        g = self._target_graph
+        g: DataGraph = self._target_graph
 
         if specified_focus_nodes is not None and using_manually_specified_shapes:
             on_focus_nodes: Union[Sequence[URIRef], None] = specified_focus_nodes

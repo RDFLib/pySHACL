@@ -97,11 +97,11 @@ class TripleRule(SHACLRule):
                 if this_added:
                     added += 1
             if added > 0:
-                if isinstance(data_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+                if isinstance(data_graph, rdflib.Dataset):
                     if target_graph_identifier is not None:
                         target_graph = data_graph.get_context(target_graph_identifier)
                     else:
-                        target_graph = data_graph.default_context
+                        target_graph = data_graph.default_graph
                 else:
                     target_graph = data_graph
                 for i in to_add:

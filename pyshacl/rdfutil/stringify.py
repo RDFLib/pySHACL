@@ -29,7 +29,7 @@ def with_dict_cache(f):
 def stringify_blank_node(
     graph: rdflib.Graph, bnode: rdflib.BNode, ns_manager: Optional[NamespaceManager] = None, recursion: int = 0
 ):
-    if isinstance(graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
+    if isinstance(graph, rdflib.Dataset):
         raise RuntimeError("Can only stringify a blank node when graph is a rdflib.Graph")
     assert isinstance(graph, rdflib.Graph)
     assert isinstance(bnode, rdflib.BNode)
@@ -124,7 +124,7 @@ def stringify_literal(graph: rdflib.Graph, node: rdflib.Literal, ns_manager: Opt
     return node_string
 
 
-def find_node_named_graph(dataset: Union[rdflib.Dataset, rdflib.ConjunctiveGraph], node) -> rdflib.Graph:
+def find_node_named_graph(dataset: rdflib.Dataset, node) -> rdflib.Graph:
     """
     Search through each graph in a dataset for one node, when it finds it, returns the graph it is in
     :param dataset:
@@ -164,7 +164,7 @@ def stringify_node(
     if ns_manager is None:
         ns_manager = graph.namespace_manager
     if isinstance(ns_manager, rdflib.Graph):
-        # json-ld loader can set namespace_manager to the conjunctive graph itself.
+        # json-ld loader can set namespace_manager to the Dataset itself.
         ns_manager = ns_manager.namespace_manager
     if ns_manager is None or isinstance(ns_manager, rdflib.Graph):
         raise RuntimeError("Cannot stringify node, no namespaces known.")
@@ -172,7 +172,7 @@ def stringify_node(
     if isinstance(node, rdflib.Literal):
         return stringify_literal(graph, node, ns_manager=ns_manager)
     if isinstance(node, rdflib.BNode):
-        if isinstance(graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
+        if isinstance(graph, rdflib.Dataset):
             graph = find_node_named_graph(graph, node)
         return stringify_blank_node(graph, node, ns_manager=ns_manager, recursion=recursion + 1)
     if isinstance(node, rdflib.URIRef):

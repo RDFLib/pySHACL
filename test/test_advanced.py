@@ -4,10 +4,14 @@ SHACL Functions (implemented as SPARQL functions)
 SHACL Rules
 Node Expressions
 Expression Constraint
+SPARQL constraints that call SHACL Functions as SPARQL extension functions
 """
 
+from typing import Tuple, Union
 from pyshacl import validate
 from rdflib import Graph
+
+from pyshacl.graph_abstraction import has_oxigraph
 
 shacl_file = '''\
 # prefix: ex
@@ -24,6 +28,14 @@ shacl_file = '''\
 <http://datashapes.org/shasf/tests/expression/advanced.test.shacl>
   rdf:type owl:Ontology ;
   rdfs:label "Test of advanced features" ;
+  sh:declare [
+    sh:prefix "ex" ;
+    sh:namespace "http://datashapes.org/shasf/tests/expression/advanced.test.shacl#" ;
+  ] ;
+  sh:declare [
+    sh:prefix "exOnt" ;
+    sh:namespace "http://datashapes.org/shasf/tests/expression/advanced.test.ont#" ;
+  ] ;
 .
 
 ex:concat
@@ -41,7 +53,7 @@ ex:concat
     ] ;
     sh:returnType xsd:string ;
     sh:select """
-        SELECT ?result
+        SELECT ?result ?op1 ?op2
         WHERE {
           BIND(CONCAT(STR(?op1),STR(?op2)) AS ?result) .
         }
@@ -57,7 +69,7 @@ ex:strlen
     ] ;
     sh:returnType xsd:integer ;
     sh:select """
-        SELECT ?result
+        SELECT ?result ?op1
         WHERE {
           BIND(STRLEN(?op1) AS ?result) .
         }
@@ -78,7 +90,7 @@ ex:lessThan
     ] ;
     sh:returnType xsd:boolean ;
     sh:select """
-        SELECT ?result
+        SELECT ?result ?op1 ?op2
         WHERE {
           BIND(IF(?op1 < ?op2, true, false) AS ?result) .
         }
@@ -95,6 +107,24 @@ ex:PersonExpressionShape
             ]
             35 );
     ] .
+
+ex:PersonSparqlFunctionShape
+    a sh:NodeShape ;
+    sh:targetClass exOnt:Person ;
+    sh:sparql ex:PersonFullNameLength-sparql .
+
+ex:PersonFullNameLength-sparql
+    a sh:SPARQLConstraintObject ;
+    sh:prefixes <http://datashapes.org/shasf/tests/expression/advanced.test.shacl> ;
+    sh:message "Person full name must be under 35 characters (SPARQL custom function path)." ;
+    sh:select """
+        SELECT $this
+        WHERE {
+            $this exOnt:firstName ?firstName .
+            $this exOnt:lastName ?lastName .
+            FILTER (STRLEN(ex:concat(?firstName, ?lastName)) >= 35)
+        }
+        """ .
 
 ex:PersonRuleShape
 	a sh:NodeShape ;
@@ -129,6 +159,12 @@ ex:Jenny
   exOnt:firstName "Jennifer" ;
   exOnt:lastName "Wolfeschlegelsteinhausenbergerdorff" ;
 .
+
+ex:Bob
+  rdf:type exOnt:Person ;
+  exOnt:firstName "Robert" ;
+  exOnt:lastName "Bartholomew-Williamson-Jefferson-III" ;
+.
 '''
 
 
@@ -138,6 +174,43 @@ def test_advanced():
     conforms, report, message = validate(d, shacl_graph=s, advanced=True, debug=False)
     print(message)
     assert not conforms
+
+if has_oxigraph:
+    def test_advanced_sparql_custom_function():
+        """Validate SPARQL constraints that invoke SHACL Functions as SPARQL extension functions.
+
+        Unlike node-expression evaluation (which calls SPARQLFunction.execute() in Python), this
+        path registers custom functions and invokes execute_from_sparql / execute_from_sparql_oxigraph
+        from inside the SPARQL engine when a constraint query contains calls like ex:concat(...).
+        """
+        import pyoxigraph as ox
+        from pyoxigraph import RdfFormat, NamedNode, BlankNode, Literal
+
+        from pyshacl.functions.shacl_function import SPARQLFunction
+
+        oxigraph_sparql_fn_calls = []
+        orig = SPARQLFunction.execute_from_sparql_oxigraph
+
+        def recording_execute_from_sparql_oxigraph(self, g, *args: Tuple[Union[NamedNode, BlankNode, Literal], ...]):
+            oxigraph_sparql_fn_calls.append(self.node)
+            return orig(self, g, *args)
+
+        SPARQLFunction.execute_from_sparql_oxigraph = recording_execute_from_sparql_oxigraph
+        try:
+            d = ox.Store()
+            d.bulk_load(data_graph, format=RdfFormat.TURTLE)
+            s = Graph().parse(data=shacl_file, format="turtle")
+            conforms, report, message = validate(d, shacl_graph=s, advanced=True, debug=False)
+        finally:
+            SPARQLFunction.execute_from_sparql_oxigraph = orig
+
+        assert not conforms
+        assert len(oxigraph_sparql_fn_calls) > 0, (
+            "Expected ex:concat to be invoked via execute_from_sparql_oxigraph "
+            "from the PersonFullNameLength SPARQL constraint"
+        )
+        concat_uri = "http://datashapes.org/shasf/tests/expression/advanced.test.shacl#concat"
+        assert any(str(node) == concat_uri for node in oxigraph_sparql_fn_calls)
 
 
 if __name__ == "__main__":

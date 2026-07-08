@@ -4,25 +4,40 @@ import os
 import platform
 import subprocess
 import sys
-from os import getenv, path
-from sys import stderr
+from os import getenv, path, pathsep, sep
 
 from rdflib import RDF, Graph, URIRef
 
+if platform.system() == "Windows":
+    is_windows = True
+    bin_dir = "Scripts"
+else:
+    is_windows = False
+    bin_dir = "bin"
+
 PATH = getenv("PATH", "")
 PP = getenv('PYTHONPATH', "")
-here_dir = path.abspath(path.dirname(__file__))
-ENV_VARS = {"PATH": PATH, "PYTHONPATH": ':'.join((here_dir, PP))}
+test_dir = path.abspath(path.dirname(__file__))
+ENV_VARS = {"PATH": PATH, "PYTHONPATH": ':'.join((test_dir, PP))}
 PH = getenv('PYTHONHOME', "")
 if PH:
     ENV_VARS['PYTHONHOME'] = PH
 VE = getenv('VIRTUAL_ENV', "")
 if VE:
     ENV_VARS['VIRTUAL_ENV'] = VE
-    virtual_bin = path.join(VE, "bin")
+    virtual_bin = path.join(VE, bin_dir)
     ENV_VARS['PATH'] = ':'.join((virtual_bin, PATH))
-abs_resources_dir = path.join(here_dir, 'resources')
+    is_venv = True
+else:
+    is_venv = False
+    virtual_bin = None
+
+abs_resources_dir = path.join(test_dir, 'resources')
 cmdline_files_dir = path.join(abs_resources_dir, 'cmdline_tests')
+if is_windows:
+    # The python debugger needs to know the SystemRoot and windir environment variables
+    ENV_VARS["SystemRoot"] = os.getenv("SystemRoot", "")
+    ENV_VARS["windir"] = os.getenv("windir", "")
 
 check_resources = path.join(path.abspath(os.getcwd()), 'resources')
 in_test_dir = False
@@ -32,10 +47,10 @@ else:
     in_test_dir = False
 
 if in_test_dir:
-    lib_dir = os.path.abspath(os.path.join(here_dir, os.pardir))
-    ENV_VARS["PYTHONPATH"] = ':'.join((lib_dir, PP))
+    lib_dir = os.path.abspath(os.path.join(test_dir, os.pardir))
+    PP = ENV_VARS["PYTHONPATH"]
+    ENV_VARS["PYTHONPATH"] = pathsep.join((lib_dir, PP))
 
-it = ENV_VARS["PYTHONPATH"].split(":")
 scr_dir = "scripts-{}.{}".format(sys.version_info[0], sys.version_info[1])
 if in_test_dir:
     scr_dir = path.join('..', scr_dir)
@@ -45,7 +60,6 @@ if path.exists(check_scrdir) and path.isdir(check_scrdir):
 else:
     has_scripts_dir = False
 
-bin_dir = "bin"
 if in_test_dir:
     bin_dir = path.join('..', bin_dir)
 check_bindir = path.join(path.abspath(os.getcwd()), bin_dir)
@@ -54,7 +68,7 @@ if path.exists(check_bindir) and path.isdir(check_bindir):
 else:
     has_bin_dir = False
 
-cli_rules_script = "pyshacl/cli_rules.py"
+cli_rules_script = f"pyshacl{sep}cli_rules.py"
 if in_test_dir:
     cli_rules_script = path.join('..', cli_rules_script)
 check_cli_script = path.join(path.abspath(os.getcwd()), cli_rules_script)
@@ -63,12 +77,22 @@ if path.exists(check_cli_script) and path.isfile(check_cli_script):
 else:
     has_cli_script = False
 
+project_dir = path.abspath(path.dirname(path.dirname(check_cli_script)))
 if has_scripts_dir:
-    pyshacl_rules_command = ["{}/pyshacl_rules".format(scr_dir)]
+    pyshacl_rules_command = [f"{scr_dir}{sep}pyshacl_rules"]
 elif has_bin_dir:
-    pyshacl_rules_command = ["{}/pyshacl_rules".format(bin_dir)]
+    pyshacl_rules_command = [f"{bin_dir}{sep}pyshacl_rules"]
 elif has_cli_script:
-    pyshacl_rules_command = ["python3", cli_rules_script]
+    if is_venv:
+        if is_windows:
+            pyshacl_rules_command = [f"{virtual_bin}{sep}python.exe", cli_rules_script]
+        else:
+            pyshacl_rules_command = [f"{virtual_bin}{sep}python3", cli_rules_script]
+    else:
+        python_exe = sys.executable
+        pyshacl_rules_command = [python_exe, cli_rules_script]
+    PP = ENV_VARS["PYTHONPATH"]
+    ENV_VARS["PYTHONPATH"] = pathsep.join((project_dir, PP))
 else:
     pyshacl_rules_command = ["pyshacl_rules"]
 

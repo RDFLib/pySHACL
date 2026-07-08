@@ -408,7 +408,7 @@ def check_dash_result(
     was_default_union = None
     if log is None:
         log = logging.getLogger(__name__)
-    if isinstance(expected_result_graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
+    if isinstance(expected_result_graph, rdflib.Dataset):
         was_default_union = expected_result_graph.default_union
         expected_result_graph.default_union = True  # Force default-union to make all of this a bit easier
     gv_test_cases = expected_result_graph.subjects(RDF_type, DASH_GraphValidationTestCase)
@@ -436,8 +436,10 @@ def check_dash_result(
     if len(inf_test_cases_set) > 0:
         data_graph = validator.target_graph
         assert data_graph is not None
-        if isinstance(data_graph, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
-            named_graphs = list(data_graph.contexts())
+        if isinstance(data_graph, rdflib.Dataset):
+            named_graphs = list(data_graph.graphs())
+            if len(named_graphs) < 1:
+                named_graphs = [data_graph]
             was_union: Union[bool, None] = data_graph.default_union
             data_graph.default_union = True
         else:
