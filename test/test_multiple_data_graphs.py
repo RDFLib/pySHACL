@@ -45,8 +45,8 @@ def test_validate_each_multiple_graphs():
         shacl_graph=SHAPES_TTL,
     )
     assert len(results) == 2
-    assert results[DATA_GRAPH_OK][0] is True
-    assert results[DATA_GRAPH_BAD][0] is False
+    assert results[0][0] is True
+    assert results[1][0] is False
 
 def test_validate_each_multiple_graphs_via_mode():
     results = pyshacl.validate(
@@ -55,5 +55,5 @@ def test_validate_each_multiple_graphs_via_mode():
         multi_data_graphs_mode="validate_each",
     )
     assert len(results) == 2
-    assert results[DATA_GRAPH_OK][0] is True
-    assert results[DATA_GRAPH_BAD][0] is False
+    assert results[0][0] is True
+    assert results[1][0] is False

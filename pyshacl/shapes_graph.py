@@ -47,7 +47,7 @@ class ShapesGraph(object):
         :param logger:
         :type logger: logging.Logger|None
         """
-        assert isinstance(graph, (rdflib.Dataset, rdflib.ConjunctiveGraph, rdflib.Graph))
+        assert isinstance(graph, (rdflib.Dataset, rdflib.Graph))
         self.graph = graph
         if isinstance(self.graph, rdflib.Dataset):
             self.graph.default_union = True
@@ -72,8 +72,8 @@ class ShapesGraph(object):
         return bool(self._use_js)
 
     def _add_system_triples(self):
-        if isinstance(self.graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
-            g = self.graph.default_context
+        if isinstance(self.graph, rdflib.Dataset):
+            g = self.graph.default_graph
         else:
             g = self.graph
         for t in self.system_triples:

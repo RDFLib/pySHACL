@@ -141,7 +141,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
     ):
         """
         :param datagraph:
-        :type datagraph: rdflib.Graph | rdflib.ConjunctiveGraph | rdflib.Dataset
+        :type datagraph: rdflib.Graph | rdflib.Dataset
         :param focus_node:
         :type focus_node: RDFNode
         :param severity:
@@ -231,7 +231,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
     ):
         """
         :param datagraph:
-        :type datagraph: rdflib.Graph | rdflib.ConjunctiveGraph | rdflib.Dataset
+        :type datagraph: rdflib.Graph | rdflib.Dataset
         :param focus_node:
         :type focus_node: RDFNode
         :param value_node:

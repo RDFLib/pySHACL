@@ -129,9 +129,13 @@ class SPARQLQueryHelper(object):
         prefixes_vals = set(sg.objects(self.node, SH_prefixes))
         if len(prefixes_vals) < 1:
             return
-        named_graph = sg.identifier
-        if named_graph:
-            ng_declares = set(sg.objects(named_graph, SH_declare))
+        if isinstance(sg, rdflib.Dataset):
+            default_graph = sg.default_graph
+            g_name = default_graph.identifier
+        else:
+            g_name = sg.identifier
+        if g_name:
+            ng_declares = set(sg.objects(g_name, SH_declare))
         else:
             ng_declares = set()
         onts = set(sg.subjects(RDF_type, OWL_Ontology))

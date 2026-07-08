@@ -46,6 +46,7 @@ else:
 
 if in_test_dir:
     lib_dir = os.path.abspath(os.path.join(test_dir, os.pardir))
+    PP = ENV_VARS["PYTHONPATH"]
     ENV_VARS["PYTHONPATH"] = pathsep.join((lib_dir, PP))
 
 scr_dir = f"scripts-{sys.version_info[0]}.{sys.version_info[1]}"
@@ -56,7 +57,6 @@ if path.exists(check_scrdir) and path.isdir(check_scrdir):
     has_scripts_dir = True
 else:
     has_scripts_dir = False
-
 
 if in_test_dir:
     bin_dir = path.join('..', bin_dir)
@@ -74,22 +74,22 @@ if path.exists(check_cli_script) and path.isfile(check_cli_script):
     has_cli_script = True
 else:
     has_cli_script = False
-
+project_dir = path.abspath(path.dirname(path.dirname(check_cli_script)))
 if has_scripts_dir:
     pyshacl_command = [f"{scr_dir}{sep}pyshacl"]
 elif has_bin_dir:
     pyshacl_command = [f"{bin_dir}{sep}pyshacl"]
 elif has_cli_script:
-    if is_windows:
-        if is_venv:
+    if is_venv:
+        if is_windows:
             pyshacl_command = [f"{virtual_bin}{sep}python.exe", cli_script]
         else:
-            pyshacl_command = [f"{bin_dir}{sep}python.exe", cli_script]
-    else:
-        if is_venv:
             pyshacl_command = [f"{virtual_bin}{sep}python3", cli_script]
-        else:
-            pyshacl_command = [f"{bin_dir}{sep}python3", cli_script]
+    else:
+        python_exe = sys.executable
+        pyshacl_command = [python_exe, cli_script]
+    PP = ENV_VARS["PYTHONPATH"]
+    ENV_VARS["PYTHONPATH"] = pathsep.join((project_dir, PP))
 else:
     pyshacl_command = ["pyshacl"]
 

@@ -2,14 +2,12 @@ import logging
 from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING, Optional
 
-import rdflib
-
-from pyshacl.errors import ReportableRuntimeError
+from .errors import ReportableRuntimeError
 
 if TYPE_CHECKING:
     from rdflib.term import URIRef
 
-    from pyshacl.pytypes import GraphLike
+    from .graph_abstraction import DataGraph
 
 
 class PySHACLRunType(metaclass=ABCMeta):
@@ -22,7 +20,7 @@ class PySHACLRunType(metaclass=ABCMeta):
     @classmethod
     def _run_pre_inference(
         cls,
-        target_graph: 'GraphLike',
+        target_graph: 'DataGraph',
         inference_option: str,
         destination_graph_identifier: Optional['URIRef'] = None,
         logger: Optional[logging.Logger] = None,
@@ -31,7 +29,7 @@ class PySHACLRunType(metaclass=ABCMeta):
         Note, this is the OWL/RDFS pre-inference,
         it is not the Advanced Spec SHACL-Rule inferencing step.
         :param target_graph:
-        :type target_graph: rdflib.Graph|rdflib.ConjunctiveGraph|rdflib.Dataset
+        :type target_graph: rdflib.Graph|rdflib.Dataset
         :param inference_option:
         :type inference_option: str
         :return:
@@ -39,6 +37,7 @@ class PySHACLRunType(metaclass=ABCMeta):
         """
         # Lazy import owlrl
         import owlrl
+        from owlrl.graph_abstraction import DataGraph as OWLDataGraph
 
         from .inference import CustomRDFSOWLRLSemantics, CustomRDFSSemantics
 
@@ -60,16 +59,26 @@ class PySHACLRunType(metaclass=ABCMeta):
             raise ReportableRuntimeError(
                 "Error during creation of OWL-RL Deductive Closure\n{}".format(str(e.args[0]))
             )
-        if isinstance(target_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+        if target_graph.is_oxigraph:
+            ox_store = target_graph.impl
+            owl_target = OWLDataGraph(ox_store)
+        else:
+            owl_target = target_graph.impl
+        if target_graph.is_multigraph():
             target_graph.default_union = True
             if destination_graph_identifier is not None:
-                destination_graph = target_graph.get_context(destination_graph_identifier)
+                if target_graph.is_oxigraph:
+                    ox_store = target_graph.impl
+                    owl_dest = OWLDataGraph(ox_store, locked_context=destination_graph_identifier)
+                else:
+                    rdf_graph = target_graph.impl.get_context(destination_graph_identifier)
+                    owl_dest = rdf_graph
             else:
-                destination_graph = target_graph.default_context
+                owl_dest = target_graph.default_graph
         else:
-            destination_graph = None
+            owl_dest = None
         try:
-            inferencer.expand(target_graph, destination=destination_graph)
+            inferencer.expand(owl_target, destination=owl_dest)
         except Exception as e:  # pragma: no cover
             raise
             logger.error("Error while running OWL-RL Deductive Closure")

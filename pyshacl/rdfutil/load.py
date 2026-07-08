@@ -512,9 +512,7 @@ def load_from_source(
         source_is_graph = True
     elif source_is_graph and (target_g is not source):
         # clone source into g
-        if isinstance(target_g, rdflib.Dataset) and isinstance(
-            source, rdflib.Dataset
-        ):
+        if isinstance(target_g, rdflib.Dataset) and isinstance(source, rdflib.Dataset):
             clone_dataset(source, target_g)
         elif isinstance(target_g, rdflib.Graph) and isinstance(source, rdflib.Dataset):
             raise RuntimeError("Cannot load a Dataset source into a bare Graph target.")

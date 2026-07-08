@@ -2,7 +2,7 @@
 #
 from typing import Union
 
-from rdflib import RDF, RDFS, ConjunctiveGraph, Dataset, Graph, Namespace
+from rdflib import RDF, RDFS, Dataset, Graph, Namespace
 from rdflib.namespace import OWL
 from rdflib.term import Node
 
@@ -10,8 +10,7 @@ RDFS_Resource = RDFS.Resource
 RDF_first = RDF.first
 SH = Namespace('http://www.w3.org/ns/shacl#')
 
-ConjunctiveLike = Union[ConjunctiveGraph, Dataset]
-GraphLike = Union[ConjunctiveLike, Graph]
+GraphLike = Union[Dataset, Graph]
 RDFNode = Node
 
 OWL_properties = [

@@ -15,7 +15,8 @@ from ..shacl_rule import SHACLRule
 if TYPE_CHECKING:
     from rdflib.term import URIRef
 
-    from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
+    from pyshacl.graph_abstraction import DataGraph
+    from pyshacl.pytypes import RDFNode, SHACLExecutor
     from pyshacl.shape import Shape
 
 XSD_string = XSD.string
@@ -55,7 +56,7 @@ class SPARQLRule(SHACLRule):
 
     def apply(
         self,
-        data_graph: 'GraphLike',
+        data_graph: 'DataGraph',
         focus_nodes: Optional[Sequence['RDFNode']] = None,
         target_graph_identifier: Optional['URIRef'] = None,
     ) -> int:
@@ -108,11 +109,11 @@ class SPARQLRule(SHACLRule):
                         added += 1
                         construct_graphs.add(result_graph)
             if added > 0:
-                if isinstance(data_graph, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+                if data_graph.is_multigraph():
                     if target_graph_identifier is not None:
                         target_graph = data_graph.get_context(target_graph_identifier)
                     else:
-                        target_graph = data_graph.default_context
+                        target_graph = data_graph.default_graph
                 else:
                     target_graph = data_graph
                 for g in construct_graphs:

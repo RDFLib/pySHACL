@@ -2,7 +2,6 @@
 #
 from typing import Union
 
-from rdflib import ConjunctiveGraph, Dataset, Graph
+from rdflib import Dataset, Graph
 
-ConjunctiveLike = Union[ConjunctiveGraph, Dataset]
-GraphLike = Union[ConjunctiveLike, Graph]
+GraphLike = Union[Dataset, Graph]

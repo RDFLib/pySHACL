@@ -3,8 +3,9 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import rdflib
 
-from .clone import clone_blank_node, clone_dataset, clone_node
-from .consts import OWL, RDF, ConjunctiveLike, GraphLike, OWL_classes, OWL_properties, RDFS_classes, RDFS_properties
+from ..graph_abstraction import DataGraph
+from .clone import clone_blank_node, clone_node
+from .consts import OWL, RDF, GraphLike, OWL_classes, OWL_properties, RDFS_classes, RDFS_properties
 
 if TYPE_CHECKING:
     from rdflib import BNode
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 OWLNamedIndividual = OWL.NamedIndividual
 
 
-def inoculate(data_graph: rdflib.Graph, ontology: GraphLike) -> rdflib.Graph:
+def inoculate(data_graph: DataGraph, ontology: GraphLike) -> 'DataGraph':
     """
     Copies all RDFS and OWL axioms (classes, relationship definitions, and properties)
     from the ontology graph into the data_graph.
@@ -31,7 +32,7 @@ def inoculate(data_graph: rdflib.Graph, ontology: GraphLike) -> rdflib.Graph:
     ontology_ns = ontology.namespace_manager
     data_graph_ns = data_graph.namespace_manager
 
-    if isinstance(ontology, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
+    if isinstance(ontology, rdflib.Dataset):
         # always set default_union true on the ontology DS
         ontology.default_union = True
     # Bind any missing ontology namespaces in the DataGraph NS manager.
@@ -109,9 +110,9 @@ def inoculate(data_graph: rdflib.Graph, ontology: GraphLike) -> rdflib.Graph:
 
 
 def inoculate_dataset(
-    base_ds: ConjunctiveLike,
+    base_ds: DataGraph,
     ontology_ds: GraphLike,
-    target_ds: Optional[Union[ConjunctiveLike, str]] = None,
+    target_ds: Optional[Union[DataGraph, str]] = None,
     target_graph_identifier: Optional['URIRef'] = None,
 ):
     """
@@ -119,17 +120,17 @@ def inoculate_dataset(
     :param base_ds:
     :type base_ds: rdflib.Dataset
     :param ontology_ds:
-    :type ontology_ds: rdflib.Dataset|rdflib.ConjunctiveGraph|rdflib.Graph
+    :type ontology_ds: rdflib.Dataset|rdflib.Graph
     :param target_ds:
     :type target_ds: rdflib.Dataset|str|NoneType
     :param target_graph_identifier:
     :type target_graph_identifier: rdflib.URIRef | None
     :return: The cloned Dataset with ontology triples from ontology_ds
-    :rtype: rdflib.Dataset
+    :rtype: DataGraph
     """
 
     if target_ds is None:
-        target_ds = clone_dataset(base_ds)
+        target_ds = base_ds.clone()
     elif target_ds is base_ds:
         pass
     elif target_ds == "inplace" or target_ds == "base":
@@ -137,16 +138,13 @@ def inoculate_dataset(
     elif isinstance(target_ds, str):
         raise RuntimeError("target_ds cannot be a string (unless it is 'inplace' or 'base')")
 
-    if isinstance(target_ds, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
-        if not isinstance(target_ds, rdflib.Dataset):
-            raise RuntimeError("Cannot inoculate ConjunctiveGraph, use Dataset instead.")
-    else:
+    if not isinstance(target_ds, DataGraph):
         raise RuntimeError("Cannot inoculate datasets if target_ds passed in is not a Dataset itself.")
 
     if target_graph_identifier:
-        dest_graph = target_ds.get_context(target_graph_identifier)
+        dest_graph = target_ds.with_locked_context(target_graph_identifier)
     else:
-        dest_graph = target_ds.default_context
+        dest_graph = target_ds
 
     # inoculate() routine will set default_union on the ontology_ds if it is a Dataset
     inoculate(dest_graph, ontology_ds)

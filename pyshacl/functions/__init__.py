@@ -3,7 +3,7 @@
 import sys
 from typing import TYPE_CHECKING, Dict, Sequence, Union
 
-from pyshacl.consts import (
+from ..consts import (
     RDF_type,
     SH_ask,
     SH_JSFunction,
@@ -13,12 +13,12 @@ from pyshacl.consts import (
     SH_SHACLFunction,
     SH_SPARQLFunction,
 )
-from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
+from ..pytypes import RDFNode, SHACLExecutor
 
 if TYPE_CHECKING:
-    from pyshacl.extras.js.function import JSFunction  # noqa F401
-    from pyshacl.shapes_graph import ShapesGraph
-
+    from ..extras.js.function import JSFunction  # noqa F401
+    from ..shapes_graph import ShapesGraph
+    from ..graph_abstraction import DataGraph
     from .shacl_function import SHACLFunction, SPARQLFunction
 
 
@@ -99,11 +99,11 @@ def gather_functions(
     return list(all_fns.values())
 
 
-def apply_functions(executor: SHACLExecutor, fns: Sequence, data_graph: GraphLike):
+def apply_functions(executor: SHACLExecutor, fns: Sequence, data_graph: 'DataGraph'):
     for f in fns:
         f.apply(data_graph)
 
 
-def unapply_functions(fns: Sequence, data_graph: GraphLike):
+def unapply_functions(fns: Sequence, data_graph: 'DataGraph'):
     for f in fns:
         f.unapply(data_graph)

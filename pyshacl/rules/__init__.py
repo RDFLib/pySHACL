@@ -4,16 +4,16 @@ from typing import TYPE_CHECKING, Any, Dict, List, Sequence, Tuple, Type, Union
 
 from rdflib import BNode, URIRef
 
-from pyshacl.consts import RDF_type, SH_rule, SH_SPARQLRule, SH_TripleRule
-from pyshacl.errors import ReportableRuntimeError, RuleLoadError
-from pyshacl.pytypes import GraphLike, RDFNode, SHACLExecutor
-from pyshacl.rules.sparql import SPARQLRule
-from pyshacl.rules.triple import TripleRule
+from ..consts import RDF_type, SH_rule, SH_SPARQLRule, SH_TripleRule
+from ..errors import ReportableRuntimeError, RuleLoadError
+from ..pytypes import RDFNode, SHACLExecutor
+from ..rules.sparql import SPARQLRule
+from ..rules.triple import TripleRule
 
 if TYPE_CHECKING:
-    from pyshacl.shape import Shape
-    from pyshacl.shapes_graph import ShapesGraph
-
+    from ..graph_abstraction import DataGraph
+    from ..shape import Shape
+    from ..shapes_graph import ShapesGraph
     from .shacl_rule import SHACLRule
 
 
@@ -92,7 +92,7 @@ RULES_ITERATE_LIMIT = 100
 def apply_rules(
     executor: SHACLExecutor,
     shapes_rules: Dict,
-    data_graph: GraphLike,
+    data_graph: 'DataGraph',
     focus_nodes: Union[Sequence[RDFNode], None] = None,
 ) -> int:
     # short the shapes dict by shapes sh:order before execution

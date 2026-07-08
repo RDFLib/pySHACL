@@ -4,11 +4,10 @@
 from dataclasses import dataclass
 from typing import List, Optional, Union
 
-from rdflib import ConjunctiveGraph, Dataset, Graph, Literal
+from rdflib import Dataset, Graph, Literal
 from rdflib.term import IdentifiedNode, URIRef
 
-ConjunctiveLike = Union[ConjunctiveGraph, Dataset]
-GraphLike = Union[ConjunctiveLike, Graph]
+GraphLike = Union[Dataset, Graph]
 RDFNode = Union[IdentifiedNode, Literal]
 
 
