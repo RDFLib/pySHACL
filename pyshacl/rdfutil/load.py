@@ -21,8 +21,7 @@ from .clone import clone_dataset, clone_graph
 
 SCHEMA = SDO
 
-ConjunctiveLike = Union[rdflib.ConjunctiveGraph, rdflib.Dataset]
-GraphLike = Union[ConjunctiveLike, rdflib.Graph]
+GraphLike = Union[rdflib.Dataset, rdflib.Graph]
 
 is_windows = platform.system() == "Windows"
 MAX_OWL_IMPORT_DEPTH = 3
@@ -200,7 +199,7 @@ def load_from_source(
         logger = getLogger("rdfutil.load")
         logger.setLevel(WARNING)
     is_imported_graph = do_owl_imports and isinstance(do_owl_imports, int) and do_owl_imports > 1
-    if isinstance(source, (rdflib.Graph, rdflib.ConjunctiveGraph, rdflib.Dataset)):
+    if isinstance(source, (rdflib.Graph, rdflib.Dataset)):
         source_is_graph = True
         if g is None:
             g = source
@@ -339,22 +338,22 @@ def load_from_source(
         raise ValueError("Cannot determine the format of the input graph")
     if g is None:
         if source_is_graph:
-            target_g: Union[rdflib.Graph, rdflib.ConjunctiveGraph, rdflib.Dataset] = source  # type: ignore
+            target_g: Union[rdflib.Graph, rdflib.Dataset] = source  # type: ignore
         else:
             default_graph_base: Union[str, None] = base_uri if base_uri else (identifier if identifier else None)
             if multigraph:
                 target_ds = rdflib.Dataset(default_graph_base=default_graph_base, default_union=True)
                 target_ds.namespace_manager = NamespaceManager(target_ds, 'core')
                 if identifier:  # if identifier is explicitly given, use that as a new named graph id
-                    old_default_context = target_ds.default_context
-                    if str(old_default_context.identifier) != identifier:
+                    old_default_graph = target_ds.default_graph
+                    if str(old_default_graph.identifier) != identifier:
                         named_g = target_ds.graph(URIRef(identifier))
                         named_g.base = default_graph_base
-                        target_ds.default_context = named_g
-                        target_ds.remove_graph(old_default_context)
+                        target_ds.default_graph = named_g
+                        target_ds.remove_graph(old_default_graph)
                 else:
-                    target_ds.default_context.namespace_manager = target_ds.namespace_manager
-                    default_g = target_ds.default_context
+                    target_ds.default_graph.namespace_manager = target_ds.namespace_manager
+                    default_g = target_ds.default_graph
                     target_ds.graph(default_g)
                 target_g = target_ds
             else:
@@ -365,7 +364,7 @@ def load_from_source(
                 )
 
     else:
-        if not isinstance(g, (rdflib.Graph, rdflib.Dataset, rdflib.ConjunctiveGraph)):
+        if not isinstance(g, (rdflib.Graph, rdflib.Dataset)):
             raise RuntimeError("Passing in 'g' must be a rdflib Graph or Dataset.")
         target_g = g
 
@@ -489,12 +488,12 @@ def load_from_source(
 
         # use base_uri if it is set, otherwise use identifier or _maybe_id
         parser_base_uri: Union[str, None] = base_uri if base_uri else (identifier if identifier else _maybe_id)
-        if isinstance(target_g, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+        if isinstance(target_g, rdflib.Dataset):
             if identifier:
                 dest_g = target_g.get_context(URIRef(identifier))
                 dest_g.base = parser_base_uri
             else:
-                dest_g = target_g.default_context
+                dest_g = target_g.default_graph
                 dest_g.base = parser_base_uri
             # parsing uses base_uri as the public_id, because it is used for relative URIs
             dest_g.parse(source=cast(IO[bytes], _source), format=rdf_format, publicID=parser_base_uri)
@@ -512,15 +511,15 @@ def load_from_source(
                 # The parser closed our file!
                 pass
         source_is_graph = True
-    elif source_is_graph and (target_g != source):
+    elif source_is_graph and (target_g is not source):
         # clone source into g
-        if isinstance(target_g, (rdflib.Dataset, rdflib.ConjunctiveGraph)) and isinstance(
-            source, (rdflib.Dataset, rdflib.ConjunctiveGraph)
+        if isinstance(target_g, rdflib.Dataset) and isinstance(
+            source, rdflib.Dataset
         ):
             clone_dataset(source, target_g)
-        elif isinstance(target_g, rdflib.Graph) and isinstance(source, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
-            raise RuntimeError("Cannot load a Dataset source into a Graph target.")
-        elif isinstance(target_g, (rdflib.Dataset, rdflib.ConjunctiveGraph)) and isinstance(source, rdflib.Graph):
+        elif isinstance(target_g, rdflib.Graph) and isinstance(source, rdflib.Dataset):
+            raise RuntimeError("Cannot load a Dataset source into a bare Graph target.")
+        elif isinstance(target_g, rdflib.Dataset) and isinstance(source, rdflib.Graph):
             _temp_target = rdflib.Graph(
                 store=target_g.store,
                 identifier=source.identifier if not identifier else URIRef(identifier),
@@ -563,11 +562,11 @@ def load_from_source(
 
         if import_chain is None:
             import_chain = []
-        if isinstance(target_g, (rdflib.Dataset, rdflib.ConjunctiveGraph)):
+        if isinstance(target_g, rdflib.Dataset):
             if identifier:
                 dest_g = target_g.get_context(URIRef(identifier))
             else:
-                dest_g = target_g.default_context
+                dest_g = target_g.default_graph
         else:
             dest_g = target_g
         return chain_load_owl_imports(
@@ -632,7 +631,7 @@ def chain_load_owl_imports(
             _done_imports += 1
         return _done_imports
 
-    if isinstance(target_g, (rdflib.ConjunctiveGraph, rdflib.Dataset)):
+    if isinstance(target_g, rdflib.Dataset):
         # Don't care about named graphs, search across the whole
         # thing at once.
         target_g.default_union = True
