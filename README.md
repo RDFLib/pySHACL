@@ -37,6 +37,15 @@ To exit the virtual enviornment:
 $ deactivate
 ```
 
+### Optional: Oxigraph backend
+To enable Oxigraph compatibility, install the optional `oxigraph` extra:
+```bash
+$ pip3 install pyshacl[oxigraph]
+```
+
+This installs `pyoxigraph`, which lets pySHACL run validation and SHACL Rules
+against an Oxigraph store backend.
+
 ## Command Line Use
 For command line use:
 _(these example commandline instructions are for a Linux/Unix based OS)_
@@ -167,6 +176,26 @@ r = validate(data_graph,
       debug=False)
 conforms, results_graph, results_text = r
 ```
+
+To validate using an Oxigraph-backed data graph:
+
+```python
+from pyoxigraph import RdfFormat, Store
+from pyshacl import validate
+
+data_store = Store()
+with open("some-data.ttl", "rb") as f:
+    data_store.bulk_load(f.read(), format=RdfFormat.TURTLE)
+
+conforms, results_graph, results_text = validate(
+    data_store,
+    shacl_graph="some-shacl.ttl",
+    ont_graph="some-ontology.ttl",
+    advanced=True,
+)
+```
+
+The same Oxigraph store input is also supported by `shacl_rules(...)`.
 
 To validate multiple data graphs in combine mode (default):
 ```python

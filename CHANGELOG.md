@@ -6,6 +6,43 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 ## [Unreleased]
 
+## [0.40.0] - 2026-07-08
+
+### Added
+- Compatibility with Oxigraph stores.
+  - PySHACL can now validate a graph that is loaded into a PyOxigraph `pyoxigraph.Store` instance. 
+  - New `DataGraph` graph abstraction layer that wraps RDFLib `Graph`/`Dataset` and, when installed, `pyoxigraph.Store`.
+  - Validation and SHACL Rules expansion can use an Oxigraph-backed data graph for faster SPARQL execution.
+  - Install with the new optional extra: `pip install pyshacl[oxigraph]`.
+  - Pass a `pyoxigraph.Store` directly to `validate()` or `shacl_rules()`.
+- SHACL Functions and SHACL-JS Functions now register and execute on both RDFLib and Oxigraph SPARQL engines.
+  - SPARQL constraints can invoke SHACL Functions as SPARQL extension functions when using an Oxigraph-backed data graph.
+- Python 3.13 support in the test matrix.
+  - `pyduktape2` dependency is now version-split for Python 3.13+.
+
+### Changed
+- Dropped `rdflib.ConjunctiveGraph` support throughout the codebase. **Breaking**
+  - ConjunctiveGraph has been deprecatd in RDFLib for a long time, it will be gone in RDFLib 8. Removing it now from PySHACL to prevent compatibility issues later.
+  - Multigraph inputs must be an `rdflib.Dataset`; bare `rdflib.Graph` remain supported for single-graph use.
+- Adapted to RDFLib 7.3+ API changes: `default_context` has been replaced with `default_graph`, and `contexts()` replaced with `graphs()`.
+  - Resolves #316
+  - Thanks @torsknod2
+- Updated minimum dependency versions:
+  - `rdflib[html]>=7.3.0,<8.0`
+  - `owlrl>=7.6.1,<8`
+- `validate_each()` now returns a dict keyed by input index (`int`) instead of by source identifier.
+- Internal validation and rules expansion now operate on the `DataGraph` wrapper rather than raw RDFLib graph objects.
+- SPARQL prefix resolution for shapes graphs stored in a `Dataset` now reads `sh:declare` blocks from the default graph.
+- DASH conformance checking now enumerates named graphs with `Dataset.graphs()` instead of the deprecated `contexts()` API.
+
+### Fixed
+- OWL `owl:imports` over HTTP no longer leaves closed `HTTPResponse` objects that trigger finalizer errors during garbage collection.
+  - Fixes #319
+  - Thanks @gaoflow 
+
+### Removed
+- Support for `rdflib.ConjunctiveGraph` as a data graph, shapes graph, or ontology graph input type. **Breaking**
+
 ## [0.31.0] - 2026-01-16
 
 ### Added
@@ -1250,8 +1287,9 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.31.0...HEAD
-[0.31.0]: https://github.com/RDFLib/pySHACL/compare/v0.31.1...v0.31.0
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.40.0...HEAD
+[0.40.0]: https://github.com/RDFLib/pySHACL/compare/v0.31.0...v0.40.0
+[0.31.0]: https://github.com/RDFLib/pySHACL/compare/v0.30.1...v0.31.0
 [0.30.1]: https://github.com/RDFLib/pySHACL/compare/v0.30.0...v0.30.1
 [0.30.0]: https://github.com/RDFLib/pySHACL/compare/v0.29.1...v0.30.0
 [0.29.1]: https://github.com/RDFLib/pySHACL/compare/v0.29.0...v0.29.1
