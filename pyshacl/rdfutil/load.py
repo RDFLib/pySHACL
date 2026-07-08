@@ -250,7 +250,7 @@ def load_from_source(
             _maybe_id = source
             base_uri = source
             try:
-                resp, resp_filename, web_format, raw_fp = get_rdf_from_web(source)
+                resp, resp_filename, web_format, _raw_fp = get_rdf_from_web(source)
             except HTTPError:
                 if is_imported_graph:
                     return g
@@ -267,9 +267,8 @@ def load_from_source(
             else:
                 rdf_format = web_format
                 filename = resp_filename
-                fp = resp.fp if raw_fp else resp
                 source_was_open = False
-                source = open_source = fp
+                source = open_source = resp
         else:
             first_char = source[0]
             if is_windows and (first_char == '\\' or (len(source) > 3 and source[1:3] == ":\\")):
