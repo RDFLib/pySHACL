@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 try:
     from pyoxigraph import (
         BlankNode as ox_BlankNode,
