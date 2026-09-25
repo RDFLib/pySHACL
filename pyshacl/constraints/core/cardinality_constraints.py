@@ -34,7 +34,7 @@ class MinCountConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_MinCountConstraintComponent
 
-    def __init__(self, shape: Shape, min_count_objects: Optional[List[RDFNode]] = None) -> None:
+    def __init__(self, shape: Shape, min_count_objects: Optional[list[RDFNode]] = None) -> None:
         super(MinCountConstraintComponent, self).__init__(shape)
         if min_count_objects is None:
             min_count = list(self.shape.objects(SH_minCount))
@@ -68,14 +68,14 @@ class MinCountConstraintComponent(ConstraintComponent):
             )
 
     @classmethod
-    def constraint_parameters(cls) -> List[URIRef]:
+    def constraint_parameters(cls) -> list[URIRef]:
         return [SH_minCount]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "MinCountConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[Literal]:
         p = self.shape.path()
         if p:
             p = stringify_node(self.shape.sg.graph, p)
@@ -123,7 +123,7 @@ class MaxCountConstraintComponent(ConstraintComponent):
 
     shacl_constraint_component = SH_MaxCountConstraintComponent
 
-    def __init__(self, shape: Shape, max_count_objects: Optional[List[RDFNode]] = None) -> None:
+    def __init__(self, shape: Shape, max_count_objects: Optional[list[RDFNode]] = None) -> None:
         super(MaxCountConstraintComponent, self).__init__(shape)
         if max_count_objects is None:
             max_count = list(self.shape.objects(SH_maxCount))
@@ -158,14 +158,14 @@ class MaxCountConstraintComponent(ConstraintComponent):
             )
 
     @classmethod
-    def constraint_parameters(cls) -> List[URIRef]:
+    def constraint_parameters(cls) -> list[URIRef]:
         return [SH_maxCount]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "MaxCountConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[Literal]:
         p = self.shape.path()
         if p:
             p = stringify_node(self.shape.sg.graph, p)

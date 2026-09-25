@@ -36,14 +36,14 @@ class ExpressionConstraint(ConstraintComponent):
             )
 
     @classmethod
-    def constraint_parameters(cls) -> List[URIRef]:
+    def constraint_parameters(cls) -> list[URIRef]:
         return [SH_expression]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "ExpressionConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[Literal]:
         return [Literal("Expression evaluation generated constraint did not return true.")]
 
     def evaluate(

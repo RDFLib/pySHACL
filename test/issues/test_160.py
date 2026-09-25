@@ -112,7 +112,7 @@ def _test_160_template(
         data_graph_format='turtle',
         shacl_graph_format='turtle',
         debug=True,
-        metashacl=True,
+        meta_shacl=True,
     )
 
     assert not conforms

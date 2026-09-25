@@ -55,11 +55,11 @@ class ShapesGraph(object):
             logger = logging.getLogger(__name__)
         self.logger = logger
         self.debug = debug
-        self._node_shape_cache: Dict['RDFNode', Shape] = {}
+        self._node_shape_cache: dict['RDFNode', Shape] = {}
         self._shapes = None
         self._custom_constraints = None
-        self._shacl_functions: Dict[str, tuple] = {}
-        self._shacl_target_types: Dict[str, 'RDFNode'] = {}
+        self._shacl_functions: dict[str, tuple] = {}
+        self._shacl_target_types: dict[str, 'RDFNode'] = {}
         self._filtered_out_shapes: set = set()
         self._use_js = False
         self._add_system_triples()
@@ -165,19 +165,19 @@ class ShapesGraph(object):
     def shapes(self):
         """
 
-        :returns: List[Shape]
-        :rtype: List[pyshacl.shape.Shape]
+        :returns: list[Shape]
+        :rtype: list[pyshacl.shape.Shape]
         """
         if len(self._node_shape_cache) < 1:
             self._build_node_shape_cache()
         return self._node_shape_cache.values()
 
-    def shapes_from_uris(self, shapes_uris: List[rdflib.URIRef]):
+    def shapes_from_uris(self, shapes_uris: list[rdflib.URIRef]):
         """
         :param shapes_uris:
-        :type shapes_uris: List[rdflib.URIRef]
-        :returns: List[Shape]
-        :rtype: List[Shape]
+        :type shapes_uris: list[rdflib.URIRef]
+        :returns: list[Shape]
+        :rtype: list[Shape]
         """
         if len(self._node_shape_cache) < 1:
             self._build_node_shape_cache_from_list(shapes_uris)
@@ -347,7 +347,7 @@ class ShapesGraph(object):
                 f"Cached {node_shape_count} unique NodeShapes and {property_shape_count} unique PropertyShapes."
             )
 
-    def _build_node_shape_cache_from_list(self, shapes_list: List[rdflib.URIRef]):
+    def _build_node_shape_cache_from_list(self, shapes_list: list[rdflib.URIRef]):
         """
         :returns: None
         :rtype: NoneType
@@ -355,7 +355,7 @@ class ShapesGraph(object):
         g = self.graph
         gathered_node_shapes = set()
         gathered_prop_shapes = set()
-        found_prop_shapes_paths: Dict[Union[rdflib.URIRef, rdflib.BNode], Union[rdflib.URIRef, rdflib.BNode]] = dict()
+        found_prop_shapes_paths: dict[Union[rdflib.URIRef, rdflib.BNode], Union[rdflib.URIRef, rdflib.BNode]] = dict()
 
         def _gather_shapes(shapes_nodes: Sequence[Union[rdflib.URIRef, rdflib.BNode]], recurse_depth: int = 0):
             nonlocal gathered_node_shapes, gathered_prop_shapes, found_prop_shapes_paths
@@ -376,7 +376,7 @@ class ShapesGraph(object):
                     else:
                         return
                 has_class = any(RDF_type == _p for _p, _o in all_po)
-                has_shape_expecting_p: Dict[rdflib.URIRef, bool] = {}
+                has_shape_expecting_p: dict[rdflib.URIRef, bool] = {}
                 for _p in shape_expecting_preds:
                     if any(_p == _p2 for _p2, _o in all_po):
                         has_shape_expecting_p[_p] = True
@@ -416,7 +416,7 @@ class ShapesGraph(object):
                             gathered_prop_shapes.add(s)
                         else:
                             gathered_node_shapes.add(s)
-                _found_child_bnodes: List[rdflib.BNode] = []
+                _found_child_bnodes: list[rdflib.BNode] = []
                 if has_shape_expecting_p:
                     for _p in has_shape_expecting_p.keys():
                         property_entries = list(g.objects(s, _p))

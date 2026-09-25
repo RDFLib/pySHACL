@@ -27,8 +27,8 @@ def inoculate(data_graph: DataGraph, ontology: GraphLike) -> 'DataGraph':
     :return:
     :rtype:
     """
-    copied_bnode_map: Dict[RDFNode, BNode] = {}
-    copied_named_map: Dict[RDFNode, Union[BNode, RDFNode]] = {}
+    copied_bnode_map: dict[RDFNode, BNode] = {}
+    copied_named_map: dict[RDFNode, Union[BNode, RDFNode]] = {}
     ontology_ns = ontology.namespace_manager
     data_graph_ns = data_graph.namespace_manager
 

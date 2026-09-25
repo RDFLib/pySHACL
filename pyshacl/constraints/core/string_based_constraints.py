@@ -42,11 +42,11 @@ class StringBasedConstraintBase(ConstraintComponent):
 
     def __init__(self, shape: Shape) -> None:
         super(StringBasedConstraintBase, self).__init__(shape)
-        self.string_rules: List[RDFNode] = []
+        self.string_rules: list[RDFNode] = []
         self.allow_multi_rules = True
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         raise NotImplementedError()
 
     @classmethod
@@ -135,14 +135,14 @@ class MinLengthConstraintComponent(StringBasedConstraintBase):
         self.string_rules = patterns_found
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_minLength]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "MinLengthConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         m = "String length not >= {}".format(stringify_node(datagraph, self.string_rules[0]))
         return [rdflib.Literal(m)]
 
@@ -215,14 +215,14 @@ class MaxLengthConstraintComponent(StringBasedConstraintBase):
         self.string_rules = patterns_found
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_maxLength]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "MaxLengthConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         m = "String length not <= {}".format(stringify_node(datagraph, self.string_rules[0]))
         return [rdflib.Literal(m)]
 
@@ -262,7 +262,7 @@ class PatternConstraintComponent(StringBasedConstraintBase):
 
     def __init__(self, shape: Shape) -> None:
         super(PatternConstraintComponent, self).__init__(shape)
-        patterns_found: List[rdflib.Literal] = []
+        patterns_found: list[rdflib.Literal] = []
         for pattern_found in self.shape.objects(SH_pattern):
             if not isinstance(pattern_found, rdflib.Literal):
                 raise ConstraintLoadError(
@@ -275,7 +275,7 @@ class PatternConstraintComponent(StringBasedConstraintBase):
                 "PatternConstraintComponent must have at least one sh:pattern predicate.",
                 "https://www.w3.org/TR/shacl/#PatternConstraintComponent",
             )
-        self.string_rules = cast(List[RDFNode], patterns_found)
+        self.string_rules = cast(list[RDFNode], patterns_found)
         flags_found = set(self.shape.objects(SH_flags))
         if len(flags_found) > 0:
             # Just get the first found flags
@@ -302,21 +302,21 @@ class PatternConstraintComponent(StringBasedConstraintBase):
             self.compiled_cache[p] = re_matcher
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_pattern]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "PatternConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         if len(self.string_rules) < 2:
             string_rule = self.string_rules[0]
             assert isinstance(string_rule, rdflib.Literal)
             m = "Value does not match pattern '{}'".format(str(string_rule.value))
         else:
             # Inform type system that all the string rules are Literals.
-            _string_rules: List[rdflib.Literal] = []
+            _string_rules: list[rdflib.Literal] = []
             for string_rule in self.string_rules:
                 if not isinstance(string_rule, rdflib.Literal):
                     logging.debug("string_rule = %r.", string_rule)
@@ -381,14 +381,14 @@ class LanguageInConstraintComponent(StringBasedConstraintBase):
         self.string_rules = language_ins_found
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_languageIn]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "LanguageInConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         m = "String language is not in {}".format(stringify_node(self.shape.sg.graph, self.string_rules[0]))
         return [rdflib.Literal(m)]
 
@@ -475,14 +475,14 @@ class UniqueLangConstraintComponent(StringBasedConstraintBase):
         self.string_rules = {is_unique_lang.value}
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_uniqueLang]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "UniqueLangConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         return [rdflib.Literal("More than one String shares the same Language")]
 
     def _evaluate_string_rule(self, is_unique_lang, target_graph, f_v_dict):

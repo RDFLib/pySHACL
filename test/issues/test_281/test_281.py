@@ -31,6 +31,8 @@ def test_281_b():
     with open(f"{BASE_DIR}/policies.ttl") as policy_f:
         policy_g = load_from_source(policy_f, rdf_format="turtle", do_owl_imports=True)
 
+    assert data_g is not None
+
     conforms, results_graph, results_text = pyshacl.validate(
         data_g,
         shacl_graph=policy_g,

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from types import NoneType
 
 try:
     from pyoxigraph import (
@@ -50,7 +51,7 @@ except ImportError:
 import shutil
 import warnings
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, Iterable, Mapping, Sequence, Tuple, Type, Union
+from typing import Any, Callable, Dict, Generator, Iterable, Mapping, Sequence, Tuple, Type, Union, TypeAlias, TYPE_CHECKING
 
 from rdflib import Dataset as rdf_Dataset
 from rdflib import Graph as rdf_Graph
@@ -78,7 +79,10 @@ from rdflib.term import (
     Variable as rdf_Variable,
 )
 
-ALLOWED_BACKING_TYPES = Union[rdflib_Store, ox_Store]
+if TYPE_CHECKING:
+    import pyoxigraph
+
+ALLOWED_BACKING_TYPES: TypeAlias = Union[rdflib_Store, None, "pyoxigraph.Store"]
 
 
 class DataGraph(rdf_Dataset):
@@ -92,7 +96,7 @@ class DataGraph(rdf_Dataset):
         impl: Union[rdf_Dataset, rdf_Graph, None] = None,
         locked_context: Union[rdf_Graph, str, None] = None,
     ):
-        use_oxigraph = has_oxigraph and isinstance(store, ox_Store)
+        use_oxigraph = has_oxigraph and ox_Store is not None and isinstance(store, ox_Store)
         if cls is DataGraph:
             # Determine the correct subclass to use
             if use_oxigraph:
@@ -108,7 +112,7 @@ class DataGraph(rdf_Dataset):
             return self
 
     @classmethod
-    def is_multigraph(self) -> bool:
+    def is_multigraph(cls) -> bool:
         return False
 
     @property
@@ -117,6 +121,10 @@ class DataGraph(rdf_Dataset):
 
     @property
     def default_graph(self):
+        raise NotImplementedError("Default graph is not supported for this graph type")
+
+    @default_graph.setter
+    def default_graph(self, value: Any):
         raise NotImplementedError("Default graph is not supported for this graph type")
 
     @default_union.setter
@@ -133,7 +141,11 @@ class DataGraph(rdf_Dataset):
     def namespace_manager(self) -> NamespaceManager:
         raise NotImplementedError("Namespace manager is not supported for this graph type")
 
-    def query(self, **kwargs):
+    @namespace_manager.setter
+    def namespace_manager(self, nm: NamespaceManager):
+        raise NotImplementedError("Namespace manager is not supported for this graph type")
+
+    def query(self, *args, **kwargs):
         raise NotImplementedError("Query is not supported for this graph type")
 
     @classmethod
@@ -154,7 +166,7 @@ class DataGraph(rdf_Dataset):
             raise ValueError("Invalid rdflib source type")
 
     @classmethod
-    def from_oxigraph_store(cls, store: ox_Store) -> "DataGraph":
+    def from_oxigraph_store(cls, store: "pyoxigraph.Store") -> "DataGraph":
         if not has_oxigraph:
             raise ValueError("pyoxigraph is not installed")
         return cls(store, impl=None)
@@ -175,7 +187,8 @@ class DataGraph(rdf_Dataset):
 
     @property
     def identifier(self) -> str:
-        return self.impl.identifier
+        if self.impl is not None:
+            return self.impl.identifier
 
 
 class RdfLibDataGraph(DataGraph):
@@ -293,7 +306,7 @@ class RdfLibDataGraph(DataGraph):
 
     def add(
         self,
-        triple: Tuple[
+        triple: tuple[
             Union[rdf_IdentifiedNode, rdf_Literal],
             rdf_IdentifiedNode,
             Union[rdf_Literal, rdf_IdentifiedNode],
@@ -309,7 +322,7 @@ class RdfLibDataGraph(DataGraph):
 
     def remove(
         self,
-        triple: Tuple[
+        triple: tuple[
             Union[rdf_IdentifiedNode, rdf_Literal],
             rdf_IdentifiedNode,
             Union[rdf_Literal, rdf_IdentifiedNode],
@@ -325,13 +338,13 @@ class RdfLibDataGraph(DataGraph):
 
     def triples(
         self,
-        triple: Tuple[
+        triple: tuple[
             Union[rdf_IdentifiedNode, rdf_Literal, None],
             Union[rdf_IdentifiedNode, None],
             Union[rdf_IdentifiedNode, rdf_Literal, None],
         ],
     ) -> Generator[
-        Tuple[
+        tuple[
             Union[rdf_IdentifiedNode, rdf_Literal],
             rdf_IdentifiedNode,
             Union[rdf_IdentifiedNode, rdf_Literal],
@@ -390,7 +403,7 @@ class RdfLibDataGraph(DataGraph):
         self,
         predicate: rdf_IdentifiedNode,
         object_: Union[rdf_IdentifiedNode, rdf_Literal, None],
-        remember: Union[Dict[Union[rdf_IdentifiedNode, rdf_Literal], int], None] = None,
+        remember: Union[dict[Union[rdf_IdentifiedNode, rdf_Literal], int], None] = None,
     ):
         if self.locked_context is not None:
             yield from self.locked_context.transitive_subjects(predicate, object_, remember=remember)
@@ -401,7 +414,7 @@ class RdfLibDataGraph(DataGraph):
         self,
         subject: Union[rdf_IdentifiedNode, rdf_Literal, None],
         predicate: Union[rdf_IdentifiedNode, None],
-        remember: Union[Dict[Union[rdf_IdentifiedNode, rdf_Literal], int], None] = None,
+        remember: Union[dict[Union[rdf_IdentifiedNode, rdf_Literal], int], None] = None,
     ):
         if self.locked_context is not None:
             yield from self.locked_context.transitive_objects(subject, predicate, remember=remember)
@@ -436,7 +449,7 @@ class RdfLibDataGraph(DataGraph):
 
     def __contains__(
         self,
-        triple: Tuple[
+        triple: tuple[
             Union[rdf_IdentifiedNode, rdf_Literal, None],
             Union[rdf_IdentifiedNode, None],
             Union[rdf_IdentifiedNode, rdf_Literal, None],
@@ -481,8 +494,8 @@ if has_oxigraph:
 
         impl: ox_Store
         locked_context: Union[ox_NamedNode, None]
-        custom_functions: Dict[ox_NamedNode, Any]
-        custom_aggregate_functions: Dict[ox_NamedNode, Any]
+        custom_functions: dict[ox_NamedNode, Any]
+        custom_aggregate_functions: dict[ox_NamedNode, Any]
         _store: 'OxigraphStore'
         _default_graph: rdf_Graph
         _namespace_manager: NamespaceManager
@@ -646,7 +659,7 @@ if has_oxigraph:
 
         def add(
             self,
-            triple: Tuple[
+            triple: tuple[
                 Union[rdf_IdentifiedNode, rdf_Literal],
                 rdf_IdentifiedNode,
                 Union[rdf_Literal, rdf_IdentifiedNode],
@@ -685,7 +698,7 @@ if has_oxigraph:
 
         def remove(
             self,
-            triple: Tuple[
+            triple: tuple[
                 Union[rdf_IdentifiedNode, rdf_Literal],
                 rdf_IdentifiedNode,
                 Union[rdf_Literal, rdf_IdentifiedNode],
@@ -728,13 +741,13 @@ if has_oxigraph:
 
         def triples(
             self,
-            triple: Tuple[
+            triple: tuple[
                 Union[rdf_IdentifiedNode, rdf_Literal, None],
                 Union[rdf_IdentifiedNode, None],
                 Union[rdf_IdentifiedNode, rdf_Literal, None],
             ],
         ) -> Generator[
-            Tuple[
+            tuple[
                 Union[rdf_IdentifiedNode, rdf_Literal],
                 rdf_IdentifiedNode,
                 Union[rdf_IdentifiedNode, rdf_Literal],
@@ -765,7 +778,7 @@ if has_oxigraph:
         def subject_objects(
             self, predicate: Union[rdf_IdentifiedNode, None], unique: bool = False
         ) -> Generator[
-            Tuple[
+            tuple[
                 Union[rdf_IdentifiedNode, rdf_Literal],
                 Union[rdf_IdentifiedNode, rdf_Literal],
             ],
@@ -792,7 +805,7 @@ if has_oxigraph:
 
         def subject_predicates(
             self, object_: Union[rdf_IdentifiedNode, rdf_Literal, None], unique: bool = False
-        ) -> Generator[Tuple[Union[rdf_IdentifiedNode, rdf_Literal], rdf_IdentifiedNode], None, None]:
+        ) -> Generator[tuple[Union[rdf_IdentifiedNode, rdf_Literal], rdf_IdentifiedNode], None, None]:
             _o = to_ox(object_)
             if self.locked_context is not None:
                 for q in self.impl.quads_for_pattern(None, None, _o, self.locked_context):
@@ -809,7 +822,7 @@ if has_oxigraph:
 
         def predicate_objects(
             self, subject: Union[rdf_IdentifiedNode, rdf_Literal, None], unique: bool = False
-        ) -> Generator[Tuple[rdf_IdentifiedNode, Union[rdf_IdentifiedNode, rdf_Literal]], None, None]:
+        ) -> Generator[tuple[rdf_IdentifiedNode, Union[rdf_IdentifiedNode, rdf_Literal]], None, None]:
             _s = to_ox(subject)
             if self.locked_context is not None:
                 for q in self.impl.quads_for_pattern(_s, None, None, self.locked_context):
@@ -850,7 +863,7 @@ if has_oxigraph:
             self,
             predicate: rdf_IdentifiedNode,
             object_: Union[rdf_IdentifiedNode, rdf_Literal, None],
-            remember: Union[Dict[Union[rdf_IdentifiedNode, rdf_Literal], int], None] = None,
+            remember: Union[dict[Union[rdf_IdentifiedNode, rdf_Literal], int], None] = None,
         ):
             if remember is None:
                 remember = {}
@@ -887,7 +900,7 @@ if has_oxigraph:
             self,
             subject: Union[rdf_IdentifiedNode, rdf_Literal, None],
             predicate: Union[rdf_IdentifiedNode, None],
-            remember: Union[Dict[Union[rdf_IdentifiedNode, rdf_Literal], int], None] = None,
+            remember: Union[dict[Union[rdf_IdentifiedNode, rdf_Literal], int], None] = None,
         ):
             if remember is None:
                 remember = {}
@@ -906,7 +919,7 @@ if has_oxigraph:
 
         def __contains__(
             self,
-            triple: Tuple[
+            triple: tuple[
                 Union[rdf_IdentifiedNode, rdf_Literal, None],
                 Union[rdf_IdentifiedNode, None],
                 Union[rdf_IdentifiedNode, rdf_Literal, None],
@@ -1002,8 +1015,8 @@ if has_oxigraph:
             store: Union[ox_Store, None] = None,
         ) -> None:
             self._store = store
-            self._prefix_for_namespace: Dict[rdf_URIRef, str] = {}
-            self._namespace_for_prefix: Dict[str, rdf_URIRef] = {}
+            self._prefix_for_namespace: dict[rdf_URIRef, str] = {}
+            self._namespace_for_prefix: dict[str, rdf_URIRef] = {}
             super().__init__(configuration, identifier)
 
         def open(self, configuration: str, create: bool = False) -> Union[int, None]:
@@ -1032,7 +1045,7 @@ if has_oxigraph:
 
         def add(
             self,
-            triple: Tuple[
+            triple: tuple[
                 Union[rdf_IdentifiedNode, rdf_Literal], rdf_IdentifiedNode, Union[rdf_Literal, rdf_IdentifiedNode]
             ],
             context: Union[rdf_Graph, None] = None,
@@ -1056,7 +1069,7 @@ if has_oxigraph:
 
         def remove(
             self,
-            triple: Tuple[
+            triple: tuple[
                 Union[rdf_IdentifiedNode, rdf_Literal, None],
                 Union[rdf_IdentifiedNode, None],
                 Union[rdf_IdentifiedNode, rdf_Literal, None],
@@ -1077,15 +1090,15 @@ if has_oxigraph:
 
         def triples(
             self,
-            triple_pattern: Tuple[
+            triple_pattern: tuple[
                 Union[rdf_IdentifiedNode, rdf_Literal, None],
                 Union[rdf_IdentifiedNode, None],
                 Union[rdf_IdentifiedNode, rdf_Literal, None],
             ],
             context: Union[rdf_Graph, None] = None,
         ) -> Generator[
-            Tuple[
-                Tuple[
+            tuple[
+                tuple[
                     Union[rdf_IdentifiedNode, rdf_Literal], rdf_IdentifiedNode, Union[rdf_Literal, rdf_IdentifiedNode]
                 ],
                 Generator[Union[rdf_Graph, None], None, None],
@@ -1253,7 +1266,7 @@ if has_oxigraph:
         def namespace(self, prefix: str) -> Union[rdf_URIRef, None]:
             return self._namespace_for_prefix.get(prefix)
 
-        def namespaces(self) -> Generator[Tuple[str, rdf_URIRef], None, None]:
+        def namespaces(self) -> Generator[tuple[str, rdf_URIRef], None, None]:
             yield from self._namespace_for_prefix.items()
 
 else:
@@ -1368,7 +1381,7 @@ def from_ox_graph_name(
 
 
 def convert_triple_to_oxigraph(
-    triple: Tuple[
+    triple: tuple[
         Union[rdf_IdentifiedNode, rdf_Literal, None],
         Union[rdf_IdentifiedNode, None],
         Union[rdf_Literal, rdf_IdentifiedNode, None],

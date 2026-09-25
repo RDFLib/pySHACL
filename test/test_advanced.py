@@ -191,7 +191,7 @@ if has_oxigraph:
         oxigraph_sparql_fn_calls = []
         orig = SPARQLFunction.execute_from_sparql_oxigraph
 
-        def recording_execute_from_sparql_oxigraph(self, g, *args: Tuple[Union[NamedNode, BlankNode, Literal], ...]):
+        def recording_execute_from_sparql_oxigraph(self, g, *args: tuple[Union[NamedNode, BlankNode, Literal], ...]):
             oxigraph_sparql_fn_calls.append(self.node)
             return orig(self, g, *args)
 
