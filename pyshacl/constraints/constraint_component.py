@@ -168,7 +168,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         source_shape_text = stringify_node(sg, self.shape.node)
         severity_node_text = stringify_node(sg, severity)
         try:
-            focus_node_text = stringify_node(datagraph or sg, focus_node)
+            focus_node_text = stringify_node(sg if datagraph is None else datagraph, focus_node)
         except (LookupError, ValueError):
             # focus node doesn't exist in the datagraph. We can deal.
             focus_node_text = str(focus_node)
@@ -182,7 +182,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         )
         if value_node is not None:
             try:
-                val_node_string = stringify_node(datagraph or sg, value_node)
+                val_node_string = stringify_node(sg if datagraph is None else datagraph, value_node)
             except (LookupError, ValueError):
                 # value node doesn't exist in the datagraph.
                 val_node_string = str(value_node)
@@ -254,7 +254,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         r_triples.append((r_node, SH_sourceConstraintComponent, (sg, constraint_component)))
         r_triples.append((r_node, SH_sourceShape, (sg, self.shape.node)))
         r_triples.append((r_node, SH_resultSeverity, severity))
-        r_triples.append((r_node, SH_focusNode, (datagraph or sg, focus_node)))
+        r_triples.append((r_node, SH_focusNode, (sg if datagraph is None else datagraph, focus_node)))
         if value_node is not None:
             r_triples.append((r_node, SH_value, (datagraph, value_node)))
         if result_path is None and self.shape.is_property_shape:
