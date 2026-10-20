@@ -6,6 +6,13 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 ## [Unreleased]
 
+### Fixed
+
+- Oxigraph-backed validation no longer computes `len()` of the whole data graph for every validation result.
+  - `datagraph or sg` evaluated the truthiness of the DataGraph, which on Oxigraph runs a `COUNT` query over the entire store.
+- Plain string literals read from an Oxigraph store now compare equal to plain literals in the shapes graph.
+  - Oxigraph reports them as `xsd:string`; they are now mapped back to plain RDFLib literals, which fixes false violations of `sh:in`, `sh:hasValue` and similar constraints.
+
 ## [0.40.1] - 2026-07-28
 
 ### Fixed

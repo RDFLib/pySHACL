@@ -1297,14 +1297,24 @@ def to_rdf(
     elif isinstance(term, ox_BlankNode):
         return rdf_BNode(term.value)
     elif isinstance(term, ox_Literal):
-        if term.language is not None:
-            return rdf_Literal(term.value, lang=term.language)
-        data_type = term.datatype
-        if data_type is not None:
-            data_type = rdf_URIRef(data_type.value)
-        return rdf_Literal(term.value, datatype=data_type)
+        return _ox_literal_to_rdf(term)
     else:
         return rdf_URIRef(term.value)
+
+
+XSD_STRING_IRI = "http://www.w3.org/2001/XMLSchema#string"
+
+
+def _ox_literal_to_rdf(term: ox_Literal) -> rdf_Literal:
+    if term.language is not None:
+        return rdf_Literal(term.value, lang=term.language)
+    data_type = term.datatype
+    # Oxigraph reports simple literals with their RDF 1.1 datatype xsd:string, but RDFLib
+    # treats Literal("x") and Literal("x", datatype=XSD.string) as unequal. Map them back to
+    # plain literals so they compare equal to the literals in the shapes graph.
+    if data_type is None or data_type.value == XSD_STRING_IRI:
+        return rdf_Literal(term.value)
+    return rdf_Literal(term.value, datatype=rdf_URIRef(data_type.value))
 
 
 def convert_quad_to_rdflib(quad: ox_Quad):
@@ -1316,13 +1326,7 @@ def convert_quad_to_rdflib(quad: ox_Quad):
     elif isinstance(s, ox_Literal):
         # Technically a subject can never be a Literal
         # in Oxigraph, but this is here for completeness
-        if s.language is not None:
-            out_s = rdf_Literal(s.value, lang=s.language)
-        else:
-            data_type = s.datatype
-            if data_type is not None:
-                data_type = rdf_URIRef(data_type.value)
-            out_s = rdf_Literal(s.value, datatype=data_type)
+        out_s = _ox_literal_to_rdf(s)
     else:
         out_s = rdf_URIRef(s.value)
     if p is None:
@@ -1334,13 +1338,7 @@ def convert_quad_to_rdflib(quad: ox_Quad):
     if o is None:
         out_o = None
     elif isinstance(o, ox_Literal):
-        if o.language is not None:
-            out_o = rdf_Literal(o.value, lang=o.language)
-        else:
-            data_type = o.datatype
-            if data_type is not None:
-                data_type = rdf_URIRef(data_type.value)
-            out_o = rdf_Literal(o.value, datatype=data_type)
+        out_o = _ox_literal_to_rdf(o)
     elif isinstance(o, ox_BlankNode):
         out_o = rdf_BNode(o.value)
     else:
