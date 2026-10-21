@@ -40,7 +40,7 @@ class InConstraintComponent(ConstraintComponent):
 
     def __init__(self, shape: Shape) -> None:
         super(InConstraintComponent, self).__init__(shape)
-        in_val_lists: List[IdentifiedNode] = list(self.shape.objects(SH_in))
+        in_val_lists: list[IdentifiedNode] = list(self.shape.objects(SH_in))
         if len(in_val_lists) < 1:
             raise ConstraintLoadError(
                 "InConstraintComponent must have at least one sh:in predicate.",
@@ -63,14 +63,14 @@ class InConstraintComponent(ConstraintComponent):
             self.in_vals.add(item)
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_in]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "InConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         list1 = [stringify_node(self.shape.sg.graph, val) for val in self.in_vals]
         m = "Value {} not in list {}".format(stringify_node(datagraph, value_node), list1)
         return [rdflib.Literal(m)]
@@ -148,14 +148,14 @@ class ClosedConstraintComponent(ConstraintComponent):
         self.property_shapes = list(self.shape.objects(SH_property))
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_closed, SH_ignoredProperties]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "ClosedConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         m = "Node {} is closed. It cannot have value: {}".format(
             stringify_node(datagraph, focus_node), stringify_node(datagraph, value_node)
         )
@@ -297,14 +297,14 @@ class HasValueConstraintComponent(ConstraintComponent):
         self.has_value_set = has_value_set
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_hasValue]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "HasValueConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         the_set = [stringify_node(self.shape.sg.graph, s) for s in self.has_value_set]
         p = self.shape.path()
         if p:

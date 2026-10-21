@@ -83,7 +83,7 @@ class SPARQLBasedConstraint(ConstraintComponent):
         self.sparql_constraints = sparql_constraints
 
     @classmethod
-    def constraint_parameters(cls) -> List[URIRef]:
+    def constraint_parameters(cls) -> list[URIRef]:
         return [SH_sparql]
 
     @classmethod

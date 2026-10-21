@@ -21,14 +21,14 @@ def gather_rules(
     executor: SHACLExecutor,
     shacl_graph: 'ShapesGraph',
     from_shapes: Union[Sequence[Union[URIRef, BNode]], None] = None,
-) -> Dict['Shape', List['SHACLRule']]:
+) -> dict['Shape', list['SHACLRule']]:
     """
     :param executor:
     :type executor: SHACLExecutor
     :param shacl_graph:
     :type shacl_graph: ShapesGraph
     :return:
-    :rtype: Dict[Shape, List[SHACLRule]]
+    :rtype: dict[Shape, list[SHACLRule]]
     """
     triple_rule_nodes = set(shacl_graph.subjects(RDF_type, SH_TripleRule))
     sparql_rule_nodes = set(shacl_graph.subjects(RDF_type, SH_SPARQLRule))
@@ -96,7 +96,7 @@ def apply_rules(
     focus_nodes: Union[Sequence[RDFNode], None] = None,
 ) -> int:
     # short the shapes dict by shapes sh:order before execution
-    sorted_shapes_rules: List[Tuple[Any, Any]] = sorted(shapes_rules.items(), key=lambda x: x[0].order)
+    sorted_shapes_rules: list[tuple[Any, Any]] = sorted(shapes_rules.items(), key=lambda x: x[0].order)
     total_modified = 0
     for shape, rules in sorted_shapes_rules:
         # sort the rules by the sh:order before execution

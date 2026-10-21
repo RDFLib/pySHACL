@@ -69,7 +69,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
 
     @classmethod
     @abc.abstractmethod
-    def constraint_parameters(cls) -> List[URIRef]:
+    def constraint_parameters(cls) -> list[URIRef]:
         raise NotImplementedError()  # pragma: no cover
 
     @classmethod
@@ -83,7 +83,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
     ):
         raise NotImplementedError()  # pragma: no cover
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[Literal]:
         return []
 
     def __str__(self) -> str:
@@ -91,7 +91,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         shape_id = str(self.shape)
         return "<{} on {}>".format(c_name, shape_id)
 
-    def recursion_triggers(self, _evaluation_path, trigger_depth=3) -> Optional[List['RDFNode']]:
+    def recursion_triggers(self, _evaluation_path, trigger_depth=3) -> Optional[list['RDFNode']]:
         shape = self.shape
         eval_length = len(_evaluation_path)
         if eval_length < 4:
@@ -132,7 +132,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         focus_node: 'RDFNode',
         severity: URIRef,
         value_node: Optional['RDFNode'],
-        messages: List[str],
+        messages: list[str],
         result_path=None,
         constraint_component=None,
         source_constraint=None,
@@ -149,7 +149,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         :param value_node:
         :type value_node: rdflib.term.Identifier | None
         :param messages:
-        :type messages: List[str]
+        :type messages: list[str]
         :param result_path:
         :param bound_vars:
         :param constraint_component:
@@ -248,7 +248,7 @@ class ConstraintComponent(object, metaclass=abc.ABCMeta):
         constraint_component = constraint_component or self.shacl_constraint_component
         severity = self.shape.severity
         sg = self.shape.sg.graph
-        r_triples: List[Tuple[RDFNode, RDFNode, Any]] = list()
+        r_triples: list[tuple[RDFNode, RDFNode, Any]] = list()
         r_node = BNode()
         r_triples.append((r_node, RDF_type, SH_ValidationResult))
         r_triples.append((r_node, SH_sourceConstraintComponent, (sg, constraint_component)))
@@ -336,7 +336,7 @@ class CustomConstraintComponentFactory(object):
     __slots__: Tuple = tuple()
 
     def __new__(cls, shacl_graph: 'ShapesGraph', node):
-        self: List[Any] = list()
+        self: list[Any] = list()
         self.append(shacl_graph)
         self.append(node)
         optional_params = []
@@ -430,7 +430,7 @@ class CustomConstraintComponent(object):
     if typing.TYPE_CHECKING:
         sg: ShapesGraph
         node: Any
-        parameters: List[SHACLParameter]
+        parameters: list[SHACLParameter]
         validators: Set
         node_validators: Set
         property_validators: Set

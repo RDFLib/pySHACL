@@ -42,7 +42,7 @@ class Validator(PySHACLRunType):
     debug: bool
     pre_inferenced: bool
     inplace: bool
-    options: Dict[str, Any]
+    options: dict[str, Any]
 
     def __init__(
         self,
@@ -50,7 +50,7 @@ class Validator(PySHACLRunType):
         *args,
         shacl_graph: Optional[GraphLike] = None,
         ont_graph: Optional[GraphLike] = None,
-        options: Optional[Dict[str, Any]] = None,
+        options: Optional[dict[str, Any]] = None,
         **kwargs,
     ):
         options = options or {}
@@ -112,7 +112,7 @@ class Validator(PySHACLRunType):
                 options_dict['logger'].setLevel(logging.DEBUG)
 
     @classmethod
-    def create_validation_report(cls, sg, conforms: bool, results: List[Tuple]):
+    def create_validation_report(cls, sg, conforms: bool, results: list[Tuple]):
         v_text = "Validation Report\nConforms: {}\n".format(str(conforms))
         result_len = len(results)
         if not conforms and result_len < 1:
@@ -125,7 +125,7 @@ class Validator(PySHACLRunType):
         vr = BNode()
         vg.add((vr, RDF_type, SH_ValidationReport))
         vg.add((vr, SH_conforms, Literal(conforms)))
-        cloned_nodes: Dict[Tuple[GraphLike, str], Union[BNode, URIRef]] = {}
+        cloned_nodes: dict[tuple[GraphLike, str], Union[BNode, URIRef]] = {}
         text_results = sorted(results, key=lambda r: r[0])
         for result in iter(text_results):
             _d, _bn, _tr = result
@@ -259,7 +259,7 @@ class Validator(PySHACLRunType):
         option_focus_nodes = self.options.get("focus_nodes", None)
         if option_focus_nodes is not None and len(option_focus_nodes) > 0:
             # Expand any CURIEs in the focus_nodes list
-            expanded_focus_nodes: List[URIRef] = []
+            expanded_focus_nodes: list[URIRef] = []
             for f in option_focus_nodes:
                 f_lower = f.lower()
                 if (

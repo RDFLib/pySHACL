@@ -265,8 +265,8 @@ def main(prog: Union[str, None] = None) -> None:
         parser.print_usage(sys.stderr)
         sys.exit(1)
     validator_kwargs = {'debug': args.debug}
-    data_files: List[BufferedReader] = []
-    data_graphs: List[Union[BufferedReader, str]] = []
+    data_files: list[BufferedReader] = []
+    data_graphs: list[Union[BufferedReader, str]] = []
     if args.sparql_mode is not None and args.sparql_mode is True:
         if len(args.data) > 1:
             sys.stderr.write("Input Error. SPARQL Endpoint mode only supports a single target.\n")
