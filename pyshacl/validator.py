@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Modified by Andreas Ehstand (AI-assisted), 2026-10-24:
+# Preserve DataGraph during full ontology mixing (RDFLib/pySHACL#332).
 #
 import logging
 import sys
