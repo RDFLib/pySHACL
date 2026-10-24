@@ -24,7 +24,6 @@ from .rdfutil import (
     add_baked_in,
     clone_blank_node,
     mix_datasets,
-    mix_graphs,
 )
 from .rules import apply_rules, gather_rules
 from .run_type import PySHACLRunType
@@ -157,9 +156,16 @@ class Validator(PySHACLRunType):
 
     def mix_in_ontology(self):
         if USE_FULL_MIXIN:
-            if not self.data_graph_is_multigraph:
-                return mix_graphs(self.data_graph, self.ont_graph, "inplace" if self.inplace else None)
-            return mix_datasets(self.data_graph, self.ont_graph, "inplace" if self.inplace else None)
+            to_graph = self.data_graph if self.inplace else self.data_graph.clone()
+            if self.data_graph_is_multigraph:
+                return mix_datasets(self.data_graph, self.ont_graph, to_graph)
+            # DataGraph inherits Dataset even when it wraps a single Graph.
+            # Copy the ontology's union without changing the data graph's type.
+            for prefix, namespace in self.ont_graph.namespace_manager.namespaces():
+                to_graph.namespace_manager.bind(prefix, namespace, override=False, replace=False)
+            for triple in self.ont_graph:
+                to_graph.add(triple)
+            return to_graph
         # Lazy import to avoid circular import
         from .rdfutil.inoculate import inoculate, inoculate_dataset
 
