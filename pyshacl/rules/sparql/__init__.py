@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, List, Optional, Sequence, Union
 
 import rdflib
 from rdflib import Literal
+from rdflib.graph import Dataset as rdf_Dataset
 from rdflib.namespace import XSD
 
 from pyshacl.consts import SH_construct
@@ -109,7 +110,14 @@ class SPARQLRule(SHACLRule):
                         added += 1
                         construct_graphs.add(result_graph)
             if added > 0:
-                if data_graph.is_multigraph():
+                if not hasattr(data_graph, 'is_multigraph'):
+                    if isinstance(data_graph.impl, rdf_Dataset):
+                        multi_graph = True
+                    else:
+                        multi_graph = False
+                else:
+                    multi_graph = data_graph.is_multigraph()
+                if multi_graph:
                     if target_graph_identifier is not None:
                         target_graph = data_graph.get_context(target_graph_identifier)
                     else:

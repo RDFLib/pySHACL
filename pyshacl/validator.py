@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import rdflib
 from rdflib import BNode, Literal, URIRef
+from rdflib.graph import Dataset as rdf_Dataset
 
 from .consts import (
     RDF_type,
@@ -65,7 +66,13 @@ class Validator(PySHACLRunType):
         self.data_graph = data_graph
         self._target_graph: Union[DataGraph, None] = None
         self.ont_graph = ont_graph
-        self.data_graph_is_multigraph = self.data_graph.is_multigraph()
+        if not hasattr(self.data_graph, 'is_multigraph'):
+            if isinstance(self.data_graph.impl, rdf_Dataset):
+                self.data_graph_is_multigraph = True
+            else:
+                self.data_graph_is_multigraph = False
+        else:
+            self.data_graph_is_multigraph = self.data_graph.is_multigraph()
         if self.ont_graph is not None and isinstance(self.ont_graph, rdflib.Dataset):
             self.ont_graph.default_union = True
         if self.ont_graph is not None and options['sparql_mode']:

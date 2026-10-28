@@ -2,6 +2,8 @@ import logging
 from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING, Optional
 
+from rdflib.graph import Dataset as rdf_Dataset
+
 from .errors import ReportableRuntimeError
 
 if TYPE_CHECKING:
@@ -59,17 +61,28 @@ class PySHACLRunType(metaclass=ABCMeta):
             raise ReportableRuntimeError(
                 "Error during creation of OWL-RL Deductive Closure\n{}".format(str(e.args[0]))
             )
-        if target_graph.is_oxigraph:
+        if not hasattr(target_graph, 'is_oxigraph'):
+            owl_target = target_graph
+        elif target_graph.is_oxigraph:
             ox_store = target_graph.impl
             owl_target = OWLDataGraph(ox_store)
         else:
             owl_target = target_graph.impl
-        if target_graph.is_multigraph():
+        if not hasattr(target_graph, 'is_multigraph'):
+            if isinstance(target_graph.impl, rdf_Dataset):
+                is_multigraph = True
+            else:
+                is_multigraph = False
+        else:
+            is_multigraph = target_graph.is_multigraph()
+        if is_multigraph:
             target_graph.default_union = True
             if destination_graph_identifier is not None:
-                if target_graph.is_oxigraph:
-                    ox_store = target_graph.impl
-                    owl_dest = OWLDataGraph(ox_store, locked_context=destination_graph_identifier)
+                if not hasattr(target_graph, 'is_oxigraph'):
+                    owl_dest = target_graph.get_context(destination_graph_identifier)
+                elif target_graph.is_oxigraph:
+                    ox_store2 = target_graph.impl
+                    owl_dest = OWLDataGraph(ox_store2, locked_context=destination_graph_identifier)
                 else:
                     rdf_graph = target_graph.impl.get_context(destination_graph_identifier)
                     owl_dest = rdf_graph
@@ -80,6 +93,5 @@ class PySHACLRunType(metaclass=ABCMeta):
         try:
             inferencer.expand(owl_target, destination=owl_dest)
         except Exception as e:  # pragma: no cover
-            raise
             logger.error("Error while running OWL-RL Deductive Closure")
             raise ReportableRuntimeError("Error while running OWL-RL Deductive Closure\n{}".format(str(e.args[0])))

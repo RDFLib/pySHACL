@@ -87,7 +87,7 @@ class JSFunction(SHACLFunction):
         *args: Union[ox_NamedNode, ox_BlankNode, ox_Triple],
     ):
         """Oxigraph custom-function callback: evaluated argument terms in, one RDF term out."""
-        if not g.is_oxigraph:
+        if not getattr(g, 'is_oxigraph', False):
             raise ReportableRuntimeError("execute_from_sparql_oxigraph requires an Oxigraph-backed DataGraph.")
         params = self.get_params_in_order()
         num_params = len(params)

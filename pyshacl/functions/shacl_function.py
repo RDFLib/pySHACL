@@ -386,7 +386,7 @@ class SPARQLFunction(SHACLFunction):
         (pyoxigraph NamedNode, BlankNode, Literal, or Triple). The DataGraph is not provided
         by Oxigraph; apply() binds it with functools.partial().
         """
-        if not g.is_oxigraph:
+        if not getattr(g, 'is_oxigraph', False):
             raise ReportableRuntimeError("execute_from_sparql_oxigraph requires an Oxigraph-backed DataGraph.")
         params = self.get_params_in_order()
         num_params = len(params)
