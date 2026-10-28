@@ -6,12 +6,20 @@ and this project adheres to [Python PEP 440 Versioning](https://www.python.org/d
 
 ## [Unreleased]
 
+## [0.40.2] - 2026-07-28
+
 ### Fixed
 
 - Oxigraph-backed validation no longer computes `len()` of the whole data graph for every validation result.
   - `datagraph or sg` evaluated the truthiness of the DataGraph, which on Oxigraph runs a `COUNT` query over the entire store.
+  - Thanks @lepy
 - Plain string literals read from an Oxigraph store now compare equal to plain literals in the shapes graph.
   - Oxigraph reports them as `xsd:string`; they are now mapped back to plain RDFLib literals, which fixes false violations of `sh:in`, `sh:hasValue` and similar constraints.
+  - Thanks @lepy
+- Add concurrency lock when adding system triples to the data graph, and only install the triples if they're not present in the graph.
+  - Thanks @mhatipog
+- Quick fix for when using PYSHACL_USE_FULL_MIXIN=1, the ontology mixer returns a plain Graph or Datagraph, not a wrapper.
+  - Better fix incoming next release from @AndreasEhstandLicenseofClarityLOC
 
 ## [0.40.1] - 2026-07-28
 
@@ -1303,7 +1311,8 @@ just leaves the files open. Now it is up to the command-line client to close the
 
 - Initial version, limited functionality
 
-[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.40.1...HEAD
+[Unreleased]: https://github.com/RDFLib/pySHACL/compare/v0.40.2...HEAD
+[0.40.2]: https://github.com/RDFLib/pySHACL/compare/v0.40.1...v0.40.2
 [0.40.1]: https://github.com/RDFLib/pySHACL/compare/v0.40.0...v0.40.1
 [0.40.0]: https://github.com/RDFLib/pySHACL/compare/v0.31.0...v0.40.0
 [0.31.0]: https://github.com/RDFLib/pySHACL/compare/v0.30.1...v0.31.0
