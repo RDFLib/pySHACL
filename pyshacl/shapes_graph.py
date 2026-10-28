@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import warnings
+from threading import Lock
 from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Union
 
 import rdflib
@@ -32,6 +33,11 @@ from .shape import Shape
 
 if TYPE_CHECKING:
     from .pytypes import RDFNode
+
+
+# A preloaded shapes graph may be shared by concurrent validation calls. RDFLib's
+# Memory store is not safe for simultaneous writes, even of the same triple.
+_system_triples_lock = Lock()
 
 
 class ShapesGraph(object):
@@ -76,8 +82,12 @@ class ShapesGraph(object):
             g = self.graph.default_graph
         else:
             g = self.graph
-        for t in self.system_triples:
-            g.add(t)
+        # Keep initialization idempotent and protect the (usually first) writes
+        # when several validators share the same rdflib graph.
+        with _system_triples_lock:
+            for t in self.system_triples:
+                if t not in g:
+                    g.add(t)
 
     def subjects(self, p, o):
         return self.graph.subjects(p, o)
