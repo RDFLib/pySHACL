@@ -565,7 +565,7 @@ class Shape(object):
             return {f: set((f,)) for f in focus}
         path_val = self.path()
 
-        focus_dict: Dict[RDFNode, Set[RDFNode]] = {}
+        focus_dict: dict[RDFNode, Set[RDFNode]] = {}
         if sparql_mode:
             # Shortcut for simple URI path, path rewriting and everything else
             if isinstance(path_val, URIRef):
@@ -668,7 +668,7 @@ class Shape(object):
             self.logger.debug(f"Running evaluation of Shape {str(self)}")
 
         if executor.focus_nodes is not None and len(executor.focus_nodes) > 0:
-            filtered_focus_nodes: List[Union[URIRef]] = []
+            filtered_focus_nodes: list[Union[URIRef]] = []
             for _fo in focus_list:  # type: RDFNode
                 if isinstance(_fo, URIRef) and _fo in executor.focus_nodes:
                     filtered_focus_nodes.append(_fo)

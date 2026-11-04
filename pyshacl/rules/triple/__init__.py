@@ -64,7 +64,7 @@ class TripleRule(SHACLRule):
         else:
             focus_list = list(self.shape.focus_nodes(data_graph))
         if self.executor.focus_nodes is not None and len(self.executor.focus_nodes) > 0:
-            filtered_focus_nodes: List[Union[rdflib.URIRef]] = []
+            filtered_focus_nodes: list[Union[rdflib.URIRef]] = []
             for _fo in focus_list:  # type: RDFNode
                 if isinstance(_fo, rdflib.URIRef) and _fo in self.executor.focus_nodes:
                     filtered_focus_nodes.append(_fo)
@@ -105,7 +105,7 @@ class TripleRule(SHACLRule):
                 else:
                     target_graph = data_graph
                 for i in to_add:
-                    target_graph.add(cast(Tuple['RDFNode', 'RDFNode', 'RDFNode'], i))
+                    target_graph.add(cast(tuple['RDFNode', 'RDFNode', 'RDFNode'], i))
                 all_added += added
                 if self.iterate:
                     continue  # Jump up to iterate

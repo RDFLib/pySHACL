@@ -131,8 +131,8 @@ def compare_validation_reports(
         )
         return False
 
-    expected_results_dict: Dict[Tuple[str, str, str], Any] = {}
-    report_results_dict: Dict[Tuple[str, str, str], Any] = {}
+    expected_results_dict: dict[tuple[str, str, str], Any] = {}
+    report_results_dict: dict[tuple[str, str, str], Any] = {}
     for result_nodes, result_graph, dest_dict in (
         (expected_result_nodes, expected_graph, expected_results_dict),
         (report_result_nodes, report_graph, report_results_dict),
@@ -261,7 +261,7 @@ def compare_inferencing_reports(data_graph: GraphLike, expected_graph: GraphLike
 
 def extract_query_and_expected_result(
     test_case: Union[URIRef, BNode], graph: GraphLike, log: Optional[logging.Logger] = None
-) -> Tuple[str, Result]:
+) -> tuple[str, Result]:
     """
     Extract the SPARQL SELECT query and expected result from a DASH QueryTestCase node.
 
@@ -311,7 +311,7 @@ def check_query_result(
     query_str: str,
     expected_result: Result,
     log: Optional[logging.Logger] = None,
-) -> Tuple[bool, Optional[str]]:
+) -> tuple[bool, Optional[str]]:
     """
     Execute the SPARQL SELECT query against the given RDF graph and compare the result to the expected result.
 
@@ -377,7 +377,7 @@ def check_query_result(
 
 def evaluate_query_testcase(
     query_graph: GraphLike, test_case: Union[URIRef, BNode], log: Optional[logging.Logger] = None
-) -> Tuple[bool, Optional[str]]:
+) -> tuple[bool, Optional[str]]:
     """
     Check conformance of a DASH QueryTestCase against a query graph.
     The test_case is assumed to exist in the query_graph.
@@ -398,7 +398,7 @@ def check_dash_result(
     report_graph: GraphLike,
     expected_result_graph: GraphLike,
     log: Union[logging.Logger, None] = None,
-):
+) -> bool:
     DASH_GraphValidationTestCase = DASH.GraphValidationTestCase
     DASH_InferencingTestCase = DASH.InferencingTestCase
     DASH_FunctionTestCase = DASH.FunctionTestCase
@@ -487,7 +487,7 @@ def check_dash_result(
             expression_node = next(iter(expressions))
             expression = str(expression_node).strip()
             parts = [e.strip() for e in expression.split("(", 1)]
-            eargs: List[Optional[Union[str, RDFNode]]]
+            eargs: list[Optional[Union[str, RDFNode]]]
             if len(parts) < 1:
                 expression = parts[0]
                 eargs = []
@@ -495,7 +495,7 @@ def check_dash_result(
                 expression, sargs = parts
                 sargs = sargs.rstrip(")")
                 if len(sargs) < 1:
-                    eargs_str_list: List[str] = []
+                    eargs_str_list: list[str] = []
                 else:
                     eargs_str_list = [a.strip() for a in sargs.split(',')]
                 eargs = []

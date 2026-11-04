@@ -204,7 +204,7 @@ def test_validate_with_ontology_XFAIL_spaces() -> None:
     )
     conforms, graph, string = res
 
-    expected_path_values: Set[Tuple[URIRef, Literal]] = {
+    expected_path_values: Set[tuple[URIRef, Literal]] = {
         (EX_ONT.propInteger, Literal("zero", datatype=XSD.integer)),
         (EX_ONT.propNegativeInteger, Literal("0", datatype=XSD.negativeInteger)),
         (EX_ONT.propNegativeInteger, Literal("1", datatype=XSD.negativeInteger)),
@@ -213,7 +213,7 @@ def test_validate_with_ontology_XFAIL_spaces() -> None:
         (EX_ONT.propPositiveInteger, Literal("-1", datatype=XSD.positiveInteger)),
         (EX_ONT.propPositiveInteger, Literal("0", datatype=XSD.positiveInteger)),
     }
-    computed_path_values: Set[Tuple[URIRef, Literal]] = set()
+    computed_path_values: Set[tuple[URIRef, Literal]] = set()
 
     # .triples() is used somewhat redundantly instead of using SPARQL, to avoid the possibility of any extra interpretation steps with SPARQL conversion.
     for triple0 in graph.triples((None, RDF.type, SH.ValidationResult)):

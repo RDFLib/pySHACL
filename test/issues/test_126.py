@@ -66,7 +66,7 @@ ex:MyInstance
 
 
 def _test_126_template(expected_conformance: bool, allow_level: Optional[URIRef] = None) -> None:
-    validate_kwargs: Dict[Any] = {"data_graph_format": "turtle", "shacl_graph_format": "turtle", "debug": True}
+    validate_kwargs: dict[Any] = {"data_graph_format": "turtle", "shacl_graph_format": "turtle", "debug": True}
     if allow_level is None:
         pass
     elif allow_level == SH.Info:

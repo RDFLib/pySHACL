@@ -46,14 +46,14 @@ class MinExclusiveConstraintComponent(ConstraintComponent):
         self.min_vals = min_vals
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_minExclusive]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "MinExclusiveConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         if len(self.min_vals) < 2:
             m = "Value is not > {}".format(stringify_node(self.shape.sg.graph, self.min_vals[0]))
         else:
@@ -136,14 +136,14 @@ class MinInclusiveConstraintComponent(ConstraintComponent):
         self.min_vals = min_vals
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_minInclusive]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "MinInclusiveConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         if len(self.min_vals) < 2:
             m = "Value is not >= {}".format(stringify_node(self.shape.sg.graph, self.min_vals[0]))
         else:
@@ -226,14 +226,14 @@ class MaxExclusiveConstraintComponent(ConstraintComponent):
         self.max_vals = max_vals
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_maxExclusive]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "MaxExclusiveConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         if len(self.max_vals) < 2:
             m = "Value is not < {}".format(stringify_node(self.shape.sg.graph, self.max_vals[0]))
         else:
@@ -316,14 +316,14 @@ class MaxInclusiveConstraintComponent(ConstraintComponent):
         self.max_vals = max_vals
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_maxInclusive]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "MaxInclusiveConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         if len(self.max_vals) < 2:
             m = "Value is not <= {}".format(stringify_node(self.shape.sg.graph, self.max_vals[0]))
         else:

@@ -22,4 +22,4 @@ class SHACLExecutor:
     debug: bool = False
     sparql_mode: bool = False
     max_validation_depth: int = 15
-    focus_nodes: Optional[List[URIRef]] = None
+    focus_nodes: Optional[list[URIRef]] = None

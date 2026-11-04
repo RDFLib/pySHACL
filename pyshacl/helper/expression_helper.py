@@ -157,7 +157,7 @@ def value_nodes_from_path(sg, focus, path_val, target_graph, inverse: bool = Fal
 
 def nodes_from_node_expression(
     expr, focus_node, data_graph: 'GraphLike', sg: 'ShapesGraph', recurse_depth=0
-) -> Union[Set[Union['RDFNode', None]], List[Union['RDFNode', None]]]:
+) -> Union[Set[Union['RDFNode', None]], list[Union['RDFNode', None]]]:
     # https://www.w3.org/TR/shacl-af/#node-expressions
     if expr == SH_this:
         return [focus_node]
@@ -244,7 +244,7 @@ def nodes_from_node_expression(
                 "The SHACLFunction {} was not defined in this SHACL Shapes file.".format(fnexpr)
             )
         argslist_parts = list(sg.graph.items(fnargslist))
-        args_sets: List[Union[List[Union['RDFNode', None]], Set[Union['RDFNode', None]]]] = [
+        args_sets: list[Union[list[Union['RDFNode', None]], Set[Union['RDFNode', None]]]] = [
             nodes_from_node_expression(p, focus_node, data_graph, sg, recurse_depth=recurse_depth + 1)
             for p in argslist_parts
         ]

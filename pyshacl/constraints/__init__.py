@@ -46,7 +46,7 @@ from pyshacl.constraints.core.value_range_constraints import (
 from pyshacl.constraints.sparql.sparql_based_constraint_components import SPARQLConstraintComponent  # noqa: F401
 from pyshacl.constraints.sparql.sparql_based_constraints import SPARQLBasedConstraint
 
-ALL_CONSTRAINT_COMPONENTS: List[Type[ConstraintComponent]] = [
+ALL_CONSTRAINT_COMPONENTS: list[Type[ConstraintComponent]] = [
     ClassConstraintComponent,
     DatatypeConstraintComponent,
     NodeKindConstraintComponent,
@@ -81,8 +81,8 @@ ALL_CONSTRAINT_COMPONENTS: List[Type[ConstraintComponent]] = [
     # list because it gets matched to shapes manually later
 ]
 
-CONSTRAINT_PARAMETERS_MAP: Dict[Any, Type[ConstraintComponent]] = {
+CONSTRAINT_PARAMETERS_MAP: dict[Any, Type[ConstraintComponent]] = {
     p: c for c in ALL_CONSTRAINT_COMPONENTS for p in c.constraint_parameters()
 }
 
-ALL_CONSTRAINT_PARAMETERS: List[Any] = list(CONSTRAINT_PARAMETERS_MAP.keys())
+ALL_CONSTRAINT_PARAMETERS: list[Any] = list(CONSTRAINT_PARAMETERS_MAP.keys())

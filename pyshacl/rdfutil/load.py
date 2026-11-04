@@ -97,7 +97,7 @@ def get_rdf_from_web(url: Union[URIRef, str]):
         raise RuntimeError("Cannot pull RDF URL from the web: {}, code: {}".format(url, str(code)))
 
     filename = None
-    content_dispositions: List[str] = resp.headers.get_all("Content-Disposition", [])
+    content_dispositions: list[str] = resp.headers.get_all("Content-Disposition", [])
     for c_d in content_dispositions:
         cd_parts = [s.strip() for s in str(c_d).split(',')]
         for cd_part in cd_parts:
@@ -109,7 +109,7 @@ def get_rdf_from_web(url: Union[URIRef, str]):
         except Exception:
             pass
 
-    content_types: List[str] = resp.headers.get_all('Content-Type', [])
+    content_types: list[str] = resp.headers.get_all('Content-Type', [])
     for content_type in content_types:
         ct_parts = [s.strip() for s in str(content_type).split(',')]
         for ct_part in ct_parts:
@@ -129,7 +129,7 @@ def get_rdf_from_web(url: Union[URIRef, str]):
                 continue
             break
 
-    transfer_encodings: List[str] = resp.headers.get_all('Transfer-Encoding', [])
+    transfer_encodings: list[str] = resp.headers.get_all('Transfer-Encoding', [])
     for t_e in transfer_encodings:
         te_parts = [s.strip() for s in str(t_e).split(',')]
         for check in ('chunked', 'compress', 'deflate', 'gzip', 'x-gzip'):
@@ -161,7 +161,7 @@ def load_from_source(
     identifier: Optional[Union[URIRef, str]] = None,
     multigraph: bool = False,
     do_owl_imports: Union[bool, int] = False,
-    import_chain: Optional[List[Union[URIRef, str]]] = None,
+    import_chain: Optional[list[Union[URIRef, str]]] = None,
     logger: Optional[Logger] = None,
 ):
     """
@@ -581,7 +581,7 @@ def chain_load_owl_imports(
     graph_id: Union[URIRef, rdflib.BNode, None],
     graph_base: Union[str, None],
     target_g: GraphLike,
-    import_chain: List[Union[URIRef, str]],
+    import_chain: list[Union[URIRef, str]],
     load_iter: int,
     multigraph: bool,
 ) -> GraphLike:
@@ -591,7 +591,7 @@ def chain_load_owl_imports(
         root_id = URIRef(graph_base) if graph_base else None
     done_imports = 0
 
-    def _load_from_imports_nodes(imports_nodes: List[Union[URIRef, rdflib.BNode]]) -> int:
+    def _load_from_imports_nodes(imports_nodes: list[Union[URIRef, rdflib.BNode]]) -> int:
         nonlocal target_g, multigraph, import_chain, load_iter
         _done_imports = 0
         for _i in imports_nodes:

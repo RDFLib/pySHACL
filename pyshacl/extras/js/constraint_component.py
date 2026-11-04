@@ -40,8 +40,8 @@ class BoundShapeJSValidatorComponent(ConstraintComponent):
         super(BoundShapeJSValidatorComponent, self).__init__(shape)
         self.constraint = constraint
         self.validator = validator
-        self.param_bind_map: Dict[str, Any] = {}
-        self.messages: List[Any] = []
+        self.param_bind_map: dict[str, Any] = {}
+        self.messages: list[Any] = []
         self.bind_params()
 
     def bind_params(self):
@@ -65,7 +65,7 @@ class BoundShapeJSValidatorComponent(ConstraintComponent):
         self.param_bind_map = bind_map
 
     @classmethod
-    def constraint_parameters(cls) -> List[URIRef]:
+    def constraint_parameters(cls) -> list[URIRef]:
         # TODO:coverage: this is never used for this constraint?
         return []
 
@@ -73,7 +73,7 @@ class BoundShapeJSValidatorComponent(ConstraintComponent):
     def constraint_name(cls) -> str:
         return "ConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[Literal]:
         return [Literal("Parameterised Javascript Function generated constraint validation reports.")]
 
     def evaluate(
@@ -202,7 +202,7 @@ class JSConstraintComponent(CustomConstraintComponent):
 class JSConstraintComponentValidator(JSExecutable):
     __slots__ = ("messages", "initialised")
 
-    validator_cache: Dict[Tuple[int, str], 'JSConstraintComponentValidator'] = {}
+    validator_cache: dict[tuple[int, str], 'JSConstraintComponentValidator'] = {}
 
     def __new__(cls, shacl_graph: 'ShapesGraph', node, *args, **kwargs):
         cache_key = (id(shacl_graph.graph), str(node))
@@ -285,7 +285,7 @@ class JSConstraintComponentValidator(JSExecutable):
 
 
 class JSConstraintComponentPathValidator(JSConstraintComponentValidator):
-    path_validator_cache: Dict[Tuple[int, str], 'JSConstraintComponentPathValidator'] = {}
+    path_validator_cache: dict[tuple[int, str], 'JSConstraintComponentPathValidator'] = {}
 
     def __new__(cls, shacl_graph: 'ShapesGraph', node, *args, **kwargs):
         cache_key = (id(shacl_graph.graph), str(node))

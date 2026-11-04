@@ -63,14 +63,14 @@ class PropertyConstraintComponent(ConstraintComponent):
         self.property_shapes = property_shapes
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_property]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "PropertyConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         raise NotImplementedError("A Property Constraint Component should not be able to generate its own message.")
 
     def evaluate(
@@ -83,7 +83,7 @@ class PropertyConstraintComponent(ConstraintComponent):
         :type focus_value_nodes: dict
         :type _evaluation_path: list
         """
-        reports: List[Dict] = []
+        reports: list[Dict] = []
         non_conformant = False
 
         # Shortcut, when there are no value nodes, don't check for recursion, don't validate and exit early
@@ -159,14 +159,14 @@ class NodeConstraintComponent(ConstraintComponent):
         self.node_shapes = node_shapes
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_node]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "NodeConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         if len(self.node_shapes) < 2:
             m = "Value does not conform to Shape {}.".format(stringify_node(self.shape.sg.graph, self.node_shapes[0]))
         else:
@@ -184,7 +184,7 @@ class NodeConstraintComponent(ConstraintComponent):
         :type focus_value_nodes: dict
         :type _evaluation_path: list
         """
-        reports: List[Dict] = []
+        reports: list[Dict] = []
         non_conformant = False
 
         # Shortcut, when there are no value nodes, don't check for recursion, don't validate and exit early
@@ -328,14 +328,14 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
         self.is_disjoint = is_disjoint
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_qualifiedValueShape, SH_qualifiedMinCount, SH_qualifiedValueShapesDisjoint, SH_qualifiedMaxCount]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "QualifiedValueShapeConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         # TODO:
         #  Implement default message for QualifiedValueConstraint (seems messy)
         shapes_string = ",".join(stringify_node(self.shape.sg.graph, s) for s in self.value_shapes)
@@ -357,7 +357,7 @@ class QualifiedValueShapeConstraintComponent(ConstraintComponent):
         :type focus_value_nodes: dict
         :type _evaluation_path: list
         """
-        reports: List[Dict] = []
+        reports: list[Dict] = []
         non_conformant = False
 
         # Shortcut, when there are no value nodes, don't check for recursion, don't validate and exit early

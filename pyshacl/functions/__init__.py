@@ -65,7 +65,7 @@ def gather_functions(
         scl_nodes.remove(n)
         js_nodes.add(n)
 
-    all_fns: Dict[RDFNode, Union['SHACLFunction', 'SPARQLFunction', 'JSFunction']] = {}
+    all_fns: dict[RDFNode, Union['SHACLFunction', 'SPARQLFunction', 'JSFunction']] = {}
     if spq_nodes:
         SPQ = getattr(module, 'SPARQLFunction', None)
         if not SPQ:

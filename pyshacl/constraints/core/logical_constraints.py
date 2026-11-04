@@ -50,14 +50,14 @@ class NotConstraintComponent(ConstraintComponent):
         self.not_list = not_list
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_not]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "NotConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         try:
             value_node_str = stringify_node(datagraph, value_node)
         except (LookupError, ValueError):
@@ -95,7 +95,7 @@ class NotConstraintComponent(ConstraintComponent):
         self, executor, not_c, datagraph, focus_value_nodes, potentially_recursive, _evaluation_path
     ):
         """
-        :type not_c: List[Node]
+        :type not_c: list[Node]
         :type datagraph: rdflib.Graph
         :type focus_value_nodes: dict
         :type potentially_recursive: Optional[List]
@@ -161,14 +161,14 @@ class AndConstraintComponent(ConstraintComponent):
         self.and_list = and_list
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_and]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "AndConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         if len(self.and_list) < 2:
             and_node_string = " , ".join(
                 stringify_node(self.shape.sg.graph, a_c) for a_c in self.shape.sg.graph.items(self.and_list[0])
@@ -276,14 +276,14 @@ class OrConstraintComponent(ConstraintComponent):
         self.or_list = or_list
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_or]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "OrConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         if len(self.or_list) < 2:
             or_node_string = " , ".join(
                 stringify_node(self.shape.sg.graph, o_c) for o_c in self.shape.sg.graph.items(self.or_list[0])
@@ -390,14 +390,14 @@ class XoneConstraintComponent(ConstraintComponent):
         self.xone_nodes = xone_nodes
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         return [SH_xone]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "XoneConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         if len(self.xone_nodes) < 2:
             xone_node_string = " , ".join(
                 stringify_node(self.shape.sg.graph, a_c) for a_c in self.shape.sg.graph.items(self.xone_nodes[0])

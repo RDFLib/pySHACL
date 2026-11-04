@@ -70,14 +70,14 @@ class JSConstraint(ConstraintComponent):
         self.js_impls = [JSConstraintImpl(shape.sg, j) for j in js_decls]
 
     @classmethod
-    def constraint_parameters(cls) -> List[URIRef]:
+    def constraint_parameters(cls) -> list[URIRef]:
         return [SH_js]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "JSConstraint"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[Literal]:
         return [Literal("Javascript Function generated constraint validation reports.")]
 
     def evaluate(

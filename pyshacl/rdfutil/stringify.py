@@ -48,14 +48,14 @@ def stringify_blank_node(
 
     def stringify_list(node: rdflib.BNode) -> str:
         nonlocal graph, ns_manager, recursion
-        item_texts: List[str] = []
+        item_texts: list[str] = []
         for item in iter(graph.items(node)):
             item_text = stringify_node(graph, item, ns_manager=ns_manager, recursion=recursion + 1)
             item_texts.append(item_text)
         # item_texts.sort()  ## Don't sort, to preserve list order
         return "( {} )".format(" ".join(item_texts))
 
-    predicates: List[RDFNode] = list(cast(Iterator[RDFNode], graph.predicates(bnode)))
+    predicates: list[RDFNode] = list(cast(Iterator[RDFNode], graph.predicates(bnode)))
     if len(predicates) < 1:
         return "[ ]"
     if RDF_first in predicates:
@@ -66,7 +66,7 @@ def stringify_blank_node(
             p_string = p.n3(namespace_manager=ns_manager)
         else:
             p_string = str(p)
-        objs: List[RDFNode] = list(cast(Iterator[RDFNode], graph.objects(bnode, p)))
+        objs: list[RDFNode] = list(cast(Iterator[RDFNode], graph.objects(bnode, p)))
         if len(objs) < 1:
             continue
         o_texts = []
@@ -187,7 +187,7 @@ def stringify_node(
 
 def stringify_graph(graph: rdflib.Graph):
     string_builder = ""
-    t: Tuple[rdflib.term.Node, rdflib.term.Node, rdflib.term.Node]
+    t: tuple[rdflib.term.Node, rdflib.term.Node, rdflib.term.Node]
     for t in iter(graph):
         n1, n2, n3 = t
         node_string = stringify_node(graph, n1, ns_manager=graph.namespace_manager)

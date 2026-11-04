@@ -187,7 +187,7 @@ class SHACLFunction(object):
         self.node = fn_node
         self.sg = sg
         params = list(sg.objects(fn_node, SH_parameter))
-        self.parameters: List[SHACLParameter] = [SHACLParameter(sg, p) for p in params]
+        self.parameters: list[SHACLParameter] = [SHACLParameter(sg, p) for p in params]
         self.comments = set(sg.objects(fn_node, RDFS_comment))
         rtypes = list(sg.objects(fn_node, SH_returnType))
         if len(rtypes) < 1:
@@ -328,7 +328,7 @@ class SPARQLFunction(SHACLFunction):
     def execute_select_oxigraph(
         self,
         g: 'OxigraphDataGraph',
-        init_bindings: Dict[str, NamedNode | BlankNode | OxLiteral | Triple],
+        init_bindings: dict[str, NamedNode | BlankNode | OxLiteral | Triple],
     ):
         s = self._qh.apply_prefixes(self.select)
         s = self._ensure_oxigraph_select_bindings(s, list(init_bindings.keys()))
@@ -346,7 +346,7 @@ class SPARQLFunction(SHACLFunction):
     def execute_ask_oxigraph(
         self,
         g: 'OxigraphDataGraph',
-        init_bindings: Dict[str, NamedNode | BlankNode | OxLiteral | Triple],
+        init_bindings: dict[str, NamedNode | BlankNode | OxLiteral | Triple],
     ):
         a = self._qh.apply_prefixes(self.ask)
         results = g.query_oxigraph(a, initBindings=init_bindings)
@@ -395,7 +395,7 @@ class SPARQLFunction(SHACLFunction):
             raise ValueError("Too many parameters passed to SPARQLFunction {}.".format(self.node))
         if num_args < num_params:
             raise ValueError("Too few parameters passed to SPARQLFunction {}.".format(self.node))
-        init_bindings: Dict[str, NamedNode | BlankNode | OxLiteral | Triple] = {}
+        init_bindings: dict[str, NamedNode | BlankNode | OxLiteral | Triple] = {}
         for i, p in enumerate(params):
             ox_arg = args[i]
             ln = p.localname

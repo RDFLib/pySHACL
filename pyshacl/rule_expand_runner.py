@@ -35,7 +35,7 @@ class RuleExpandRunner(PySHACLRunType):
     debug: bool
     pre_inferenced: bool
     inplace: bool
-    options: Dict[str, Any]
+    options: dict[str, Any]
 
     def __init__(
         self,
@@ -43,7 +43,7 @@ class RuleExpandRunner(PySHACLRunType):
         *args,
         shacl_graph: Optional[GraphLike] = None,
         ont_graph: Optional[GraphLike] = None,
-        options: Optional[Dict[str, Any]] = None,
+        options: Optional[dict[str, Any]] = None,
         **kwargs,
     ):
         options = options or {}
@@ -199,7 +199,7 @@ class RuleExpandRunner(PySHACLRunType):
         option_focus_nodes = self.options.get("focus_nodes", None)
         if option_focus_nodes is not None and len(option_focus_nodes) > 0:
             # Expand any CURIEs in the focus_nodes list
-            expanded_focus_nodes: List[URIRef] = []
+            expanded_focus_nodes: list[URIRef] = []
             for f in option_focus_nodes:
                 f_lower = f.lower()
                 if (

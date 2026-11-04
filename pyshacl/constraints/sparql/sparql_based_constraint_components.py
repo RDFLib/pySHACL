@@ -48,7 +48,7 @@ class BoundShapeValidatorComponent(ConstraintComponent):
         self.query_helper.collect_prefixes()
 
     @classmethod
-    def constraint_parameters(cls) -> List[rdflib.URIRef]:
+    def constraint_parameters(cls) -> list[rdflib.URIRef]:
         # TODO:coverage: this is never used for this constraint?
         return []
 
@@ -56,7 +56,7 @@ class BoundShapeValidatorComponent(ConstraintComponent):
     def constraint_name(cls) -> str:
         return "ConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[rdflib.Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[rdflib.Literal]:
         return [rdflib.Literal("Parameterised SHACL Query generated constraint validation reports.")]
 
     def evaluate(
@@ -126,7 +126,7 @@ class BoundShapeValidatorComponent(ConstraintComponent):
 
 
 class SPARQLConstraintComponentValidator(object):
-    validator_cache: Dict[Tuple[int, str], Union['SelectConstraintValidator', 'AskConstraintValidator']] = {}
+    validator_cache: dict[tuple[int, str], Union['SelectConstraintValidator', 'AskConstraintValidator']] = {}
 
     def __new__(cls, shacl_graph: 'ShapesGraph', node, *args, **kwargs):
         cache_key = (id(shacl_graph.graph), str(node))

@@ -15,11 +15,13 @@ ont_graph = load_from_source("./test/issues/test_220/owl-REPRODUCTION.ttl")
 
 
 def test_220_1():
+    assert data_graph1 is not None
     conforms, g, s = validate(data_graph=data_graph1, shacl_graph=shacl_graph1, ont_graph=ont_graph, inference='none')
     assert conforms
 
 
 def test_220_2():
+    assert data_graph2 is not None
     conforms, g, s = validate(data_graph=data_graph2, shacl_graph=shacl_graph2, ont_graph=ont_graph, inference='none')
     assert not conforms
     assert "Results (2)" in s

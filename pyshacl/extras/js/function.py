@@ -71,7 +71,7 @@ class JSFunction(SHACLFunction):
     def execute_oxigraph(
         self,
         g: 'DataGraph',
-        args_map: Dict[str, Union[ox_NamedNode, ox_BlankNode, ox_Triple]],
+        args_map: dict[str, Union[ox_NamedNode, ox_BlankNode, ox_Triple]],
     ):
         """Run the SHACL-JS function body and return a pyoxigraph term."""
         rdf_args_map = {k: to_rdf(v) if v is not None else None for k, v in args_map.items()}
@@ -96,7 +96,7 @@ class JSFunction(SHACLFunction):
             raise ValueError("Too many parameters passed to JSFunction {}.".format(self.node))
         if num_args < num_params:
             raise ValueError("Too few parameters passed to JSFunction {}.".format(self.node))
-        args_map: Dict[str, Union[ox_NamedNode, ox_BlankNode, ox_Triple]] = {}
+        args_map: dict[str, Union[ox_NamedNode, ox_BlankNode, ox_Triple]] = {}
         for i, p in enumerate(params):
             ox_arg = args[i]
             ln = p.localname

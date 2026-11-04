@@ -72,14 +72,14 @@ class ClassConstraintComponent(ConstraintComponent):
         self.class_rules = class_rules
 
     @classmethod
-    def constraint_parameters(cls) -> List[URIRef]:
+    def constraint_parameters(cls) -> list[URIRef]:
         return [SH_class]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "ClassConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[Literal]:
         if len(self.class_rules) < 2:
             m = "Value does not have class {}".format(stringify_node(self.shape.sg.graph, self.class_rules[0]))
         else:
@@ -186,14 +186,14 @@ class DatatypeConstraintComponent(ConstraintComponent):
         self.datatype_rule = datatype_rules[0]
 
     @classmethod
-    def constraint_parameters(cls) -> List[URIRef]:
+    def constraint_parameters(cls) -> list[URIRef]:
         return [SH_datatype]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "DatatypeConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[Literal]:
         m = "Value is not Literal with datatype {}".format(stringify_node(self.shape.sg.graph, self.datatype_rule))
         return [Literal(m)]
 
@@ -294,14 +294,14 @@ class NodeKindConstraintComponent(ConstraintComponent):
         self.nodekind_rule = nodekind_rules[0]
 
     @classmethod
-    def constraint_parameters(cls) -> List[URIRef]:
+    def constraint_parameters(cls) -> list[URIRef]:
         return [SH_nodeKind]
 
     @classmethod
     def constraint_name(cls) -> str:
         return "NodeKindConstraintComponent"
 
-    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> List[Literal]:
+    def make_generic_messages(self, datagraph: GraphLike, focus_node, value_node) -> list[Literal]:
         m = "Value is not of Node Kind {}".format(stringify_node(self.shape.sg.graph, self.nodekind_rule))
         return [Literal(m)]
 

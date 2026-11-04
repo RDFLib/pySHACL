@@ -37,7 +37,7 @@ class SHACLTargetType(object):
         self.node = t_node
         self.sg = sg
         params = list(sg.objects(t_node, SH_parameter))
-        self.parameters = [SHACLParameter(sg, p) for p in params]  # type: List[SHACLParameter]
+        self.parameters = [SHACLParameter(sg, p) for p in params]  # type: list[SHACLParameter]
         ltemps = list(sg.objects(t_node, SH_labelTempalate))
         if len(ltemps) < 1:
             self.label_template = None
@@ -98,7 +98,7 @@ class BoundSHACLTargetType(ConstraintComponent):
         :param shape:
         :type shape: pyshacl.shape.Shape
         :param param_vals:
-        :type param_vals: Dict[SHACLParameter, Any]
+        :type param_vals: dict[SHACLParameter, Any]
         """
         super(BoundSHACLTargetType, self).__init__(shape)
         self.target_type = target_type
@@ -107,7 +107,7 @@ class BoundSHACLTargetType(ConstraintComponent):
         self.param_vals = param_vals
 
     @classmethod
-    def constraint_parameters(cls) -> List[URIRef]:
+    def constraint_parameters(cls) -> list[URIRef]:
         return []
 
     @classmethod
@@ -188,7 +188,7 @@ def gather_target_types(shacl_graph: 'ShapesGraph') -> Sequence[Union['SHACLTarg
     :return:
     :rtype: [SHACLTargetType]
     """
-    all_target_types: List[Union['SHACLTargetType', 'SPARQLTargetType']] = []
+    all_target_types: list[Union['SHACLTargetType', 'SPARQLTargetType']] = []
     sub_targets = set(shacl_graph.subjects(RDFS_subClassOf, SH_Target))
 
     # remove these two which are the known native types in shacl.ttl
