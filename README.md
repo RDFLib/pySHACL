@@ -361,17 +361,17 @@ The necessary ``.spec`` file is already included in ``pyshacl/pyshacl-cli.spec``
 The ``pyshacl-cli.spec`` PyInstaller spec file creates a ``.exe`` for the
 pySHACL Command Line utility. See above for the pySHACL command line util usage instructions.
 
-See [the PyInstaller installation guide](https://pyinstaller.readthedocs.io/en/stable/installation.html#installing-in-windows) for info on how to install PyInstaller for Windows.
+From the repository root, install PyInstaller and the checkout in the same Python
+environment so the build includes pySHACL's dependencies:
 
-Once you have pyinstaller, use pyinstaller to generate the ``pyshacl.exe`` CLI file like so:
-```bash powershell
-$ cd src/pyshacl
-$ pyinstaller pyshacl-cli.spec
+```powershell
+python -m pip install PyInstaller
+python -m pip install .
+cd pyshacl
+python -m PyInstaller --clean pyshacl-cli.spec
 ```
-This will output ``pyshacl.exe`` in the ``dist`` directory in ``src/pyshacl``.
 
-You can now run the pySHACL Command Line utility via ``pyshacl.exe``.
-See above for the pySHACL command line util usage instructions.
+The executable is `pyshacl/dist/pyshacl.exe` relative to the repository root.
 
 ## Docker
 Pull the official docker image from Dockerhub:
