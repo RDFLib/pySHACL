@@ -254,10 +254,13 @@ def clone_list(graph, lnode, target_graph, keepid=False, recursion=0, deep_clone
     else:
         # A list can be a NamedIndividual too
         cloned_node = rdflib.URIRef(str(lnode))
-    new_list = Collection(target_graph, cloned_node)
-    for item in iter(graph.items(lnode)):
-        cloned_item = clone_node(graph, item, target_graph, recursion=recursion + 1, deep_clone=deep_clone)
-        new_list.append(cloned_item)
+    # Clone the members first, then add them in one pass: Collection.append walks
+    # to the list's end on each call, which made cloning a long list quadratic.
+    cloned_items = [
+        clone_node(graph, item, target_graph, recursion=recursion + 1, deep_clone=deep_clone)
+        for item in graph.items(lnode)
+    ]
+    Collection(target_graph, cloned_node, cloned_items)
     return cloned_node
 
 
